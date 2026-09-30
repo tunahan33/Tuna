@@ -58,6 +58,28 @@ Yetkiler `includes/auth.php` dosyasındaki `PERMISSIONS` tablosundan değiştiri
    Tüm sözleşmeler ve sayfa altı bu bilgilerle otomatik dolar. Sağdaki **Garanti Sanal POS Başvuru Kontrolü** listesi
    eksikleri gösterir.
 
+## VPS kurulumu (gsprojeler.com.tr)
+
+Boş bir Ubuntu 22.04 / 24.04 sunucuyu tek komutla canlı siteye çevirir: Apache, PHP, MariaDB, Let's Encrypt SSL, güvenlik duvarı (UFW),
+fail2ban, otomatik güvenlik güncellemeleri ve her gece veritabanı yedeği. Site ve süper admin hesabı terminalden kurulur;
+kurulum sihirbazı internete hiç açılmaz.
+
+1. Sunucu panelinden işletim sistemi olarak **Ubuntu 24.04 LTS** kurun.
+2. Natro > Alan Adı > **DNS Yönetimi**: `@` ve `www` için **A kaydı** = sunucu IP'si (mevcut park/yönlendirme kayıtlarını silin).
+3. Sunucuya bağlanın (Windows PowerShell / Mac Terminal): `ssh root@SUNUCU_IP`
+4. Çalıştırın:
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/tunahan33/Tuna/claude/dreamy-carson-mpbcx7/deploy/vps-kurulum.sh -o kurulum.sh
+   bash kurulum.sh
+   ```
+   Süper admin adı, e-postası ve şifresi sorulur. DNS hazırsa SSL de otomatik kurulur.
+5. DNS kurulum sırasında hazır değilse, yayıldıktan sonra: `bash kurulum.sh ssl`
+6. Sonraki kod güncellemeleri: `bash kurulum.sh guncelle` (önce yedek alır; ayarlar ve veritabanı korunur).
+
+Veritabanı şifresi sunucuda `/root/gsprojeler-bilgiler.txt`, gece yedekleri `/var/backups/gsprojeler/` klasöründedir.
+VPS'te e-posta sunucusu yoktur: `info@gsprojeler.com.tr` için bir e-posta hizmeti (Natro, Yandex, Zoho, Google Workspace vb.)
+açıp bilgilerini panelde **E-posta (SMTP)** sekmesine girin.
+
 ## Alan adı olmadan hosting hazırlığı
 
 Site, alan adı alınmadan da hostinge kurulup denenebilir. Alan adı gelince tek ayar değiştirilir.
