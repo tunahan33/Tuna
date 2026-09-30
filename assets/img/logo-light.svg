@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 264 60" width="264" height="60">
+  <defs><clipPath id="c"><rect x="2" y="4" width="52" height="52" rx="13"/></clipPath></defs>
+  <g clip-path="url(#c)">
+    <rect x="0" y="0" width="60" height="60" fill="#2B2F33"/>
+    <path d="M0 44 L60 20 L60 60 L0 60Z" fill="#C8102E"/>
+    <path d="M0 44 L60 20 L60 27 L0 51Z" fill="#FDB913"/>
+  </g>
+  <text x="28" y="37" text-anchor="middle" font-family="Montserrat,'Segoe UI',Arial,Helvetica,sans-serif" font-weight="800" font-size="22" fill="#FFFFFF" letter-spacing="-0.5">GS</text>
+  <text x="68" y="32" font-family="Montserrat,'Segoe UI',Arial,Helvetica,sans-serif" font-weight="800" font-size="23" fill="#FFFFFF" letter-spacing="0.6">GS <tspan font-weight="600">PROJELER</tspan></text>
+  <rect x="69" y="39" width="20" height="3" rx="1.5" fill="#FDB913"/>
+  <rect x="91" y="39" width="20" height="3" rx="1.5" fill="#C8102E"/>
+  <text x="116" y="43" font-family="Montserrat,'Segoe UI',Arial,Helvetica,sans-serif" font-weight="600" font-size="8.5" fill="#B8BDC3" letter-spacing="2.4">SPOR DANIŞMANLIK</text>
+</svg>

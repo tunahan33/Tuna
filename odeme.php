@@ -1,0 +1,222 @@
+<?php
+/** Ödeme akışı: 1) Fatura bilgileri  2) Sözleşme onayı  3) Garanti BBVA 3D ödeme */
+require __DIR__ . '/includes/bootstrap.php';
+require __DIR__ . '/includes/garanti.php';
+
+$user = require_login();
+
+function contract_vars(array $o): array
+{
+    return [
+        'alici_ad' => $o['invoice_type'] === 'kurumsal' && $o['company_name'] ? $o['company_name'] . ' (' . $o['customer_name'] . ')' : $o['customer_name'],
+        'alici_adres' => $o['customer_address'] . ($o['customer_city'] ? ' / ' . $o['customer_city'] : ''),
+        'alici_telefon' => $o['customer_phone'], 'alici_eposta' => $o['customer_email'],
+        'hizmet_adi' => $o['service_title'], 'paket_adi' => $o['package_name'],
+        'paket_sure' => $o['_duration'] ?? '-', 'toplam_tutar' => money($o['amount']),
+        'siparis_tarihi' => tr_date($o['created_at']),
+    ];
+}
+
+/* ---------- 2. ve 3. adım: mevcut sipariş ---------- */
+if ($orderNo = input('siparis')) {
+    $order = row('SELECT o.*, p.duration AS _duration FROM orders o LEFT JOIN packages p ON p.id = o.package_id WHERE o.order_no = ? AND o.user_id = ?', [$orderNo, $user['id']]);
+    if (!$order) {
+        flash('error', 'Sipariş bulunamadı.');
+        redirect('hesabim.php');
+    }
+    if (!in_array($order['status'], ['pending', 'failed'], true)) {
+        redirect('odeme-sonuc.php?no=' . urlencode($order['order_no']) . '&t=' . order_access_token($order));
+    }
+
+    if (is_post() && input('action') === 'pay') {
+        verify_csrf();
+        if (!input('accept_pre') || !input('accept_contract') || !input('accept_start')) {
+            flash('error', 'Ödemeye geçmek için tüm sözleşme onaylarını işaretlemelisiniz.');
+            redirect('odeme.php?siparis=' . urlencode($order['order_no']));
+        }
+        // Başarısız bir denemeden sonra bankaya yeni sipariş numarası ile gidilir
+        if ($order['status'] === 'failed') {
+            $newNo = generate_order_no();
+            q('UPDATE orders SET order_no = ?, status = ?, updated_at = ? WHERE id = ?', [$newNo, 'pending', now(), $order['id']]);
+            $order['order_no'] = $newNo;
+            $order['status'] = 'pending';
+        }
+        q('UPDATE orders SET contract_accepted_at = ?, ip = ?, updated_at = ? WHERE id = ?', [now(), client_ip(), now(), $order['id']]);
+        $order['ip'] = client_ip();
+        log_activity('Ödemeye yönlendirildi', $order['order_no'] . ' · ' . money($order['amount']) . ' · Mod: ' . pos_mode(), 'order', (int) $order['id']);
+
+        $mode = pos_mode();
+        $pageTitle = 'Güvenli Ödeme';
+        require __DIR__ . '/includes/header.php';
+        echo '<section class="section"><div class="container narrow-sm"><div class="card center">';
+        if ($mode === 'demo') {
+            echo '<h1 class="h2">Demo Ödeme</h1><p>Site şu anda <b>demo modunda</b>. Garanti BBVA bilgileri girildiğinde bu adımda bankanın 3D Secure ödeme sayfası açılır.</p>';
+            echo '<form method="post" action="' . url('odeme-demo.php') . '" class="form">' . csrf_field() . '<input type="hidden" name="order_no" value="' . e($order['order_no']) . '">';
+            echo '<button name="result" value="success" class="btn btn-primary btn-block">Başarılı Ödeme Simüle Et</button> <button name="result" value="fail" class="btn btn-outline btn-block">Başarısız Ödeme Simüle Et</button></form>';
+        } elseif (garanti_security_level() === '3D_OOS_PAY') {
+            echo '<h1 class="h2">Bankaya yönlendiriliyorsunuz…</h1><p>Garanti BBVA güvenli ödeme sayfası açılıyor. Lütfen bekleyin.</p>';
+            echo '<form id="bankForm" method="post" action="' . e(garanti_endpoint()) . '">';
+            foreach (garanti_form_fields($order) as $k => $v) echo '<input type="hidden" name="' . e($k) . '" value="' . e($v) . '">';
+            echo '<button class="btn btn-primary">Ödeme sayfasına git</button></form><script>document.getElementById("bankForm").submit();</script>';
+        } else {
+            echo '<h1 class="h2">Kart Bilgileri</h1><p class="small muted">Kart bilgileriniz doğrudan Garanti BBVA\'ya iletilir, sitemizde saklanmaz.</p>';
+            echo '<form method="post" action="' . e(garanti_endpoint()) . '" class="form card-form" autocomplete="on">';
+            foreach (garanti_form_fields($order) as $k => $v) echo '<input type="hidden" name="' . e($k) . '" value="' . e($v) . '">';
+            echo '<label>Kart Üzerindeki İsim<input name="cardholdername" autocomplete="cc-name" required></label>';
+            echo '<label>Kart Numarası<input name="cardnumber" inputmode="numeric" autocomplete="cc-number" pattern="[0-9 ]{15,19}" maxlength="19" required data-card-number></label>';
+            echo '<div class="grid-3"><label>Ay<select name="cardexpiredatemonth" required>';
+            for ($m = 1; $m <= 12; $m++) echo '<option>' . sprintf('%02d', $m) . '</option>';
+            echo '</select></label><label>Yıl<select name="cardexpiredateyear" required>';
+            for ($y = (int) date('y'); $y <= (int) date('y') + 12; $y++) echo '<option>' . sprintf('%02d', $y) . '</option>';
+            echo '</select></label><label>CVV<input name="cardcvv2" inputmode="numeric" pattern="[0-9]{3,4}" maxlength="4" autocomplete="cc-csc" required></label></div>';
+            echo '<div class="pay-total">Ödenecek Tutar: <strong>' . money($order['amount']) . '</strong></div>';
+            echo '<button class="btn btn-primary btn-block btn-lg">Ödemeyi Tamamla</button></form>';
+        }
+        echo '<img src="' . asset('img/payment-logos.svg') . '" alt="" height="30" class="mt-1"></div></div></section>';
+        require __DIR__ . '/includes/footer.php';
+        exit;
+    }
+
+    $vars = contract_vars($order);
+    $pre = row('SELECT content FROM pages WHERE slug = ?', ['on-bilgilendirme-formu'])['content'] ?? '';
+    $contract = row('SELECT content FROM pages WHERE slug = ?', ['mesafeli-satis-sozlesmesi'])['content'] ?? '';
+    $pageTitle = 'Sipariş Onayı';
+    require __DIR__ . '/includes/header.php';
+    ?>
+    <section class="section"><div class="container">
+        <ol class="checkout-steps"><li class="done">Fatura Bilgileri</li><li class="active">Sözleşme ve Onay</li><li>Güvenli Ödeme</li></ol>
+        <div class="checkout-grid">
+            <div class="card">
+                <h2 class="h3">Sözleşmeler</h2>
+                <?php if ($order['status'] === 'failed'): ?><div class="alert alert-error">Önceki ödeme denemesi başarısız oldu: <?= e($order['payment_message']) ?>. Tekrar deneyebilirsiniz.</div><?php endif; ?>
+                <h4>Ön Bilgilendirme Formu</h4>
+                <div class="contract-box prose"><?= fill_placeholders($pre, $vars) ?></div>
+                <h4>Mesafeli Satış Sözleşmesi</h4>
+                <div class="contract-box prose"><?= fill_placeholders($contract, $vars) ?></div>
+                <form method="post" class="form mt-1">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="pay">
+                    <label class="check"><input type="checkbox" name="accept_pre" value="1" required> <span>Ön Bilgilendirme Formu'nu okudum ve onaylıyorum.</span></label>
+                    <label class="check"><input type="checkbox" name="accept_contract" value="1" required> <span>Mesafeli Satış Sözleşmesi'ni ve <a href="<?= url('sayfa.php?s=iptal-ve-iade-kosullari') ?>" target="_blank">İptal ve İade Koşulları</a>'nı okudum, kabul ediyorum.</span></label>
+                    <label class="check"><input type="checkbox" name="accept_start" value="1" required> <span>Hizmetin cayma süresi içinde başlatılmasını talep ediyorum; hizmet başladıktan sonra cayma hakkımın kalmayacağını biliyorum.</span></label>
+                    <button class="btn btn-primary btn-lg btn-block"><?= money($order['amount']) ?> Öde</button>
+                    <p class="small muted center">Ödeme sayfasında Garanti BBVA 3D Secure doğrulaması yapılacaktır.</p>
+                </form>
+            </div>
+            <aside class="card summary">
+                <h3>Sipariş Özeti</h3>
+                <dl>
+                    <dt>Sipariş No</dt><dd><?= e($order['order_no']) ?></dd>
+                    <dt>Hizmet</dt><dd><?= e($order['service_title']) ?></dd>
+                    <dt>Paket</dt><dd><?= e($order['package_name']) ?></dd>
+                    <dt>Fatura</dt><dd><?= e($vars['alici_ad']) ?><br><small><?= e($vars['alici_adres']) ?></small></dd>
+                </dl>
+                <div class="summary-total"><span>Toplam (KDV dahil)</span><strong><?= money($order['amount']) ?></strong></div>
+                <a class="small" href="<?= url('odeme.php?paket=' . (int) $order['package_id']) ?>">← Bilgileri düzenle</a>
+            </aside>
+        </div>
+    </div></section>
+    <?php
+    require __DIR__ . '/includes/footer.php';
+    exit;
+}
+
+/* ---------- 1. adım: fatura bilgileri ---------- */
+$pkg = row('SELECT p.*, s.title AS service_title FROM packages p JOIN services s ON s.id = p.service_id WHERE p.id = ? AND p.is_active = 1 AND s.is_active = 1', [(int) input('paket')]);
+if (!$pkg) {
+    flash('error', 'Paket bulunamadı.');
+    redirect('paketler.php');
+}
+$last = row('SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC LIMIT 1', [$user['id']]) ?? [];
+$f = [
+    'customer_name' => $last['customer_name'] ?? $user['name'], 'customer_email' => $last['customer_email'] ?? $user['email'],
+    'customer_phone' => $last['customer_phone'] ?? $user['phone'], 'customer_address' => $last['customer_address'] ?? '',
+    'customer_city' => $last['customer_city'] ?? '', 'identity_no' => $last['identity_no'] ?? '',
+    'invoice_type' => $last['invoice_type'] ?? 'bireysel', 'company_name' => $last['company_name'] ?? '',
+    'tax_office' => $last['tax_office'] ?? '', 'tax_number' => $last['tax_number'] ?? '', 'customer_note' => '',
+];
+
+if (is_post()) {
+    verify_csrf();
+    foreach ($f as $k => $_) {
+        $f[$k] = mb_substr((string) input($k), 0, $k === 'customer_note' ? 2000 : 500);
+    }
+    $f['invoice_type'] = $f['invoice_type'] === 'kurumsal' ? 'kurumsal' : 'bireysel';
+    $err = null;
+    if (mb_strlen($f['customer_name']) < 3) $err = 'Ad soyad girin.';
+    elseif (!filter_var($f['customer_email'], FILTER_VALIDATE_EMAIL)) $err = 'Geçerli bir e-posta girin.';
+    elseif (strlen(preg_replace('/\D/', '', $f['customer_phone'])) < 10) $err = 'Geçerli bir telefon numarası girin.';
+    elseif (mb_strlen($f['customer_address']) < 10) $err = 'Fatura adresinizi eksiksiz girin.';
+    elseif ($f['invoice_type'] === 'kurumsal' && (!$f['company_name'] || !$f['tax_office'] || !$f['tax_number'])) $err = 'Kurumsal fatura için firma ünvanı, vergi dairesi ve vergi numarası zorunludur.';
+    elseif ($f['identity_no'] !== '' && !preg_match('/^\d{11}$/', $f['identity_no'])) $err = 'T.C. kimlik numarası 11 haneli olmalıdır.';
+
+    if ($err) {
+        flash('error', $err);
+    } else {
+        // Aynı paket için bekleyen sipariş varsa güncelle, yoksa yeni oluştur
+        $existing = row("SELECT * FROM orders WHERE user_id = ? AND package_id = ? AND status IN ('pending','failed') ORDER BY id DESC LIMIT 1", [$user['id'], $pkg['id']]);
+        $data = $f + ['amount' => $pkg['price'], 'package_name' => $pkg['name'], 'service_title' => $pkg['service_title'], 'updated_at' => now(), 'ip' => client_ip()];
+        if ($existing) {
+            update('orders', $data, (int) $existing['id']);
+            $no = $existing['order_no'];
+            $oid = (int) $existing['id'];
+        } else {
+            $no = generate_order_no();
+            $oid = insert('orders', $data + ['order_no' => $no, 'user_id' => $user['id'], 'package_id' => $pkg['id'], 'status' => 'pending', 'created_at' => now()]);
+            log_activity('Sipariş oluşturdu', $no . ' · ' . $pkg['service_title'] . ' / ' . $pkg['name'] . ' · ' . money($pkg['price']), 'order', $oid);
+        }
+        if (!$user['phone'] && $f['customer_phone']) {
+            q('UPDATE users SET phone = ? WHERE id = ?', [$f['customer_phone'], $user['id']]);
+        }
+        redirect('odeme.php?siparis=' . urlencode($no));
+    }
+}
+
+$pageTitle = 'Ödeme - Fatura Bilgileri';
+require __DIR__ . '/includes/header.php';
+?>
+<section class="section"><div class="container">
+    <ol class="checkout-steps"><li class="active">Fatura Bilgileri</li><li>Sözleşme ve Onay</li><li>Güvenli Ödeme</li></ol>
+    <div class="checkout-grid">
+        <div class="card">
+            <h2 class="h3">Fatura ve İletişim Bilgileri</h2>
+            <form method="post" class="form" data-invoice-form>
+                <?= csrf_field() ?>
+                <div class="segmented">
+                    <label><input type="radio" name="invoice_type" value="bireysel" <?= $f['invoice_type'] !== 'kurumsal' ? 'checked' : '' ?>> Bireysel</label>
+                    <label><input type="radio" name="invoice_type" value="kurumsal" <?= $f['invoice_type'] === 'kurumsal' ? 'checked' : '' ?>> Kurumsal</label>
+                </div>
+                <div class="grid-2">
+                    <label>Ad Soyad *<input name="customer_name" value="<?= e($f['customer_name']) ?>" required></label>
+                    <label>T.C. Kimlik No <small>(e-arşiv fatura için)</small><input name="identity_no" value="<?= e($f['identity_no']) ?>" inputmode="numeric" maxlength="11"></label>
+                    <label>E-posta *<input type="email" name="customer_email" value="<?= e($f['customer_email']) ?>" required></label>
+                    <label>Telefon *<input name="customer_phone" value="<?= e($f['customer_phone']) ?>" required></label>
+                </div>
+                <div class="grid-3 corporate-fields">
+                    <label>Firma Ünvanı<input name="company_name" value="<?= e($f['company_name']) ?>"></label>
+                    <label>Vergi Dairesi<input name="tax_office" value="<?= e($f['tax_office']) ?>"></label>
+                    <label>Vergi No<input name="tax_number" value="<?= e($f['tax_number']) ?>"></label>
+                </div>
+                <div class="grid-2">
+                    <label>İl *<input name="customer_city" value="<?= e($f['customer_city']) ?>" required></label>
+                    <span></span>
+                </div>
+                <label>Fatura Adresi *<textarea name="customer_address" rows="2" required><?= e($f['customer_address']) ?></textarea></label>
+                <label>Sipariş Notu <small>(branşınız, hedefiniz, uygun görüşme saatleri vb.)</small><textarea name="customer_note" rows="3"><?= e($f['customer_note']) ?></textarea></label>
+                <button class="btn btn-primary btn-lg btn-block">Devam Et</button>
+            </form>
+        </div>
+        <aside class="card summary">
+            <h3>Sipariş Özeti</h3>
+            <dl>
+                <dt>Hizmet</dt><dd><?= e($pkg['service_title']) ?></dd>
+                <dt>Paket</dt><dd><?= e($pkg['name']) ?></dd>
+                <dt>Süre</dt><dd><?= e($pkg['duration']) ?><?= $pkg['sessions'] ? ' · ' . e($pkg['sessions']) : '' ?></dd>
+            </dl>
+            <ul class="check-list small"><?php foreach (features_list($pkg['features']) as $x): ?><li><?= e($x) ?></li><?php endforeach; ?></ul>
+            <div class="summary-total"><span>Toplam (KDV dahil)</span><strong><?= money($pkg['price']) ?></strong></div>
+            <img src="<?= asset('img/payment-logos.svg') ?>" alt="Visa, Mastercard, Troy, 3D Secure" class="w100 mt-1">
+        </aside>
+    </div>
+</div></section>
+<?php require __DIR__ . '/includes/footer.php'; ?>

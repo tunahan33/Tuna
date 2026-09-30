@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 36" width="300" height="36">
+  <!-- Basit kart şeması rozetleri. Bankanızın ilettiği resmi logo seti ile değiştirebilirsiniz. -->
+  <rect x="0.5" y="0.5" width="62" height="35" rx="5" fill="#fff" stroke="#d9dce0"/>
+  <text x="31.5" y="24.5" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-style="italic" font-size="16" fill="#1A1F71">VISA</text>
+  <rect x="70.5" y="0.5" width="62" height="35" rx="5" fill="#fff" stroke="#d9dce0"/>
+  <circle cx="94" cy="18" r="10" fill="#EB001B"/><circle cx="109" cy="18" r="10" fill="#F79E1B" fill-opacity="0.9"/>
+  <rect x="140.5" y="0.5" width="62" height="35" rx="5" fill="#fff" stroke="#d9dce0"/>
+  <text x="171.5" y="24" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="15" fill="#00A0DF">tro<tspan fill="#6CC04A">y</tspan></text>
+  <rect x="210.5" y="0.5" width="89" height="35" rx="5" fill="#fff" stroke="#d9dce0"/>
+  <path d="M224 9 l8 3 v6 c0 5-3.5 8-8 9.5c-4.5-1.5-8-4.5-8-9.5v-6z" fill="#2B2F33"/><path d="M220.5 18l2.5 2.5 4.5-5" stroke="#FDB913" stroke-width="2" fill="none"/>
+  <text x="238" y="16" font-family="Arial,sans-serif" font-weight="700" font-size="10" fill="#2B2F33">3D SECURE</text>
+  <text x="238" y="28" font-family="Arial,sans-serif" font-size="8.5" fill="#6B7178">Garanti BBVA</text>
+</svg>

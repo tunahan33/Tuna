@@ -1,0 +1,27 @@
+# GS Projeler - Apache ayarları
+Options -Indexes
+DirectoryIndex index.php
+AddDefaultCharset UTF-8
+
+# Hassas dosyalara doğrudan erişimi engelle
+<FilesMatch "^(config\.php|config\.sample\.php|README\.md|\.gitignore)$">
+    Require all denied
+</FilesMatch>
+<FilesMatch "^_.*\.php$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # SSL sertifikası kurulduktan sonra aşağıdaki iki satırın başındaki # işaretini kaldırın (http -> https yönlendirmesi)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    RewriteRule ^(includes|storage)/ - [F,L]
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>

@@ -1,0 +1,86 @@
+# GS Projeler – Spor Danışmanlık Sitesi
+
+Sarı · kırmızı · antrasit temalı, Garanti BBVA Sanal POS uyumlu spor danışmanlık sitesi ve rol bazlı yönetim paneli.
+Saf PHP 8 + MySQL ile yazılmıştır; framework, Composer veya Node.js gerekmez. Her paylaşımlı hostinge (cPanel, Plesk, DirectAdmin) kurulabilir.
+
+## İçerik
+
+**Site (ziyaretçi tarafı)**
+- 7 danışmanlık hizmeti, her birinde 3 paket (toplam 21 paket), KDV dahil net fiyatlar
+- Her hizmet ve paket tıklanabilir; paket kartına tıklayınca detaylı açıklama penceresi açılır
+- Üyelik, giriş, şifremi unuttum, hesabım (siparişlerim)
+- 3 adımlı ödeme: Fatura bilgileri → Ön bilgilendirme + mesafeli satış sözleşmesi onayı → Garanti 3D Secure ödeme
+- Garanti başvurusu için gerekenler: Hakkımızda, Mesafeli Satış Sözleşmesi, Ön Bilgilendirme Formu, İptal ve İade Koşulları,
+  Teslimat ve Hizmet Koşulları, Gizlilik Politikası, KVKK Aydınlatma Metni, Çerez Politikası, Üyelik Sözleşmesi, İletişim sayfası,
+  altbilgide firma ünvanı/adres/vergi/MERSİS bilgileri, kart logoları ve güvenli ödeme ibaresi
+
+**Yönetim paneli (`/admin`)**
+
+| Yetki | Süper Admin | Admin | Editör | Satış Temsilcisi | Üye |
+|---|:-:|:-:|:-:|:-:|:-:|
+| Panele giriş | ✓ | ✓ | ✓ | ✓ | – |
+| Siparişleri görme, durum güncelleme, not | ✓ | ✓ | – | ✓ | – |
+| İptal / iade / temsilci atama | ✓ | ✓ | – | – | – |
+| Sipariş silme | ✓ | – | – | – | – |
+| Müşteriler, mesajlar | ✓ | ✓ | – | ✓ | – |
+| Hizmet ve paket metinleri, sayfalar | ✓ | ✓ | ✓ | – | – |
+| Hizmet/paket ekleme, silme, fiyat | ✓ | ✓ | – | – | – |
+| Kullanıcı ve rol yönetimi | ✓ (herkes) | ✓ (editör, satış, üye) | – | – | – |
+| **Günlük sipariş ve satış raporu (gün gün, tek tek, Excel)** | ✓ | – | – | – | – |
+| **Aktivite akışı (kim, ne zaman, ne yaptı)** | ✓ | – | – | – | – |
+| **Site ve sanal POS ayarları** | ✓ | – | – | – | – |
+
+Yetkiler `includes/auth.php` dosyasındaki `PERMISSIONS` tablosundan değiştirilebilir.
+
+## VS Code ile açma ve bilgisayarda çalıştırma
+
+1. VS Code'da **File → Open Folder** ile proje klasörünü açın (önerilen eklentiler otomatik önerilir).
+2. Bilgisayarınızda PHP 8.1+ kurulu olmalı (Windows için XAMPP ya da `winget install PHP.PHP`).
+3. VS Code terminalinde:
+   ```bash
+   php install/cli.php        # SQLite ile yerel kurulum yapar
+   php install/demo.php       # (isteğe bağlı) örnek personel ve siparişler ekler
+   php -S localhost:8000      # siteyi başlatır
+   ```
+4. Tarayıcıda http://localhost:8000 → Panel: http://localhost:8000/admin
+   - Süper admin: `admin@gsprojeler.local` / `Admin123!`
+   - Demo verisi eklendiyse: `yonetici@`, `editor@`, `satis@`, `uye@gsprojeler.local` – şifre `Test1234!`
+
+## Hostinge kurulum
+
+1. cPanel → **MySQL Veritabanları**: yeni veritabanı ve kullanıcı oluşturun, kullanıcıya tüm yetkileri verin.
+2. Tüm dosyaları `public_html` klasörüne yükleyin (Dosya Yöneticisi'nden zip yükleyip açabilir veya FTP kullanabilirsiniz).
+   `storage/` klasöründeki `database.sqlite` ve kök dizindeki `config.php` yerel dosyalardır, **yüklemeyin**.
+3. Tarayıcıda `https://alanadiniz.com/install/` adresine gidin, veritabanı bilgilerini ve süper admin hesabını girin.
+4. Kurulum bitince **`install` klasörünü silin**.
+5. SSL aktifse `.htaccess` içindeki https yönlendirme satırlarının başındaki `#` işaretini kaldırın.
+6. Panel → **Site & Ödeme Ayarları → Firma Bilgileri**: ünvan, adres, telefon, vergi dairesi/no, MERSİS, KEP bilgilerini girin.
+   Tüm sözleşmeler ve sayfa altı bu bilgilerle otomatik dolar. Sağdaki **Garanti Sanal POS Başvuru Kontrolü** listesi
+   eksikleri gösterir.
+
+## Garanti BBVA Sanal POS
+
+- Başvuru onaylanınca banka size **Üye İşyeri No, Terminal No, Provizyon kullanıcısı/şifresi ve 3D Store Key** iletir.
+- Panel → Site & Ödeme Ayarları → **Ödeme** sekmesine girin.
+- Bankaya bildirilecek dönüş adresi: `https://alanadiniz.com/odeme-sonuc.php`
+- Modlar: **DEMO** (bankasız simülasyon) → **TEST** (Garanti test ortamı) → **CANLI**.
+- 3D modeli: **3D OOS Pay** (kart bankanın sayfasında girilir, önerilir) veya **3D Pay** (kart formu sitede, veriler doğrudan bankaya gider).
+- Kart bilgileri hiçbir zaman sunucuya gelmez ve saklanmaz. Banka yanıtı SHA-512 imzası ve tutarla doğrulanır.
+
+## Klasör yapısı
+
+```
+index.php, hizmetler.php, hizmet.php, paketler.php, paket.php   Site sayfaları
+odeme.php, odeme-sonuc.php, odeme-demo.php                       Ödeme akışı
+giris.php, kayit.php, hesabim.php, sifremi-unuttum.php          Üyelik
+iletisim.php, sayfa.php                                          İletişim ve yasal sayfalar
+admin/                                                          Yönetim paneli
+includes/                                                       Çekirdek (veritabanı, yetki, Garanti entegrasyonu)
+assets/                                                         CSS, JS, logo ve görseller
+install/                                                        Kurulum sihirbazı ve başlangıç içerikleri
+```
+
+## Logo
+
+`assets/img/logo.svg` (açık zemin), `logo-light.svg` (koyu zemin), `favicon.svg`. Kart logoları `assets/img/payment-logos.svg`
+dosyasındadır; bankanın ilettiği resmi logo setiyle değiştirilebilir.
