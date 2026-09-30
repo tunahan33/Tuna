@@ -12,6 +12,10 @@ $__current = basename($_SERVER['SCRIPT_NAME'] ?? '');
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($__title) ?></title>
 <meta name="description" content="<?= e($__desc) ?>">
+<link rel="canonical" href="<?= e(rtrim(config('base_url'), '/') . preg_replace('#^' . preg_quote(rtrim((string) parse_url(config('base_url'), PHP_URL_PATH), '/'), '#') . '#', '', strtok($_SERVER['REQUEST_URI'] ?? '/', '#'))) ?>">
+<meta property="og:url" content="<?= e(config('base_url')) ?>">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="tr_TR">
 <meta property="og:title" content="<?= e($__title) ?>">
 <meta property="og:description" content="<?= e($__desc) ?>">
 <meta name="theme-color" content="#2B2F33">

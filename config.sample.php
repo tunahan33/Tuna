@@ -14,8 +14,8 @@ return [
         'pass'     => 'veritabani_sifre',
         'sqlite'   => __DIR__ . '/storage/database.sqlite',
     ],
-    // Sitenin tam adresi, sonunda / olmadan. Örn: https://www.gsprojeler.com
-    'base_url' => 'https://www.alanadiniz.com',
+    // Sitenin tam adresi, sonunda / olmadan
+    'base_url' => 'https://www.gsprojeler.com.tr',
     // Rastgele uzun bir anahtar (kurulumda otomatik üretilir)
     'app_key'  => 'BURAYA-RASTGELE-UZUN-BIR-ANAHTAR',
     'timezone' => 'Europe/Istanbul',

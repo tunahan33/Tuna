@@ -13,10 +13,12 @@ AddDefaultCharset UTF-8
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    # SSL sertifikası kurulduktan sonra aşağıdaki iki satırın başındaki # işaretini kaldırın (http -> https yönlendirmesi)
-    # RewriteCond %{HTTPS} off
-    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    # http -> https ve gsprojeler.com.tr -> www.gsprojeler.com.tr yönlendirmesi panelden açılır:
+    # Yönetim > Site & Ödeme Ayarları > Sunucu & Yedek > "https ve tek adrese yönlendir"
     RewriteRule ^(includes|storage)/ - [F,L]
+    # Arama motorları için dinamik dosyalar
+    RewriteRule ^robots\.txt$ robots.php [L]
+    RewriteRule ^sitemap\.xml$ sitemap.php [L]
 </IfModule>
 
 <IfModule mod_expires.c>

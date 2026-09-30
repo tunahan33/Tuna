@@ -75,7 +75,7 @@ function install_run(array $config, array $admin): void
         'company_title' => 'GS Projeler Spor Danışmanlık (Ünvanınızı girin)',
         'company_address' => 'Adresinizi yönetim panelinden girin',
         'company_phone' => '+90 (___) ___ __ __',
-        'company_email' => $email,
+        'company_email' => 'info@gsprojeler.com.tr',
         'company_whatsapp' => '',
         'tax_office' => '-',
         'tax_number' => '-',
@@ -87,7 +87,7 @@ function install_run(array $config, array $admin): void
         'garanti_merchant_id' => '', 'garanti_terminal_id' => '', 'garanti_prov_user' => 'PROVAUT',
         'garanti_prov_password' => '', 'garanti_store_key' => '', 'garanti_security_level' => '3D_OOS_PAY',
         'notify_email' => $email,
-        'mail_driver' => 'mail', 'smtp_host' => '', 'smtp_port' => '465', 'smtp_secure' => 'ssl', 'smtp_user' => '', 'smtp_pass' => '', 'smtp_from' => '',
+        'mail_driver' => 'mail', 'smtp_host' => 'mail.gsprojeler.com.tr', 'smtp_port' => '465', 'smtp_secure' => 'ssl', 'smtp_user' => 'info@gsprojeler.com.tr', 'smtp_pass' => '', 'smtp_from' => 'info@gsprojeler.com.tr',
         'force_https' => '0',
     ];
     foreach ($defaults as $k => $v) {
