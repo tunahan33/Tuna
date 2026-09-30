@@ -4,7 +4,8 @@
 require __DIR__ . '/installer.php';
 
 $root = dirname(__DIR__);
-$locked = file_exists(__DIR__ . '/install.lock') && file_exists($root . '/config.php');
+// config.php varsa site kurulu kabul edilir; kurulum sihirbazı bir daha çalışmaz (yeniden yüklense bile)
+$locked = file_exists($root . '/config.php');
 
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') ? 'https' : 'http';
 $path = rtrim(preg_replace('#/install(/.*)?$#', '', dirname($_SERVER['SCRIPT_NAME'] ?? '/install/index.php')), '/');

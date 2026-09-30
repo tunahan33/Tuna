@@ -52,11 +52,40 @@ Yetkiler `includes/auth.php` dosyasındaki `PERMISSIONS` tablosundan değiştiri
 2. Tüm dosyaları `public_html` klasörüne yükleyin (Dosya Yöneticisi'nden zip yükleyip açabilir veya FTP kullanabilirsiniz).
    `storage/` klasöründeki `database.sqlite` ve kök dizindeki `config.php` yerel dosyalardır, **yüklemeyin**.
 3. Tarayıcıda `https://alanadiniz.com/install/` adresine gidin, veritabanı bilgilerini ve süper admin hesabını girin.
-4. Kurulum bitince **`install` klasörünü silin**.
+4. Kurulum bitince **`install` klasörünü silin**. (Silinmese bile, `config.php` oluştuğu için sihirbaz tekrar çalışmaz.)
 5. SSL aktifse `.htaccess` içindeki https yönlendirme satırlarının başındaki `#` işaretini kaldırın.
 6. Panel → **Site & Ödeme Ayarları → Firma Bilgileri**: ünvan, adres, telefon, vergi dairesi/no, MERSİS, KEP bilgilerini girin.
    Tüm sözleşmeler ve sayfa altı bu bilgilerle otomatik dolar. Sağdaki **Garanti Sanal POS Başvuru Kontrolü** listesi
    eksikleri gösterir.
+
+## Alan adı olmadan hosting hazırlığı
+
+Site, alan adı alınmadan da hostinge kurulup denenebilir. Alan adı gelince tek ayar değiştirilir.
+
+**Önerilen hosting özellikleri:** Linux + cPanel (veya Plesk/DirectAdmin), PHP 8.1 veya üzeri, MySQL/MariaDB, ücretsiz SSL (Let's Encrypt / AutoSSL),
+e-posta hesabı, FTP erişimi. Yaklaşık 1 GB alan ve 1 veritabanı yeterlidir.
+
+1. **Geçici adres:** Hosting firmaları alan adı yokken genelde geçici bir adres verir (örn. `http://sunucu-ip/~kullanici/`
+   veya `firma-sunucu.hosting.com`). Kurulum sihirbazı bu adresi otomatik algılar.
+2. **Kurulum:** Yukarıdaki “Hostinge kurulum” adımlarını geçici adresle uygulayın. Siteyi gerçek MySQL ile uçtan uca test edebilirsiniz
+   (ödeme DEMO modunda çalışır).
+3. **E-posta:** cPanel > E-posta Hesapları'ndan bir hesap açın. Panel > Site & Ödeme Ayarları > **E-posta (SMTP)** sekmesine girip
+   **Test Gönder** ile deneyin.
+4. **Alan adı alınınca:**
+   - Alan adının DNS/nameserver ayarlarını hosting firmasının verdiği adreslere yönlendirin (24 saate kadar sürebilir).
+   - cPanel'den SSL sertifikasını (AutoSSL / Let's Encrypt) etkinleştirin.
+   - Panel > Site & Ödeme Ayarları > **Sunucu & Yedek** sekmesinde site adresini `https://www.alanadiniz.com` yapın ve
+     “https yönlendirmesi” kutusunu işaretleyin.
+   - Aynı sekmedeki **Sunucu Durumu** listesinin tamamen yeşil olduğunu kontrol edin.
+   - Firma bilgilerini girip Garanti BBVA başvurusunu yapın (başvuru için alan adı ve SSL şarttır).
+5. **Yedek:** Sunucu & Yedek sekmesindeki **Yedeği İndir** butonu tüm veritabanını `.sql` dosyası olarak indirir.
+
+### GitHub'dan otomatik yükleme (isteğe bağlı)
+
+`.github/workflows/deploy.yml` dosyası kodu FTP ile hostinge yükler. GitHub > Settings > Secrets and variables > Actions altına
+`FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`, `FTP_SERVER_DIR` (örn. `public_html/`) bilgilerini ekleyin, ardından
+Actions > **Hostinge Yükle** > Run workflow deyin. İlk yüklemede “Kurulum sihirbazını da yükle” seçeneğini işaretleyin.
+`config.php` ve veritabanı hiçbir zaman ezilmez.
 
 ## Garanti BBVA Sanal POS
 

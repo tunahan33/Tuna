@@ -25,8 +25,55 @@ $groups = [
         'garanti_prov_user' => ['Provizyon Kullanıcısı', 'text'], 'garanti_prov_password' => ['Provizyon Şifresi', 'secret'],
         'garanti_store_key' => ['3D Secure Anahtarı (Store Key)', 'secret'],
     ]],
+    'mail' => ['E-posta (SMTP)', [
+        'mail_driver' => ['Gönderim Yöntemi', 'select', ['mail' => 'PHP mail() - hostingin varsayılan gönderimi', 'smtp' => 'SMTP - e-posta hesabı ile doğrulamalı gönderim (önerilen)']],
+        'smtp_host' => ['SMTP Sunucusu (örn. mail.alanadiniz.com)', 'text'],
+        'smtp_port' => ['Port (SSL: 465, TLS: 587)', 'text'],
+        'smtp_secure' => ['Güvenlik', 'select', ['ssl' => 'SSL (465)', 'tls' => 'TLS / STARTTLS (587)', 'none' => 'Yok (önerilmez)']],
+        'smtp_user' => ['Kullanıcı Adı (genelde e-posta adresinin tamamı)', 'text'],
+        'smtp_pass' => ['E-posta Şifresi', 'secret'],
+        'smtp_from' => ['Gönderen Adresi (boşsa firma e-postası)', 'email'],
+    ]],
+    'server' => ['Sunucu & Yedek', []],
 ];
 $tab = isset($groups[input('tab')]) ? input('tab') : 'general';
+
+if (is_post() && input('action') === 'test_mail') {
+    verify_csrf();
+    $err = null;
+    $to = input('test_to') ?: $u['email'];
+    if (send_mail($to, 'Test e-postası - ' . setting('site_name', 'GS Projeler'), '<p>Bu bir test e-postasıdır. E-posta ayarlarınız doğru çalışıyor.</p><p>Gönderim yöntemi: <b>' . e(strtoupper(setting('mail_driver', 'mail'))) . '</b></p>', $err)) {
+        flash('success', 'Test e-postası gönderildi: ' . $to . ' (Gelen kutusu ve spam klasörünü kontrol edin.)');
+        log_activity('Test e-postası gönderdi', $to, 'settings');
+    } else {
+        flash('error', 'E-posta gönderilemedi: ' . $err);
+    }
+    redirect('admin/settings.php?tab=mail');
+}
+
+if (is_post() && $tab === 'server') {
+    verify_csrf();
+    $newUrl = rtrim(input('base_url'), '/');
+    if ($newUrl !== config('base_url')) {
+        if (!filter_var($newUrl, FILTER_VALIDATE_URL) || !preg_match('#^https?://#', $newUrl)) {
+            flash('error', 'Geçerli bir site adresi girin (örn. https://www.gsprojeler.com).');
+            redirect('admin/settings.php?tab=server');
+        }
+        if (!write_config(['base_url' => $newUrl])) {
+            flash('error', 'config.php dosyası yazılamadı. Dosya Yöneticisi ile config.php içindeki base_url değerini elle değiştirin.');
+            redirect('admin/settings.php?tab=server');
+        }
+        log_activity('Site adresini değiştirdi', $newUrl, 'settings');
+    }
+    $force = input('force_https') === '1' && str_starts_with($newUrl, 'https://') ? '1' : '0';
+    if ($force !== setting('force_https', '0')) {
+        save_setting('force_https', $force);
+        log_activity($force === '1' ? 'HTTPS zorunluluğunu açtı' : 'HTTPS zorunluluğunu kapattı', '', 'settings');
+    }
+    flash('success', 'Sunucu ayarları kaydedildi.');
+    header('Location: ' . $newUrl . '/admin/settings.php?tab=server', true, 303);
+    exit;
+}
 
 if (is_post()) {
     verify_csrf();
@@ -79,6 +126,45 @@ admin_header('Site & Ödeme Ayarları', '<span class="lock-tag">★ Yalnızca S�
     <?php foreach ($groups as $k => [$l]): ?><a href="?tab=<?= $k ?>" class="<?= $tab === $k ? 'active' : '' ?>"><?= e($l) ?></a><?php endforeach; ?>
 </div>
 <div class="grid-main">
+<?php if ($tab === 'server'):
+    $dbVersion = (string) db()->getAttribute(PDO::ATTR_SERVER_VERSION);
+    $health = [
+        ['PHP sürümü', PHP_VERSION, version_compare(PHP_VERSION, '8.1', '>=')],
+        ['Veritabanı', strtoupper(config('db.driver')) . ' ' . $dbVersion, true],
+        ['SSL (bu istek https ile mi?)', request_is_https() ? 'Evet' : 'Hayır', request_is_https()],
+        ['Site adresi https ile mi tanımlı?', config('base_url'), str_starts_with(config('base_url'), 'https://')],
+        ['install klasörü silindi mi?', is_dir(ROOT . '/install') ? 'Hayır - silin!' : 'Evet', !is_dir(ROOT . '/install')],
+        ['config.php yazılabilir (adres değişikliği için)', is_writable(ROOT . '/config.php') ? 'Evet' : 'Hayır', is_writable(ROOT . '/config.php')],
+        ['Hata gösterimi kapalı (debug)', config('debug') ? 'Açık - canlıda kapatın' : 'Kapalı', !config('debug')],
+        ['OpenSSL / mbstring / cURL', (extension_loaded('openssl') ? '✓' : '✕') . ' / ' . (extension_loaded('mbstring') ? '✓' : '✕') . ' / ' . (extension_loaded('curl') ? '✓' : '✕'), extension_loaded('openssl') && extension_loaded('mbstring')],
+        ['Yükleme limiti / bellek', ini_get('upload_max_filesize') . ' / ' . ini_get('memory_limit'), true],
+        ['Sunucu saati', date('d.m.Y H:i') . ' (' . date_default_timezone_get() . ')', true],
+        ['E-posta yöntemi', strtoupper(setting('mail_driver', 'mail')), setting('mail_driver') === 'smtp'],
+    ];
+    ?>
+    <div>
+        <form method="post" class="panel form">
+            <?= csrf_field() ?>
+            <h3>Site Adresi</h3>
+            <div class="info-box">Alan adınızı aldığınızda veya geçici adresten gerçek adrese geçtiğinizde buradan güncelleyin. E-posta bağlantıları, banka dönüş adresi ve sözleşmelerdeki site adresi bu değeri kullanır.</div>
+            <label>Sitenin tam adresi<input name="base_url" value="<?= e(config('base_url')) ?>" required placeholder="https://www.gsprojeler.com"></label>
+            <label class="check"><input type="checkbox" name="force_https" value="1" <?= setting('force_https') === '1' ? 'checked' : '' ?>> <span>Tüm ziyaretçileri <b>https://</b> adresine yönlendir (SSL sertifikası kurulduktan sonra açın; adres https ile başlamıyorsa uygulanmaz)</span></label>
+            <div class="form-actions"><button class="btn btn-primary">Kaydet</button></div>
+        </form>
+        <form method="post" action="backup.php" class="panel form">
+            <?= csrf_field() ?>
+            <h3>Veritabanı Yedeği</h3>
+            <p class="small muted">Siparişler, üyeler, içerikler ve ayarların tamamını tek dosya olarak indirir. Haftada bir indirip saklamanız önerilir. Geri yüklemek için cPanel &gt; phpMyAdmin &gt; İçe Aktar kullanılır.</p>
+            <div class="form-actions"><button class="btn btn-yellow">Yedeği İndir</button></div>
+        </form>
+    </div>
+    <section class="panel">
+        <div class="panel-head"><h2>Sunucu Durumu</h2></div>
+        <ul class="checks">
+            <?php foreach ($health as [$l, $v, $okk]): ?><li class="<?= $okk ? 'ok' : 'no' ?>"><span><?= $okk ? '✓' : '!' ?></span><div><?= e($l) ?><br><small class="muted"><?= e($v) ?></small></div></li><?php endforeach; ?>
+        </ul>
+    </section>
+<?php else: ?>
     <form method="post" class="panel form">
         <?= csrf_field() ?>
         <?php if ($tab === 'pos'): ?>
@@ -102,6 +188,16 @@ admin_header('Site & Ödeme Ayarları', '<span class="lock-tag">★ Yalnızca S�
         <?php endforeach; ?>
         <div class="form-actions"><button class="btn btn-primary">Kaydet</button></div>
     </form>
+    <?php if ($tab === 'mail'): ?>
+    <section class="panel">
+        <div class="panel-head"><h2>Test E-postası Gönder</h2></div>
+        <p class="small muted">Ayarları kaydettikten sonra buradan deneyin. Hosting firmanızın panelinde (cPanel &gt; E-posta Hesapları) oluşturduğunuz hesabın bilgilerini kullanın.</p>
+        <form method="post" class="form"><?= csrf_field() ?><input type="hidden" name="action" value="test_mail">
+            <label>Alıcı<input type="email" name="test_to" value="<?= e($u['email']) ?>"></label>
+            <button class="btn btn-dark btn-sm">Test Gönder</button>
+        </form>
+    </section>
+    <?php else: ?>
     <section class="panel">
         <div class="panel-head"><h2>Garanti Sanal POS Başvuru Kontrolü</h2><span class="badge <?= $ok === count($checks) ? 'badge-green' : 'badge-yellow' ?>"><?= $ok ?>/<?= count($checks) ?></span></div>
         <ul class="checks">
@@ -109,5 +205,7 @@ admin_header('Site & Ödeme Ayarları', '<span class="lock-tag">★ Yalnızca S�
         </ul>
         <p class="small muted">Eksik firma bilgileri “Firma Bilgileri” sekmesinden tamamlanır; tüm yasal sayfalar bu bilgilerle otomatik güncellenir.</p>
     </section>
+    <?php endif; ?>
+<?php endif; ?>
 </div>
 <?php admin_footer();

@@ -87,6 +87,8 @@ function install_run(array $config, array $admin): void
         'garanti_merchant_id' => '', 'garanti_terminal_id' => '', 'garanti_prov_user' => 'PROVAUT',
         'garanti_prov_password' => '', 'garanti_store_key' => '', 'garanti_security_level' => '3D_OOS_PAY',
         'notify_email' => $email,
+        'mail_driver' => 'mail', 'smtp_host' => '', 'smtp_port' => '465', 'smtp_secure' => 'ssl', 'smtp_user' => '', 'smtp_pass' => '', 'smtp_from' => '',
+        'force_https' => '0',
     ];
     foreach ($defaults as $k => $v) {
         if (!row('SELECT skey FROM settings WHERE skey = ?', [$k])) {

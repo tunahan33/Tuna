@@ -39,6 +39,15 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// SSL zorunluluğu (Yönetim > Site Ayarları > Sunucu & Yedek)
+if (PHP_SAPI !== 'cli' && setting('force_https') === '1' && str_starts_with(config('base_url'), 'https://') && !request_is_https()) {
+    header('Location: https://' . ($_SERVER['HTTP_HOST'] ?? parse_url(config('base_url'), PHP_URL_HOST)) . ($_SERVER['REQUEST_URI'] ?? '/'), true, 301);
+    exit;
+}
+if (request_is_https()) {
+    header('Strict-Transport-Security: max-age=31536000');
+}
+
 // Güvenlik başlıkları
 header('X-Frame-Options: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');

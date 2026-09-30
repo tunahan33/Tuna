@@ -254,23 +254,38 @@ const SERVICE_ICONS = ['performance' => 'Performans (şimşek)', 'nutrition' => 
 
 /* ---------- E-posta ---------- */
 
-function send_mail(string $to, string $subject, string $html): bool
+function send_mail(string $to, string $subject, string $html, ?string &$error = null): bool
 {
-    $from = setting('company_email') ?: 'no-reply@' . (parse_url(config('base_url'), PHP_URL_HOST) ?: 'localhost');
+    $from = setting('smtp_from') ?: setting('company_email') ?: 'no-reply@' . (parse_url(config('base_url'), PHP_URL_HOST) ?: 'localhost');
     $name = setting('site_name', 'GS Projeler');
-    $headers = [
-        'MIME-Version: 1.0',
-        'Content-Type: text/html; charset=UTF-8',
-        'From: =?UTF-8?B?' . base64_encode($name) . '?= <' . $from . '>',
-        'Reply-To: ' . $from,
-    ];
     $body = '<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border-top:4px solid #C8102E">'
         . '<div style="background:#2B2F33;color:#fff;padding:16px 24px;font-weight:bold;font-size:18px">' . e($name) . '</div>'
         . '<div style="padding:24px;color:#2B2F33;line-height:1.6">' . $html . '</div>'
         . '<div style="padding:12px 24px;font-size:12px;color:#6B7178;background:#f4f5f6">' . e(setting('company_title')) . ' · ' . e(setting('company_phone')) . '</div></div>';
+
+    if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Geçersiz alıcı adresi.';
+        return false;
+    }
     try {
-        return @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, implode("\r\n", $headers));
+        if (setting('mail_driver') === 'smtp' && setting('smtp_host') !== '') {
+            require_once __DIR__ . '/mailer.php';
+            return smtp_send([
+                'host' => setting('smtp_host'), 'port' => setting('smtp_port', '465'), 'secure' => setting('smtp_secure', 'ssl'),
+                'user' => setting('smtp_user'), 'pass' => setting('smtp_pass'),
+            ], $to, $subject, $body, $name, $from);
+        }
+        $headers = [
+            'MIME-Version: 1.0',
+            'Content-Type: text/html; charset=UTF-8',
+            'From: =?UTF-8?B?' . base64_encode($name) . '?= <' . $from . '>',
+            'Reply-To: ' . $from,
+        ];
+        $ok = @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, implode("\r\n", $headers));
+        if (!$ok) $error = 'PHP mail() fonksiyonu e-postayı gönderemedi. SMTP ayarlarını kullanın.';
+        return $ok;
     } catch (Throwable $e) {
+        $error = $e->getMessage();
         return false;
     }
 }
@@ -328,4 +343,31 @@ function sanitize_html(string $html): string
         $out .= $doc->saveHTML($c);
     }
     return trim($out);
+}
+
+/** config.php dosyasını yeniden yazar (site adresi değişikliği vb.) */
+function write_config(array $changes): bool
+{
+    $file = ROOT . '/config.php';
+    if (!is_writable($file)) {
+        return false;
+    }
+    $cfg = array_replace_recursive($GLOBALS['__config'], $changes);
+    $php = "<?php\n// GS Projeler yapılandırması - son güncelleme: " . date('d.m.Y H:i') . "\nreturn " . var_export($cfg, true) . ";\n";
+    if (file_put_contents($file, $php, LOCK_EX) === false) {
+        return false;
+    }
+    $GLOBALS['__config'] = $cfg;
+    if (function_exists('opcache_invalidate')) {
+        @opcache_invalidate($file, true);
+    }
+    return true;
+}
+
+function request_is_https(): bool
+{
+    return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['SERVER_PORT'] ?? '') === '443')
+        || strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https'
+        || strtolower($_SERVER['HTTP_X_FORWARDED_SSL'] ?? '') === 'on';
 }
