@@ -57,6 +57,7 @@ jobs:
             README.md
             config.php
             storage/*.sqlite
+            sportif/**
 
       - name: Yükle (güncelleme)
         if: ${{ !inputs.include_installer }}
@@ -75,4 +76,5 @@ jobs:
             README.md
             config.php
             storage/*.sqlite
+            sportif/**
             install/**

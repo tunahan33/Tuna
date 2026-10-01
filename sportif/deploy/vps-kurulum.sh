@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  GS Projeler - VPS kurulum betiği (Ubuntu 22.04 / 24.04, Debian 12)
+#  GS Sportif (spor giyim mağazası) - VPS kurulum betiği (Ubuntu 22.04 / 24.04, Debian 12)
 #
 #  Kullanım (sunucuya root olarak bağlanıp):
-#    curl -fsSL https://raw.githubusercontent.com/tunahan33/Tuna/claude/dreamy-carson-mpbcx7/deploy/vps-kurulum.sh -o kurulum.sh
+#    curl -fsSL https://raw.githubusercontent.com/tunahan33/Tuna/claude/dreamy-carson-mpbcx7/sportif/deploy/vps-kurulum.sh -o kurulum.sh
 #    bash kurulum.sh              # ilk kurulum
 #    bash kurulum.sh ssl          # alan adı sunucuya yönlendikten sonra SSL kur ve https'e geç
 #    bash kurulum.sh guncelle     # GitHub'daki son sürümü yükle (ayarlar ve veritabanı korunur)
@@ -13,14 +13,15 @@
 # =============================================================================
 set -euo pipefail
 
-DOMAIN="${DOMAIN:-gsprojeler.com}"
+DOMAIN="${DOMAIN:-gssportifurunler.com}"
 WWW_DOMAIN="www.${DOMAIN}"
 REPO_TARBALL="${REPO_TARBALL:-https://codeload.github.com/tunahan33/Tuna/tar.gz/refs/heads/claude/dreamy-carson-mpbcx7}"
-APP_DIR="${APP_DIR:-/var/www/gsprojeler}"
-DB_NAME="gsprojeler"
-DB_USER="gsprojeler"
-CRED_FILE="/root/gsprojeler-bilgiler.txt"
-BACKUP_DIR="/var/backups/gsprojeler"
+APP_DIR="${APP_DIR:-/var/www/gssportif}"
+SOURCE_SUBDIR="sportif"
+DB_NAME="gssportif"
+DB_USER="gssportif"
+CRED_FILE="/root/gssportif-bilgiler.txt"
+BACKUP_DIR="/var/backups/gssportif"
 TEST_MODE="${TEST_MODE:-0}"   # 1: konteyner testleri için güvenlik duvarı/SSL/servis adımlarını atlar
 
 yesil() { printf '\033[1;32m%s\033[0m\n' "$*"; }
@@ -47,9 +48,11 @@ indir_kod() { # $1 hedef klasör
     local tmp; tmp="$(mktemp -d)"
     if [ -n "${SOURCE_TARBALL:-}" ]; then cp "$SOURCE_TARBALL" "$tmp/src.tgz"; else curl -fsSL "$REPO_TARBALL" -o "$tmp/src.tgz"; fi
     mkdir -p "$tmp/src" && tar -xzf "$tmp/src.tgz" -C "$tmp/src" --strip-components=1
+    # Yüklenen ürün fotoğrafları (uploads) ve ayarlar güncellemede korunur
     rsync -a --delete \
-        --exclude config.php --exclude 'storage/*.sqlite' --exclude '.git*' --exclude '.github' --exclude '.vscode' --exclude '/sportif' \
-        --exclude 'install/install.lock' "$tmp/src/" "$1/"
+        --exclude config.php --exclude 'storage/*.sqlite' --exclude '.git*' --exclude '/deploy' \
+        --include 'uploads/.htaccess' --exclude 'uploads/*' \
+        --exclude 'install/install.lock' "$tmp/src/$SOURCE_SUBDIR/" "$1/"
     rm -rf "$tmp"
 }
 
@@ -58,7 +61,7 @@ izinler() {
     find "$APP_DIR" -type d -exec chmod 755 {} \;
     find "$APP_DIR" -type f -exec chmod 644 {} \;
     if [ -f "$APP_DIR/config.php" ]; then chown www-data:www-data "$APP_DIR/config.php"; chmod 640 "$APP_DIR/config.php"; fi
-    chown -R www-data:www-data "$APP_DIR/storage"
+    chown -R www-data:www-data "$APP_DIR/storage" "$APP_DIR/uploads"
 }
 
 php_ayar() { # $1 anahtar, $2 değer - veritabanındaki settings tablosuna yazar
@@ -94,7 +97,7 @@ if [ "${1:-}" = "guncelle" ]; then
     mkdir -p "$BACKUP_DIR" && mysqldump --single-transaction "$DB_NAME" | gzip > "$BACKUP_DIR/guncelleme-oncesi-$(date +%F-%H%M).sql.gz"
     adim "Son sürüm indiriliyor"
     indir_kod "$APP_DIR"
-    rm -rf "$APP_DIR/install" "$APP_DIR/sportif"
+    rm -rf "$APP_DIR/install"
     izinler
     yesil "Güncelleme tamamlandı."
     exit 0
@@ -167,7 +170,7 @@ rm -rf "$APP_DIR/install"
 izinler
 
 adim "Apache yapılandırması"
-cat > /etc/apache2/sites-available/gsprojeler.conf <<VHOST
+cat > /etc/apache2/sites-available/gssportif.conf <<VHOST
 <VirtualHost *:80>
     ServerName $WWW_DOMAIN
     ServerAlias $DOMAIN $IP
@@ -177,21 +180,22 @@ cat > /etc/apache2/sites-available/gsprojeler.conf <<VHOST
         AllowOverride All
         Require all granted
     </Directory>
-    ErrorLog \${APACHE_LOG_DIR}/gsprojeler-error.log
-    CustomLog \${APACHE_LOG_DIR}/gsprojeler-access.log combined
+    ErrorLog \${APACHE_LOG_DIR}/gssportif-error.log
+    CustomLog \${APACHE_LOG_DIR}/gssportif-access.log combined
 </VirtualHost>
 VHOST
-cat > /etc/apache2/conf-available/zz-gsprojeler-guvenlik.conf <<'CONF'
+cat > /etc/apache2/conf-available/zz-gssportif-guvenlik.conf <<'CONF'
 ServerTokens Prod
 ServerSignature Off
 TraceEnable Off
 CONF
 PHP_INI_DIR="$(php -r 'echo "/etc/php/".PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')"
-cat > "$PHP_INI_DIR/apache2/conf.d/99-gsprojeler.ini" <<'INI'
+cat > "$PHP_INI_DIR/apache2/conf.d/99-gssportif.ini" <<'INI'
 expose_php = Off
 display_errors = Off
 log_errors = On
 upload_max_filesize = 16M
+max_file_uploads = 20
 post_max_size = 20M
 memory_limit = 256M
 max_execution_time = 120
@@ -200,16 +204,16 @@ session.cookie_httponly = 1
 session.use_strict_mode = 1
 INI
 a2enmod -q rewrite headers expires >/dev/null
-a2enconf -q zz-gsprojeler-guvenlik >/dev/null
+a2enconf -q zz-gssportif-guvenlik >/dev/null
 a2dissite -q 000-default >/dev/null 2>&1 || true
-a2ensite -q gsprojeler >/dev/null
+a2ensite -q gssportif >/dev/null
 apache2ctl configtest
 svc enable apache2 || true; svc restart apache2
 
 adim "Otomatik yedek (her gece 03:30, 14 gün saklanır)"
 mkdir -p "$BACKUP_DIR" && chmod 700 "$BACKUP_DIR"
-cat > /etc/cron.d/gsprojeler-yedek <<CRON
-30 3 * * * root mysqldump --single-transaction $DB_NAME | gzip > $BACKUP_DIR/gsprojeler-\$(date +\%F).sql.gz && find $BACKUP_DIR -name '*.sql.gz' -mtime +14 -delete
+cat > /etc/cron.d/gssportif-yedek <<CRON
+30 3 * * * root mysqldump --single-transaction $DB_NAME | gzip > $BACKUP_DIR/gssportif-\$(date +\%F).sql.gz && find $BACKUP_DIR -name '*.sql.gz' -mtime +14 -delete
 CRON
 
 if [ "$TEST_MODE" != 1 ]; then
@@ -220,7 +224,7 @@ if [ "$TEST_MODE" != 1 ]; then
 fi
 
 cat > "$CRED_FILE" <<CRED
-GS Projeler kurulum bilgileri ($(date '+%d.%m.%Y %H:%M'))
+GS Sportif kurulum bilgileri ($(date '+%d.%m.%Y %H:%M'))
 Site klasörü   : $APP_DIR
 Veritabanı     : $DB_NAME
 DB kullanıcı   : $DB_USER
