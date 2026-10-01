@@ -51,6 +51,23 @@ if (is_post() && input('action') === 'test_mail') {
     redirect('admin/settings.php?tab=mail');
 }
 
+if (is_post() && input('action') === 'maintenance') {
+    verify_csrf();
+    $on = input('maintenance_mode') === '1';
+    $until = input('maintenance_until');
+    $until = $on && $until !== '' && strtotime($until) ? date('Y-m-d H:i:s', strtotime($until)) : '';
+    if ($on && $until !== '' && strtotime($until) <= time()) {
+        flash('error', 'Bitiş saati ileri bir zaman olmalı (ya da boş bırakın).');
+        redirect('admin/settings.php?tab=server');
+    }
+    save_setting('maintenance_mode', $on ? '1' : '0');
+    save_setting('maintenance_until', $until);
+    save_setting('maintenance_message', mb_substr(input('maintenance_message'), 0, 500));
+    log_activity($on ? 'Bakım modunu açtı' : 'Bakım modunu kapattı', $on ? ($until ? 'Bitiş: ' . tr_date($until) : 'Elle kapatılana kadar') : '', 'settings');
+    flash('success', $on ? 'Bakım modu açıldı. Ziyaretçiler bakım sayfasını görüyor; siz siteyi normal görmeye devam edersiniz.' : 'Bakım modu kapatıldı, site herkese açık.');
+    redirect('admin/settings.php?tab=server');
+}
+
 if (is_post() && $tab === 'server') {
     verify_csrf();
     $newUrl = rtrim(input('base_url'), '/');
@@ -143,6 +160,18 @@ admin_header('Site & Ödeme Ayarları', '<span class="lock-tag">★ Yalnızca S�
     ];
     ?>
     <div>
+        <form method="post" class="panel form maint-<?= maintenance_active() ? 'on' : 'off' ?>">
+            <?= csrf_field() ?><input type="hidden" name="action" value="maintenance">
+            <div class="panel-head"><h3>Bakım Modu</h3><?= maintenance_active() ? '<span class="badge badge-red">AÇIK - site ziyaretçilere kapalı</span>' : '<span class="badge badge-green">Kapalı - site yayında</span>' ?></div>
+            <p class="small muted">Açıkken ziyaretçiler “Kısa bir bakımdayız” sayfasını görür. Siz ve ekibiniz (giriş yapmış personel) siteyi normal görürsünüz. Banka ödeme dönüşleri etkilenmez.</p>
+            <div class="segmented">
+                <label><input type="radio" name="maintenance_mode" value="0" <?= maintenance_active() ? '' : 'checked' ?>> Site açık</label>
+                <label><input type="radio" name="maintenance_mode" value="1" <?= maintenance_active() ? 'checked' : '' ?>> Bakım modu</label>
+            </div>
+            <label>Otomatik açılış saati <small>(isteğe bağlı; boşsa siz kapatana kadar sürer)</small><input type="datetime-local" name="maintenance_until" value="<?= setting('maintenance_until') ? e(date('Y-m-d\TH:i', strtotime(setting('maintenance_until')))) : '' ?>"></label>
+            <label>Ziyaretçiye gösterilecek mesaj <small>(boşsa varsayılan mesaj)</small><textarea name="maintenance_message" rows="2"><?= e(setting('maintenance_message')) ?></textarea></label>
+            <div class="form-actions"><button class="btn btn-dark">Uygula</button> <a class="btn btn-outline" href="<?= url() ?>" target="_blank">Siteyi gör</a></div>
+        </form>
         <form method="post" class="panel form">
             <?= csrf_field() ?>
             <h3>Site Adresi</h3>

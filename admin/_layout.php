@@ -107,6 +107,9 @@ function admin_header(string $title, string $subtitle = ''): void
         <div class="top-date"><?= tr_day_name(date('Y-m-d')) ?>, <?= date('d.m.Y') ?></div>
     </header>
     <div class="admin-content">
+        <?php if (maintenance_active()): ?>
+            <div class="alert alert-error">🔧 <strong>Bakım modu açık</strong> — site ziyaretçilere kapalı<?= setting('maintenance_until') ? ', ' . e(tr_date(setting('maintenance_until'))) . ' itibarıyla otomatik açılacak' : '' ?>. <?= can('settings.edit') ? '<a href="' . url('admin/settings.php?tab=server') . '">Yönet →</a>' : '' ?></div>
+        <?php endif; ?>
         <?= flashes() ?>
     <?php
 }

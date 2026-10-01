@@ -371,3 +371,13 @@ function request_is_https(): bool
         || strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https'
         || strtolower($_SERVER['HTTP_X_FORWARDED_SSL'] ?? '') === 'on';
 }
+
+/** Bakım modu açık mı? (bitiş saati geçtiyse kendiliğinden kapanır) */
+function maintenance_active(): bool
+{
+    if (setting('maintenance_mode') !== '1') {
+        return false;
+    }
+    $until = setting('maintenance_until');
+    return $until === '' || strtotime($until) > time();
+}

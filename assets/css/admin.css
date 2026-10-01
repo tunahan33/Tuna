@@ -183,3 +183,5 @@ tr.dim td { color: #A5AAB0; }
     .bars { gap: 3px; }
     .filters input[name=q] { min-width: 0; width: 100%; }
 }
+.maint-on { box-shadow: inset 4px 0 0 var(--red), 0 1px 2px rgba(0,0,0,.04); }
+.maint-on .panel-head h3, .maint-off .panel-head h3 { margin: 0; }

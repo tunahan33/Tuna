@@ -57,3 +57,14 @@ if (request_is_https()) {
 header('X-Frame-Options: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: strict-origin-when-cross-origin');
+
+// Bakım modu: personel (panel yetkisi olanlar) siteyi normal görür, ziyaretçilere bakım sayfası gösterilir.
+// Yönetim paneli, giriş ve banka dönüş adresi her zaman açıktır.
+if (PHP_SAPI !== 'cli' && maintenance_active()) {
+    $__script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+    $__open = str_contains($__script, '/admin/') || in_array(basename($__script), ['odeme-sonuc.php', 'robots.php'], true);
+    if (!$__open && !can('panel.access')) {
+        require __DIR__ . '/maintenance.php';
+        exit;
+    }
+}
