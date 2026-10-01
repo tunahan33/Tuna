@@ -13,7 +13,7 @@
 # =============================================================================
 set -euo pipefail
 
-DOMAIN="${DOMAIN:-gsprojeler.com.tr}"
+DOMAIN="${DOMAIN:-gsprojeler.com}"
 WWW_DOMAIN="www.${DOMAIN}"
 REPO_TARBALL="${REPO_TARBALL:-https://codeload.github.com/tunahan33/Tuna/tar.gz/refs/heads/claude/dreamy-carson-mpbcx7}"
 APP_DIR="${APP_DIR:-/var/www/gsprojeler}"

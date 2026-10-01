@@ -13,7 +13,7 @@ AddDefaultCharset UTF-8
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    # http -> https ve gsprojeler.com.tr -> www.gsprojeler.com.tr yönlendirmesi panelden açılır:
+    # http -> https ve gsprojeler.com -> www.gsprojeler.com yönlendirmesi panelden açılır:
     # Yönetim > Site & Ödeme Ayarları > Sunucu & Yedek > "https ve tek adrese yönlendir"
     RewriteRule ^(includes|storage)/ - [F,L]
     # Arama motorları için dinamik dosyalar

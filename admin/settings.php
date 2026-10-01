@@ -27,7 +27,7 @@ $groups = [
     ]],
     'mail' => ['E-posta (SMTP)', [
         'mail_driver' => ['Gönderim Yöntemi', 'select', ['mail' => 'PHP mail() - hostingin varsayılan gönderimi', 'smtp' => 'SMTP - e-posta hesabı ile doğrulamalı gönderim (önerilen)']],
-        'smtp_host' => ['SMTP Sunucusu (örn. mail.gsprojeler.com.tr)', 'text'],
+        'smtp_host' => ['SMTP Sunucusu (örn. mail.gsprojeler.com)', 'text'],
         'smtp_port' => ['Port (SSL: 465, TLS: 587)', 'text'],
         'smtp_secure' => ['Güvenlik', 'select', ['ssl' => 'SSL (465)', 'tls' => 'TLS / STARTTLS (587)', 'none' => 'Yok (önerilmez)']],
         'smtp_user' => ['Kullanıcı Adı (genelde e-posta adresinin tamamı)', 'text'],
@@ -56,7 +56,7 @@ if (is_post() && $tab === 'server') {
     $newUrl = rtrim(input('base_url'), '/');
     if ($newUrl !== config('base_url')) {
         if (!filter_var($newUrl, FILTER_VALIDATE_URL) || !preg_match('#^https?://#', $newUrl)) {
-            flash('error', 'Geçerli bir site adresi girin (örn. https://www.gsprojeler.com.tr).');
+            flash('error', 'Geçerli bir site adresi girin (örn. https://www.gsprojeler.com).');
             redirect('admin/settings.php?tab=server');
         }
         if (!write_config(['base_url' => $newUrl])) {
@@ -147,8 +147,8 @@ admin_header('Site & Ödeme Ayarları', '<span class="lock-tag">★ Yalnızca S�
             <?= csrf_field() ?>
             <h3>Site Adresi</h3>
             <div class="info-box">Alan adınızı aldığınızda veya geçici adresten gerçek adrese geçtiğinizde buradan güncelleyin. E-posta bağlantıları, banka dönüş adresi ve sözleşmelerdeki site adresi bu değeri kullanır.</div>
-            <label>Sitenin tam adresi<input name="base_url" value="<?= e(config('base_url')) ?>" required placeholder="https://www.gsprojeler.com.tr"></label>
-            <label class="check"><input type="checkbox" name="force_https" value="1" <?= setting('force_https') === '1' ? 'checked' : '' ?>> <span>Tüm ziyaretçileri <b>https://</b> ve yukarıdaki tek adrese yönlendir (örn. gsprojeler.com.tr → www.gsprojeler.com.tr). SSL sertifikası kurulduktan sonra açın; adres https ile başlamıyorsa uygulanmaz.</span></label>
+            <label>Sitenin tam adresi<input name="base_url" value="<?= e(config('base_url')) ?>" required placeholder="https://www.gsprojeler.com"></label>
+            <label class="check"><input type="checkbox" name="force_https" value="1" <?= setting('force_https') === '1' ? 'checked' : '' ?>> <span>Tüm ziyaretçileri <b>https://</b> ve yukarıdaki tek adrese yönlendir (örn. gsprojeler.com → www.gsprojeler.com). SSL sertifikası kurulduktan sonra açın; adres https ile başlamıyorsa uygulanmaz.</span></label>
             <div class="form-actions"><button class="btn btn-primary">Kaydet</button></div>
         </form>
         <form method="post" action="backup.php" class="panel form">

@@ -58,7 +58,7 @@ Yetkiler `includes/auth.php` dosyasındaki `PERMISSIONS` tablosundan değiştiri
    Tüm sözleşmeler ve sayfa altı bu bilgilerle otomatik dolar. Sağdaki **Garanti Sanal POS Başvuru Kontrolü** listesi
    eksikleri gösterir.
 
-## VPS kurulumu (gsprojeler.com.tr)
+## VPS kurulumu (gsprojeler.com)
 
 Boş bir Ubuntu 22.04 / 24.04 sunucuyu tek komutla canlı siteye çevirir: Apache, PHP, MariaDB, Let's Encrypt SSL, güvenlik duvarı (UFW),
 fail2ban, otomatik güvenlik güncellemeleri ve her gece veritabanı yedeği. Site ve süper admin hesabı terminalden kurulur;
@@ -77,7 +77,7 @@ kurulum sihirbazı internete hiç açılmaz.
 6. Sonraki kod güncellemeleri: `bash kurulum.sh guncelle` (önce yedek alır; ayarlar ve veritabanı korunur).
 
 Veritabanı şifresi sunucuda `/root/gsprojeler-bilgiler.txt`, gece yedekleri `/var/backups/gsprojeler/` klasöründedir.
-VPS'te e-posta sunucusu yoktur: `info@gsprojeler.com.tr` için bir e-posta hizmeti (Natro, Yandex, Zoho, Google Workspace vb.)
+VPS'te e-posta sunucusu yoktur: `info@gsprojeler.com` için bir e-posta hizmeti (Natro, Yandex, Zoho, Google Workspace vb.)
 açıp bilgilerini panelde **E-posta (SMTP)** sekmesine girin.
 
 ## Alan adı olmadan hosting hazırlığı

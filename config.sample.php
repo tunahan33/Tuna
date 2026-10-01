@@ -15,7 +15,7 @@ return [
         'sqlite'   => __DIR__ . '/storage/database.sqlite',
     ],
     // Sitenin tam adresi, sonunda / olmadan
-    'base_url' => 'https://www.gsprojeler.com.tr',
+    'base_url' => 'https://www.gsprojeler.com',
     // Rastgele uzun bir anahtar (kurulumda otomatik üretilir)
     'app_key'  => 'BURAYA-RASTGELE-UZUN-BIR-ANAHTAR',
     'timezone' => 'Europe/Istanbul',
