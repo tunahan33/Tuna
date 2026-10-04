@@ -58,6 +58,7 @@ jobs:
             config.php
             storage/*.sqlite
             sportif/**
+            espor/**
 
       - name: Yükle (güncelleme)
         if: ${{ !inputs.include_installer }}
@@ -77,4 +78,5 @@ jobs:
             config.php
             storage/*.sqlite
             sportif/**
+            espor/**
             install/**

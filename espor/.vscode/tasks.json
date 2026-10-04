@@ -1,0 +1,26 @@
+{
+    // Terminal > Run Task... (Ctrl+Shift+P > "Tasks: Run Task") menüsünden çalıştırılır.
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "1) Siteyi kur (ilk sefer)",
+            "type": "shell",
+            "command": "php install/cli.php; php install/demo.php",
+            "problemMatcher": []
+        },
+        {
+            "label": "2) Siteyi başlat (http://localhost:8000)",
+            "type": "shell",
+            "command": "php -S localhost:8000",
+            "isBackground": true,
+            "problemMatcher": [],
+            "group": { "kind": "build", "isDefault": true }
+        },
+        {
+            "label": "Siteyi sıfırla (tüm veriler silinir)",
+            "type": "shell",
+            "command": "php install/cli.php --yeniden; php install/demo.php",
+            "problemMatcher": []
+        }
+    ]
+}

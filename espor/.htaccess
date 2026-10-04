@@ -1,0 +1,29 @@
+# GS Sportif Faaliyetler - Apache ayarları
+Options -Indexes
+DirectoryIndex index.php
+AddDefaultCharset UTF-8
+
+# Hassas dosyalara doğrudan erişimi engelle
+<FilesMatch "^(config\.php|config\.sample\.php|README\.md|\.gitignore)$">
+    Require all denied
+</FilesMatch>
+<FilesMatch "^_.*\.php$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # http -> https ve gssportif.com -> www.gssportif.com yönlendirmesi panelden açılır:
+    # Yönetim > Site & Ödeme Ayarları > Sunucu & Yedek > "https ve tek adrese yönlendir"
+    RewriteRule ^(includes|storage)/ - [F,L]
+    # Arama motorları için dinamik dosyalar
+    RewriteRule ^robots\.txt$ robots.php [L]
+    RewriteRule ^sitemap\.xml$ sitemap.php [L]
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>

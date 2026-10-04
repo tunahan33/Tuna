@@ -1,0 +1,8 @@
+config.php
+storage/*.sqlite
+storage/*.log
+install/install.lock
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+!.vscode/tasks.json
