@@ -15,9 +15,11 @@ $GLOBALS['__config'] = require ROOT . '/config.php';
 require __DIR__ . '/db.php';
 require __DIR__ . '/functions.php';
 require __DIR__ . '/auth.php';
+require __DIR__ . '/vouchers.php';
 
 date_default_timezone_set(config('timezone') ?: 'Europe/Istanbul');
 mb_internal_encoding('UTF-8');
+db_upgrade();
 
 if (config('debug')) {
     ini_set('display_errors', '1');

@@ -31,6 +31,8 @@ if (is_post()) {
 }
 
 $orders = rows('SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC', [$user['id']]);
+$emails = array_values(array_unique(array_map('mb_strtolower', array_merge([$user['email']], array_column($orders, 'customer_email')))));
+$vouchers = array_map(fn($v) => voucher_find($v['code']), rows('SELECT code FROM vouchers WHERE LOWER(customer_email) IN (' . implode(',', array_fill(0, count($emails), '?')) . ") AND status <> 'cancelled' ORDER BY id DESC", $emails));
 $pageTitle = 'Hesabım';
 require __DIR__ . '/includes/header.php';
 ?>
@@ -52,7 +54,7 @@ require __DIR__ . '/includes/header.php';
                         <td><?= e($o['order_no']) ?></td>
                         <td><?= tr_date($o['created_at']) ?></td>
                         <td><?= e($o['service_title']) ?><br><small class="muted"><?= e($o['package_name']) ?></small></td>
-                        <td><?= money($o['amount']) ?></td>
+                        <td><?= money($o['amount']) ?><?= $o['voucher_code'] ? '<br><small class="muted">+ ' . money($o['voucher_amount']) . ' iade çeki</small>' : '' ?></td>
                         <td><?= status_badge($o['status']) ?></td>
                         <td><?php if (in_array($o['status'], ['pending', 'failed'], true)): ?><a class="btn btn-primary btn-xs" href="<?= url('odeme.php?siparis=' . urlencode($o['order_no'])) ?>">Öde</a><?php endif; ?></td>
                     </tr>
@@ -62,6 +64,18 @@ require __DIR__ . '/includes/header.php';
         <?php endif; ?>
     </div>
     <div>
+        <?php if ($vouchers): ?>
+        <div class="card mb-1">
+            <h3>İade Çeklerim</h3>
+            <?php foreach ($vouchers as $v): ?>
+                <div class="voucher-card">
+                    <div><code><?= e($v['code']) ?></code><br><small class="muted">Son kullanma: <?= tr_date($v['expires_at'], false) ?> · <?= e($v['customer_email']) ?></small></div>
+                    <div class="center"><strong><?= money($v['balance']) ?></strong><br><?= voucher_badge($v['status']) ?></div>
+                </div>
+            <?php endforeach; ?>
+            <p class="small muted">Kodu ödeme sayfasında “İade çeki kodum var” alanına girerek kullanabilirsiniz.</p>
+        </div>
+        <?php endif; ?>
         <div class="card">
             <h3>Profil Bilgileri</h3>
             <form method="post" class="form"><?= csrf_field() ?><input type="hidden" name="action" value="profile">

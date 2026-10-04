@@ -88,6 +88,8 @@ Her şeyi sıfırlamak için: **Run Task → Siteyi sıfırla**.
 | İptal / iade / temsilci atama | ✓ | ✓ | – | – | – |
 | Sipariş silme | ✓ | – | – | – | – |
 | Müşteriler, mesajlar, arıza / KVKK / iş başvuruları ve yanıtlama | ✓ | ✓ | – | ✓ | – |
+| İade çeklerini görme | ✓ | ✓ | – | ✓ | – |
+| İade çeki tanımlama / iptal | ✓ | ✓ | – | – | – |
 | Koçluk ve paket metinleri, sayfalar | ✓ | ✓ | ✓ | – | – |
 | Koçluk/paket ekleme, silme, fiyat | ✓ | ✓ | – | – | – |
 | Kullanıcı ve rol yönetimi | ✓ (herkes) | ✓ (editör, satış, üye) | – | – | – |
@@ -96,6 +98,17 @@ Her şeyi sıfırlamak için: **Run Task → Siteyi sıfırla**.
 | **Site ve sanal POS ayarları** | ✓ | – | – | – | – |
 
 Yetkiler `includes/auth.php` dosyasındaki `PERMISSIONS` tablosundan değiştirilebilir.
+
+## İade çekleri
+
+Müşteri kart iadesi yerine iade çeki isterse: Panel → **İade Çekleri** (veya sipariş detayındaki **Bu sipariş için iade çeki tanımla**).
+Sipariş no + iade tutarı girilir; “%10 ekle” işaretliyse çek tutarı iade tutarının %10 fazlası olur. `IC-XXXX-XXXX` biçiminde kod
+üretilir ve müşteriye e-postayla gönderilir. Müşteri kodu ödeme sayfasındaki **İade çeki kodum var** alanına girer:
+
+- Kod yalnızca tanımlandığı e-posta adresiyle kullanılabilir, 12 ay geçerlidir (ay sayısı değiştirilebilir).
+- Paket fiyatından düşülür, fark kartla ödenir. Çek paketi tamamen karşılıyorsa bankaya gidilmeden sipariş tamamlanır.
+- Kalan bakiye sonraki siparişlerde kullanılabilir; bakiye yalnızca ödeme onaylanınca düşer.
+- Müşteri çeklerini **Hesabım** sayfasında görür. Tüm işlemler aktivite akışına yazılır.
 
 ## Garanti BBVA Sanal POS başvurusu
 

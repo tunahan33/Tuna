@@ -71,6 +71,8 @@ admin_header('Sipariş ' . $o['order_no'], status_badge($o['status']) . ' · ' .
                 <dt>Hizmet</dt><dd><?= e($o['service_title']) ?></dd>
                 <dt>Paket</dt><dd><?= e($o['package_name']) ?></dd>
                 <dt>Tutar</dt><dd><strong class="big"><?= money($o['amount']) ?></strong> <small class="muted">KDV dahil</small></dd>
+                <?php if ($o['voucher_code']): ?><dt>İade Çeki</dt><dd><?= money($o['voucher_amount']) ?> <small class="muted">(<?= e($o['voucher_code']) ?>) · kartla ödenen: <?= money($o['amount']) ?></small></dd><?php endif; ?>
+                <?php if (can('vouchers.manage') && in_array($o['status'], ['paid', 'processing', 'cancelled', 'refunded'], true)): ?><dt></dt><dd><a class="btn btn-xs btn-outline" href="<?= url('admin/vouchers.php?siparis=' . urlencode($o['order_no'])) ?>">Bu sipariş için iade çeki tanımla</a></dd><?php endif; ?>
                 <dt>Durum</dt><dd><?= status_badge($o['status']) ?></dd>
                 <dt>Ödeme Tarihi</dt><dd><?= tr_date($o['paid_at']) ?></dd>
                 <dt>Banka Referansı</dt><dd><?= e($o['payment_ref'] ?: '-') ?></dd>

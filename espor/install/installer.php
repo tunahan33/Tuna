@@ -89,6 +89,7 @@ function install_run(array $config, array $admin): void
         'notify_email' => $email,
         'mail_driver' => 'mail', 'smtp_host' => 'mail.gssportif.com', 'smtp_port' => '465', 'smtp_secure' => 'ssl', 'smtp_user' => 'info@gssportif.com', 'smtp_pass' => '', 'smtp_from' => 'info@gssportif.com',
         'force_https' => '0',
+        'db_version' => '2',
     ];
     foreach ($defaults as $k => $v) {
         if (!row('SELECT skey FROM settings WHERE skey = ?', [$k])) {

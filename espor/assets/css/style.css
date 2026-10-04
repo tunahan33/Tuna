@@ -570,3 +570,14 @@ code { background: var(--bg-soft); padding: .1em .4em; border-radius: 4px; font-
     .main-nav .btn { margin-left: .2rem; }
     .theme-dark .brand img { height: 38px; }
 }
+
+/* İade çeki */
+.voucher-field { border: 1px dashed var(--line); border-radius: 10px; padding: .7rem 1rem; }
+.voucher-field summary { cursor: pointer; font-weight: 600; color: var(--yellow); }
+.voucher-field[open] summary { margin-bottom: .8rem; }
+.voucher-lines { display: grid; grid-template-columns: 1fr auto; gap: .3rem 1rem; font-size: .92rem; border-top: 1px solid var(--line); padding-top: .8rem; margin: .8rem 0 0; }
+.voucher-lines dd { margin: 0; text-align: right; font-weight: 600; }
+.voucher-lines small { color: var(--muted); }
+.voucher-card { display: flex; justify-content: space-between; align-items: center; gap: 1rem; border: 1px dashed var(--yellow); border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: .8rem; background: rgba(253, 185, 19, .06); }
+.voucher-card code { font-size: 1.05rem; font-weight: 700; color: var(--yellow); background: none; padding: 0; }
+.voucher-card strong { font-family: var(--font-head); font-size: 1.3rem; color: #fff; }

@@ -15,6 +15,7 @@ function admin_menu(): array
             ['orders.php', 'Siparişler', 'bag', 'orders.view', $newOrders],
             ['customers.php', 'Müşteriler', 'users', 'customers.view'],
             ['messages.php', 'Mesajlar / Talepler', 'mail', 'messages.view', $newMsgs],
+            ['vouchers.php', 'İade Çekleri', 'ticket', 'vouchers.view'],
         ]],
         ['İçerik', [
             ['services.php', 'Hizmetler', 'layers', 'content.edit'],
@@ -39,6 +40,7 @@ function admin_icon(string $n): string
         'users' => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
         'mail' => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
         'layers' => '<path d="m12 3 9 5-9 5-9-5 9-5z"/><path d="m3 13 9 5 9-5"/>',
+        'ticket' => '<path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/>',
         'tag' => '<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9z"/><circle cx="8" cy="8" r="1.5"/>',
         'file' => '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
         'shield' => '<path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3z"/>',

@@ -73,6 +73,8 @@ function schema_sql(string $driver): array
             tax_office VARCHAR(100) NULL,
             tax_number VARCHAR(20) NULL,
             customer_note TEXT NULL,
+            voucher_code VARCHAR(30) NULL,
+            voucher_amount DECIMAL(12,2) NULL,
             status VARCHAR(20) NOT NULL DEFAULT 'pending',
             payment_method VARCHAR(30) NULL,
             payment_ref VARCHAR(100) NULL,
@@ -131,6 +133,28 @@ function schema_sql(string $driver): array
             ip VARCHAR(45) NULL,
             created_at DATETIME NOT NULL
         )$tail",
+        "CREATE TABLE IF NOT EXISTS vouchers (
+            id $pk,
+            code VARCHAR(30) NOT NULL UNIQUE,
+            customer_email VARCHAR(190) NOT NULL,
+            customer_name VARCHAR(120) NULL,
+            amount DECIMAL(12,2) NOT NULL,
+            balance DECIMAL(12,2) NOT NULL,
+            source_order_no VARCHAR(40) NULL,
+            note VARCHAR(500) NULL,
+            status VARCHAR(12) NOT NULL DEFAULT 'active',
+            expires_at DATETIME NOT NULL,
+            created_by $int NULL,
+            created_at DATETIME NOT NULL
+        )$tail",
+        "CREATE TABLE IF NOT EXISTS voucher_uses (
+            id $pk,
+            voucher_id $int NOT NULL,
+            order_id $int NOT NULL,
+            order_no VARCHAR(40) NOT NULL,
+            amount DECIMAL(12,2) NOT NULL,
+            created_at DATETIME NOT NULL
+        )$tail",
         "CREATE TABLE IF NOT EXISTS settings (
             skey VARCHAR(80) NOT NULL PRIMARY KEY,
             svalue TEXT NULL
@@ -140,5 +164,6 @@ function schema_sql(string $driver): array
         "CREATE INDEX idx_activity_created ON activity_log (created_at)",
         "CREATE INDEX idx_packages_service ON packages (service_id)",
         "CREATE INDEX idx_messages_ticket ON messages (ticket_no)",
+        "CREATE INDEX idx_vouchers_email ON vouchers (customer_email)",
     ];
 }
