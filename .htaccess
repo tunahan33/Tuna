@@ -15,7 +15,7 @@ AddDefaultCharset UTF-8
     RewriteEngine On
     # http -> https ve gsprojeler.com -> www.gsprojeler.com yönlendirmesi panelden açılır:
     # Yönetim > Site & Ödeme Ayarları > Sunucu & Yedek > "https ve tek adrese yönlendir"
-    RewriteRule ^(includes|storage)/ - [F,L]
+    RewriteRule ^(includes|storage|tools|deploy)/ - [F,L]
     # Arama motorları için dinamik dosyalar
     RewriteRule ^robots\.txt$ robots.php [L]
     RewriteRule ^sitemap\.xml$ sitemap.php [L]
