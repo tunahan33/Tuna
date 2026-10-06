@@ -13,7 +13,7 @@
 # =============================================================================
 set -euo pipefail
 
-DOMAIN="${DOMAIN:-gssportiffaaliyetler.com.tr}"
+DOMAIN="${DOMAIN:-gssportiffaaliyetler.com}"
 WWW_DOMAIN="www.${DOMAIN}"
 REPO_TARBALL="${REPO_TARBALL:-https://codeload.github.com/tunahan33/Tuna/tar.gz/refs/heads/claude/dreamy-newton-rci15t}"
 APP_DIR="${APP_DIR:-/var/www/gssportif}"

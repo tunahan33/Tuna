@@ -121,12 +121,12 @@ Başvurudan önce:
 
 Kart bilgileri hiçbir zaman sunucuya gelmez ve saklanmaz (3D OOS Pay: kart bankanın sayfasında girilir).
 
-## Sunucuya kurulum (gssportiffaaliyetler.com.tr)
+## Sunucuya kurulum (gssportiffaaliyetler.com)
 
 Sunucu: Ubuntu 24.04 VPS. Tek komutla Apache, PHP, MariaDB, ücretsiz SSL, güvenlik duvarı, saldırı koruması ve her gece
 veritabanı yedeği kurulur.
 
-**1. Alan adını sunucuya yönlendir:** Natro → Alan Adlarım → gssportiffaaliyetler.com.tr → **DNS Yönetimi**:
+**1. Alan adını sunucuya yönlendir:** Natro → Alan Adlarım → gssportiffaaliyetler.com → **DNS Yönetimi**:
 mevcut `@` ve `www` A kayıtlarını silip şunları ekle (park/yönlendirme varsa kapat):
 
 | Tür | Ad | Değer |
@@ -142,13 +142,13 @@ curl -fsSL https://raw.githubusercontent.com/tunahan33/Tuna/claude/dreamy-newton
 bash kurulum.sh
 ```
 Senden süper admin adı, e-postası ve şifresi istenir. DNS hazırsa SSL de otomatik kurulur ve site
-https://www.gssportiffaaliyetler.com.tr adresinde açılır. DNS henüz yayılmadıysa site önce `http://213.142.148.32` adresinde açılır;
+https://www.gssportiffaaliyetler.com adresinde açılır. DNS henüz yayılmadıysa site önce `http://213.142.148.32` adresinde açılır;
 yayılınca (15 dk – birkaç saat) `bash kurulum.sh ssl` komutunu çalıştır.
 
 **4. Sonraki güncellemeler:** `bash kurulum.sh guncelle` (önce yedek alır; ayarlar, siparişler ve üyeler korunur).
 
 Veritabanı şifresi sunucuda `/root/gssportif-bilgiler.txt`, gece yedekleri `/var/backups/gssportif/` klasöründedir.
-Garanti BBVA'ya bildirilecek dönüş adresi: `https://www.gssportiffaaliyetler.com.tr/odeme-sonuc.php`
+Garanti BBVA'ya bildirilecek dönüş adresi: `https://www.gssportiffaaliyetler.com/odeme-sonuc.php`
 
 > Güvenlik: kurulumdan sonra sunucuda `passwd` yazarak root şifresini en az 16 karakterli güçlü bir şifreyle değiştir.
 
