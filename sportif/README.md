@@ -1,4 +1,4 @@
-# GS Sportif – Spor Giyim Mağazası
+# GS Sportif Ürünler – Spor Giyim Mağazası
 
 GS Projeler ile aynı sarı · kırmızı · antrasit kimlikte, Garanti BBVA Sanal POS uyumlu spor giyim e-ticaret sitesi.
 Saf PHP 8 + MySQL; framework, Composer veya Node.js gerekmez. VS Code ile `sportif` klasörünü açarak çalışabilirsiniz.

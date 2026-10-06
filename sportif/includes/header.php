@@ -2,7 +2,7 @@
 /** Mağaza üst bölümü. $pageTitle, $pageDesc değişkenleri tanımlanıp dahil edilir. */
 $__user = current_user();
 $__cats = rows('SELECT slug, name FROM categories WHERE is_active = 1 ORDER BY sort_order, id');
-$__title = isset($pageTitle) ? $pageTitle . ' | ' . setting('site_name', 'GS Sportif') : setting('site_name', 'GS Sportif') . ' | ' . setting('site_slogan');
+$__title = isset($pageTitle) ? $pageTitle . ' | ' . setting('site_name', 'GS Sportif Ürünler') : setting('site_name', 'GS Sportif Ürünler') . ' | ' . setting('site_slogan');
 $__desc = $pageDesc ?? setting('site_description');
 $__current = basename($_SERVER['SCRIPT_NAME'] ?? '');
 $__cartCount = cart_count();
@@ -38,7 +38,7 @@ $__cartCount = cart_count();
 </div>
 <header class="site-header">
     <div class="container header-inner">
-        <a class="brand" href="<?= url() ?>" aria-label="Ana sayfa"><img src="<?= asset('img/logo.svg') ?>" alt="<?= e(setting('site_name', 'GS Sportif')) ?>" width="210" height="48"></a>
+        <a class="brand" href="<?= url() ?>" aria-label="Ana sayfa"><img src="<?= asset('img/logo.svg') ?>" alt="<?= e(setting('site_name', 'GS Sportif Ürünler')) ?>" width="210" height="48"></a>
         <form class="header-search" action="<?= url('urunler.php') ?>" method="get" role="search">
             <input type="search" name="q" value="<?= e(input('q')) ?>" placeholder="Ürün ara… (forma, eşofman, tayt)" aria-label="Ürün ara">
             <button aria-label="Ara"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>

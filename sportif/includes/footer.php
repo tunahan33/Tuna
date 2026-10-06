@@ -11,7 +11,7 @@
 <footer class="site-footer">
     <div class="container footer-grid">
         <div>
-            <img src="<?= asset('img/logo-light.svg') ?>" alt="<?= e(setting('site_name', 'GS Sportif')) ?>" width="210" height="48">
+            <img src="<?= asset('img/logo-light.svg') ?>" alt="<?= e(setting('site_name', 'GS Sportif Ürünler')) ?>" width="210" height="48">
             <p class="muted-light"><?= e(setting('site_description')) ?></p>
         </div>
         <div>
@@ -49,7 +49,7 @@
         <img src="<?= asset('img/payment-logos.svg') ?>" alt="Visa, Mastercard, Troy, 3D Secure" height="32" class="pay-logos">
     </div>
     <div class="footer-bottom">
-        <div class="container">© <?= date('Y') ?> <?= e(setting('site_name', 'GS Sportif')) ?>. Tüm hakları saklıdır. Sitedeki tüm fiyatlara KDV dahildir.</div>
+        <div class="container">© <?= date('Y') ?> <?= e(setting('site_name', 'GS Sportif Ürünler')) ?>. Tüm hakları saklıdır. Sitedeki tüm fiyatlara KDV dahildir.</div>
     </div>
 </footer>
 <div class="cookie-bar" data-cookie-bar hidden>

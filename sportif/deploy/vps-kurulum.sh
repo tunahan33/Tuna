@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  GS Sportif (spor giyim mağazası) - VPS kurulum betiği (Ubuntu 22.04 / 24.04, Debian 12)
+#  GS Sportif Ürünler (spor giyim mağazası) - VPS kurulum betiği (Ubuntu 22.04 / 24.04, Debian 12)
 #
 #  Kullanım (sunucuya root olarak bağlanıp):
 #    curl -fsSL https://raw.githubusercontent.com/tunahan33/Tuna/claude/dreamy-carson-mpbcx7/sportif/deploy/vps-kurulum.sh -o kurulum.sh
@@ -224,7 +224,7 @@ if [ "$TEST_MODE" != 1 ]; then
 fi
 
 cat > "$CRED_FILE" <<CRED
-GS Sportif kurulum bilgileri ($(date '+%d.%m.%Y %H:%M'))
+GS Sportif Ürünler kurulum bilgileri ($(date '+%d.%m.%Y %H:%M'))
 Site klasörü   : $APP_DIR
 Veritabanı     : $DB_NAME
 DB kullanıcı   : $DB_USER

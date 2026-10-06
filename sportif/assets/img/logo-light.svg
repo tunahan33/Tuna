@@ -9,5 +9,5 @@
   <text x="68" y="32" font-family="Montserrat,'Segoe UI',Arial,Helvetica,sans-serif" font-weight="800" font-size="23" fill="#FFFFFF" letter-spacing="0.6">GS <tspan fill="#C8102E">SPORTİF</tspan></text>
   <rect x="69" y="39" width="20" height="3" rx="1.5" fill="#FDB913"/>
   <rect x="91" y="39" width="20" height="3" rx="1.5" fill="#C8102E"/>
-  <text x="116" y="43" font-family="Montserrat,'Segoe UI',Arial,Helvetica,sans-serif" font-weight="600" font-size="8.5" fill="#B8BDC3" letter-spacing="2.4">SPOR GİYİM</text>
+  <text x="116" y="44" font-family="Montserrat,'Segoe UI',Arial,Helvetica,sans-serif" font-weight="800" font-size="11" fill="#E4E6E9" letter-spacing="4.2">ÜRÜNLER</text>
 </svg>

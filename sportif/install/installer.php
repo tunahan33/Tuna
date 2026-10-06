@@ -74,10 +74,10 @@ function install_run(array $config, array $admin): void
 
     // Varsayılan ayarlar
     $defaults = [
-        'site_name' => 'GS Sportif',
+        'site_name' => 'GS Sportif Ürünler',
         'site_slogan' => 'Sahada fark yaratanların giyimi.',
-        'site_description' => 'GS Sportif; forma, antrenman giyim, eşofman, şort, sweatshirt ve spor aksesuarlarında kaliteli ve uygun fiyatlı ürünler sunar. Takımlar için isim-numara baskılı toplu sipariş.',
-        'company_title' => 'GS Sportif (Ünvanınızı girin)',
+        'site_description' => 'GS Sportif Ürünler; forma, antrenman giyim, eşofman, şort, sweatshirt ve spor aksesuarlarında kaliteli ve uygun fiyatlı ürünler sunar. Takımlar için isim-numara baskılı toplu sipariş.',
+        'company_title' => 'GS Sportif Ürünler (Ünvanınızı girin)',
         'company_address' => 'Adresinizi yönetim panelinden girin',
         'company_phone' => '+90 (___) ___ __ __',
         'company_email' => 'info@gssportifurunler.com',

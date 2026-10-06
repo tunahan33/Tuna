@@ -69,7 +69,7 @@ function admin_header(string $title, string $subtitle = ''): void
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title><?= e($title) ?> · GS Sportif Yönetim</title>
+<title><?= e($title) ?> · GS Sportif Ürünler Yönetim</title>
 <link rel="icon" type="image/svg+xml" href="<?= asset('img/favicon.svg') ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -79,7 +79,7 @@ function admin_header(string $title, string $subtitle = ''): void
 </head>
 <body class="admin">
 <aside class="sidebar" data-sidebar>
-    <a class="sb-brand" href="<?= url('admin/') ?>"><img src="<?= asset('img/logo-light.svg') ?>" alt="GS Sportif" height="40"></a>
+    <a class="sb-brand" href="<?= url('admin/') ?>"><img src="<?= asset('img/logo-light.svg') ?>" alt="GS Sportif Ürünler" height="40"></a>
     <div class="sb-user">
         <span class="avatar"><?= e(mb_strtoupper(mb_substr($u['name'], 0, 1))) ?></span>
         <div><strong><?= e($u['name']) ?></strong><span class="role role-<?= e($u['role']) ?>"><?= e(role_label($u['role'])) ?></span></div>

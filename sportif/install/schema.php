@@ -1,5 +1,5 @@
 <?php
-/** Veritabanı tabloları (MySQL ve SQLite uyumlu) - GS Sportif mağaza */
+/** Veritabanı tabloları (MySQL ve SQLite uyumlu) - GS Sportif Ürünler mağaza */
 
 function schema_sql(string $driver): array
 {
