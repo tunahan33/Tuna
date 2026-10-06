@@ -15,32 +15,6 @@ const VOUCHER_STATUSES = [
     'cancelled' => ['İptal edildi', 'red'],
 ];
 
-/** Eski kurulumlara yeni tablo/sütunları ekler (bir kez çalışır) */
-function db_upgrade(): void
-{
-    if ((int) setting('db_version', '1') >= 2) {
-        return;
-    }
-    $mysql = (config('db.driver') ?? 'mysql') === 'mysql';
-    $pk = $mysql ? 'INT UNSIGNED AUTO_INCREMENT PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT';
-    $int = $mysql ? 'INT UNSIGNED' : 'INTEGER';
-    $tail = $mysql ? ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci' : '';
-    $sql = [
-        'ALTER TABLE orders ADD voucher_code VARCHAR(30) NULL',
-        'ALTER TABLE orders ADD voucher_amount DECIMAL(12,2) NULL',
-        "CREATE TABLE IF NOT EXISTS vouchers (id $pk, code VARCHAR(30) NOT NULL UNIQUE, customer_email VARCHAR(190) NOT NULL, customer_name VARCHAR(120) NULL, amount DECIMAL(12,2) NOT NULL, balance DECIMAL(12,2) NOT NULL, source_order_no VARCHAR(40) NULL, note VARCHAR(500) NULL, status VARCHAR(12) NOT NULL DEFAULT 'active', expires_at DATETIME NOT NULL, created_by $int NULL, created_at DATETIME NOT NULL)$tail",
-        "CREATE TABLE IF NOT EXISTS voucher_uses (id $pk, voucher_id $int NOT NULL, order_id $int NOT NULL, order_no VARCHAR(40) NOT NULL, amount DECIMAL(12,2) NOT NULL, created_at DATETIME NOT NULL)$tail",
-    ];
-    foreach ($sql as $s) {
-        try {
-            db()->exec($s);
-        } catch (Throwable $e) {
-            // Sütun zaten varsa yoksay
-        }
-    }
-    save_setting('db_version', '2');
-}
-
 function voucher_generate_code(): string
 {
     $chars = 'ABCDEFGHJKLMNPRSTUVYZ23456789'; // karışan harf/rakamlar çıkarıldı

@@ -20,10 +20,10 @@ require __DIR__ . '/includes/header.php';
             <ul class="hero-stats">
                 <li><strong><?= count($services) ?></strong><span>Koçluk türü</span></li>
                 <li><strong>24 saat</strong><span>İçinde koçunuz sizi arar</span></li>
-                <?php if ($minPrice): ?><li><strong><?= money($minPrice) ?></strong><span>'den başlayan paketler</span></li><?php endif; ?>
+                <?php if ($minPrice): ?><li><strong><?= number_format((float) $minPrice, 0, ',', '.') ?> ₺</strong><span>'den başlayan paketler</span></li><?php endif; ?>
                 <li><strong>3D Secure</strong><span>Güvenli ödeme</span></li>
             </ul>
-            <div class="game-strip"><span>Valorant</span><span>League of Legends</span><span>CS2</span><span>PUBG Mobile</span><span>EA SPORTS FC</span></div>
+            
         </div>
         <div class="hero-emblem" aria-hidden="true">
             <img src="<?= asset('img/emblem-3d.jpg') ?>" alt="" width="600" height="500">
@@ -33,6 +33,9 @@ require __DIR__ . '/includes/header.php';
         </div>
     </div>
 </section>
+<div class="ticker" aria-hidden="true"><div class="ticker-track">
+    <?php for ($t = 0; $t < 2; $t++): ?><span>Valorant</span><span>League of Legends</span><span>Counter-Strike 2</span><span>PUBG Mobile</span><span>EA SPORTS FC</span><span>Takım &amp; Turnuva</span><span>Mental Performans</span><span>Yayıncılık</span><?php endfor; ?>
+</div></div>
 
 <section class="section">
     <div class="container">

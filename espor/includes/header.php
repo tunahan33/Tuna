@@ -18,14 +18,15 @@ $__current = basename($_SERVER['SCRIPT_NAME'] ?? '');
 <meta property="og:locale" content="tr_TR">
 <meta property="og:title" content="<?= e($__title) ?>">
 <meta property="og:description" content="<?= e($__desc) ?>">
-<meta name="theme-color" content="#1A1D20">
+<meta name="theme-color" content="#0D0F12">
 <link rel="icon" type="image/svg+xml" href="<?= asset('img/favicon.svg') ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
+<link rel="stylesheet" href="<?= asset('css/site.css') ?>">
 </head>
-<body class="theme-dark">
+<body class="site">
 <div class="topbar">
     <div class="container topbar-inner">
         <span><?= e(setting('working_hours')) ?></span>

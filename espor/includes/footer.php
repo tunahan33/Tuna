@@ -62,7 +62,7 @@ $__socials = array_filter(['Instagram' => setting('instagram'), 'YouTube' => set
         <img src="<?= asset('img/payment-logos.svg') ?>" alt="Visa, Mastercard, Troy, 3D Secure" height="32" class="pay-logos">
     </div>
     <div class="footer-bottom">
-        <div class="container">© <?= date('Y') ?> <?= e(setting('site_name', 'GS Sportif Faaliyetler')) ?>. Tüm hakları saklıdır. Sitede yer alan tüm fiyatlara KDV dahildir. Adı geçen oyun adları ilgili şirketlerin tescilli markalarıdır.</div>
+        <div class="container">© <?= date('Y') ?> <?= e(setting('site_name', 'GS Sportif Faaliyetler')) ?>. Tüm hakları saklıdır. <?= e(setting('site_name', 'GS Sportif Faaliyetler')) ?>, <?= e(setting('company_title')) ?> markasıdır. Sitede yer alan tüm fiyatlara KDV dahildir. Adı geçen oyun adları ilgili şirketlerin tescilli markalarıdır.</div>
     </div>
 </footer>
 <div class="modal" id="package-modal" hidden>
