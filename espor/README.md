@@ -121,7 +121,38 @@ Başvurudan önce:
 
 Kart bilgileri hiçbir zaman sunucuya gelmez ve saklanmaz (3D OOS Pay: kart bankanın sayfasında girilir).
 
-## Hostinge kurulum (yayına alma)
+## Sunucuya kurulum (gssportiffaaliyetler.com.tr)
+
+Sunucu: Ubuntu 24.04 VPS. Tek komutla Apache, PHP, MariaDB, ücretsiz SSL, güvenlik duvarı, saldırı koruması ve her gece
+veritabanı yedeği kurulur.
+
+**1. Alan adını sunucuya yönlendir:** Natro → Alan Adlarım → gssportiffaaliyetler.com.tr → **DNS Yönetimi**:
+mevcut `@` ve `www` A kayıtlarını silip şunları ekle (park/yönlendirme varsa kapat):
+
+| Tür | Ad | Değer |
+|---|---|---|
+| A | @ | 213.142.148.32 |
+| A | www | 213.142.148.32 |
+
+**2. Sunucuya bağlan:** Windows'ta *PowerShell* aç → `ssh root@213.142.148.32` → `yes` → şifreyi yaz (yazarken görünmez).
+
+**3. Kurulumu başlat:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/tunahan33/Tuna/claude/dreamy-newton-rci15t/espor/deploy/vps-kurulum.sh -o kurulum.sh
+bash kurulum.sh
+```
+Senden süper admin adı, e-postası ve şifresi istenir. DNS hazırsa SSL de otomatik kurulur ve site
+https://www.gssportiffaaliyetler.com.tr adresinde açılır. DNS henüz yayılmadıysa site önce `http://213.142.148.32` adresinde açılır;
+yayılınca (15 dk – birkaç saat) `bash kurulum.sh ssl` komutunu çalıştır.
+
+**4. Sonraki güncellemeler:** `bash kurulum.sh guncelle` (önce yedek alır; ayarlar, siparişler ve üyeler korunur).
+
+Veritabanı şifresi sunucuda `/root/gssportif-bilgiler.txt`, gece yedekleri `/var/backups/gssportif/` klasöründedir.
+Garanti BBVA'ya bildirilecek dönüş adresi: `https://www.gssportiffaaliyetler.com.tr/odeme-sonuc.php`
+
+> Güvenlik: kurulumdan sonra sunucuda `passwd` yazarak root şifresini en az 16 karakterli güçlü bir şifreyle değiştir.
+
+## Paylaşımlı hostinge kurulum (cPanel, alternatif)
 
 1. cPanel → MySQL veritabanı ve kullanıcı oluştur.
 2. `espor` klasörünün **içindekileri** `public_html` klasörüne yükle (`config.php` ve `storage/*.sqlite` yerel dosyalardır, yükleme).
