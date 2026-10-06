@@ -78,6 +78,21 @@ function can_manage_role(string $targetRole, ?array $user = null): bool
     return $user && in_array($targetRole, MANAGEABLE_ROLES[$user['role']] ?? [], true);
 }
 
+/**
+ * Başka bir kullanıcının hesabını (rol, durum, e-posta, şifre) değiştirebilir mi?
+ * Süper admin hesapları korumalıdır: hiçbir süper admin başka bir süper adminin
+ * yetkisini düşüremez, hesabını pasifleştiremez veya bilgilerini değiştiremez.
+ * Her kullanıcı kendi bilgilerini yalnızca Profilim sayfasından düzenler.
+ */
+function can_edit_user(array $target, ?array $user = null): bool
+{
+    $user = $user ?? current_user();
+    return $user
+        && (int) $target['id'] !== (int) $user['id']
+        && $target['role'] !== 'super_admin'
+        && can_manage_role($target['role'], $user);
+}
+
 function require_login(): array
 {
     $u = current_user();

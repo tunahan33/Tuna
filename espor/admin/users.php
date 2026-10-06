@@ -5,13 +5,16 @@ $u = require_perm('users.view');
 if (is_post()) {
     verify_csrf();
     $t = row('SELECT * FROM users WHERE id = ?', [(int) input('id')]);
-    if ($t && (int) $t['id'] !== (int) $u['id'] && can_manage_role($t['role']) && input('action') === 'toggle') {
+    if ($t && can_edit_user($t) && input('action') === 'toggle') {
         $new = $t['status'] === 'active' ? 'passive' : 'active';
         q('UPDATE users SET status = ? WHERE id = ?', [$new, $t['id']]);
         log_activity($new === 'active' ? 'Kullanıcıyı aktifleştirdi' : 'Kullanıcıyı pasifleştirdi', $t['name'] . ' (' . role_label($t['role']) . ')', 'user', (int) $t['id']);
         flash('success', 'Kullanıcı durumu güncellendi.');
     } else {
-        flash('error', 'Bu işlem için yetkiniz yok.');
+        if ($t && $t['role'] === 'super_admin' && (int) $t['id'] !== (int) $u['id']) {
+            log_activity('Yetkisiz erişim denemesi', 'Başka bir süper admini pasifleştirmeye çalıştı: ' . $t['name'], 'user', (int) $t['id']);
+        }
+        flash('error', 'Bu işlem için yetkiniz yok.' . ($t && $t['role'] === 'super_admin' ? ' Süper admin hesapları korumalıdır.' : ''));
     }
     redirect('admin/users.php?' . http_build_query(['role' => input('role')]));
 }
@@ -42,7 +45,7 @@ admin_header('Kullanıcılar & Yetkiler', 'Üyelere rol atayarak yetkilendirin')
     <div class="table-wrap"><table class="table">
         <thead><tr><th>Kullanıcı</th><th>Rol</th><th>Telefon</th><th>Kayıt</th><th>Son Giriş</th><th>Durum</th><th></th></tr></thead>
         <tbody>
-        <?php foreach ($list as $x): $manage = can_manage_role($x['role']) && (int) $x['id'] !== (int) $u['id']; ?>
+        <?php foreach ($list as $x): $manage = can_edit_user($x); ?>
             <tr>
                 <td><strong><?= e($x['name']) ?></strong><br><small class="muted"><?= e($x['email']) ?></small></td>
                 <td><span class="role role-<?= e($x['role']) ?>"><?= e(role_label($x['role'])) ?></span></td>
@@ -56,6 +59,8 @@ admin_header('Kullanıcılar & Yetkiler', 'Üyelere rol atayarak yetkilendirin')
                         <form method="post"><?= csrf_field() ?><input type="hidden" name="id" value="<?= (int) $x['id'] ?>"><input type="hidden" name="role" value="<?= e($role) ?>"><button name="action" value="toggle" class="btn btn-xs btn-outline"><?= $x['status'] === 'active' ? 'Pasifleştir' : 'Aktifleştir' ?></button></form>
                     <?php elseif ((int) $x['id'] === (int) $u['id']): ?>
                         <a class="btn btn-xs btn-outline" href="profile.php">Profilim</a>
+                    <?php elseif ($x['role'] === 'super_admin'): ?>
+                        <span class="small muted" title="Süper admin hesapları korumalıdır; yetkisi düşürülemez, pasifleştirilemez.">🔒 Korumalı</span>
                     <?php else: ?>
                         <span class="small muted">🔒</span>
                     <?php endif; ?>
@@ -79,6 +84,6 @@ admin_header('Kullanıcılar & Yetkiler', 'Üyelere rol atayarak yetkilendirin')
         <tr><td>Satın alma (müşteri olarak)</td><?php foreach (ROLES as $k => $_): ?><td class="center"><span class="yes">✓</span></td><?php endforeach; ?></tr>
         </tbody>
     </table></div>
-    <p class="small muted">Admin; editör, satış temsilcisi ve üyeleri yönetebilir. Admin ve süper admin hesaplarını yalnızca süper admin yönetebilir.</p>
+    <p class="small muted">Admin; editör, satış temsilcisi ve üyeleri yönetebilir. Admin hesaplarını yalnızca süper admin yönetebilir. Süper admin yeni süper admin atayabilir; ancak süper admin hesapları korumalıdır: hiçbir süper admin bir başkasının yetkisini düşüremez, hesabını pasifleştiremez veya bilgilerini/şifresini değiştiremez.</p>
 </section>
 <?php admin_footer();

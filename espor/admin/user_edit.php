@@ -4,8 +4,13 @@ $u = require_perm('users.manage');
 
 $id = (int) input('id');
 $x = $id ? row('SELECT * FROM users WHERE id = ?', [$id]) : null;
-if ($id && (!$x || !can_manage_role($x['role']) || (int) $x['id'] === (int) $u['id'])) {
-    flash('error', 'Bu kullanıcıyı düzenleme yetkiniz yok.');
+if ($id && (!$x || !can_edit_user($x))) {
+    if ($x && $x['role'] === 'super_admin' && (int) $x['id'] !== (int) $u['id']) {
+        log_activity('Yetkisiz erişim denemesi', 'Başka bir süper adminin hesabını düzenlemeye çalıştı: ' . $x['name'], 'user', (int) $x['id']);
+        flash('error', 'Süper admin hesapları korumalıdır; başka bir süper adminin yetkisi düşürülemez veya bilgileri değiştirilemez.');
+    } else {
+        flash('error', 'Bu kullanıcıyı düzenleme yetkiniz yok.');
+    }
     redirect('admin/users.php');
 }
 $x = $x ?? ['name' => '', 'email' => '', 'phone' => '', 'role' => 'sales', 'status' => 'active'];

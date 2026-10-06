@@ -92,10 +92,15 @@ Her şeyi sıfırlamak için: **Run Task → Siteyi sıfırla**.
 | İade çeki tanımlama / iptal | ✓ | ✓ | – | – | – |
 | Koçluk ve paket metinleri, sayfalar | ✓ | ✓ | ✓ | – | – |
 | Koçluk/paket ekleme, silme, fiyat | ✓ | ✓ | – | – | – |
-| Kullanıcı ve rol yönetimi | ✓ (herkes) | ✓ (editör, satış, üye) | – | – | – |
+| Kullanıcı ve rol yönetimi | ✓ (süper admin hariç herkes) | ✓ (editör, satış, üye) | – | – | – |
+| Yeni süper admin atama | ✓ | – | – | – | – |
 | **Günlük sipariş ve satış raporu (gün gün, tek tek, Excel)** | ✓ | – | – | – | – |
 | **Aktivite akışı (kim, ne zaman, ne yaptı)** | ✓ | – | – | – | – |
 | **Site ve sanal POS ayarları** | ✓ | – | – | – | – |
+
+Süper admin hesapları korumalıdır: bir süper admin başka bir süper adminin yetkisini düşüremez, hesabını pasifleştiremez,
+e-postasını veya şifresini değiştiremez (denemeler aktivite akışına “Yetkisiz erişim denemesi” olarak düşer).
+Her süper admin kendi bilgilerini yalnızca **Profilim** sayfasından değiştirir.
 
 Yetkiler `includes/auth.php` dosyasındaki `PERMISSIONS` tablosundan değiştirilebilir.
 
