@@ -23,6 +23,8 @@ function db(): PDO
         require_once __DIR__ . '/seed.php';
         seed_database();
     }
+    require_once __DIR__ . '/migrate.php';
+    migrate_database($pdo);
     return $pdo;
 }
 

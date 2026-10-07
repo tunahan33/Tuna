@@ -23,6 +23,7 @@ if (is_post()) {
 }
 
 $sizes = product_sizes($p);
+$images = product_images($p);
 $off = discount_percent($p);
 $features = features_list($p['features']);
 $related = rows('SELECT * FROM products WHERE category_id = ? AND id <> ? AND active = 1 ORDER BY featured DESC LIMIT 4', [$p['category_id'], $p['id']]);
@@ -34,7 +35,14 @@ require __DIR__ . '/app/header.php';
     <div class="container">
         <nav class="crumbs"><a href="<?= url() ?>">Ana Sayfa</a> / <a href="<?= url('urunler.php?kategori=' . $p['cat_slug']) ?>"><?= e($p['cat_name']) ?></a> / <?= e($p['name']) ?></nav>
         <div class="pd">
-            <div class="pd-media"><?= product_art($p) ?></div>
+            <div class="pd-gallery" data-gallery>
+                <div class="pd-media"><?= product_media($p, 'pd-main') ?><?php if ($off): ?><span class="tag tag-red pd-off">%<?= $off ?> indirim</span><?php endif; ?></div>
+                <?php if (count($images) > 1): ?>
+                    <div class="pd-thumbs">
+                        <?php foreach ($images as $i => $img): ?><button type="button" class="<?= $i ? '' : 'active' ?>" data-src="<?= e(url($img)) ?>" aria-label="Fotoğraf <?= $i + 1 ?>"><img src="<?= e(url($img)) ?>" alt=""></button><?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
             <div class="pd-info">
                 <a class="pd-cat" href="<?= url('urunler.php?kategori=' . $p['cat_slug']) ?>"><?= e($p['cat_name']) ?></a>
                 <h1><?= e($p['name']) ?></h1>

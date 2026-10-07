@@ -1,11 +1,16 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
 
-$featured = rows('SELECT * FROM products WHERE active = 1 AND featured = 1 ORDER BY id LIMIT 8');
+$featured = rows("SELECT * FROM products WHERE active = 1 AND featured = 1 ORDER BY images <> '[]' DESC, id LIMIT 8");
 $deals = rows('SELECT * FROM products WHERE active = 1 AND old_price > price ORDER BY (old_price - price) DESC LIMIT 4');
-$cats = rows('SELECT c.*, (SELECT art FROM products p WHERE p.category_id = c.id ORDER BY featured DESC, id LIMIT 1) AS art,
-    (SELECT color FROM products p WHERE p.category_id = c.id ORDER BY featured DESC, id LIMIT 1) AS color FROM categories c ORDER BY sort');
-$hero = $featured[0] ?? null;
+$cats = rows('SELECT * FROM categories ORDER BY sort');
+foreach ($cats as &$c) {
+    // Kategori kartında, fotoğrafı olan ürün öncelikli gösterilir
+    $c['cover'] = row("SELECT * FROM products WHERE category_id = ? AND active = 1 ORDER BY images <> '[]' DESC, featured DESC, id LIMIT 1", [$c['id']]);
+}
+unset($c);
+// Vitrin: fotoğrafı olan en değerli öne çıkan ürün
+$hero = row("SELECT * FROM products WHERE active = 1 AND featured = 1 ORDER BY images <> '[]' DESC, price DESC LIMIT 1");
 require __DIR__ . '/app/header.php';
 ?>
 <section class="hero">
@@ -21,7 +26,7 @@ require __DIR__ . '/app/header.php';
         </div>
         <?php if ($hero): ?>
             <a class="hero-art" href="<?= url('urun.php?u=' . $hero['slug']) ?>">
-                <?= product_art($hero) ?>
+                <?= product_media($hero) ?>
                 <span class="stamp"><?= e($hero['name']) ?><small><?= money($hero['price']) ?></small></span>
             </a>
         <?php endif; ?>
@@ -34,7 +39,7 @@ require __DIR__ . '/app/header.php';
         <div class="cat-grid">
             <?php foreach ($cats as $c): ?>
                 <a class="cat-card" href="<?= url('urunler.php?kategori=' . $c['slug']) ?>">
-                    <?= product_art(['art' => $c['art'] ?? 'forma', 'color' => $c['color'] ?? '#C8102E', 'name' => $c['name']]) ?>
+                    <?= $c['cover'] ? product_media($c['cover']) : product_art(['art' => 'forma', 'color' => '#C8102E', 'name' => $c['name']]) ?>
                     <strong><?= e($c['name']) ?></strong>
                 </a>
             <?php endforeach; ?>

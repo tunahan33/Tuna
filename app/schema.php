@@ -36,6 +36,7 @@ CREATE TABLE products (
     sizes TEXT,
     art TEXT NOT NULL DEFAULT 'forma',
     color TEXT NOT NULL DEFAULT '#C8102E',
+    images TEXT NOT NULL DEFAULT '[]',
     featured INTEGER NOT NULL DEFAULT 0,
     active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL,

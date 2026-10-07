@@ -166,7 +166,7 @@ require __DIR__ . '/app/header.php';
             <aside class="card summary">
                 <h3>Sipariş Özeti</h3>
                 <?php foreach ($s['lines'] as $l): ?>
-                    <div class="cart-item" style="margin-bottom:12px"><?= product_art($l['product']) ?><div><strong class="small"><?= e($l['product']['name']) ?></strong><div class="small muted"><?= $l['size'] ? e($l['size']) . ' · ' : '' ?><?= $l['qty'] ?> adet · <?= money($l['total']) ?></div></div></div>
+                    <div class="cart-item" style="margin-bottom:12px"><?= product_media($l['product']) ?><div><strong class="small"><?= e($l['product']['name']) ?></strong><div class="small muted"><?= $l['size'] ? e($l['size']) . ' · ' : '' ?><?= $l['qty'] ?> adet · <?= money($l['total']) ?></div></div></div>
                 <?php endforeach; ?>
                 <dl>
                     <dt>Ara toplam</dt><dd><?= money($s['subtotal']) ?></dd>

@@ -35,12 +35,16 @@ Değişiklik anında görünür. Hiçbir şey internete gitmez; site yalnızca s
 | Ne değiştirmek istiyorsunuz? | Nereden? |
 |---|---|
 | Ürünler, fiyatlar, stok, açıklamalar | Panel → **Ürünler** (kod gerekmez) |
+| Ürün fotoğrafları | Panel → **Ürünler** → ürünü açın → **Fotoğraflar** bölümünden yükleyin, kapak seçin, silin |
 | Sözleşmeler, SSS, Hakkımızda vb. metinler | Panel → **Sayfalar & Sözleşmeler** |
 | Firma ünvanı, adres, telefon, vergi no, kargo ücreti | Panel → **Mağaza Ayarları** (Süper Admin) |
 | Renkler | `assets/css/site.css` en üstteki `:root` bölümü |
 | Altbilgi (footer) bağlantıları | `app/footer.php` |
 | Logo | `assets/img/logo.svg` (koyu zemin için `logo-light.svg`) |
 | Rollerin yetkileri | `app/auth.php` → `PERMISSIONS` tablosu |
+
+Yeni sürüm indirdiğinizde veritabanını silmenize gerek yoktur: eksik tablolar ve yeni ürünler site açılırken otomatik eklenir
+(`app/migrate.php`), siparişleriniz ve değişiklikleriniz korunur.
 
 **Her şeyi baştan başlatmak** (demo verilere dönmek): `Terminal → Run Task… → Veritabanını Sıfırla`
 ya da `php app/sifirla.php`. *Dikkat: tüm siparişler ve değişiklikler silinir.*
@@ -84,8 +88,11 @@ Yalnızca Süper Admin'e açık menüler panelde **SA** etiketiyle işaretlidir.
 
 ## 4. Sitede neler var?
 
-- **Mağaza:** 6 kategori, 16 ürün (en düşük fiyat 2.549,90 ₺; panel 2.500 ₺ altını kabul etmez), net KDV dahil fiyatlar,
-  ürüne tıklayınca açıklama / özellikler / kargo-iade sekmeleri, beden seçimi, stok uyarısı, arama, sıralama, indirimler.
+- **Mağaza:** 8 kategori, 20 ürün (en düşük fiyat 2.549,90 ₺; panel 2.500 ₺ altını kabul etmez), net KDV dahil fiyatlar,
+  ürüne tıklayınca fotoğraf galerisi ve açıklama / özellikler / kargo-iade sekmeleri, beden seçimi, stok uyarısı, arama, sıralama, indirimler.
+- **Ürün fotoğrafları:** GS Jogger Eşofman Altı, GS Hakiki Deri Kemer, GS Heritage FG Krampon ve GS Antrenman Şortu gerçek
+  fotoğraflarıyla gelir (`assets/urunler/`). Panelden yüklenen fotoğraflar kareye tamamlanıp küçültülerek `uploads/` klasörüne
+  kaydedilir. Fotoğrafı olmayan ürünlerde marka renklerinde bir çizim gösterilir.
 - **Sepet ve ödeme:** ücretsiz kargo çubuğu → teslimat bilgileri → müşterinin bilgileriyle doldurulmuş
   **Ön Bilgilendirme Formu** ve **Mesafeli Satış Sözleşmesi** onayı → kart bilgileri → sipariş. Ödemede stoktan düşülür.
 - **Altbilgi (görseldeki tasarımın birebir aynısı), hepsi tıklanabilir ve dolu:**
@@ -108,7 +115,7 @@ Yalnızca Süper Admin'e açık menüler panelde **SA** etiketiyle işaretlidir.
 Gerçek satış için bankanızın sanal POS'u veya bir ödeme kuruluşu (iyzico, PayTR vb.) entegrasyonu `odeme.php` içine eklenir.
 
 Hosting gereksinimi: PHP 8.1+, `pdo_sqlite` eklentisi (hemen hepsinde açıktır), SSL. Dosyaları yükleyip
-`data/` klasörünün yazılabilir olduğundan emin olmanız yeterlidir; `.htaccess` dosyaları `app/` ve `data/` klasörlerini dışarıya kapatır.
+`data/` ve `uploads/` klasörlerinin yazılabilir olduğundan emin olmanız yeterlidir; `.htaccess` dosyaları `app/` ve `data/` klasörlerini dışarıya kapatır.
 Alan adı ve hosting bilgileri geldiğinde Panel → Mağaza Ayarları'ndaki **Yayına Hazırlık Kontrolü** listesini tamamlayın.
 
 ## Klasör yapısı
@@ -123,6 +130,7 @@ iletisim.php, insan-kaynaklari.php      Formlar
 cerez-tercihleri.php, basvuru-formu.php Çerez tercihleri, KVKK başvurusu
 admin/                                  Yönetim paneli
 app/                                    Çekirdek: veritabanı, yetkiler, demo veriler, üst/alt bölüm
-assets/                                 CSS, JavaScript, logo
+assets/                                 CSS, JavaScript, logo, hazır ürün fotoğrafları (assets/urunler)
+uploads/                                Panelden yüklenen ürün fotoğrafları (git'e eklenmez)
 data/                                   Veritabanı dosyası (otomatik oluşur, git'e eklenmez)
 ```

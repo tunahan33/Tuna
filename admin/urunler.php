@@ -26,7 +26,7 @@ admin_header('Ürünler', count($list) . ' ürün' . (can('products.manage') ? '
         <tbody>
         <?php foreach ($list as $p): ?>
             <tr data-href="<?= url('admin/urun-duzenle.php?id=' . $p['id']) ?>">
-                <td style="width:56px"><div class="thumb"><?= product_art($p) ?></div></td>
+                <td style="width:56px"><div class="thumb"><?= product_media($p) ?></div></td>
                 <td><strong><?= e($p['name']) ?></strong><?= $p['featured'] ? ' <span class="badge badge-yellow">Öne çıkan</span>' : '' ?><br><small class="muted"><?= e($p['short_desc']) ?></small></td>
                 <td><?= e($p['cat']) ?></td>
                 <td><strong><?= money($p['price']) ?></strong><?= $p['old_price'] > $p['price'] ? '<br><del class="muted small">' . money($p['old_price']) . '</del>' : '' ?></td>

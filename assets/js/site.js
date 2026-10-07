@@ -67,3 +67,14 @@
         el.addEventListener('click', function (ev) { if (!confirm(el.dataset.confirm)) ev.preventDefault(); });
     });
 })();
+
+// Ürün galerisi: küçük fotoğrafa tıklayınca büyük fotoğraf değişir
+document.querySelectorAll('[data-gallery]').forEach(function (g) {
+    var main = g.querySelector('.pd-main');
+    g.querySelectorAll('.pd-thumbs button').forEach(function (b) {
+        b.addEventListener('click', function () {
+            if (main && main.tagName === 'IMG') main.src = b.dataset.src;
+            g.querySelectorAll('.pd-thumbs button').forEach(function (x) { x.classList.toggle('active', x === b); });
+        });
+    });
+});

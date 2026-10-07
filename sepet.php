@@ -36,7 +36,7 @@ require __DIR__ . '/app/header.php';
                 <table class="cart-table">
                     <?php foreach ($s['lines'] as $l): $p = $l['product']; ?>
                     <tr>
-                        <td><div class="cart-item"><?= product_art($p) ?><div><a href="<?= url('urun.php?u=' . $p['slug']) ?>"><?= e($p['name']) ?></a><div class="small muted"><?= $l['size'] ? 'Beden: ' . e($l['size']) . ' · ' : '' ?><?= money($p['price']) ?></div></div></div></td>
+                        <td><div class="cart-item"><?= product_media($p) ?><div><a href="<?= url('urun.php?u=' . $p['slug']) ?>"><?= e($p['name']) ?></a><div class="small muted"><?= $l['size'] ? 'Beden: ' . e($l['size']) . ' · ' : '' ?><?= money($p['price']) ?></div></div></div></td>
                         <td>
                             <form method="post"><?= csrf_field() ?><input type="hidden" name="key" value="<?= e($l['key']) ?>">
                                 <select name="qty" data-autosubmit aria-label="Adet" style="padding:8px;border-radius:8px;border:1px solid var(--line)">

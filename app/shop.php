@@ -200,7 +200,7 @@ function product_card(array $p): string
 {
     $off = discount_percent($p);
     $html = '<a class="product-card' . ($p['stock'] <= 0 ? ' soldout' : '') . '" href="' . e(url('urun.php?u=' . $p['slug'])) . '">';
-    $html .= '<div class="pc-media">' . product_art($p) . '<div class="pc-tags">';
+    $html .= '<div class="pc-media">' . product_media($p) . '<div class="pc-tags">';
     if ($off) $html .= '<span class="tag tag-red">%' . $off . ' indirim</span>';
     if ($p['stock'] <= 0) $html .= '<span class="tag tag-dark">Tükendi</span>';
     elseif ($p['stock'] <= 5) $html .= '<span class="tag tag-yellow">Son ' . (int) $p['stock'] . ' ürün</span>';
@@ -261,4 +261,75 @@ function order_track_html(array $o): string
         $html .= '<tr><td>' . e($i['name']) . ($i['size'] ? ' · ' . e($i['size']) : '') . '</td><td>' . $i['qty'] . ' adet</td><td style="text-align:right">' . money($i['price'] * $i['qty']) . '</td></tr>';
     }
     return $html . '</table>';
+}
+
+/* ---------- Ürün fotoğrafları ---------- */
+
+/** Ürünün fotoğraf yolları (site köküne göre, örn. assets/urunler/x.webp veya uploads/x.webp) */
+function product_images(array $p): array
+{
+    $list = json_decode((string) ($p['images'] ?? '[]'), true);
+    return is_array($list) ? array_values(array_filter($list, fn($f) => is_string($f) && is_file(ROOT . '/' . $f))) : [];
+}
+
+/** Fotoğraf varsa ilk fotoğrafı, yoksa marka renklerindeki çizimi gösterir */
+function product_media(array $p, string $class = ''): string
+{
+    $imgs = product_images($p);
+    if (!$imgs) {
+        return product_art($p, $class);
+    }
+    return '<img class="photo ' . e($class) . '" src="' . e(url($imgs[0])) . '" alt="' . e($p['name'] ?? '') . '" loading="lazy" width="800" height="800">';
+}
+
+/**
+ * Panelden yüklenen fotoğrafı kontrol eder, kare yapar (kenarları fotoğrafın kendi renkleriyle doldurur),
+ * en fazla 1200 px'e küçültür ve uploads/ klasörüne WEBP olarak kaydeder. Hata varsa null döner.
+ */
+function save_product_photo(array $file, ?string &$error = null): ?string
+{
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        $error = 'Dosya yüklenemedi.';
+        return null;
+    }
+    if ($file['size'] > 8 * 1024 * 1024) {
+        $error = 'Fotoğraf en fazla 8 MB olabilir.';
+        return null;
+    }
+    $info = @getimagesize($file['tmp_name']);
+    $loaders = ['image/jpeg' => 'imagecreatefromjpeg', 'image/png' => 'imagecreatefrompng', 'image/webp' => 'imagecreatefromwebp'];
+    if (!$info || !isset($loaders[$info['mime']]) || !function_exists($loaders[$info['mime']])) {
+        $error = 'Yalnızca JPG, PNG veya WEBP fotoğraf yükleyebilirsiniz.';
+        return null;
+    }
+    $src = @$loaders[$info['mime']]($file['tmp_name']);
+    if (!$src) {
+        $error = 'Fotoğraf okunamadı.';
+        return null;
+    }
+    [$w, $h] = [imagesx($src), imagesy($src)];
+    $side = min(1200, max($w, $h));
+    $scale = $side / max($w, $h);
+    [$nw, $nh] = [(int) round($w * $scale), (int) round($h * $scale)];
+    $dst = imagecreatetruecolor($side, $side);
+    // Boş kalan kenarları fotoğrafın kenar rengiyle doldur
+    $edge = fn($x, $y) => imagecolorat($src, min($w - 1, $x), min($h - 1, $y));
+    $c1 = $edge(0, 0);
+    $c2 = $edge($w - 1, $h - 1);
+    $rgb = fn($c) => imagecolorallocate($dst, ($c >> 16) & 255, ($c >> 8) & 255, $c & 255);
+    $ox = intdiv($side - $nw, 2);
+    $oy = intdiv($side - $nh, 2);
+    imagefilledrectangle($dst, 0, 0, $side, $side, $rgb($c1));
+    if ($nh < $side) imagefilledrectangle($dst, 0, $oy + $nh, $side, $side, $rgb($c2));
+    if ($nw < $side) imagefilledrectangle($dst, $ox + $nw, 0, $side, $side, $rgb($c2));
+    imagecopyresampled($dst, $src, $ox, $oy, 0, 0, $nw, $nh, $w, $h);
+    if (!is_dir(ROOT . '/uploads')) {
+        mkdir(ROOT . '/uploads', 0775, true);
+    }
+    $name = 'uploads/' . date('Ymd') . '-' . bin2hex(random_bytes(6)) . '.webp';
+    if (!imagewebp($dst, ROOT . '/' . $name, 85)) {
+        $error = 'Fotoğraf kaydedilemedi (uploads klasörü yazılabilir mi?).';
+        return null;
+    }
+    return $name;
 }
