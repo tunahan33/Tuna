@@ -137,6 +137,12 @@ function csrf_field(): string
 
 function verify_csrf(): void
 {
+    // Gönderilen dosyalar sunucu sınırını aştığında PHP tüm formu boşaltır
+    if (empty($_POST) && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
+        flash('error', 'Gönderilen dosyaların toplam boyutu sunucu sınırını aştı (' . ini_get('post_max_size') . '). Fotoğrafları birkaç parti hâlinde yükleyin.');
+        header('Location: ' . ($_SERVER['REQUEST_URI'] ?? url()));
+        exit;
+    }
     if (!hash_equals(csrf_token(), (string) ($_POST['_csrf'] ?? ''))) {
         http_response_code(419);
         exit('Oturum süresi doldu. Lütfen sayfayı yenileyip tekrar deneyin.');
@@ -210,5 +216,9 @@ function clean_html(string $html): string
     $html = preg_replace('#<(script|style|iframe|object|embed|form)[^>]*>.*?</\1>#is', '', $html);
     $html = preg_replace('#<(script|iframe|object|embed)[^>]*/?>#i', '', $html);
     $html = preg_replace('/\son\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $html);
-    return preg_replace('/(href|src)\s*=\s*(["\']?)\s*javascript:[^"\'>\s]*/i', '$1=$2#', $html);
+    $html = preg_replace('/(href|src)\s*=\s*(["\']?)\s*javascript:[^"\'>\s]*/i', '$1=$2#', $html);
+    // Editörün ürettiği hatalı iç içe yapıları düzelt: <p><ul>…</ul></p>, boş paragraflar
+    $html = preg_replace('#<p>\s*(<(ul|ol|h3|table|details)\b)#i', '$1', $html);
+    $html = preg_replace('#(</(ul|ol|h3|table|details)>)\s*</p>#i', '$1', $html);
+    return preg_replace('#<p>(\s|&nbsp;|<br\s*/?>)*</p>#i', '', $html);
 }

@@ -35,9 +35,10 @@ Değişiklik anında görünür. Hiçbir şey internete gitmez; site yalnızca s
 | Ne değiştirmek istiyorsunuz? | Nereden? |
 |---|---|
 | Ürünler, fiyatlar, stok, açıklamalar | Panel → **Ürünler** (kod gerekmez) |
-| Ürün fotoğrafları | Panel → **Ürünler** → ürünü açın → **Fotoğraflar** bölümünden yükleyin, kapak seçin, silin |
+| Ürün fotoğrafları | Panel → **Ürünler** → ürünü açın → **Fotoğraflar**: sürükleyip bırakın veya seçin (sınırsız sayıda), kapak seçin, sıralayın, silin |
+| Ürün açıklaması, sayfa ve sözleşme metinleri | Word benzeri editörle: Başlık, Kalın, Liste, Bağlantı düğmeleri. Kod bilmeye gerek yok |
 | Sözleşmeler, SSS, Hakkımızda vb. metinler | Panel → **Sayfalar & Sözleşmeler** |
-| Firma ünvanı, adres, telefon, vergi no, kargo ücreti | Panel → **Mağaza Ayarları** (Süper Admin) |
+| Firma unvanı, adres, telefon, vergi no, kargo ücreti | Panel → **Mağaza Ayarları** (Süper Admin) |
 | Renkler | `assets/css/site.css` en üstteki `:root` bölümü |
 | Altbilgi (footer) bağlantıları | `app/footer.php` |
 | Logo | `assets/img/logo.svg` (koyu zemin için `logo-light.svg`) |
@@ -88,7 +89,7 @@ Yalnızca Süper Admin'e açık menüler panelde **SA** etiketiyle işaretlidir.
 
 ## 4. Sitede neler var?
 
-- **Mağaza:** 8 kategori, 20 ürün (en düşük fiyat 2.549,90 ₺; panel 2.500 ₺ altını kabul etmez), net KDV dahil fiyatlar,
+- **Mağaza:** 8 kategori, 20 ürün (en düşük fiyat 2.549,90 ₺; panel 2.500 ₺ altını kabul etmez), net KDV dâhil fiyatlar,
   ürüne tıklayınca fotoğraf galerisi ve açıklama / özellikler / kargo-iade sekmeleri, beden seçimi, stok uyarısı, arama, sıralama, indirimler.
 - **Ürün fotoğrafları:** GS Jogger Eşofman Altı, GS Hakiki Deri Kemer, GS Heritage FG Krampon ve GS Antrenman Şortu gerçek
   fotoğraflarıyla gelir (`assets/urunler/`). Panelden yüklenen fotoğraflar kareye tamamlanıp küçültülerek `uploads/` klasörüne

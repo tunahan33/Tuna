@@ -65,7 +65,7 @@ if ($day) {
                     <td><strong><?= e($o['order_no']) ?></strong></td>
                     <td><?= e($o['customer_name']) ?><br><small class="muted"><?= e($o['email']) ?> · <?= e($o['city']) ?></small></td>
                     <td class="small"><?php foreach ($items[$o['id']] ?? [] as $i): ?><?= $i['qty'] ?>× <?= e($i['name']) ?><?= $i['size'] ? ' <span class="muted">(' . e($i['size']) . ')</span>' : '' ?> — <?= money($i['price'] * $i['qty']) ?><br><?php endforeach; ?></td>
-                    <td><strong><?= money($o['total']) ?></strong><?= $o['shipping'] > 0 ? '<br><small class="muted">+' . money($o['shipping']) . ' kargo dahil</small>' : '' ?></td>
+                    <td><strong><?= money($o['total']) ?></strong><?= $o['shipping'] > 0 ? '<br><small class="muted">+' . money($o['shipping']) . ' kargo dâhil</small>' : '' ?></td>
                     <td><?= order_badge($o['status']) ?></td>
                     <td><?= e($o['rep'] ?? '—') ?></td>
                 </tr>

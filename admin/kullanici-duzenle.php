@@ -63,7 +63,7 @@ admin_header($x['id'] ? $x['name'] : 'Yeni Kullanıcı', $x['id'] ? role_label($
         <h2>Roller</h2>
         <ul class="role-help">
             <li><span class="role-tag role-super_admin">Süper Admin</span> Her şey: günlük satış raporu, aktivite akışı, ayarlar, sipariş silme, tüm kullanıcılar.</li>
-            <li><span class="role-tag role-admin">Admin</span> Siparişler (iptal/iade dahil), ürün-fiyat-stok, kategoriler, sayfalar, talepler; editör/satış/üye yönetimi.</li>
+            <li><span class="role-tag role-admin">Admin</span> Siparişler (iptal/iade dâhil), ürün-fiyat-stok, kategoriler, sayfalar, talepler; editör/satış/üye yönetimi.</li>
             <li><span class="role-tag role-editor">Editör</span> Yalnızca ürün metinleri ve kurumsal/yasal sayfalar.</li>
             <li><span class="role-tag role-satis">Satış Temsilcisi</span> Siparişleri hazırlama, kargoya verme, teslim; müşteriler ve talepler.</li>
             <li><span class="role-tag role-uye">Üye</span> Panele giremez; sitede alışveriş ve sipariş takibi.</li>

@@ -23,10 +23,10 @@ admin_header($p['title'], 'Sayfa düzenle', '<a class="btn btn-ghost" href="' . 
 <form method="post" class="panel form">
     <?= csrf_field() ?>
     <label>Başlık<input name="title" value="<?= e($p['title']) ?>" required></label>
-    <div class="editor-bar" data-editor-bar>
-        <button type="button" data-wrap="h3">Başlık</button><button type="button" data-wrap="p">Paragraf</button><button type="button" data-wrap="strong">Kalın</button><button type="button" data-wrap="li">Madde</button><button type="button" data-wrap="ul">Liste</button>
+    <div class="field">
+        <span class="field-label">İçerik <small class="muted">({{firma_unvan}} gibi süslü parantezli alanlar firma bilgileriyle otomatik dolar, silmeyin)</small></span>
+        <textarea name="content" rows="24" data-rich><?= e($p['content']) ?></textarea>
     </div>
-    <label>İçerik (HTML)<textarea name="content" rows="24" class="code" data-editor><?= e($p['content']) ?></textarea></label>
     <button class="btn btn-primary btn-lg">Kaydet</button>
 </form>
 <?php admin_footer();

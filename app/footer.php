@@ -48,7 +48,7 @@
         <div class="footer-pay" aria-label="Kabul edilen kartlar">
             <span>VISA</span><span>Mastercard</span><span>troy</span><span>3D Secure</span>
         </div>
-        <p>© <?= date('Y') ?> <?= e(setting('site_name')) ?> · Tüm fiyatlara KDV dahildir.</p>
+        <p>© <?= date('Y') ?> <?= e(setting('site_name')) ?> · Tüm fiyatlara KDV dâhildir.</p>
     </div>
 </footer>
 <?php if (!isset($_COOKIE['gs_cerez'])): ?>

@@ -9,7 +9,7 @@ $groups = [
         'announcement' => ['Üst duyuru şeridi (boş bırakılırsa gizlenir)', 'text'],
     ],
     'Firma Bilgileri (sözleşmelerde kullanılır)' => [
-        'company_title' => ['Ticari ünvan', 'text'], 'company_address' => ['Adres', 'text'], 'company_phone' => ['Telefon', 'text'],
+        'company_title' => ['Ticari unvan', 'text'], 'company_address' => ['Adres', 'text'], 'company_phone' => ['Telefon', 'text'],
         'company_email' => ['E-posta', 'email'], 'working_hours' => ['Çalışma saatleri', 'text'], 'tax_office' => ['Vergi dairesi', 'text'],
         'tax_number' => ['Vergi numarası', 'text'], 'mersis_number' => ['MERSİS no', 'text'], 'kep_address' => ['KEP adresi', 'text'],
     ],
@@ -54,7 +54,7 @@ admin_header('Mağaza Ayarları', 'Yalnızca Süper Admin görebilir');
         <ul class="checklist">
             <?php
             $checks = [
-                'Ticari ünvan girildi' => !str_contains(setting('company_title'), 'girin'),
+                'Ticari unvan girildi' => !str_contains(setting('company_title'), 'girin'),
                 'Adres girildi' => !str_contains(setting('company_address'), 'girin'),
                 'Vergi numarası girildi' => setting('tax_number') !== '-' && setting('tax_number') !== '',
                 'MERSİS numarası girildi' => setting('mersis_number') !== '-' && setting('mersis_number') !== '',

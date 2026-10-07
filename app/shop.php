@@ -288,14 +288,21 @@ function product_media(array $p, string $class = ''): string
  */
 function save_product_photo(array $file, ?string &$error = null): ?string
 {
-    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-        $error = 'Dosya yüklenemedi.';
+    $code = $file['error'] ?? UPLOAD_ERR_NO_FILE;
+    if ($code === UPLOAD_ERR_INI_SIZE || $code === UPLOAD_ERR_FORM_SIZE) {
+        $error = 'Fotoğraf sunucunun dosya boyutu sınırını aşıyor (' . ini_get('upload_max_filesize') . '). Daha küçük bir fotoğraf deneyin.';
         return null;
     }
-    if ($file['size'] > 8 * 1024 * 1024) {
-        $error = 'Fotoğraf en fazla 8 MB olabilir.';
+    if ($code !== UPLOAD_ERR_OK) {
+        $error = 'Dosya yüklenemedi (hata kodu ' . $code . ').';
         return null;
     }
+    if ($file['size'] > 40 * 1024 * 1024) {
+        $error = 'Fotoğraf en fazla 40 MB olabilir.';
+        return null;
+    }
+    // Büyük fotoğrafları işleyebilmek için bellek sınırını yükselt
+    @ini_set('memory_limit', '512M');
     $info = @getimagesize($file['tmp_name']);
     $loaders = ['image/jpeg' => 'imagecreatefromjpeg', 'image/png' => 'imagecreatefrompng', 'image/webp' => 'imagecreatefromwebp'];
     if (!$info || !isset($loaders[$info['mime']]) || !function_exists($loaders[$info['mime']])) {
@@ -307,6 +314,7 @@ function save_product_photo(array $file, ?string &$error = null): ?string
         $error = 'Fotoğraf okunamadı.';
         return null;
     }
+    imagepalettetotruecolor($src);
     [$w, $h] = [imagesx($src), imagesy($src)];
     $side = min(1200, max($w, $h));
     $scale = $side / max($w, $h);

@@ -1,5 +1,5 @@
 Options -Indexes
 DirectoryIndex index.php
-<FilesMatch "\.(sqlite|sqlite-journal|log|md)$">
+<FilesMatch "(\.(sqlite|sqlite-journal|log|md|ini)|^\.user\.ini)$">
     Require all denied
 </FilesMatch>

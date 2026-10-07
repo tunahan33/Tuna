@@ -29,7 +29,7 @@ if (is_post()) {
         flash('success', 'Ürün silindi.');
         redirect('admin/urunler.php');
     }
-    // Fotoğraf işlemleri: kapak yap / sil (editör dahil)
+    // Fotoğraf işlemleri: kapak yap / sil (editör dâhil)
     if ($p['id'] && preg_match('/^(cover|remove|left):(\d+)$/', (string) input('photo_action'), $m)) {
         $imgs = product_images($p);
         $i = (int) $m[2];
@@ -63,9 +63,9 @@ if (is_post()) {
             else flash('error', $n . ': ' . $err);
         }
     }
-    $allImages = array_slice(array_merge(product_images($p), $uploaded), 0, 10);
+    $allImages = array_merge(product_images($p), $uploaded);
 
-    // Herkesin (editör dahil) düzenleyebildiği metin alanları
+    // Herkesin (editör dâhil) düzenleyebildiği metin alanları
     $data = [
         'name' => mb_substr((string) input('name'), 0, 120),
         'short_desc' => mb_substr((string) input('short_desc'), 0, 200),
@@ -129,7 +129,10 @@ $ro = $manage ? '' : 'disabled';
             <h2>Ürün Metinleri</h2>
             <label>Ürün adı<input name="name" value="<?= e($p['name']) ?>" required maxlength="120"></label>
             <label>Kısa açıklama <small class="muted">(ürün kartında görünür)</small><input name="short_desc" value="<?= e($p['short_desc']) ?>" required maxlength="200"></label>
-            <label>Detaylı açıklama <small class="muted">(ürüne tıklayınca görünür · &lt;p&gt;, &lt;strong&gt;, &lt;h3&gt;, &lt;ul&gt;&lt;li&gt; kullanabilirsiniz)</small><textarea name="description" rows="12"><?= e($p['description']) ?></textarea></label>
+            <div class="field">
+                <span class="field-label">Detaylı açıklama <small class="muted">(ürüne tıklayınca görünür)</small></span>
+                <textarea name="description" rows="12" data-rich><?= e($p['description']) ?></textarea>
+            </div>
             <label>Öne çıkan özellikler <small class="muted">(her satıra bir özellik)</small><textarea name="features" rows="5"><?= e($p['features']) ?></textarea></label>
         </section>
         <section class="panel">
@@ -148,17 +151,21 @@ $ro = $manage ? '' : 'disabled';
                     <?php endforeach; ?>
                 </div>
             <?php else: ?><p class="muted small">Henüz fotoğraf yok; sitede marka renklerinde bir çizim gösteriliyor.</p><?php endif; ?>
-            <label class="drop">📷 Fotoğraf ekle (JPG, PNG, WEBP · birden fazla seçebilirsiniz)
-                <input type="file" name="photos[]" accept="image/jpeg,image/png,image/webp" multiple>
+            <?php if ($imgs): ?><p class="small muted"><?= count($imgs) ?> fotoğraf</p><?php endif; ?>
+            <label class="drop" data-drop>📷 Fotoğrafları buraya sürükleyin veya tıklayıp seçin
+                <small>JPG, PNG, WEBP · istediğiniz kadar fotoğraf, tek seferde birden fazla seçebilirsiniz</small>
+                <input type="file" name="photos[]" accept="image/jpeg,image/png,image/webp" multiple data-photo-input>
             </label>
-            <p class="small muted">Fotoğraflar kaydedince yüklenir. Kare olmayan fotoğrafların kenarları otomatik doldurulur. İlk fotoğraf kapak olarak listelerde görünür.</p>
+            <p class="photo-status" data-photo-status hidden></p>
+            <div class="photo-grid" data-photo-preview style="margin-top:10px"></div>
+            <p class="small muted">Fotoğraflar “Kaydet”e basınca yüklenir. Büyük fotoğraflar otomatik küçültülür, kare olmayanların kenarları doldurulur. İlk fotoğraf kapaktır; sırayı “Kapak yap” ve “←” düğmeleriyle değiştirebilirsiniz.</p>
         </section>
     </div>
     <div>
         <section class="panel form">
             <h2>Fiyat & Stok</h2>
             <?php if (!$manage): ?><p class="alert alert-info small">Fiyat, stok ve yayın ayarlarını yalnızca Admin ve Süper Admin değiştirebilir.</p><?php endif; ?>
-            <label>Satış fiyatı (₺, KDV dahil) <small class="muted">en az <?= money($minPrice) ?></small><input name="price" type="number" step="0.01" min="<?= $minPrice ?>" value="<?= e($p['price']) ?>" <?= $ro ?> required></label>
+            <label>Satış fiyatı (₺, KDV dâhil) <small class="muted">en az <?= money($minPrice) ?></small><input name="price" type="number" step="0.01" min="<?= $minPrice ?>" value="<?= e($p['price']) ?>" <?= $ro ?> required></label>
             <label>Eski fiyat (₺) <small class="muted">indirim göstermek için</small><input name="old_price" type="number" step="0.01" value="<?= e($p['old_price']) ?>" <?= $ro ?>></label>
             <label>Stok adedi<input name="stock" type="number" min="0" value="<?= (int) $p['stock'] ?>" <?= $ro ?>></label>
             <label>Bedenler / numaralar <small class="muted">virgülle ayırın, boş bırakılabilir</small><input name="sizes" value="<?= e($p['sizes']) ?>" <?= $ro ?>></label>

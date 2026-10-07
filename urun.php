@@ -50,7 +50,7 @@ require __DIR__ . '/app/header.php';
                 <div class="pd-price">
                     <strong><?= money($p['price']) ?></strong>
                     <?php if ($off): ?><del><?= money($p['old_price']) ?></del><span class="tag tag-red">%<?= $off ?> indirim</span><?php endif; ?>
-                    <small>Net fiyat · KDV dahil · <?= $p['price'] >= (float) setting('free_shipping_limit') ? 'Kargo bedava' : 'Kargo ' . money(setting('shipping_fee')) ?></small>
+                    <small>Net fiyat · KDV dâhil · <?= $p['price'] >= (float) setting('free_shipping_limit') ? 'Kargo bedava' : 'Kargo ' . money(setting('shipping_fee')) ?></small>
                 </div>
                 <form method="post">
                     <?= csrf_field() ?>
@@ -61,7 +61,7 @@ require __DIR__ . '/app/header.php';
                         </div>
                     <?php endif; ?>
                     <div class="buy-row">
-                        <div class="qty"><button type="button" data-qty="-1" aria-label="Azalt">−</button><input name="qty" type="number" value="1" min="1" max="<?= max(1, min(20, (int) $p['stock'])) ?>" aria-label="Adet"><button type="button" data-qty="1" aria-label="Arttır">+</button></div>
+                        <div class="qty"><button type="button" data-qty="-1" aria-label="Azalt">−</button><input name="qty" type="number" value="1" min="1" max="<?= max(1, min(20, (int) $p['stock'])) ?>" aria-label="Adet"><button type="button" data-qty="1" aria-label="Artır">+</button></div>
                         <button class="btn btn-primary btn-lg" <?= $p['stock'] <= 0 ? 'disabled' : '' ?>><?= $p['stock'] <= 0 ? 'Tükendi' : 'Sepete Ekle' ?></button>
                     </div>
                     <?php if ($p['stock'] > 0): ?>

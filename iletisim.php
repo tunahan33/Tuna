@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
 
-$topics = ['Sipariş', 'İade / Değişim', 'İade çeki', 'Ürün bilgisi', 'Ödeme', 'Öneri / Şikayet', 'Diğer'];
+$topics = ['Sipariş', 'İade / Değişim', 'İade çeki', 'Ürün bilgisi', 'Ödeme', 'Öneri / Şikâyet', 'Diğer'];
 if (is_post()) {
     verify_csrf();
     $name = (string) input('name');

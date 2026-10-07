@@ -64,7 +64,7 @@ require __DIR__ . '/app/header.php';
                     <dt class="total">Toplam</dt><dd class="total"><?= money($s['total']) ?></dd>
                 </dl>
                 <a class="btn btn-primary btn-lg btn-block" href="<?= url('odeme.php') ?>">Ödemeye Geç</a>
-                <p class="small muted center">Tüm fiyatlara KDV dahildir.</p>
+                <p class="small muted center">Tüm fiyatlara KDV dâhildir.</p>
             </aside>
         </div>
         <?php endif; ?>
