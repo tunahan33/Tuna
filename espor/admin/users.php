@@ -5,14 +5,23 @@ $u = require_perm('users.view');
 if (is_post()) {
     verify_csrf();
     $t = row('SELECT * FROM users WHERE id = ?', [(int) input('id')]);
-    if ($t && can_edit_user($t) && input('action') === 'toggle') {
+    $newRole = (string) input('new_role');
+    if ($t && can_edit_user($t) && input('action') === 'role') {
+        if (!can_manage_role($newRole)) {
+            flash('error', 'Bu rolü atama yetkiniz yok.');
+        } elseif ($newRole !== $t['role']) {
+            q('UPDATE users SET role = ? WHERE id = ?', [$newRole, $t['id']]);
+            log_activity('Kullanıcının yetkisini değiştirdi', $t['name'] . ' (' . $t['email'] . ') · ' . role_label($t['role']) . ' → ' . role_label($newRole), 'user', (int) $t['id']);
+            flash('success', $t['name'] . ' artık ' . role_label($newRole) . '.' . ($newRole === 'super_admin' ? ' Süper admin hesapları korumalıdır; bu yetki sonradan panelden geri alınamaz.' : ''));
+        }
+    } elseif ($t && can_edit_user($t) && input('action') === 'toggle') {
         $new = $t['status'] === 'active' ? 'passive' : 'active';
         q('UPDATE users SET status = ? WHERE id = ?', [$new, $t['id']]);
         log_activity($new === 'active' ? 'Kullanıcıyı aktifleştirdi' : 'Kullanıcıyı pasifleştirdi', $t['name'] . ' (' . role_label($t['role']) . ')', 'user', (int) $t['id']);
         flash('success', 'Kullanıcı durumu güncellendi.');
     } else {
         if ($t && $t['role'] === 'super_admin' && (int) $t['id'] !== (int) $u['id']) {
-            log_activity('Yetkisiz erişim denemesi', 'Başka bir süper admini pasifleştirmeye çalıştı: ' . $t['name'], 'user', (int) $t['id']);
+            log_activity('Yetkisiz erişim denemesi', 'Başka bir süper adminin ' . (input('action') === 'role' ? 'yetkisini değiştirmeye' : 'hesabını pasifleştirmeye') . ' çalıştı: ' . $t['name'], 'user', (int) $t['id']);
         }
         flash('error', 'Bu işlem için yetkiniz yok.' . ($t && $t['role'] === 'super_admin' ? ' Süper admin hesapları korumalıdır.' : ''));
     }
@@ -31,7 +40,7 @@ $list = rows("SELECT * FROM users WHERE $w ORDER BY CASE role WHEN 'super_admin'
 $counts = [];
 foreach (rows('SELECT role, COUNT(*) AS c FROM users GROUP BY role') as $r) $counts[$r['role']] = (int) $r['c'];
 
-admin_header('Kullanıcılar & Yetkiler', 'Üyelere rol atayarak yetkilendirin');
+admin_header('Kullanıcılar & Yetkiler', 'Kayıtlı üyelere yetki verin: satırdaki listeden Admin, Editör, Satış Temsilcisi veya Üye seçip “Kaydet”e basın');
 ?>
 <div class="role-tabs">
     <a href="users.php" class="<?= !$role ? 'active' : '' ?>">Tümü <em><?= array_sum($counts) ?></em></a>
@@ -42,14 +51,21 @@ admin_header('Kullanıcılar & Yetkiler', 'Üyelere rol atayarak yetkilendirin')
     <?php if (can('users.manage')): ?><a class="btn btn-primary btn-sm push-right" href="user_edit.php">+ Yeni Kullanıcı</a><?php endif; ?>
 </div>
 <section class="panel">
-    <div class="table-wrap"><table class="table">
-        <thead><tr><th>Kullanıcı</th><th>Rol</th><th>Telefon</th><th>Kayıt</th><th>Son Giriş</th><th>Durum</th><th></th></tr></thead>
+    <div class="table-wrap"><table class="table users-table">
+        <thead><tr><th>Kullanıcı</th><th>Rol / Yetki</th><th>Kayıt</th><th>Son Giriş</th><th>Durum</th><th></th></tr></thead>
         <tbody>
         <?php foreach ($list as $x): $manage = can_edit_user($x); ?>
             <tr>
-                <td><strong><?= e($x['name']) ?></strong><br><small class="muted"><?= e($x['email']) ?></small></td>
-                <td><span class="role role-<?= e($x['role']) ?>"><?= e(role_label($x['role'])) ?></span></td>
-                <td><?= e($x['phone'] ?: '-') ?></td>
+                <td><strong><?= e($x['name']) ?></strong><br><small class="muted"><?= e($x['email']) ?><?= $x['phone'] ? ' · ' . e($x['phone']) : '' ?></small></td>
+                <td>
+                    <?php if ($manage): ?>
+                    <form method="post" class="role-quick" data-role-form><?= csrf_field() ?><input type="hidden" name="id" value="<?= (int) $x['id'] ?>"><input type="hidden" name="role" value="<?= e($role) ?>"><input type="hidden" name="action" value="role">
+                        <select name="new_role" aria-label="Yetki" data-name="<?= e($x['name']) ?>">
+                            <?php foreach (MANAGEABLE_ROLES[$u['role']] as $rk): ?><option value="<?= $rk ?>" <?= $rk === $x['role'] ? 'selected' : '' ?>><?= e(role_label($rk)) ?></option><?php endforeach; ?>
+                        </select><button class="btn btn-xs btn-primary">Kaydet</button>
+                    </form>
+                    <?php else: ?><span class="role role-<?= e($x['role']) ?>"><?= e(role_label($x['role'])) ?></span><?php endif; ?>
+                </td>
                 <td><?= tr_date($x['created_at'], false) ?></td>
                 <td><?= tr_date($x['last_login_at']) ?></td>
                 <td><?= $x['status'] === 'active' ? '<span class="badge badge-green">Aktif</span>' : '<span class="badge badge-gray">Pasif</span>' ?></td>

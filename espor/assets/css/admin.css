@@ -195,3 +195,10 @@ tr.dim td { color: #A5AAB0; }
 .reply-box { background: #F3FAF5; border-left: 4px solid #1E8E3E; border-radius: 8px; padding: .8rem 1rem; margin: .8rem 0; }
 .reply-box p { margin: .4rem 0 0; }
 .reply-form { margin: .8rem 0; gap: .6rem; }
+
+/* Kullanıcı listesinde hızlı yetki değiştirme */
+.role-quick { display: flex; gap: .3rem; align-items: center; }
+.role-quick select { width: 150px; flex: none; padding: .35em .5em; font-size: .8rem; border-radius: 7px; }
+.users-table .actions { white-space: normal; width: 120px; }
+.users-table .actions .btn { display: block; width: 100%; margin: 0 0 .25rem; }
+.users-table .actions form { display: block; }

@@ -81,4 +81,13 @@
         area.addEventListener('input', function () { ta.value = area.innerHTML; });
         ta.form.addEventListener('submit', function () { if (ta.style.display === 'none') ta.value = area.innerHTML; });
     });
+    // Hızlı yetki değiştirme: süper admin atamasında onay iste
+    document.querySelectorAll('[data-role-form]').forEach(function (f) {
+        f.addEventListener('submit', function (e) {
+            var s = f.querySelector('select');
+            if (s.value === 'super_admin' && !confirm(s.getAttribute('data-name') + ' kullanıcısı Süper Admin yapılsın mı?\n\nSüper admin tüm raporları, aktivite akışını ve ödeme ayarlarını görür. Süper admin hesapları korumalı olduğundan bu yetki sonradan panelden geri alınamaz.')) {
+                e.preventDefault();
+            }
+        });
+    });
 })();

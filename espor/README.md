@@ -98,6 +98,10 @@ Her şeyi sıfırlamak için: **Run Task → Siteyi sıfırla**.
 | **Aktivite akışı (kim, ne zaman, ne yaptı)** | ✓ | – | – | – | – |
 | **Site ve sanal POS ayarları** | ✓ | – | – | – | – |
 
+**Yetki verme:** Panel → **Kullanıcılar & Yetkiler**. Siteye kaydolan her üye listede görünür; “Rol / Yetki” sütunundan
+Admin, Editör, Satış Temsilcisi veya Üye seçip **Kaydet**'e basmak yeterlidir (süper admin, Süper Admin de seçebilir; onay istenir).
+Admin yalnızca Editör, Satış Temsilcisi ve Üye atayabilir. Her yetki değişikliği aktivite akışına yazılır.
+
 Süper admin hesapları korumalıdır: bir süper admin başka bir süper adminin yetkisini düşüremez, hesabını pasifleştiremez,
 e-postasını veya şifresini değiştiremez (denemeler aktivite akışına “Yetkisiz erişim denemesi” olarak düşer).
 Her süper admin kendi bilgilerini yalnızca **Profilim** sayfasından değiştirir.
