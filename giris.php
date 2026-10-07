@@ -1,34 +1,36 @@
 <?php
-require __DIR__ . '/includes/bootstrap.php';
+require __DIR__ . '/app/bootstrap.php';
 
 if (current_user()) {
-    redirect(can('panel.access') ? 'admin/' : 'hesabim.php');
+    redirect('hesabim.php');
 }
 if (is_post()) {
     verify_csrf();
-    if ($u = attempt_login(input('email'), (string) ($_POST['password'] ?? ''))) {
-        $to = $_SESSION['intended'] ?? '';
-        unset($_SESSION['intended']);
-        if ($to && str_starts_with($to, '/') && !str_starts_with($to, '//')) {
-            header('Location: ' . $to, true, 303);
+    if ($u = attempt_login((string) input('email'), (string) input('password'))) {
+        $to = $_SESSION['after_login'] ?? '';
+        unset($_SESSION['after_login']);
+        flash('success', 'Hoş geldiniz, ' . explode(' ', $u['name'])[0] . '!');
+        if ($to && str_starts_with($to, base_path() . '/')) {
+            header('Location: ' . $to);
             exit;
         }
-        redirect(can('panel.access', $u) ? 'admin/' : 'hesabim.php');
+        redirect(can('panel', $u) ? 'admin/' : 'hesabim.php');
     }
 }
-$pageTitle = 'Giriş Yap';
-require __DIR__ . '/includes/header.php';
+$title = 'Giriş Yap';
+require __DIR__ . '/app/header.php';
 ?>
-<section class="section"><div class="container narrow-sm">
-    <div class="card">
-        <h1 class="h2">Giriş Yap</h1>
-        <form method="post" class="form">
+<section class="section-sm">
+    <div class="auth-wrap">
+        <form method="post" class="card form">
             <?= csrf_field() ?>
-            <label>E-posta<input type="email" name="email" value="<?= e(input('email')) ?>" required autofocus></label>
-            <label>Şifre<input type="password" name="password" required></label>
-            <button class="btn btn-primary btn-block">Giriş Yap</button>
+            <h1>Giriş Yap</h1>
+            <label>E-posta<input type="email" name="email" value="<?= e(input('email')) ?>" required autocomplete="email"></label>
+            <label>Şifre<input type="password" name="password" required autocomplete="current-password"></label>
+            <button class="btn btn-primary btn-lg">Giriş Yap</button>
+            <p class="center muted small">Hesabınız yok mu? <a href="<?= url('kayit.php') ?>">Hemen üye olun</a></p>
+            <p class="center muted small">Şifrenizi mi unuttunuz? <a href="<?= url('iletisim.php') ?>">Bize yazın</a>, hesabınızı doğrulayıp yeni şifre iletelim.</p>
         </form>
-        <p class="center small mt-1"><a href="<?= url('sifremi-unuttum.php') ?>">Şifremi unuttum</a> · Hesabınız yok mu? <a href="<?= url('kayit.php') ?>">Üye olun</a></p>
     </div>
-</div></section>
-<?php require __DIR__ . '/includes/footer.php'; ?>
+</section>
+<?php require __DIR__ . '/app/footer.php'; ?>

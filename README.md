@@ -1,137 +1,128 @@
-# GS Projeler – Spor Danışmanlık Sitesi
+# GS Sportif Ürünler — E-ticaret Sitesi
 
-Sarı · kırmızı · antrasit temalı, Garanti BBVA Sanal POS uyumlu spor danışmanlık sitesi ve rol bazlı yönetim paneli.
-Saf PHP 8 + MySQL ile yazılmıştır; framework, Composer veya Node.js gerekmez. Her paylaşımlı hostinge (cPanel, Plesk, DirectAdmin) kurulabilir.
+Sarı · kırmızı · antrasit temalı spor ürünleri mağazası ve rol bazlı yönetim paneli.
+**PHP + SQLite** ile yazıldı: kurulum sihirbazı, veritabanı sunucusu, Composer veya Node.js gerekmez.
+Site ilk açıldığında veritabanı (`data/gs.sqlite`) kendiliğinden oluşur ve demo verilerle dolar.
 
-## İçerik
+---
 
-**Site (ziyaretçi tarafı)**
-- 7 danışmanlık hizmeti, her birinde 3 paket (toplam 21 paket), KDV dahil net fiyatlar
-- Her hizmet ve paket tıklanabilir; paket kartına tıklayınca detaylı açıklama penceresi açılır
-- Üyelik, giriş, şifremi unuttum, hesabım (siparişlerim)
-- 3 adımlı ödeme: Fatura bilgileri → Ön bilgilendirme + mesafeli satış sözleşmesi onayı → Garanti 3D Secure ödeme
-- Garanti başvurusu için gerekenler: Hakkımızda, Mesafeli Satış Sözleşmesi, Ön Bilgilendirme Formu, İptal ve İade Koşulları,
-  Teslimat ve Hizmet Koşulları, Gizlilik Politikası, KVKK Aydınlatma Metni, Çerez Politikası, Üyelik Sözleşmesi, İletişim sayfası,
-  altbilgide firma ünvanı/adres/vergi/MERSİS bilgileri, kart logoları ve güvenli ödeme ibaresi
+## 1. Bilgisayarınızda açıp görmek (yayınlamadan)
 
-**Yönetim paneli (`/admin`)**
+### Bir kereye mahsus kurulum
+1. **Visual Studio Code**'u kurun: https://code.visualstudio.com
+2. **PHP**'yi kurun (8.1 veya üzeri):
+   - **Windows:** Başlat menüsünde *PowerShell* açın ve şunu yazın:
+     `winget install PHP.PHP.8.3`
+     (Sonra bilgisayarı yeniden başlatın ya da VS Code'u kapatıp açın.)
+   - **Mac:** Terminal'de `brew install php` (Homebrew yoksa: https://brew.sh)
+   - Kontrol: terminalde `php -v` yazınca sürüm görünmeli.
 
-| Yetki | Süper Admin | Admin | Editör | Satış Temsilcisi | Üye |
-|---|:-:|:-:|:-:|:-:|:-:|
-| Panele giriş | ✓ | ✓ | ✓ | ✓ | – |
-| Siparişleri görme, durum güncelleme, not | ✓ | ✓ | – | ✓ | – |
-| İptal / iade / temsilci atama | ✓ | ✓ | – | – | – |
-| Sipariş silme | ✓ | – | – | – | – |
-| Müşteriler, mesajlar | ✓ | ✓ | – | ✓ | – |
-| Hizmet ve paket metinleri, sayfalar | ✓ | ✓ | ✓ | – | – |
-| Hizmet/paket ekleme, silme, fiyat | ✓ | ✓ | – | – | – |
-| Kullanıcı ve rol yönetimi | ✓ (herkes) | ✓ (editör, satış, üye) | – | – | – |
-| **Günlük sipariş ve satış raporu (gün gün, tek tek, Excel)** | ✓ | – | – | – | – |
-| **Aktivite akışı (kim, ne zaman, ne yaptı)** | ✓ | – | – | – | – |
-| **Site ve sanal POS ayarları** | ✓ | – | – | – | – |
+### Her seferinde siteyi açmak
+1. VS Code → **File → Open Folder…** → bu proje klasörünü seçin.
+2. Aşağıdakilerden **biri**:
+   - **En kolayı:** `Ctrl + Shift + B` (Mac: `Cmd + Shift + B`) → *Siteyi Başlat* görevi çalışır.
+   - veya VS Code menüsünden **Terminal → New Terminal** açıp yazın: `php -S localhost:8000 router.php`
+   - veya (Windows) klasördeki **`baslat.bat`** dosyasına çift tıklayın — tarayıcı da otomatik açılır.
+3. Tarayıcıda açın:
+   - Mağaza: **http://localhost:8000**
+   - Yönetim paneli: **http://localhost:8000/admin**
+4. Durdurmak için terminalde `Ctrl + C`.
 
-Yetkiler `includes/auth.php` dosyasındaki `PERMISSIONS` tablosundan değiştirilebilir.
+### Düzenleme yaparken
+Siteyi çalışır halde bırakın, VS Code'da bir dosyayı değiştirip kaydedin (`Ctrl + S`), tarayıcıda sayfayı yenileyin (`F5`).
+Değişiklik anında görünür. Hiçbir şey internete gitmez; site yalnızca sizin bilgisayarınızda çalışır.
 
-## VS Code ile açma ve bilgisayarda çalıştırma
+| Ne değiştirmek istiyorsunuz? | Nereden? |
+|---|---|
+| Ürünler, fiyatlar, stok, açıklamalar | Panel → **Ürünler** (kod gerekmez) |
+| Sözleşmeler, SSS, Hakkımızda vb. metinler | Panel → **Sayfalar & Sözleşmeler** |
+| Firma ünvanı, adres, telefon, vergi no, kargo ücreti | Panel → **Mağaza Ayarları** (Süper Admin) |
+| Renkler | `assets/css/site.css` en üstteki `:root` bölümü |
+| Altbilgi (footer) bağlantıları | `app/footer.php` |
+| Logo | `assets/img/logo.svg` (koyu zemin için `logo-light.svg`) |
+| Rollerin yetkileri | `app/auth.php` → `PERMISSIONS` tablosu |
 
-1. VS Code'da **File → Open Folder** ile proje klasörünü açın (önerilen eklentiler otomatik önerilir).
-2. Bilgisayarınızda PHP 8.1+ kurulu olmalı (Windows için XAMPP ya da `winget install PHP.PHP`).
-3. VS Code terminalinde:
-   ```bash
-   php install/cli.php        # SQLite ile yerel kurulum yapar
-   php install/demo.php       # (isteğe bağlı) örnek personel ve siparişler ekler
-   php -S localhost:8000      # siteyi başlatır
-   ```
-4. Tarayıcıda http://localhost:8000 → Panel: http://localhost:8000/admin
-   - Süper admin: `admin@gsprojeler.local` / `Admin123!`
-   - Demo verisi eklendiyse: `yonetici@`, `editor@`, `satis@`, `uye@gsprojeler.local` – şifre `Test1234!`
+**Her şeyi baştan başlatmak** (demo verilere dönmek): `Terminal → Run Task… → Veritabanını Sıfırla`
+ya da `php app/sifirla.php`. *Dikkat: tüm siparişler ve değişiklikler silinir.*
 
-## Hostinge kurulum
+---
 
-1. cPanel → **MySQL Veritabanları**: yeni veritabanı ve kullanıcı oluşturun, kullanıcıya tüm yetkileri verin.
-2. Tüm dosyaları `public_html` klasörüne yükleyin (Dosya Yöneticisi'nden zip yükleyip açabilir veya FTP kullanabilirsiniz).
-   `storage/` klasöründeki `database.sqlite` ve kök dizindeki `config.php` yerel dosyalardır, **yüklemeyin**.
-3. Tarayıcıda `https://alanadiniz.com/install/` adresine gidin, veritabanı bilgilerini ve süper admin hesabını girin.
-4. Kurulum bitince **`install` klasörünü silin**. (Silinmese bile, `config.php` oluştuğu için sihirbaz tekrar çalışmaz.)
-5. SSL aktifse `.htaccess` içindeki https yönlendirme satırlarının başındaki `#` işaretini kaldırın.
-6. Panel → **Site & Ödeme Ayarları → Firma Bilgileri**: ünvan, adres, telefon, vergi dairesi/no, MERSİS, KEP bilgilerini girin.
-   Tüm sözleşmeler ve sayfa altı bu bilgilerle otomatik dolar. Sağdaki **Garanti Sanal POS Başvuru Kontrolü** listesi
-   eksikleri gösterir.
+## 2. Demo hesaplar
 
-## VPS kurulumu (gsprojeler.com)
+| Rol | E-posta | Şifre |
+|---|---|---|
+| **Süper Admin** | admin@gssportif.local | Admin123! |
+| Admin | yonetici@gssportif.local | Test1234! |
+| Editör | editor@gssportif.local | Test1234! |
+| Satış Temsilcisi | satis@gssportif.local | Test1234! |
+| Üye (müşteri) | uye@gssportif.local | Test1234! |
 
-Boş bir Ubuntu 22.04 / 24.04 sunucuyu tek komutla canlı siteye çevirir: Apache, PHP, MariaDB, Let's Encrypt SSL, güvenlik duvarı (UFW),
-fail2ban, otomatik güvenlik güncellemeleri ve her gece veritabanı yedeği. Site ve süper admin hesabı terminalden kurulur;
-kurulum sihirbazı internete hiç açılmaz.
+Deneme ödemesi için kart: **4242 4242 4242 4242**, ileri bir tarih (örn. 12/30), herhangi bir CVV.
+Yayına almadan önce bu şifreleri **mutlaka** değiştirin (Panel → Kullanıcılar).
 
-1. Sunucu panelinden işletim sistemi olarak **Ubuntu 24.04 LTS** kurun.
-2. Natro > Alan Adı > **DNS Yönetimi**: `@` ve `www` için **A kaydı** = sunucu IP'si (mevcut park/yönlendirme kayıtlarını silin).
-3. Sunucuya bağlanın (Windows PowerShell / Mac Terminal): `ssh root@SUNUCU_IP`
-4. Çalıştırın:
-   ```bash
-   curl -fsSL https://raw.githubusercontent.com/tunahan33/Tuna/claude/dreamy-carson-mpbcx7/deploy/vps-kurulum.sh -o kurulum.sh
-   bash kurulum.sh
-   ```
-   Süper admin adı, e-postası ve şifresi sorulur. DNS hazırsa SSL de otomatik kurulur.
-5. DNS kurulum sırasında hazır değilse, yayıldıktan sonra: `bash kurulum.sh ssl`
-6. Sonraki kod güncellemeleri: `bash kurulum.sh guncelle` (önce yedek alır; ayarlar ve veritabanı korunur).
+---
 
-Veritabanı şifresi sunucuda `/root/gsprojeler-bilgiler.txt`, gece yedekleri `/var/backups/gsprojeler/` klasöründedir.
-VPS'te e-posta sunucusu yoktur: `info@gsprojeler.com` için bir e-posta hizmeti (Natro, Yandex, Zoho, Google Workspace vb.)
-açıp bilgilerini panelde **E-posta (SMTP)** sekmesine girin.
+## 3. Roller ve yetkiler
 
-## Alan adı olmadan hosting hazırlığı
+| Yetki | Süper Admin | Admin | Editör | Satış Temsilcisi |
+|---|:-:|:-:|:-:|:-:|
+| Siparişleri görme, üstlenme, hazırlama, kargoya verme | ✓ | ✓ | – | ✓ |
+| İptal / iade (stok otomatik geri eklenir), temsilci atama | ✓ | ✓ | – | – |
+| Sipariş silme | ✓ | – | – | – |
+| Müşteriler, talepler (iletişim, arıza, KVKK, İK) | ✓ | ✓ | – | ✓ |
+| Ürün metinleri, sayfa ve sözleşme metinleri | ✓ | ✓ | ✓ | – |
+| Ürün ekleme/silme, fiyat, stok, kategoriler | ✓ | ✓ | – | – |
+| Kullanıcı yönetimi | ✓ (herkes) | ✓ (editör, satış, üye) | – | – |
+| **Günlük satış raporu** (gün gün, sipariş sipariş, Excel) | ✓ | – | – | – |
+| **Aktivite akışı** (kim, ne zaman, ne yaptı) | ✓ | – | – | – |
+| **Bugünün siparişleri ve ciro** (gösterge paneli) | ✓ | – | – | – |
+| Mağaza ayarları | ✓ | – | – | – |
 
-Site, alan adı alınmadan da hostinge kurulup denenebilir. Alan adı gelince tek ayar değiştirilir.
+Yalnızca Süper Admin'e açık menüler panelde **SA** etiketiyle işaretlidir.
 
-**Önerilen hosting özellikleri:** Linux + cPanel (veya Plesk/DirectAdmin), PHP 8.1 veya üzeri, MySQL/MariaDB, ücretsiz SSL (Let's Encrypt / AutoSSL),
-e-posta hesabı, FTP erişimi. Yaklaşık 1 GB alan ve 1 veritabanı yeterlidir.
+---
 
-1. **Geçici adres:** Hosting firmaları alan adı yokken genelde geçici bir adres verir (örn. `http://sunucu-ip/~kullanici/`
-   veya `firma-sunucu.hosting.com`). Kurulum sihirbazı bu adresi otomatik algılar.
-2. **Kurulum:** Yukarıdaki “Hostinge kurulum” adımlarını geçici adresle uygulayın. Siteyi gerçek MySQL ile uçtan uca test edebilirsiniz
-   (ödeme DEMO modunda çalışır).
-3. **E-posta:** cPanel > E-posta Hesapları'ndan bir hesap açın. Panel > Site & Ödeme Ayarları > **E-posta (SMTP)** sekmesine girip
-   **Test Gönder** ile deneyin.
-4. **Alan adı alınınca:**
-   - Alan adının DNS/nameserver ayarlarını hosting firmasının verdiği adreslere yönlendirin (24 saate kadar sürebilir).
-   - cPanel'den SSL sertifikasını (AutoSSL / Let's Encrypt) etkinleştirin.
-   - Panel > Site & Ödeme Ayarları > **Sunucu & Yedek** sekmesinde site adresini `https://www.alanadiniz.com` yapın ve
-     “https yönlendirmesi” kutusunu işaretleyin.
-   - Aynı sekmedeki **Sunucu Durumu** listesinin tamamen yeşil olduğunu kontrol edin.
-   - Firma bilgilerini girip Garanti BBVA başvurusunu yapın (başvuru için alan adı ve SSL şarttır).
-5. **Yedek:** Sunucu & Yedek sekmesindeki **Yedeği İndir** butonu tüm veritabanını `.sql` dosyası olarak indirir.
+## 4. Sitede neler var?
 
-### GitHub'dan otomatik yükleme (isteğe bağlı)
+- **Mağaza:** 6 kategori, 16 ürün (en düşük fiyat 2.549,90 ₺; panel 2.500 ₺ altını kabul etmez), net KDV dahil fiyatlar,
+  ürüne tıklayınca açıklama / özellikler / kargo-iade sekmeleri, beden seçimi, stok uyarısı, arama, sıralama, indirimler.
+- **Sepet ve ödeme:** ücretsiz kargo çubuğu → teslimat bilgileri → müşterinin bilgileriyle doldurulmuş
+  **Ön Bilgilendirme Formu** ve **Mesafeli Satış Sözleşmesi** onayı → kart bilgileri → sipariş. Ödemede stoktan düşülür.
+- **Altbilgi (görseldeki tasarımın birebir aynısı), hepsi tıklanabilir ve dolu:**
+  - KURUMSAL: Hakkımızda, İnsan Kaynakları (başvuru formlu)
+  - MÜŞTERİ HİZMETLERİ: Sıkça sorulan sorular, Sipariş takibi (sipariş no + e-posta ile sorgu), Arıza takibi
+    (kayıt açma ve kayıt numarasıyla sorgulama), İade ve iade çeki koşulları, Teslimat koşulları, Güvenli alışveriş, İletişim
+  - SÖZLEŞMELER VE YASAL: Üyelik sözleşmesi, Genel Aydınlatma metni, Çerez politikası, Çerez tercihleri (açma/kapama
+    anahtarlı), İlgili kişi başvuru formu (KVKK m.11)
+  - Alt satırda: Mesafeli Satış Sözleşmesi, Ön Bilgilendirme Formu, Gizlilik Politikası
+- **Üyelik:** kayıt, giriş, Hesabım (siparişler ve durumları, bilgi ve şifre değiştirme).
 
-`.github/workflows/deploy.yml` dosyası kodu FTP ile hostinge yükler. GitHub > Settings > Secrets and variables > Actions altına
-`FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`, `FTP_SERVER_DIR` (örn. `public_html/`) bilgilerini ekleyin, ardından
-Actions > **Hostinge Yükle** > Run workflow deyin. İlk yüklemede “Kurulum sihirbazını da yükle” seçeneğini işaretleyin.
-`config.php` ve veritabanı hiçbir zaman ezilmez.
+> Not: Yasal metinler genel şablondur. Yayına almadan önce bir hukukçuya kontrol ettirmeniz önerilir.
+> Firma bilgileri (Panel → Mağaza Ayarları) girildiğinde tüm sözleşmelere otomatik yansır.
 
-## Garanti BBVA Sanal POS
+---
 
-- Başvuru onaylanınca banka size **Üye İşyeri No, Terminal No, Provizyon kullanıcısı/şifresi ve 3D Store Key** iletir.
-- Panel → Site & Ödeme Ayarları → **Ödeme** sekmesine girin.
-- Bankaya bildirilecek dönüş adresi: `https://alanadiniz.com/odeme-sonuc.php`
-- Modlar: **DEMO** (bankasız simülasyon) → **TEST** (Garanti test ortamı) → **CANLI**.
-- 3D modeli: **3D OOS Pay** (kart bankanın sayfasında girilir, önerilir) veya **3D Pay** (kart formu sitede, veriler doğrudan bankaya gider).
-- Kart bilgileri hiçbir zaman sunucuya gelmez ve saklanmaz. Banka yanıtı SHA-512 imzası ve tutarla doğrulanır.
+## 5. Yayına alırken (alan adı ve hosting gelince)
+
+Ödeme şu an **DEMO** modundadır: kart doğrulanır ama para çekilmez, kart bilgisi hiçbir yerde saklanmaz.
+Gerçek satış için bankanızın sanal POS'u veya bir ödeme kuruluşu (iyzico, PayTR vb.) entegrasyonu `odeme.php` içine eklenir.
+
+Hosting gereksinimi: PHP 8.1+, `pdo_sqlite` eklentisi (hemen hepsinde açıktır), SSL. Dosyaları yükleyip
+`data/` klasörünün yazılabilir olduğundan emin olmanız yeterlidir; `.htaccess` dosyaları `app/` ve `data/` klasörlerini dışarıya kapatır.
+Alan adı ve hosting bilgileri geldiğinde Panel → Mağaza Ayarları'ndaki **Yayına Hazırlık Kontrolü** listesini tamamlayın.
 
 ## Klasör yapısı
 
 ```
-index.php, hizmetler.php, hizmet.php, paketler.php, paket.php   Site sayfaları
-odeme.php, odeme-sonuc.php, odeme-demo.php                       Ödeme akışı
-giris.php, kayit.php, hesabim.php, sifremi-unuttum.php          Üyelik
-iletisim.php, sayfa.php                                          İletişim ve yasal sayfalar
-admin/                                                          Yönetim paneli
-includes/                                                       Çekirdek (veritabanı, yetki, Garanti entegrasyonu)
-assets/                                                         CSS, JS, logo ve görseller
-install/                                                        Kurulum sihirbazı ve başlangıç içerikleri
+index.php, urunler.php, urun.php        Ana sayfa, ürün listesi, ürün detayı
+sepet.php, odeme.php, siparis-tamam.php Sepet ve ödeme
+giris.php, kayit.php, hesabim.php       Üyelik
+sayfa.php                               Kurumsal/yasal sayfalar (panelden düzenlenir)
+siparis-takibi.php, ariza-takibi.php    Sipariş ve arıza takibi
+iletisim.php, insan-kaynaklari.php      Formlar
+cerez-tercihleri.php, basvuru-formu.php Çerez tercihleri, KVKK başvurusu
+admin/                                  Yönetim paneli
+app/                                    Çekirdek: veritabanı, yetkiler, demo veriler, üst/alt bölüm
+assets/                                 CSS, JavaScript, logo
+data/                                   Veritabanı dosyası (otomatik oluşur, git'e eklenmez)
 ```
-
-## Logo
-
-`assets/img/logo.svg` (açık zemin), `logo-light.svg` (koyu zemin), `favicon.svg`. Kart logoları `assets/img/payment-logos.svg`
-dosyasındadır; bankanın ilettiği resmi logo setiyle değiştirilebilir.

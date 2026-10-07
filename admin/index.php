@@ -1,105 +1,108 @@
 <?php
-require __DIR__ . '/_init.php';
-$u = require_perm('panel.access');
-
+require __DIR__ . '/_layout.php';
+$u = require_perm('panel');
 $today = date('Y-m-d');
-$monthStart = date('Y-m-01');
-$in = "'" . implode("','", SALE_STATUSES) . "'";
+$sale = "'" . implode("','", SALE_STATUSES) . "'";
 
-admin_header('Kontrol Paneli', 'Hoş geldiniz, <strong>' . e($u['name']) . '</strong> · ' . e(role_label($u['role'])));
+admin_header('Gösterge Paneli', 'Hoş geldiniz, ' . e(explode(' ', $u['name'])[0]) . ' · ' . tr_date($today, false) . ', ' . tr_day($today));
 
-if (can('dashboard.stats')):
-    $todayOrders = (int) val('SELECT COUNT(*) FROM orders WHERE created_at >= ?', [$today . ' 00:00:00']);
-    $todaySales = (float) val("SELECT COALESCE(SUM(amount),0) FROM orders WHERE status IN ($in) AND paid_at >= ?", [$today . ' 00:00:00']);
-    $todaySaleCount = (int) val("SELECT COUNT(*) FROM orders WHERE status IN ($in) AND paid_at >= ?", [$today . ' 00:00:00']);
-    $monthSales = (float) val("SELECT COALESCE(SUM(amount),0) FROM orders WHERE status IN ($in) AND paid_at >= ?", [$monthStart . ' 00:00:00']);
-    $waiting = (int) val("SELECT COUNT(*) FROM orders WHERE status = 'paid'");
-    $members = (int) val("SELECT COUNT(*) FROM users WHERE role = 'member'");
-    ?>
-    <div class="stat-grid">
-        <div class="stat"><span>Bugünkü Siparişler</span><strong><?= $todayOrders ?></strong><small><?= $todaySaleCount ?> tanesi ödendi</small></div>
-        <div class="stat accent-yellow"><span>Bugünkü Satış</span><strong><?= money($todaySales) ?></strong><small><?= tr_day_name($today) ?></small></div>
-        <div class="stat accent-red"><span>Bu Ay Satış</span><strong><?= money($monthSales) ?></strong><small><?= date('m.Y') ?></small></div>
-        <div class="stat"><span>İşlem Bekleyen</span><strong><?= $waiting ?></strong><small>Ödendi, hizmet başlamadı</small></div>
-        <?php if ($u['role'] !== 'sales'): ?><div class="stat"><span>Toplam Üye</span><strong><?= $members ?></strong><small>Kayıtlı müşteri</small></div><?php endif; ?>
-    </div>
-<?php endif; ?>
-
-<?php if (can('reports.view')):
-    // Son 14 gün satış grafiği (yalnızca süper admin)
+/* ---------------- SÜPER ADMİN ---------------- */
+if ($u['role'] === 'super_admin'):
+    $t = row("SELECT COUNT(*) n, COALESCE(SUM(total),0) s FROM orders WHERE date(created_at) = ? AND status IN ($sale)", [$today]);
+    $y = row("SELECT COUNT(*) n, COALESCE(SUM(total),0) s FROM orders WHERE date(created_at) = ? AND status IN ($sale)", [date('Y-m-d', strtotime('-1 day'))]);
+    $m = row("SELECT COUNT(*) n, COALESCE(SUM(total),0) s FROM orders WHERE strftime('%Y-%m', created_at) = ? AND status IN ($sale)", [date('Y-m')]);
+    $pending = (int) val("SELECT COUNT(*) FROM orders WHERE status IN ('yeni','hazirlaniyor')");
+    $diff = $y['s'] > 0 ? round(($t['s'] - $y['s']) / $y['s'] * 100) : null;
     $days = [];
+    $raw = [];
+    foreach (rows("SELECT date(created_at) d, COUNT(*) n, SUM(total) s FROM orders WHERE created_at >= ? AND status IN ($sale) GROUP BY d", [date('Y-m-d', strtotime('-13 days'))]) as $r) $raw[$r['d']] = $r;
     for ($i = 13; $i >= 0; $i--) {
-        $days[date('Y-m-d', strtotime("-$i day"))] = 0.0;
+        $d = date('Y-m-d', strtotime("-$i days"));
+        $days[] = ['label' => date('d', strtotime($d)) . ' ' . mb_substr(TR_MONTHS[(int) date('n', strtotime($d))], 0, 3), 'value' => (float) ($raw[$d]['s'] ?? 0),
+            'tip' => tr_date($d, false) . ' · ' . (int) ($raw[$d]['n'] ?? 0) . ' sipariş · ' . money($raw[$d]['s'] ?? 0), 'href' => url('admin/raporlar.php?gun=' . $d)];
     }
-    foreach (rows("SELECT DATE(paid_at) AS d, SUM(amount) AS t FROM orders WHERE status IN ($in) AND paid_at >= ? GROUP BY DATE(paid_at)", [array_key_first($days) . ' 00:00:00']) as $r) {
-        if (isset($days[$r['d']])) $days[$r['d']] = (float) $r['t'];
-    }
-    $max = max($days) ?: 1;
-    $activity = rows('SELECT * FROM activity_log ORDER BY id DESC LIMIT 12');
+    $todayOrders = rows('SELECT o.*, u.name rep FROM orders o LEFT JOIN users u ON u.id = o.assigned_to WHERE date(o.created_at) = ? ORDER BY o.created_at DESC', [$today]);
+    $feed = rows('SELECT * FROM activity ORDER BY id DESC LIMIT 12');
     ?>
-    <div class="grid-main">
+    <div class="kpis">
+        <?= kpi('Bugünkü Ciro', money($t['s']), $diff === null ? 'Dün satış yok' : ($diff >= 0 ? '▲ %' . $diff : '▼ %' . abs($diff)) . ' düne göre', 'red') ?>
+        <?= kpi('Bugünkü Sipariş', (string) $t['n'], 'Dün: ' . $y['n'] . ' sipariş', 'yellow') ?>
+        <?= kpi('Bu Ay Ciro', money($m['s']), $m['n'] . ' sipariş', 'dark') ?>
+        <?= kpi('Bekleyen Sipariş', (string) $pending, 'Yeni + hazırlanıyor') ?>
+    </div>
+    <div class="grid-2-1">
         <section class="panel">
-            <div class="panel-head"><h2>Son 14 Gün Satış (₺)</h2><a href="reports.php" class="btn btn-xs btn-outline">Gün gün rapor →</a></div>
-            <div class="bars" role="img" aria-label="Son 14 günün günlük satış tutarları">
-                <?php foreach ($days as $d => $t): $h = $t > 0 ? max(3, round($t / $max * 100)) : 0; ?>
-                    <a class="bar-col" href="reports.php?day=<?= $d ?>" data-tip="<?= e(tr_day_name($d) . ' ' . date('d.m', strtotime($d)) . ': ' . money($t)) ?>">
-                        <span class="bar" style="height:<?= $h ?>%"></span>
-                        <span class="bar-label"><?= date('d', strtotime($d)) ?></span>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-            <p class="small muted">En yüksek gün: <?= money($max === 1 && !array_sum($days) ? 0 : $max) ?> · 14 gün toplamı: <strong><?= money(array_sum($days)) ?></strong>. Bir güne tıklayarak o günün siparişlerini görebilirsiniz.</p>
+            <div class="panel-head"><h2>Son 14 Gün Satış</h2><a href="<?= url('admin/raporlar.php') ?>">Detaylı rapor →</a></div>
+            <?= bar_chart($days, 'Günlük ciro (iptal ve iadeler hariç). Bir güne tıklayarak o günün siparişlerini görün.') ?>
         </section>
         <section class="panel">
-            <div class="panel-head"><h2>Canlı Aktivite</h2><a href="activity.php" class="btn btn-xs btn-outline">Tümü →</a></div>
+            <div class="panel-head"><h2>Canlı Aktivite</h2><a href="<?= url('admin/aktivite.php') ?>">Tümü →</a></div>
             <ul class="feed compact">
-                <?php foreach ($activity as $a): ?>
-                    <li><span class="dot role-<?= e($a['user_role']) ?>"></span><div><strong><?= e($a['user_name']) ?></strong> <?= e(mb_strtolower($a['action'])) ?><br><small><?= e(mb_strimwidth((string) $a['details'], 0, 70, '…')) ?> · <?= tr_date($a['created_at']) ?></small></div></li>
+                <?php foreach ($feed as $a): ?>
+                    <li><span class="dot role-<?= e($a['role']) ?>"></span><div><strong><?= e($a['user_name']) ?></strong> <?= e(mb_strtolower($a['action'])) ?><?php if ($a['details']): ?> <span class="muted">· <?= e(mb_strimwidth($a['details'], 0, 60, '…')) ?></span><?php endif; ?><small><?= tr_date($a['created_at']) ?></small></div></li>
                 <?php endforeach; ?>
             </ul>
         </section>
     </div>
-<?php endif; ?>
-
-<?php if (can('orders.view')):
-    if ($u['role'] === 'sales') {
-        $list = rows("SELECT * FROM orders WHERE status IN ('paid','processing') AND (assigned_to = ? OR assigned_to IS NULL) ORDER BY id DESC LIMIT 10", [$u['id']]);
-        $listTitle = 'Size atanan / sahipsiz aktif siparişler';
-    } else {
-        $list = rows('SELECT * FROM orders ORDER BY id DESC LIMIT 10');
-        $listTitle = 'Son Siparişler';
-    }
+    <section class="panel">
+        <div class="panel-head"><h2>Bugünün Siparişleri (<?= count($todayOrders) ?>)</h2><a href="<?= url('admin/raporlar.php?gun=' . $today) ?>">Gün raporu →</a></div>
+        <?php if (!$todayOrders): ?><p class="muted">Bugün henüz sipariş yok.</p><?php else: ?>
+        <div class="table-wrap"><table class="table">
+            <thead><tr><th>Saat</th><th>Sipariş No</th><th>Müşteri</th><th>Ürünler</th><th>Tutar</th><th>Durum</th><th>Sorumlu</th></tr></thead>
+            <tbody><?php foreach ($todayOrders as $o): $items = rows('SELECT name, qty FROM order_items WHERE order_id = ?', [$o['id']]); ?>
+                <tr data-href="<?= url('admin/siparis.php?id=' . $o['id']) ?>">
+                    <td><?= date('H:i', strtotime($o['created_at'])) ?></td><td><strong><?= e($o['order_no']) ?></strong></td><td><?= e($o['customer_name']) ?><br><small class="muted"><?= e($o['city']) ?></small></td>
+                    <td class="small"><?= e(implode(', ', array_map(fn($i) => $i['qty'] . '× ' . $i['name'], $items))) ?></td>
+                    <td><strong><?= money($o['total']) ?></strong></td><td><?= order_badge($o['status']) ?></td><td><?= e($o['rep'] ?? '—') ?></td>
+                </tr>
+            <?php endforeach; ?></tbody>
+        </table></div>
+        <?php endif; ?>
+    </section>
+<?php
+/* ---------------- ADMİN ---------------- */
+elseif ($u['role'] === 'admin'):
+    $c = fn($sql) => (int) val($sql);
     ?>
-    <section class="panel">
-        <div class="panel-head"><h2><?= e($listTitle) ?></h2><a href="orders.php" class="btn btn-xs btn-outline">Tüm siparişler →</a></div>
-        <?php include __DIR__ . '/_orders_table.php'; ?>
-    </section>
-<?php endif; ?>
-
-<?php if ($u['role'] === 'editor'):
-    $recent = rows('SELECT p.*, s.title AS st FROM packages p JOIN services s ON s.id = p.service_id ORDER BY p.updated_at DESC LIMIT 8'); ?>
-    <div class="stat-grid">
-        <div class="stat"><span>Hizmetler</span><strong><?= (int) val('SELECT COUNT(*) FROM services') ?></strong><small><a href="services.php">Düzenle →</a></small></div>
-        <div class="stat accent-yellow"><span>Paketler</span><strong><?= (int) val('SELECT COUNT(*) FROM packages') ?></strong><small><a href="packages.php">Düzenle →</a></small></div>
-        <div class="stat accent-red"><span>Sayfalar</span><strong><?= (int) val('SELECT COUNT(*) FROM pages') ?></strong><small><a href="pages.php">Düzenle →</a></small></div>
+    <div class="kpis">
+        <?= kpi('Yeni Sipariş', (string) $c("SELECT COUNT(*) FROM orders WHERE status='yeni'"), 'Onay bekliyor', 'red') ?>
+        <?= kpi('Hazırlanıyor', (string) $c("SELECT COUNT(*) FROM orders WHERE status='hazirlaniyor'"), 'Kargoya verilecek', 'yellow') ?>
+        <?= kpi('Yeni Talep', (string) $c("SELECT COUNT(*) FROM requests WHERE status='yeni'"), 'Mesaj, arıza, KVKK, İK', 'dark') ?>
+        <?= kpi('Kritik Stok', (string) $c('SELECT COUNT(*) FROM products WHERE active=1 AND stock <= 5'), '5 adet ve altı') ?>
+    </div>
+    <?php require __DIR__ . '/_dash_lists.php'; ?>
+<?php
+/* ---------------- SATIŞ TEMSİLCİSİ ---------------- */
+elseif ($u['role'] === 'satis'):
+    $mine = rows("SELECT * FROM orders WHERE assigned_to = ? AND status IN ('hazirlaniyor','kargoda') ORDER BY id DESC LIMIT 20", [$u['id']]);
+    ?>
+    <div class="kpis">
+        <?= kpi('Sahipsiz Yeni Sipariş', (string) val("SELECT COUNT(*) FROM orders WHERE status='yeni'"), 'İlk ilgilenen üstlenir', 'red') ?>
+        <?= kpi('Bende Açık', (string) count($mine), 'Hazırlanıyor + kargoda', 'yellow') ?>
+        <?= kpi('Bu Ay Teslim Ettiğim', (string) val("SELECT COUNT(*) FROM orders WHERE assigned_to = ? AND status='teslim' AND strftime('%Y-%m', updated_at) = ?", [$u['id'], date('Y-m')]), '', 'dark') ?>
+        <?= kpi('Yeni Talep', (string) val("SELECT COUNT(*) FROM requests WHERE status='yeni'"), 'Müşteri talepleri') ?>
     </div>
     <section class="panel">
-        <div class="panel-head"><h2>Son güncellenen paketler</h2></div>
-        <table class="table"><thead><tr><th>Paket</th><th>Hizmet</th><th>Güncelleme</th><th></th></tr></thead><tbody>
-        <?php foreach ($recent as $p): ?><tr><td><?= e($p['name']) ?></td><td><?= e($p['st']) ?></td><td><?= tr_date($p['updated_at']) ?></td><td><a class="btn btn-xs btn-outline" href="package_edit.php?id=<?= (int) $p['id'] ?>">Düzenle</a></td></tr><?php endforeach; ?>
-        </tbody></table>
+        <div class="panel-head"><h2>Bana Atanan Açık Siparişler</h2><a href="<?= url('admin/siparisler.php?benim=1') ?>">Tümü →</a></div>
+        <?php if (!$mine): ?><p class="muted">Üzerinizde açık sipariş yok. <a href="<?= url('admin/siparisler.php?durum=yeni') ?>">Yeni siparişlere göz atın.</a></p><?php else: ?>
+        <div class="table-wrap"><table class="table"><thead><tr><th>Sipariş</th><th>Müşteri</th><th>Tarih</th><th>Durum</th></tr></thead><tbody>
+            <?php foreach ($mine as $o): ?><tr data-href="<?= url('admin/siparis.php?id=' . $o['id']) ?>"><td><strong><?= e($o['order_no']) ?></strong></td><td><?= e($o['customer_name']) ?></td><td><?= tr_date($o['created_at']) ?></td><td><?= order_badge($o['status']) ?></td></tr><?php endforeach; ?>
+        </tbody></table></div><?php endif; ?>
     </section>
-    <div class="info-box">Editör olarak hizmet ve paket açıklamalarını, sayfa ve sözleşme metinlerini düzenleyebilirsiniz. Fiyat değişiklikleri, siparişler ve kullanıcı yönetimi admin yetkisindedir.</div>
-<?php endif; ?>
-
-<section class="panel">
-    <div class="panel-head"><h2>Yetkileriniz</h2></div>
-    <div class="perm-chips">
-        <?php
-        $labels = ['orders.view' => 'Siparişleri görme', 'orders.status' => 'Sipariş durumu güncelleme', 'orders.cancel' => 'İptal / iade', 'orders.delete' => 'Sipariş silme', 'customers.view' => 'Müşteriler', 'messages.view' => 'Mesajlar', 'content.edit' => 'İçerik düzenleme', 'content.create' => 'Hizmet/paket ekleme', 'prices.edit' => 'Fiyat değiştirme', 'pages.edit' => 'Sayfa & sözleşmeler', 'users.manage' => 'Kullanıcı yönetimi', 'reports.view' => 'Günlük satış raporları', 'activity.view' => 'Aktivite akışı', 'settings.edit' => 'Site & POS ayarları'];
-        foreach ($labels as $perm => $l): ?>
-            <span class="perm <?= can($perm) ? 'yes' : 'no' ?>"><?= can($perm) ? '✓' : '✕' ?> <?= e($l) ?></span>
-        <?php endforeach; ?>
+    <?php require __DIR__ . '/_dash_lists.php'; ?>
+<?php
+/* ---------------- EDİTÖR ---------------- */
+else: ?>
+    <div class="kpis">
+        <?= kpi('Aktif Ürün', (string) val('SELECT COUNT(*) FROM products WHERE active=1'), '', 'red') ?>
+        <?= kpi('Kategori', (string) val('SELECT COUNT(*) FROM categories'), '', 'yellow') ?>
+        <?= kpi('Sayfa & Sözleşme', (string) val('SELECT COUNT(*) FROM pages'), '', 'dark') ?>
     </div>
-</section>
-<?php admin_footer();
+    <section class="panel">
+        <div class="panel-head"><h2>Son Güncellenen Ürünler</h2><a href="<?= url('admin/urunler.php') ?>">Tümü →</a></div>
+        <div class="table-wrap"><table class="table"><tbody>
+            <?php foreach (rows('SELECT * FROM products ORDER BY updated_at DESC LIMIT 8') as $p): ?><tr data-href="<?= url('admin/urun-duzenle.php?id=' . $p['id']) ?>"><td><?= e($p['name']) ?></td><td class="muted"><?= tr_date($p['updated_at']) ?></td></tr><?php endforeach; ?>
+        </tbody></table></div>
+    </section>
+<?php endif;
+admin_footer();

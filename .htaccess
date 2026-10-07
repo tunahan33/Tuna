@@ -1,29 +1,5 @@
-# GS Projeler - Apache ayarları
 Options -Indexes
 DirectoryIndex index.php
-AddDefaultCharset UTF-8
-
-# Hassas dosyalara doğrudan erişimi engelle
-<FilesMatch "^(config\.php|config\.sample\.php|README\.md|\.gitignore)$">
+<FilesMatch "\.(sqlite|sqlite-journal|log|md)$">
     Require all denied
 </FilesMatch>
-<FilesMatch "^_.*\.php$">
-    Require all denied
-</FilesMatch>
-
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    # http -> https ve gsprojeler.com -> www.gsprojeler.com yönlendirmesi panelden açılır:
-    # Yönetim > Site & Ödeme Ayarları > Sunucu & Yedek > "https ve tek adrese yönlendir"
-    RewriteRule ^(includes|storage|tools|deploy)/ - [F,L]
-    # Arama motorları için dinamik dosyalar
-    RewriteRule ^robots\.txt$ robots.php [L]
-    RewriteRule ^sitemap\.xml$ sitemap.php [L]
-</IfModule>
-
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType text/css "access plus 1 month"
-    ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType image/svg+xml "access plus 1 month"
-</IfModule>

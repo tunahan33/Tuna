@@ -1,5 +1,0 @@
-config.php
-storage/*.sqlite
-install/install.lock
-uploads/*
-!uploads/.htaccess

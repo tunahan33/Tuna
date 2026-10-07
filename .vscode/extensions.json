@@ -1,7 +1,6 @@
 {
     "recommendations": [
         "bmewburn.vscode-intelephense-client",
-        "brapifra.phpserver",
-        "mrmlnc.vscode-apache"
+        "xdebug.php-debug"
     ]
 }

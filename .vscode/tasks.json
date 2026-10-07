@@ -1,0 +1,20 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Siteyi Başlat",
+            "type": "shell",
+            "command": "php -S localhost:8000 router.php",
+            "isBackground": true,
+            "problemMatcher": [],
+            "group": { "kind": "build", "isDefault": true },
+            "presentation": { "reveal": "always", "panel": "dedicated" }
+        },
+        {
+            "label": "Veritabanını Sıfırla (demo verileri yeniden yükler)",
+            "type": "shell",
+            "command": "php app/sifirla.php",
+            "problemMatcher": []
+        }
+    ]
+}

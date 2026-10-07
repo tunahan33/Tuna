@@ -1,84 +1,44 @@
-/* GS Projeler - yönetim paneli etkileşimleri */
+// GS Sportif Ürünler – panel etkileşimleri
 (function () {
-    'use strict';
-    var sb = document.querySelector('[data-sidebar]');
-    var ov = document.querySelector('[data-sidebar-close]');
-    var tg = document.querySelector('[data-sidebar-toggle]');
-    function toggleSb(open) { sb.classList.toggle('open', open); ov.classList.toggle('open', open); }
-    if (tg) tg.addEventListener('click', function () { toggleSb(!sb.classList.contains('open')); });
-    if (ov) ov.addEventListener('click', function () { toggleSb(false); });
+    // Mobil menü
+    var side = document.querySelector('[data-side]');
+    var tog = document.querySelector('[data-side-toggle]');
+    if (side && tog) tog.addEventListener('click', function () { side.classList.toggle('open'); });
 
-    // Satıra tıklayınca detaya git
-    document.addEventListener('click', function (e) {
-        var tr = e.target.closest('tr[data-href]');
-        if (tr && !e.target.closest('a, button, input, select, form')) location.href = tr.getAttribute('data-href');
-    });
-
-    // Onay isteyen formlar
-    document.querySelectorAll('form[data-confirm]').forEach(function (f) {
-        f.addEventListener('submit', function (e) { if (!confirm(f.getAttribute('data-confirm'))) e.preventDefault(); });
-    });
-
-    // Mesaj açılınca "okundu" işaretle
-    document.querySelectorAll('details.msg.is-new').forEach(function (d) {
-        d.addEventListener('toggle', function () {
-            if (d.open) fetch(d.getAttribute('data-open-url'), { credentials: 'same-origin' }).then(function () { d.classList.remove('is-new'); });
+    // Tıklanabilir tablo satırları
+    document.querySelectorAll('tr[data-href]').forEach(function (tr) {
+        tr.addEventListener('click', function (ev) {
+            if (ev.target.closest('a, button, input, select, textarea, form')) return;
+            window.location = tr.dataset.href;
         });
     });
 
-    // Canlı yenileme (aktivite akışı)
-    var ar = document.querySelector('[data-autorefresh]');
-    if (ar) {
-        var key = 'gsp_autorefresh', timer;
-        try { ar.checked = localStorage.getItem(key) === '1'; } catch (err) {}
-        var arm = function () {
-            clearTimeout(timer);
-            if (ar.checked) timer = setTimeout(function () { location.reload(); }, parseInt(ar.getAttribute('data-autorefresh'), 10) * 1000);
-        };
-        ar.addEventListener('change', function () { try { localStorage.setItem(key, ar.checked ? '1' : '0'); } catch (err) {} arm(); });
-        arm();
+    // Onay isteyen butonlar
+    document.querySelectorAll('[data-confirm]').forEach(function (el) {
+        el.addEventListener('click', function (ev) { if (!confirm(el.dataset.confirm)) ev.preventDefault(); });
+    });
+
+    // Sipariş durumu "Kargoya Verildi" seçilince kargo alanlarını göster
+    var sel = document.querySelector('[data-status-select]');
+    var cargo = document.querySelector('[data-cargo-fields]');
+    if (sel && cargo) {
+        var sync = function () { cargo.style.display = sel.value === 'kargoda' ? '' : 'none'; };
+        sel.addEventListener('change', sync);
+        sync();
     }
 
-    // Basit zengin metin düzenleyici
-    document.querySelectorAll('[data-rte]').forEach(function (wrap) {
-        var ta = wrap.querySelector('textarea');
-        wrap.classList.add('rte');
-        var bar = document.createElement('div');
-        bar.className = 'rte-bar';
-        var area = document.createElement('div');
-        area.className = 'rte-area prose';
-        area.contentEditable = 'true';
-        area.innerHTML = ta.value;
-        var tools = [
-            ['B', 'bold'], ['İ', 'italic'], ['Başlık', 'formatBlock', 'h3'], ['Alt Başlık', 'formatBlock', 'h4'], ['Paragraf', 'formatBlock', 'p'],
-            ['• Liste', 'insertUnorderedList'], ['1. Liste', 'insertOrderedList'], ['Bağlantı', 'createLink'], ['Temizle', 'removeFormat'], ['HTML', 'html']
-        ];
-        tools.forEach(function (t) {
-            var b = document.createElement('button');
-            b.type = 'button';
-            b.textContent = t[0];
-            b.addEventListener('click', function () {
-                if (t[1] === 'html') {
-                    var src = ta.style.display !== 'none';
-                    if (src) { area.innerHTML = ta.value; ta.style.display = 'none'; area.style.display = ''; b.classList.remove('on'); }
-                    else { ta.value = area.innerHTML; ta.style.display = ''; area.style.display = 'none'; b.classList.add('on'); }
-                    return;
-                }
-                area.focus();
-                if (t[1] === 'createLink') {
-                    var u = prompt('Bağlantı adresi (https://...)');
-                    if (u) document.execCommand('createLink', false, u);
-                } else {
-                    document.execCommand(t[1], false, t[2] ? '<' + t[2] + '>' : null);
-                }
-                ta.value = area.innerHTML;
-            });
-            bar.appendChild(b);
+    // Sayfa düzenleyici: seçili metni etiketle sar
+    var ed = document.querySelector('[data-editor]');
+    document.querySelectorAll('[data-wrap]').forEach(function (b) {
+        b.addEventListener('click', function () {
+            if (!ed) return;
+            var t = b.dataset.wrap, s = ed.selectionStart, e = ed.selectionEnd, v = ed.value;
+            var inner = v.slice(s, e) || 'Metin';
+            if (t === 'ul') inner = '\n<li>' + inner + '</li>\n';
+            var out = '<' + t + '>' + inner + '</' + t + '>';
+            ed.value = v.slice(0, s) + out + v.slice(e);
+            ed.focus();
+            ed.selectionStart = s; ed.selectionEnd = s + out.length;
         });
-        ta.style.display = 'none';
-        wrap.insertBefore(bar, ta);
-        wrap.insertBefore(area, ta);
-        area.addEventListener('input', function () { ta.value = area.innerHTML; });
-        ta.form.addEventListener('submit', function () { if (ta.style.display === 'none') ta.value = area.innerHTML; });
     });
 })();
