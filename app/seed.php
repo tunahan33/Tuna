@@ -12,11 +12,11 @@ function seed_database(): void
     $settings = [
         'site_name'          => 'GS Sportif Ürünler',
         'site_slogan'        => 'Sarı-kırmızı ruhun sportif adresi',
-        'site_url'           => 'https://www.alanadiniz.com',
+        'site_url'           => 'https://www.gssportifurunler.net',
         'company_title'      => 'Nida Coşkun',
         'company_address'    => 'Mecidiyeköy Mah. Eski Osmanlı Sk. Arıkan İş Merkezi No: 30 İç Kapı No: 10 Şişli / İstanbul',
         'company_phone'      => '+90 543 107 23 27',
-        'company_email'      => 'info@alanadiniz.com',
+        'company_email'      => 'info@gssportifurunler.net',
         'tax_office'         => 'Zincirlikuyu',
         'tax_number'         => '25529273476',
         'mersis_number'      => '',

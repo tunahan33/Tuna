@@ -4,9 +4,9 @@
 #
 #  Sunucuya root olarak bağlanıp:
 #    curl -fsSL https://raw.githubusercontent.com/tunahan33/Tuna/claude/confident-ride-wpz20g/deploy/kurulum.sh -o kurulum.sh
-#    bash kurulum.sh                       # ilk kurulum (süper admin bilgileri sorulur)
+#    bash kurulum.sh                       # ilk kurulum (süper admin bilgileri sorulur, DNS hazırsa SSL de kurulur)
 #    bash kurulum.sh guncelle              # GitHub'daki son sürümü yükler (veriler ve fotoğraflar korunur)
-#    bash kurulum.sh ssl alanadiniz.com    # alan adı sunucuya yönlendikten sonra ücretsiz SSL (https)
+#    bash kurulum.sh ssl                   # alan adı sunucuya yönlendikten sonra ücretsiz SSL (https)
 #    bash kurulum.sh yedek                 # elle yedek al
 #
 #  Kurar: Apache + PHP 8, güvenlik duvarı (UFW), fail2ban, otomatik güvenlik güncellemeleri,
@@ -14,6 +14,7 @@
 # =============================================================================
 set -euo pipefail
 
+DOMAIN="${DOMAIN:-gssportifurunler.net}"
 BRANCH="${BRANCH:-claude/confident-ride-wpz20g}"
 TARBALL="${TARBALL:-https://codeload.github.com/tunahan33/Tuna/tar.gz/refs/heads/${BRANCH}}"
 APP_DIR="${APP_DIR:-/var/www/gssportif}"
@@ -37,6 +38,8 @@ servis() { # servis <restart|reload|enable> <ad>
 }
 
 sunucu_ip() { curl -fs4 --max-time 8 https://api.ipify.org 2>/dev/null || hostname -I | awk '{print $1}'; }
+dns_ip() { getent ahostsv4 "$1" 2>/dev/null | awk 'NR==1{print $1}'; }
+dns_hazir() { local ip; ip="$(sunucu_ip)"; [ "$(dns_ip "$DOMAIN")" = "$ip" ] && [ "$(dns_ip "www.$DOMAIN")" = "$ip" ]; }
 
 kodu_indir() {
     adim "Site dosyaları GitHub'dan indiriliyor"
@@ -72,11 +75,11 @@ paketler() {
 }
 
 apache_ayar() {
-    local ad="${1:-_}"
-    adim "Apache ayarlanıyor"
+    adim "Apache ayarlanıyor ($DOMAIN)"
     cat > /etc/apache2/sites-available/gssportif.conf <<CONF
 <VirtualHost *:80>
-    ServerName ${ad}
+    ServerName ${DOMAIN}
+    ServerAlias www.${DOMAIN}
     DocumentRoot ${APP_DIR}
     <Directory ${APP_DIR}>
         Options -Indexes +FollowSymLinks
@@ -146,7 +149,7 @@ admin_olustur() {
         [ "$sifre" = "$sifre2" ] && [ "${#sifre}" -ge 10 ] && break
         kirmizi "Şifreler eşleşmiyor veya 10 karakterden kısa, tekrar deneyin."
     done
-    runuser -u www-data -- php "$APP_DIR/app/canli.php" --eposta="$eposta" --sifre="$sifre" --ad="$ad" --adres="http://$(sunucu_ip)"
+    runuser -u www-data -- php "$APP_DIR/app/canli.php" --eposta="$eposta" --sifre="$sifre" --ad="$ad" --adres="https://www.$DOMAIN"
 }
 
 kurulum() {
@@ -157,23 +160,29 @@ kurulum() {
     # Veritabanını www-data kullanıcısıyla oluştur (site ilk açılışta da oluşturabilir)
     runuser -u www-data -- php -r 'require "'"$APP_DIR"'/app/bootstrap.php"; db();'
     if [ "${SUPERADMIN_EMAIL:-}" != "" ]; then
-        runuser -u www-data -- php "$APP_DIR/app/canli.php" --eposta="$SUPERADMIN_EMAIL" --sifre="$SUPERADMIN_PASS" --ad="${SUPERADMIN_NAME:-Süper Admin}" --adres="http://$(sunucu_ip)"
+        runuser -u www-data -- php "$APP_DIR/app/canli.php" --eposta="$SUPERADMIN_EMAIL" --sifre="$SUPERADMIN_PASS" --ad="${SUPERADMIN_NAME:-Süper Admin}" --adres="https://www.$DOMAIN"
     else
         admin_olustur
     fi
     guvenlik
     yedek_kur
     local ip; ip="$(sunucu_ip)"
+    local adres="http://${ip}"
+    if [ "$TEST_MODE" != 1 ] && dns_hazir; then
+        ssl_kur && adres="https://www.${DOMAIN}"
+    else
+        sari "Alan adı ($DOMAIN) henüz bu sunucuyu göstermiyor; SSL daha sonra kurulacak."
+    fi
     yesil "
 ============================================================
  Kurulum tamamlandı!
 
- Mağaza:         http://${ip}
- Yönetim paneli: http://${ip}/admin
+ Mağaza:         ${adres}
+ Yönetim paneli: ${adres}/admin
 
- Alan adı alınca: DNS'te @ ve www için A kaydı = ${ip}
- ardından:        bash kurulum.sh ssl alanadiniz.com
- Güncelleme:      bash kurulum.sh guncelle
+ DNS hazır değilse: Natro > DNS Yönetimi'nde @ ve www için A kaydı = ${ip}
+ yayıldıktan sonra: bash kurulum.sh ssl
+ Güncelleme:        bash kurulum.sh guncelle
 ============================================================"
     sari "ÖNEMLİ: root şifrenizi değiştirin:  passwd"
 }
@@ -190,15 +199,21 @@ guncelle() {
 }
 
 ssl_kur() {
-    local alan="${1:-}"
-    [ -n "$alan" ] || { kirmizi "Kullanım: bash kurulum.sh ssl alanadiniz.com"; exit 1; }
-    adim "SSL sertifikası kuruluyor: $alan"
+    [ -n "${1:-}" ] && DOMAIN="$1"
+    adim "SSL sertifikası kuruluyor: $DOMAIN ve www.$DOMAIN"
+    local ip; ip="$(sunucu_ip)"
+    if ! dns_hazir; then
+        kirmizi "Alan adı henüz bu sunucuyu göstermiyor."
+        echo "  $DOMAIN      -> $(dns_ip "$DOMAIN" || true)   (olması gereken: $ip)"
+        echo "  www.$DOMAIN  -> $(dns_ip "www.$DOMAIN" || true)   (olması gereken: $ip)"
+        echo "Natro > Alan Adı Yönetimi > DNS Yönetimi'nden A kayıtlarını düzeltin, 15-60 dk bekleyip tekrar deneyin."
+        return 1
+    fi
+    grep -q "ServerName ${DOMAIN}" /etc/apache2/sites-available/gssportif.conf || apache_ayar
     apt-get install -y certbot python3-certbot-apache
-    sed -i "s/^    ServerName .*/    ServerName ${alan}\n    ServerAlias www.${alan}/" /etc/apache2/sites-available/gssportif.conf
-    servis reload apache2
-    certbot --apache --non-interactive --agree-tos --redirect --register-unsafely-without-email -d "$alan" -d "www.$alan"
-    runuser -u www-data -- php -r 'require "'"$APP_DIR"'/app/bootstrap.php"; save_setting("site_url", "https://www.'"$alan"'");'
-    yesil "SSL kuruldu: https://www.$alan"
+    certbot --apache --non-interactive --agree-tos --redirect --register-unsafely-without-email -d "$DOMAIN" -d "www.$DOMAIN"
+    runuser -u www-data -- php -r 'require "'"$APP_DIR"'/app/bootstrap.php"; save_setting("site_url", "https://www.'"$DOMAIN"'");'
+    yesil "SSL kuruldu: https://www.$DOMAIN (sertifika otomatik yenilenir)"
 }
 
 case "${1:-kur}" in
@@ -206,5 +221,5 @@ case "${1:-kur}" in
     guncelle)    guncelle ;;
     ssl)         ssl_kur "${2:-}" ;;
     yedek)       /usr/local/bin/gssportif-yedek && yesil "Yedek alındı: $BACKUP_DIR" ;;
-    *) echo "Kullanım: bash kurulum.sh [guncelle | ssl alanadiniz.com | yedek]" ;;
+    *) echo "Kullanım: bash kurulum.sh [guncelle | ssl | yedek]" ;;
 esac

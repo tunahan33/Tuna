@@ -4,7 +4,7 @@
  * Mevcut verileriniz (siparişler, üyeler, değişiklikleriniz) korunur.
  */
 
-const DB_VERSION = 6;
+const DB_VERSION = 7;
 
 function migrate_database(PDO $pdo): void
 {
@@ -168,6 +168,12 @@ function migrate_database(PDO $pdo): void
         q("UPDATE pages SET content = REPLACE(content, ?, ?)", ['<br><strong>MERSİS No:</strong> {{mersis_no}}<br><strong>KEP:</strong> {{kep_adresi}}', '{{mersis_satiri}}{{kep_satiri}}']);
         // Fotoğrafı olmayan ürünleri kaldır (geçmiş siparişlerdeki ürün adları korunur)
         q("DELETE FROM products WHERE images = '[]' OR images = '' OR images IS NULL");
+    }
+
+    // v7: Alan adı gssportifurunler.net (panelden değiştirilmediyse)
+    if ($current < 7) {
+        q("UPDATE settings SET svalue = 'https://www.gssportifurunler.net' WHERE skey = 'site_url' AND svalue LIKE '%alanadiniz%'");
+        q("UPDATE settings SET svalue = 'info@gssportifurunler.net' WHERE skey = 'company_email' AND svalue LIKE '%alanadiniz%'");
     }
 
     save_setting('db_version', (string) DB_VERSION);

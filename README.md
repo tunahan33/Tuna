@@ -128,11 +128,11 @@ Yalnızca Süper Admin'e açık menüler panelde **SA** etiketiyle işaretlidir.
 | İş | Komut (sunucuda) |
 |---|---|
 | Yeni sürümü yükle (veriler ve fotoğraflar korunur, önce yedek alınır) | `bash kurulum.sh guncelle` |
-| Alan adı yönlendikten sonra ücretsiz SSL (https) | `bash kurulum.sh ssl alanadiniz.com` |
+| Alan adı yönlendikten sonra ücretsiz SSL (https) | `bash kurulum.sh ssl` |
 | Elle yedek al | `bash kurulum.sh yedek` |
 
 Yedekler `/var/backups/gssportif/` klasöründedir (her gece 03:30, son 14 gün).
-Alan adı alındığında DNS'te `@` ve `www` için **A kaydı** = sunucu IP'si girin, yayıldıktan sonra `ssl` komutunu çalıştırın.
+Alan adı: **gssportifurunler.net** (Natro). Natro > Alan Adı Yönetimi > DNS Yönetimi’nde `@` ve `www` için **A kaydı** = sunucu IP’si olmalı; DNS hazırsa kurulum SSL’i kendisi kurar, değilse yayıldıktan sonra `bash kurulum.sh ssl` çalıştırın.
 
 ## 6. Ödeme
 
