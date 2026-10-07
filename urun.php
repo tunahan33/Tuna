@@ -26,7 +26,7 @@ $sizes = product_sizes($p);
 $images = product_images($p);
 $off = discount_percent($p);
 $features = features_list($p['features']);
-$related = rows('SELECT * FROM products WHERE category_id = ? AND id <> ? AND active = 1 ORDER BY featured DESC LIMIT 4', [$p['category_id'], $p['id']]);
+$related = rows('SELECT * FROM products WHERE category_id = ? AND id <> ? AND active = 1 ORDER BY featured DESC LIMIT 5', [$p['category_id'], $p['id']]);
 $title = $p['name'];
 $description = $p['short_desc'];
 require __DIR__ . '/app/header.php';

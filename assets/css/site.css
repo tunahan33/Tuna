@@ -22,7 +22,7 @@ body { margin: 0; font-family: Inter, system-ui, -apple-system, "Segoe UI", sans
 a { color: inherit; }
 img, svg { max-width: 100%; }
 h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 .6em; }
-.container { width: min(1200px, 100% - 32px); margin-inline: auto; }
+.container { width: min(1480px, 100% - 64px); margin-inline: auto; }
 .narrow { width: min(860px, 100% - 32px); }
 .muted { color: var(--muted); }
 .small { font-size: .875rem; }
@@ -81,7 +81,7 @@ h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 .6em; }
 .menu-toggle { display: none; background: none; border: 0; padding: 8px; cursor: pointer; }
 .menu-toggle span { display: block; width: 22px; height: 2px; background: var(--ant); margin: 5px 0; }
 .catnav { background: var(--ant); }
-.catnav-row { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.catnav-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 4px; }
 .catnav a { color: #E6E7E8; text-decoration: none; padding: 12px 14px; font-size: .9rem; font-weight: 600; white-space: nowrap; border-bottom: 3px solid transparent; }
 .catnav a:hover, .catnav a.active { color: #fff; border-bottom-color: var(--yellow); }
 .catnav a.hot { color: var(--yellow); }
@@ -356,3 +356,17 @@ h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 .6em; }
 .pd-thumbs button.active { border-color: var(--red); }
 .pd-thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
 @media (max-width: 1000px) { .pd-gallery { position: static; max-width: 520px; } }
+
+/* Geniş ekranlar: ürünler 5'li sıralanır */
+@media (min-width: 1400px) {
+    .product-grid { grid-template-columns: repeat(5, 1fr); }
+    .cat-grid { grid-template-columns: repeat(8, 1fr); }
+}
+@media (max-width: 720px) {
+    .container { width: min(1480px, 100% - 32px); }
+}
+@media (min-width: 721px) and (max-width: 1440px) {
+    .catnav a { padding: 12px 9px; font-size: .85rem; }
+}
+.cat-card .photo { height: auto; aspect-ratio: 1; }
+.hero h1 span { white-space: nowrap; }

@@ -1,8 +1,8 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
 
-$featured = rows("SELECT * FROM products WHERE active = 1 AND featured = 1 ORDER BY images <> '[]' DESC, id LIMIT 8");
-$deals = rows('SELECT * FROM products WHERE active = 1 AND old_price > price ORDER BY (old_price - price) DESC LIMIT 4');
+$featured = rows("SELECT * FROM products WHERE active = 1 AND featured = 1 ORDER BY images <> '[]' DESC, id LIMIT 10");
+$deals = rows('SELECT * FROM products WHERE active = 1 AND old_price > price ORDER BY (old_price - price) DESC LIMIT 5');
 $cats = rows('SELECT * FROM categories ORDER BY sort');
 foreach ($cats as &$c) {
     // Kategori kartında, fotoğrafı olan ürün öncelikli gösterilir
