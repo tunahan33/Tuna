@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
 
-$cats = rows('SELECT * FROM categories ORDER BY sort');
+$cats = rows('SELECT c.* FROM categories c WHERE EXISTS (SELECT 1 FROM products p WHERE p.category_id = c.id AND p.active = 1) ORDER BY c.sort');
 $cat = null;
 $where = ['p.active = 1'];
 $params = [];

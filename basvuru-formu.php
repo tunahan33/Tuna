@@ -51,7 +51,7 @@ require __DIR__ . '/app/header.php';
             <label class="check"><input type="checkbox" name="dogruluk" value="1" required> <span>Bu formda verdiğim bilgilerin doğru ve güncel olduğunu beyan ederim.</span></label>
             <label class="check"><input type="checkbox" name="kvkk" value="1" required> <span><a href="<?= url('sayfa.php?s=genel-aydinlatma-metni') ?>" target="_blank">Genel Aydınlatma Metni</a>'ni okudum.</span></label>
             <button class="btn btn-primary">Başvuruyu Gönder</button>
-            <p class="small muted">Güvenliğiniz için T.C. kimlik numaranızın yalnızca son 4 hanesi saklanır. Başvurunuz, kimlik doğrulaması yapıldıktan sonra değerlendirilir. Dilerseniz başvurunuzu ıslak imzalı olarak <?= e(setting('company_address')) ?> adresine veya KEP adresimize (<?= e(setting('kep_address')) ?>) de iletebilirsiniz.</p>
+            <p class="small muted">Güvenliğiniz için T.C. kimlik numaranızın yalnızca son 4 hanesi saklanır. Başvurunuz, kimlik doğrulaması yapıldıktan sonra değerlendirilir. Dilerseniz başvurunuzu ıslak imzalı olarak <?= e(setting('company_address')) ?> adresine<?= setting('kep_address') ? ' veya KEP adresimize (' . e(setting('kep_address')) . ')' : '' ?> de iletebilirsiniz.</p>
         </form>
     </div>
 </section>

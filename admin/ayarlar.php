@@ -11,7 +11,7 @@ $groups = [
     'Firma Bilgileri (sözleşmelerde kullanılır)' => [
         'company_title' => ['Ticari unvan', 'text'], 'company_address' => ['Adres', 'text'], 'company_phone' => ['Telefon', 'text'],
         'company_email' => ['E-posta', 'email'], 'working_hours' => ['Çalışma saatleri', 'text'], 'tax_office' => ['Vergi dairesi', 'text'],
-        'tax_number' => ['Vergi numarası', 'text'], 'mersis_number' => ['MERSİS no', 'text'], 'kep_address' => ['KEP adresi', 'text'],
+        'tax_number' => ['Vergi / TC kimlik numarası', 'text'], 'mersis_number' => ['MERSİS no (şirketler için, yoksa boş)', 'text'], 'kep_address' => ['KEP adresi (varsa)', 'text'],
     ],
     'Kargo' => [
         'shipping_fee' => ['Kargo ücreti (₺)', 'number'], 'free_shipping_limit' => ['Ücretsiz kargo alt limiti (₺) — 0 ise kapalı', 'number'], 'shipping_days' => ['Kargoya verilme süresi', 'text'],
@@ -57,7 +57,6 @@ admin_header('Mağaza Ayarları', 'Yalnızca Süper Admin görebilir');
                 'Ticari unvan girildi' => !str_contains(setting('company_title'), 'girin'),
                 'Adres girildi' => !str_contains(setting('company_address'), 'girin'),
                 'Vergi numarası girildi' => setting('tax_number') !== '-' && setting('tax_number') !== '',
-                'MERSİS numarası girildi' => setting('mersis_number') !== '-' && setting('mersis_number') !== '',
                 'Alan adı girildi' => !str_contains(setting('site_url'), 'alanadiniz'),
                 'Kurumsal e-posta girildi' => !str_contains(setting('company_email'), 'alanadiniz'),
                 'Demo şifreler değiştirildi' => !password_verify('Admin123!', (string) val("SELECT password_hash FROM users WHERE email = 'admin@gssportif.local'")),

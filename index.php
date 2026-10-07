@@ -1,9 +1,9 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
 
-$featured = rows("SELECT * FROM products WHERE active = 1 AND featured = 1 ORDER BY images <> '[]' DESC, id LIMIT 10");
+$featured = rows("SELECT * FROM products WHERE active = 1 ORDER BY featured DESC, images <> '[]' DESC, id LIMIT 10");
 $deals = rows('SELECT * FROM products WHERE active = 1 AND old_price > price ORDER BY (old_price - price) DESC LIMIT 5');
-$cats = rows('SELECT * FROM categories ORDER BY sort');
+$cats = rows('SELECT c.* FROM categories c WHERE EXISTS (SELECT 1 FROM products p WHERE p.category_id = c.id AND p.active = 1) ORDER BY c.sort');
 foreach ($cats as &$c) {
     // Kategori kartında, fotoğrafı olan ürün öncelikli gösterilir
     $c['cover'] = row("SELECT * FROM products WHERE category_id = ? AND active = 1 ORDER BY images <> '[]' DESC, featured DESC, id LIMIT 1", [$c['id']]);
@@ -18,7 +18,7 @@ require __DIR__ . '/app/header.php';
         <div>
             <span class="eyebrow">YENİ SEZON</span>
             <h1>Sahada da tribünde de <span>sarı-kırmızı</span> gurur.</h1>
-            <p>Formalar, eşofmanlar, kramponlar ve daha fazlası. <?= e(money(setting('free_shipping_limit'))) ?> üzeri kargo bedava, 14 gün ücretsiz iade.</p>
+            <p>Tişörtler, eşofmanlar, kramponlar ve motorsport ürünleri. <?= e(money(setting('free_shipping_limit'))) ?> üzeri kargo bedava, 14 gün ücretsiz iade.</p>
             <div class="hero-actions">
                 <a class="btn btn-yellow btn-lg" href="<?= url('urunler.php') ?>">Alışverişe Başla</a>
                 <a class="btn btn-ghost btn-lg" href="<?= url('urunler.php?indirim=1') ?>">İndirimleri Gör</a>

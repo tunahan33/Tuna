@@ -1,7 +1,8 @@
 <?php
 /** Site üst bölümü. Sayfada $title (ve isteğe bağlı $description) tanımlanıp dahil edilir. */
 $__u = current_user();
-$__cats = rows('SELECT slug, name FROM categories ORDER BY sort, id');
+// Yalnızca içinde yayında ürün olan kategoriler menüde görünür
+$__cats = rows('SELECT c.slug, c.name FROM categories c WHERE EXISTS (SELECT 1 FROM products p WHERE p.category_id = c.id AND p.active = 1) ORDER BY c.sort, c.id');
 $__site = setting('site_name', 'GS Sportif Ürünler');
 $__title = isset($title) ? $title . ' | ' . $__site : $__site . ' | ' . setting('site_slogan');
 $__count = cart_count();

@@ -89,7 +89,7 @@ Yalnızca Süper Admin'e açık menüler panelde **SA** etiketiyle işaretlidir.
 
 ## 4. Sitede neler var?
 
-- **Mağaza:** 11 kategori (Tişört & Atlet, Kadın, Motorsport dâhil), 41 ürün (en düşük fiyat 2.549,90 ₺; panel 2.500 ₺ altını kabul etmez), net KDV dâhil fiyatlar,
+- **Mağaza:** 23 fotoğraflı ürün (boş kategoriler menüde otomatik gizlenir) (en düşük fiyat 2.549,90 ₺; panel 2.500 ₺ altını kabul etmez), net KDV dâhil fiyatlar,
   ürüne tıklayınca fotoğraf galerisi ve açıklama / özellikler / kargo-iade sekmeleri, beden seçimi, stok uyarısı, arama, sıralama, indirimler.
 - **Ürün fotoğrafları:** GS Jogger Eşofman Altı, GS Hakiki Deri Kemer, GS Heritage FG Krampon ve GS Antrenman Şortu gerçek
   fotoğraflarıyla gelir (`assets/urunler/`). Panelden yüklenen fotoğraflar kareye tamamlanıp küçültülerek `uploads/` klasörüne
@@ -110,14 +110,35 @@ Yalnızca Süper Admin'e açık menüler panelde **SA** etiketiyle işaretlidir.
 
 ---
 
-## 5. Yayına alırken (alan adı ve hosting gelince)
+## 5. Sunucuya kurulum (VPS, Ubuntu 24.04)
+
+1. Sunucuya bağlanın. Windows'ta **PowerShell** açıp: `ssh root@SUNUCU_IP` (ilk bağlantıda `yes` yazın, sonra şifreyi girin;
+   şifre yazarken ekranda görünmez). Alternatif: hosting panelindeki **Konsol / VNC** düğmesi.
+2. Şu iki komutu çalıştırın:
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/tunahan33/Tuna/claude/confident-ride-wpz20g/deploy/kurulum.sh -o kurulum.sh
+   bash kurulum.sh
+   ```
+   Apache, PHP, güvenlik duvarı, fail2ban, otomatik güvenlik güncellemeleri ve gece yedeği kurulur. Sonunda süper admin
+   e-postası ve şifresi sorulur. Demo siparişler ve test hesapları (`@gssportif.local`) silinir; ürünler, sayfalar ve
+   firma bilgileri kalır.
+3. Site `http://SUNUCU_IP` adresinde açılır, panel `http://SUNUCU_IP/admin`.
+4. **root şifresini değiştirin:** `passwd`
+
+| İş | Komut (sunucuda) |
+|---|---|
+| Yeni sürümü yükle (veriler ve fotoğraflar korunur, önce yedek alınır) | `bash kurulum.sh guncelle` |
+| Alan adı yönlendikten sonra ücretsiz SSL (https) | `bash kurulum.sh ssl alanadiniz.com` |
+| Elle yedek al | `bash kurulum.sh yedek` |
+
+Yedekler `/var/backups/gssportif/` klasöründedir (her gece 03:30, son 14 gün).
+Alan adı alındığında DNS'te `@` ve `www` için **A kaydı** = sunucu IP'si girin, yayıldıktan sonra `ssl` komutunu çalıştırın.
+
+## 6. Ödeme
 
 Ödeme şu an **DEMO** modundadır: kart doğrulanır ama para çekilmez, kart bilgisi hiçbir yerde saklanmaz.
 Gerçek satış için bankanızın sanal POS'u veya bir ödeme kuruluşu (iyzico, PayTR vb.) entegrasyonu `odeme.php` içine eklenir.
-
-Hosting gereksinimi: PHP 8.1+, `pdo_sqlite` eklentisi (hemen hepsinde açıktır), SSL. Dosyaları yükleyip
-`data/` ve `uploads/` klasörlerinin yazılabilir olduğundan emin olmanız yeterlidir; `.htaccess` dosyaları `app/` ve `data/` klasörlerini dışarıya kapatır.
-Alan adı ve hosting bilgileri geldiğinde Panel → Mağaza Ayarları'ndaki **Yayına Hazırlık Kontrolü** listesini tamamlayın.
+Başvurudan önce vergi levhanızdaki faaliyet kodunun internetten perakende satışı (NACE 47.91) kapsadığından emin olun.
 
 ## Klasör yapısı
 

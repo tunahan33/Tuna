@@ -4,7 +4,7 @@
  * Mevcut verileriniz (siparişler, üyeler, değişiklikleriniz) korunur.
  */
 
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 function migrate_database(PDO $pdo): void
 {
@@ -148,6 +148,26 @@ function migrate_database(PDO $pdo): void
         foreach ($texts as $slug => [$short, $desc, $features]) {
             q('UPDATE products SET short_desc = ?, description = ?, features = ? WHERE slug = ? AND created_at = updated_at', [$short, $desc, $features, $slug]);
         }
+    }
+
+    // v6: Vergi levhasına göre firma bilgileri, yeni telefon, fotoğrafı olmayan ürünlerin kaldırılması
+    if ($current < 6) {
+        $firma = [
+            'company_title'   => 'Nida Coşkun',
+            'company_address' => 'Mecidiyeköy Mah. Eski Osmanlı Sk. Arıkan İş Merkezi No: 30 İç Kapı No: 10 Şişli / İstanbul',
+            'company_phone'   => '+90 543 107 23 27',
+            'tax_office'      => 'Zincirlikuyu',
+            'tax_number'      => '25529273476',
+            'mersis_number'   => '',
+            'kep_address'     => '',
+        ];
+        foreach ($firma as $k => $v) {
+            save_setting($k, $v);
+        }
+        // Sözleşmelerde boş MERSİS/KEP satırları görünmesin
+        q("UPDATE pages SET content = REPLACE(content, ?, ?)", ['<br><strong>MERSİS No:</strong> {{mersis_no}}<br><strong>KEP:</strong> {{kep_adresi}}', '{{mersis_satiri}}{{kep_satiri}}']);
+        // Fotoğrafı olmayan ürünleri kaldır (geçmiş siparişlerdeki ürün adları korunur)
+        q("DELETE FROM products WHERE images = '[]' OR images = '' OR images IS NULL");
     }
 
     save_setting('db_version', (string) DB_VERSION);

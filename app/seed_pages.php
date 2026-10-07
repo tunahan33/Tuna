@@ -5,7 +5,7 @@
  * Not: Metinler genel şablondur; yayına almadan önce bir hukukçuya kontrol ettirmeniz önerilir.
  */
 
-$satici = '<p><strong>Unvan:</strong> {{firma_unvan}}<br><strong>Adres:</strong> {{firma_adres}}<br><strong>Telefon:</strong> {{firma_telefon}}<br><strong>E-posta:</strong> {{firma_eposta}}<br><strong>Vergi Dairesi / No:</strong> {{vergi_dairesi}} / {{vergi_no}}<br><strong>MERSİS No:</strong> {{mersis_no}}<br><strong>KEP:</strong> {{kep_adresi}}</p>';
+$satici = '<p><strong>Unvan:</strong> {{firma_unvan}}<br><strong>Adres:</strong> {{firma_adres}}<br><strong>Telefon:</strong> {{firma_telefon}}<br><strong>E-posta:</strong> {{firma_eposta}}<br><strong>Vergi Dairesi / No:</strong> {{vergi_dairesi}} / {{vergi_no}}{{mersis_satiri}}{{kep_satiri}}</p>';
 $alici = '<p><strong>Adı Soyadı:</strong> {{alici_ad}}<br><strong>Teslimat Adresi:</strong> {{alici_adres}}<br><strong>Telefon:</strong> {{alici_telefon}}<br><strong>E-posta:</strong> {{alici_eposta}}</p>';
 $urunler = '{{urun_listesi}}<p><strong>Ara Toplam:</strong> {{ara_toplam}}<br><strong>Kargo:</strong> {{kargo_bedeli}}<br><strong>Toplam (KDV dâhil):</strong> {{toplam_tutar}}<br><strong>Ödeme Şekli:</strong> Kredi kartı / banka kartı<br><strong>Sipariş Tarihi:</strong> {{siparis_tarihi}}</p>';
 

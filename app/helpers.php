@@ -202,12 +202,15 @@ function fill_placeholders(string $html, array $extra = []): string
         'vergi_dairesi' => setting('tax_office'),
         'vergi_no'      => setting('tax_number'),
         'mersis_no'     => setting('mersis_number'),
+        // Boşsa hiç gösterilmeyen satırlar (şahıs işletmelerinde MERSİS/KEP olmayabilir)
+        'mersis_satiri' => setting('mersis_number') ? '<br><strong>MERSİS No:</strong> ' . e(setting('mersis_number')) : '',
+        'kep_satiri'    => setting('kep_address') ? '<br><strong>KEP:</strong> ' . e(setting('kep_address')) : '',
         'kep_adresi'    => setting('kep_address'),
         'kargo_suresi'  => setting('shipping_days'),
         'kargo_ucreti'  => money(setting('shipping_fee')),
         'ucretsiz_kargo' => money(setting('free_shipping_limit')),
     ] + $extra;
-    return preg_replace_callback('/\{\{\s*([a-z_0-9]+)\s*\}\}/', fn($m) => isset($map[$m[1]]) ? e($map[$m[1]]) : $m[0], $html);
+    return preg_replace_callback('/\{\{\s*([a-z_0-9]+)\s*\}\}/', fn($m) => isset($map[$m[1]]) ? (str_ends_with($m[1], '_satiri') ? $map[$m[1]] : e($map[$m[1]])) : $m[0], $html);
 }
 
 /** Panelde yazılan sayfa içeriğinden tehlikeli etiketleri temizler */

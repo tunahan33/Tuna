@@ -43,7 +43,7 @@ require __DIR__ . '/app/header.php';
             <p><small style="opacity:.7">E-posta</small><br><a href="mailto:<?= e(setting('company_email')) ?>" style="color:#fff"><?= e(setting('company_email')) ?></a></p>
             <p><small style="opacity:.7">Çalışma Saatleri</small><br><?= e(setting('working_hours')) ?></p>
             <p><small style="opacity:.7">Adres</small><br><?= e(setting('company_address')) ?></p>
-            <p><small style="opacity:.7">Firma</small><br><?= e(setting('company_title')) ?><br>Vergi D./No: <?= e(setting('tax_office')) ?> / <?= e(setting('tax_number')) ?><br>MERSİS: <?= e(setting('mersis_number')) ?></p>
+            <p><small style="opacity:.7">Firma</small><br><?= e(setting('company_title')) ?><br>Vergi D./No: <?= e(setting('tax_office')) ?> / <?= e(setting('tax_number')) ?><?= setting('mersis_number') ? '<br>MERSİS: ' . e(setting('mersis_number')) : '' ?></p>
             <hr style="border-color:#444">
             <p class="small">Siparişinizi mi soracaksınız? <a href="<?= url('siparis-takibi.php') ?>" style="color:var(--yellow)">Sipariş takibi</a> · Ürününüz arızalı mı? <a href="<?= url('ariza-takibi.php') ?>" style="color:var(--yellow)">Arıza takibi</a></p>
         </aside>
