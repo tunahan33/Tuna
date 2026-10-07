@@ -360,7 +360,7 @@ h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 .6em; }
 /* Geniş ekranlar: ürünler 5'li sıralanır */
 @media (min-width: 1400px) {
     .product-grid { grid-template-columns: repeat(5, 1fr); }
-    .cat-grid { grid-template-columns: repeat(8, 1fr); }
+    .cat-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
 }
 @media (max-width: 720px) {
     .container { width: min(1480px, 100% - 32px); }

@@ -58,6 +58,9 @@ const PRODUCT_ARTS = [
     'ayakkabi' => 'Ayakkabı / Krampon',
     'top'      => 'Top',
     'canta'    => 'Çanta',
+    'kask'     => 'Kask',
+    'eldiven'  => 'Eldiven',
+    'tulum'    => 'Yarış Tulumu',
 ];
 
 function product_art(array $p, string $class = ''): string
@@ -73,6 +76,9 @@ function product_art(array $p, string $class = ''): string
         'sort'     => "<path d='M50 48 H150 L160 150 L110 156 L100 96 L90 156 L40 150Z' fill='$c'/><rect x='50' y='48' width='100' height='14' fill='$d'/><path d='M44 120 L54 150 L48 150 Z M156 120 L146 150 L152 150Z' fill='$y'/><path d='M138 70 L152 140' stroke='$y' stroke-width='6'/>",
         'ayakkabi' => "<path d='M28 128 Q30 92 56 86 L92 80 Q104 64 118 70 L150 108 Q176 114 176 132 L176 142 L28 142Z' fill='$c'/><path d='M28 136 H176 V148 Q100 156 28 148Z' fill='$d'/><path d='M70 110 Q100 96 130 108' stroke='$y' stroke-width='7' fill='none'/><circle cx='46' cy='154' r='4' fill='$d'/><circle cx='80' cy='155' r='4' fill='$d'/><circle cx='130' cy='155' r='4' fill='$d'/><circle cx='162' cy='154' r='4' fill='$d'/>",
         'top'      => "<circle cx='100' cy='100' r='62' fill='#fff' stroke='$d' stroke-width='4'/><path d='M100 74 L124 92 L115 120 L85 120 L76 92Z' fill='$c'/><path d='M100 38 L100 74 M124 92 L156 80 M115 120 L134 150 M85 120 L66 150 M76 92 L44 80' stroke='$d' stroke-width='3'/><path d='M60 60 Q100 40 140 60' stroke='$y' stroke-width='6' fill='none'/>",
+        'kask'     => "<path d='M38 124 Q36 52 104 44 Q166 42 172 112 L172 138 Q122 150 62 146 Q40 142 38 124Z' fill='$c'/><path d='M96 84 Q150 78 170 98 L170 120 Q130 112 92 114Z' fill='$d'/><path d='M48 104 Q86 62 152 56' stroke='$y' stroke-width='9' fill='none'/><path d='M44 124 Q46 90 74 70' stroke='#fff' stroke-width='4' fill='none' opacity='.6'/><rect x='62' y='142' width='92' height='14' rx='7' fill='$d'/><text x='72' y='132' font-size='16' font-weight='800' fill='#fff' font-family='Arial'>GS</text>",
+        'eldiven'  => "<rect x='60' y='36' width='19' height='80' rx='9' fill='$c'/><rect x='81' y='28' width='19' height='88' rx='9' fill='$c'/><rect x='102' y='30' width='19' height='86' rx='9' fill='$c'/><rect x='123' y='40' width='18' height='76' rx='9' fill='$c'/><path d='M60 100 L141 100 L141 140 Q100 152 60 140Z' fill='$c'/><path d='M58 104 Q40 90 34 70 Q40 62 50 70 Q58 86 66 96Z' fill='$c'/><rect x='56' y='138' width='90' height='26' rx='6' fill='$d'/><path d='M66 112 H136' stroke='$y' stroke-width='7'/><rect x='84' y='146' width='34' height='10' rx='3' fill='$y'/>",
+        'tulum'    => "<path d='M72 30 L50 40 L30 112 L48 116 L60 76 L62 122 L58 176 L92 176 L100 124 L108 176 L142 176 L138 122 L140 76 L152 116 L170 112 L150 40 L128 30 L100 38Z' fill='$c'/><path d='M80 28 Q100 40 120 28 L118 22 Q100 32 82 22Z' fill='$d'/><rect x='62' y='112' width='76' height='10' fill='$d'/><path d='M52 44 L36 108 M148 44 L164 108' stroke='$y' stroke-width='6'/><path d='M66 128 L62 172 M134 128 L138 172' stroke='$y' stroke-width='6'/><rect x='108' y='56' width='22' height='14' rx='2' fill='#fff'/><text x='119' y='67' font-size='9' font-weight='800' text-anchor='middle' fill='$d' font-family='Arial'>GS</text>",
         'canta'    => "<path d='M70 70 Q70 40 100 40 Q130 40 130 70' stroke='$d' stroke-width='8' fill='none'/><rect x='34' y='68' width='132' height='86' rx='16' fill='$c'/><rect x='34' y='100' width='132' height='10' fill='$y'/><rect x='88' y='120' width='24' height='16' rx='3' fill='$d'/>",
     ];
     $art = $shapes[$p['art'] ?? 'forma'] ?? $shapes['forma'];

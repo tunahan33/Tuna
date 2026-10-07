@@ -4,7 +4,7 @@
  * Mevcut verileriniz (siparişler, üyeler, değişiklikleriniz) korunur.
  */
 
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 function migrate_database(PDO $pdo): void
 {
@@ -65,6 +65,22 @@ function migrate_database(PDO $pdo): void
         q("UPDATE settings SET svalue = ? WHERE skey = 'company_title' AND svalue = ?", ['GS Sportif Ürünler (Ticari unvanınızı girin)', 'GS Sportif Ürünler (Ticari ünvanınızı girin)']);
     }
 
+    // v4: Motorsport kategorisi ve ürünleri
+    if ($current < 4) {
+        $catId = val("SELECT id FROM categories WHERE slug = 'motorsport'")
+            ?: insert('categories', ['slug' => 'motorsport', 'name' => 'Motorsport', 'description' => 'Pist, karting ve tribün için motorsport ürünleri', 'sort' => (int) val('SELECT COALESCE(MAX(sort),0)+1 FROM categories')]);
+        $t = now();
+        foreach (motorsport_products() as [$name, $short, $desc, $features, $price, $old, $stock, $sizes, $art, $color, $featured]) {
+            $slug = slugify($name);
+            if (val('SELECT 1 FROM products WHERE slug = ?', [$slug])) {
+                continue;
+            }
+            insert('products', ['category_id' => $catId, 'slug' => $slug, 'name' => $name, 'short_desc' => $short, 'description' => $desc,
+                'features' => $features, 'price' => $price, 'old_price' => $old, 'stock' => $stock, 'sizes' => $sizes, 'art' => $art, 'color' => $color,
+                'images' => '[]', 'featured' => $featured, 'active' => 1, 'created_at' => $t, 'updated_at' => $t]);
+        }
+    }
+
     save_setting('db_version', (string) DB_VERSION);
 }
 
@@ -89,5 +105,31 @@ function photo_products(array $cats): array
             '<p>Antrenmanda, koşuda ve salonda tam hareket özgürlüğü sunar. <strong>Hafif ve esnek dokuma kumaşı</strong> hızlı kurur, terlediğinizde bile vücuda yapışmaz.</p><p>Geniş lastikli ve bağcıklı bel yoğun hareketlerde yerinde kalır. Diz üstü boyu ve rahat kalıbı ile hem saha hem günlük kullanım için idealdir.</p><h3>Detaylar</h3><ul><li>Gizli fermuarlı yan cep — anahtar ve kart için</li><li>Bağcıklı geniş lastikli bel</li><li>Diz üstü boy, rahat kalıp</li></ul><h3>Kumaş ve bakım</h3><p>%88 polyester, %12 elastan. 30°C\'de yıkayın, yumuşatıcı kullanmayın.</p>',
             "Hızlı kuruyan esnek kumaş\nBağcıklı lastikli bel\nFermuarlı yan cep\nDiz üstü boy", 2549.90, null, 50, $S, 'sort', '#2B2F33', 0,
             ['assets/urunler/gs-antrenman-sortu.webp']],
+    ];
+}
+
+/** Motorsport ürünleri: [ad, kısa açıklama, açıklama, özellikler, fiyat, eski fiyat, stok, bedenler, çizim, renk, öne çıkan] */
+function motorsport_products(): array
+{
+    $S = 'S,M,L,XL,XXL';
+    return [
+        ['GS Racing Karting Kaskı', 'Karting ve pist günleri için hafif, havalandırmalı kapalı kask.',
+            '<p>Karting ve pist günleri için tasarlanan <strong>kapalı tip kask</strong>. Hafif kabuğu uzun sürüşlerde boyun yorgunluğunu azaltır, ön ve üst hava kanalları kask içini serin tutar.</p><p>Sarı-kırmızı yarış grafiği, antrasit vizör ve GS logosuyla pistte ilk bakışta tanınır.</p><h3>Detaylar</h3><ul><li>Ön ve üst havalandırma kanalları</li><li>Çıkarılıp yıkanabilen iç astar</li><li>Hızlı açılan çene kilidi</li><li>Çizilmeye dayanıklı vizör</li></ul><h3>Beden seçimi</h3><p>Kaşlarınızın hemen üzerinden baş çevrenizi ölçün ve ölçünüze karşılık gelen bedeni seçin. Kask sıkı oturmalı ama baskı yapmamalıdır.</p>',
+            "Hafif kabuk\nHavalandırma kanalları\nYıkanabilir iç astar\nHızlı açılan çene kilidi", 7499.90, 8299.90, 12, 'XS (53-54 cm),S (55-56 cm),M (57-58 cm),L (59-60 cm),XL (61-62 cm)', 'kask', '#C8102E', 1],
+        ['GS Motorsport Takım Ceketi', 'Pit alanı ve tribün için su itici softshell takım ceketi.',
+            '<p>Pistte, pit alanında ve tribünde takımınızı temsil etmeniz için tasarlanan <strong>softshell takım ceketi</strong>. Su itici dış yüzeyi hafif yağmurda sizi korur, içindeki ince polar katman serin pist sabahlarında sıcak tutar.</p><p>Antrasit zemin üzerinde omuzdan bileğe uzanan sarı-kırmızı yarış şeritleri ve göğüste işlemeli GS Motorsport arması bulunur.</p><h3>Detaylar</h3><ul><li>Su itici ve rüzgâr kesen softshell kumaş</li><li>Fermuarlı iki yan cep ve bir iç cep</li><li>Ayarlanabilir kol manşetleri</li><li>Dik yaka, tam boy fermuar</li></ul>',
+            "Su itici softshell kumaş\nİçi ince polar\nİşlemeli GS Motorsport arması\nFermuarlı cepler", 3999.90, 4599.90, 30, $S, 'mont', '#2B2F33', 1],
+        ['GS Motorsport Pit Polo Tişört', 'Teknik kumaştan, yarış şeritli takım polo tişörtü.',
+            '<p>Yarış ekiplerinin pit alanında giydiği polo tişörtlerden ilham alındı. Hızlı kuruyan <strong>teknik piké kumaşı</strong> uzun yarış günlerinde bile ferah tutar.</p><p>Omuzlardaki sarı-kırmızı şeritler ve göğüsteki GS Motorsport arması ile hem pistte hem günlük hayatta şık bir görünüm sağlar.</p><h3>Detaylar</h3><ul><li>Düğmeli polo yaka</li><li>Nefes alan, hızlı kuruyan kumaş</li><li>Omuzlarda yarış şeridi detayı</li></ul>',
+            "Teknik piké kumaş\nHızlı kuruma\nDüğmeli polo yaka\nYarış şeridi detayı", 2649.90, null, 50, $S, 'forma', '#C8102E', 0],
+        ['GS Racing Sürücü Eldiveni', 'Avuç içi tutuş artırıcı, esnek yarış eldiveni.',
+            '<p>Direksiyonla aranızdaki bağlantıyı güçlendiren <strong>sürücü eldiveni</strong>. Avuç içindeki tutuş artırıcı yüzey, eller terlediğinde bile direksiyonun kaymasını önler.</p><p>Dikişleri dışa alınmış parmak yapısı sürtünmeyi azaltır, esnek bilek bandı eldiveni yerinde tutar.</p><h3>Detaylar</h3><ul><li>Tutuş artırıcı avuç içi</li><li>Dış dikişli, ön kıvrımlı parmaklar</li><li>Cırt bantlı bilek</li></ul>',
+            "Tutuş artırıcı avuç içi\nDış dikişli parmaklar\nCırt bantlı bilek\nEsnek kumaş", 2899.90, null, 25, 'S,M,L,XL', 'eldiven', '#2B2F33', 0],
+        ['GS Karting Yarış Tulumu', 'Karting için dayanıklı, esnek panelli tek parça yarış tulumu.',
+            '<p>Karting pistleri için tasarlanan <strong>tek parça yarış tulumu</strong>. Dayanıklı dış kumaşı sürtünmeye karşı direnç gösterir, sırt ve dirseklerdeki esnek paneller koltukta rahat hareket etmenizi sağlar.</p><p>Kırmızı zemin üzerindeki sarı yan şeritler, antrasit bel ve yaka detayları ile GS Motorsport kimliğini taşır.</p><h3>Detaylar</h3><ul><li>Sırtta ve dirseklerde esnek paneller</li><li>Ayarlanabilir bel</li><li>İki yönlü ön fermuar</li><li>Fermuarlı göğüs cebi</li></ul>',
+            "Tek parça tulum\nEsnek sırt ve dirsek panelleri\nAyarlanabilir bel\nİki yönlü fermuar", 8999.90, 9999.90, 10, $S, 'tulum', '#C8102E', 1],
+        ['GS Motorsport Sırt Çantası', 'Kask bölmeli, laptop gözlü pist günü sırt çantası.',
+            '<p>Pist gününe gereken her şeyi tek çantada toplayın. Alt kısımdaki <strong>ayrı kask bölmesi</strong> kaskınızı korur, dolgulu iç gözüne 15,6 inç dizüstü bilgisayar sığar.</p><p>Su itici kumaşı, yansıtıcı detayları ve dolgulu sırt paneli ile hem pistte hem şehirde kullanıma uygundur.</p><h3>Detaylar</h3><ul><li>Ayrı kask bölmesi</li><li>Dolgulu dizüstü bilgisayar gözü</li><li>Su itici kumaş, yansıtıcı detaylar</li><li>Dolgulu sırt ve omuz askıları</li></ul>',
+            "Kask bölmesi\nDizüstü bilgisayar gözü\nSu itici kumaş\nYansıtıcı detaylar", 2749.90, null, 20, '', 'canta', '#2B2F33', 0],
     ];
 }
