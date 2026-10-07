@@ -5,6 +5,19 @@
  */
 
 define('ROOT', dirname(__DIR__));
+
+// Gerekli PHP eklentileri yoksa anlaşılır bir uyarı göster
+$__missing = array_filter(['pdo_sqlite', 'mbstring'], fn($x) => !extension_loaded($x));
+if ($__missing) {
+    $msg = 'Sitenin çalışması için PHP eklentileri eksik: ' . implode(', ', $__missing) . '. '
+        . 'Windows\'ta siteyi baslat.bat dosyasına çift tıklayarak açın (eksik eklentileri kendisi açar). '
+        . 'Hostingde ise PHP ayarlarından bu eklentileri etkinleştirin.';
+    if (PHP_SAPI === 'cli') {
+        exit($msg . PHP_EOL);
+    }
+    http_response_code(500);
+    exit('<!doctype html><meta charset="utf-8"><body style="font-family:sans-serif;max-width:640px;margin:60px auto;padding:0 16px"><h1>Kurulum eksik</h1><p>' . htmlspecialchars($msg) . '</p></body>');
+}
 define('DB_FILE', ROOT . '/data/gs.sqlite');
 
 date_default_timezone_set('Europe/Istanbul');

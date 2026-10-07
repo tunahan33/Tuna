@@ -7,8 +7,17 @@
             "command": "php -S localhost:8000 router.php",
             "isBackground": true,
             "problemMatcher": [],
-            "group": { "kind": "build", "isDefault": true },
-            "presentation": { "reveal": "always", "panel": "dedicated" }
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "windows": {
+                "command": ".\\baslat.bat"
+            }
         },
         {
             "label": "Veritabanını Sıfırla (demo verileri yeniden yükler)",
