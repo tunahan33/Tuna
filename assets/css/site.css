@@ -360,7 +360,7 @@ h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 .6em; }
 /* Geniş ekranlar: ürünler 5'li sıralanır */
 @media (min-width: 1400px) {
     .product-grid { grid-template-columns: repeat(5, 1fr); }
-    .cat-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+
 }
 @media (max-width: 720px) {
     .container { width: min(1480px, 100% - 32px); }
@@ -370,3 +370,19 @@ h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 .6em; }
 }
 .cat-card .photo { height: auto; aspect-ratio: 1; }
 .hero h1 span { white-space: nowrap; }
+
+/* Kategoriler: tek sıra, sığmazsa yana kaydırılır */
+.cat-grid { display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(118px, 1fr); gap: 12px; overflow-x: auto; scroll-snap-type: x proximity; padding: 4px 2px 12px; scrollbar-width: thin; }
+.cat-card { scroll-snap-align: start; }
+.cat-card strong { font-size: .86rem; }
+@media (max-width: 720px) { .cat-grid { grid-auto-columns: 38%; } }
+
+/* Kategori menüsü: her zaman tek satır; sığmazsa yana kaydırılır */
+@media (min-width: 721px) {
+    .catnav-row { flex-wrap: nowrap; justify-content: safe center; overflow-x: auto; scrollbar-width: none; }
+    .catnav-row::-webkit-scrollbar { display: none; }
+    .catnav a { padding: 12px 8px; font-size: .86rem; }
+}
+@media (min-width: 721px) and (max-width: 1440px) {
+    .catnav a { padding: 12px 5px; font-size: .8rem; }
+}

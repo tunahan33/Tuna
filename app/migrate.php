@@ -4,7 +4,7 @@
  * Mevcut verileriniz (siparişler, üyeler, değişiklikleriniz) korunur.
  */
 
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 function migrate_database(PDO $pdo): void
 {
@@ -81,6 +81,75 @@ function migrate_database(PDO $pdo): void
         }
     }
 
+    // v5: ZIP'ten gelen fotoğraflar — yeni kategoriler, yeni ürünler, mevcut ürünlere ek fotoğraflar
+    if ($current < 5) {
+        $cat = function (string $slug, string $name, string $desc) {
+            return val('SELECT id FROM categories WHERE slug = ?', [$slug])
+                ?: insert('categories', ['slug' => $slug, 'name' => $name, 'description' => $desc, 'sort' => (int) val('SELECT COALESCE(MAX(sort),0)+1 FROM categories')]);
+        };
+        $cats = [
+            'tisort-atlet' => $cat('tisort-atlet', 'Tişört & Atlet', 'Antrenman ve günlük kullanım için tişört ve atletler'),
+            'kadin' => $cat('kadin', 'Kadın', 'Kadınlar için eşofman takımı, tayt ve spor sütyeni'),
+            'mont' => $cat('mont', 'Mont & Yağmurluk', 'Tribün ve dış saha için montlar'),
+            'alt-giyim' => $cat('alt-giyim', 'Eşofman Altı & Şort', 'Jogger eşofman altları ve antrenman şortları'),
+            'aksesuar' => $cat('aksesuar', 'Aksesuar', 'Kemer, şapka ve tamamlayıcı ürünler'),
+            'motorsport' => $cat('motorsport', 'Motorsport', 'Pist, karting ve tribün için motorsport ürünleri'),
+        ];
+        $t = now();
+        foreach (zip_photo_products() as [$c, $name, $short, $desc, $features, $price, $old, $stock, $sizes, $art, $color, $featured, $images]) {
+            $slug = slugify($name);
+            if (val('SELECT 1 FROM products WHERE slug = ?', [$slug])) {
+                continue;
+            }
+            insert('products', ['category_id' => $cats[$c], 'slug' => $slug, 'name' => $name, 'short_desc' => $short, 'description' => $desc,
+                'features' => $features, 'price' => $price, 'old_price' => $old, 'stock' => $stock, 'sizes' => $sizes, 'art' => $art, 'color' => $color,
+                'images' => json_encode(array_map(fn($f) => 'assets/urunler/' . $f . '.webp', $images)), 'featured' => $featured, 'active' => 1, 'created_at' => $t, 'updated_at' => $t]);
+        }
+
+        // Kategorileri mantıklı sıraya koy (giyim → ayakkabı → ekipman → motorsport)
+        $order = ['formalar', 'tisort-atlet', 'esofman-ceket', 'sweatshirt', 'mont', 'alt-giyim', 'kadin', 'ayakkabi', 'ekipman', 'aksesuar', 'motorsport'];
+        foreach ($order as $i => $slug) {
+            q('UPDATE categories SET sort = ? WHERE slug = ?', [$i + 1, $slug]);
+        }
+
+        // Mevcut ürünlere fotoğraf ekle: [ürün adresi, fotoğraflar, nereye (sona / başa / boşsa)]
+        $attach = [
+            ['gs-hakiki-deri-kemer', ['gs-hakiki-deri-kemer-2'], 'sona'],
+            ['gs-heritage-fg-krampon', ['gs-heritage-fg-krampon-ic'], 'sona'],
+            ['gs-antrenman-sortu', ['gs-antrenman-sortu-on'], 'basa'],
+            ['gs-resmi-mac-topu', ['gs-resmi-mac-topu'], 'bossa'],
+            ['gs-hali-saha-ayakkabisi', ['gs-halisaha-ayakkabisi-yan', 'gs-halisaha-ayakkabisi-on'], 'bossa'],
+            ['gs-racing-surucu-eldiveni', ['gs-motorsport-deri-eldiven'], 'bossa'],
+            ['gs-motorsport-sirt-cantasi', ['gs-motorsport-rulo-kapakli-canta'], 'bossa'],
+        ];
+        foreach ($attach as [$slug, $files, $where]) {
+            $p = row('SELECT id, images FROM products WHERE slug = ?', [$slug]);
+            if (!$p) {
+                continue;
+            }
+            $current_imgs = json_decode((string) $p['images'], true) ?: [];
+            $new = array_values(array_diff(array_map(fn($f) => 'assets/urunler/' . $f . '.webp', $files), $current_imgs));
+            if (!$new || ($where === 'bossa' && $current_imgs)) {
+                continue;
+            }
+            $list = $where === 'basa' ? array_merge($new, $current_imgs) : array_merge($current_imgs, $new);
+            q('UPDATE products SET images = ? WHERE id = ?', [json_encode($list), $p['id']]);
+        }
+
+        // Fotoğrafı eklenen iki motorsport ürününün açıklamasını fotoğrafa uygun hâle getir (panelden düzenlenmediyse)
+        $texts = [
+            'gs-racing-surucu-eldiveni' => ['Eklem korumalı, uzun bilekli deri sürüş eldiveni.',
+                '<p>Pistte ve yolda ellerinizi koruyan <strong>uzun bilekli deri sürüş eldiveni</strong>. Parmak eklemlerinin üzerindeki sert koruma plakaları darbelere karşı ek güvenlik sağlar.</p><p>Bilek kısmını kaplayan uzun yapısı mont kolunun altına ya da üstüne rahatça oturur. Üst yüzeyde ve bilekte altın ve kırmızı tonlarında GS logoları bulunur.</p><h3>Detaylar</h3><ul><li>Parmak eklemlerinde sert koruma</li><li>Uzun, ayarlanabilir bilek</li><li>Esneme panelli parmaklar</li></ul>',
+                "Deri gövde\nEklem koruması\nUzun bilek\nAyarlanabilir bilek kapama"],
+            'gs-motorsport-sirt-cantasi' => ['Rulo kapaklı, tokalı motorsport sırt çantası.',
+                '<p>Pist gününe gereken her şeyi tek çantada toplayın. <strong>Rulo kapaklı ağzı</strong> tokayla kilitlenir; kapağı birkaç kez katlayarak çantanın hacmini ihtiyacınıza göre ayarlayabilirsiniz.</p><p>Yanlardaki sıkıştırma askıları yükü sabit tutar. Ön yüzde altın ve kırmızı tonlarında büyük GS logosu bulunur.</p><h3>Detaylar</h3><ul><li>Rulo kapak ve tokalı kapama</li><li>Yan sıkıştırma askıları</li><li>Suya dayanıklı, silinebilir yüzey</li></ul>',
+                "Rulo kapak\nTokalı kapama\nYan sıkıştırma askıları\nSilinebilir yüzey"],
+        ];
+        foreach ($texts as $slug => [$short, $desc, $features]) {
+            q('UPDATE products SET short_desc = ?, description = ?, features = ? WHERE slug = ? AND created_at = updated_at', [$short, $desc, $features, $slug]);
+        }
+    }
+
     save_setting('db_version', (string) DB_VERSION);
 }
 
@@ -131,5 +200,74 @@ function motorsport_products(): array
         ['GS Motorsport Sırt Çantası', 'Kask bölmeli, laptop gözlü pist günü sırt çantası.',
             '<p>Pist gününe gereken her şeyi tek çantada toplayın. Alt kısımdaki <strong>ayrı kask bölmesi</strong> kaskınızı korur, dolgulu iç gözüne 15,6 inç dizüstü bilgisayar sığar.</p><p>Su itici kumaşı, yansıtıcı detayları ve dolgulu sırt paneli ile hem pistte hem şehirde kullanıma uygundur.</p><h3>Detaylar</h3><ul><li>Ayrı kask bölmesi</li><li>Dolgulu dizüstü bilgisayar gözü</li><li>Su itici kumaş, yansıtıcı detaylar</li><li>Dolgulu sırt ve omuz askıları</li></ul>',
             "Kask bölmesi\nDizüstü bilgisayar gözü\nSu itici kumaş\nYansıtıcı detaylar", 2749.90, null, 20, '', 'canta', '#2B2F33', 0],
+    ];
+}
+
+/** ZIP ile gelen fotoğraflı ürünler: [kategori, ad, kısa açıklama, açıklama, özellikler, fiyat, eski fiyat, stok, bedenler, çizim, renk, öne çıkan, fotoğraflar] */
+function zip_photo_products(): array
+{
+    $S = 'S,M,L,XL,XXL';
+    $K = 'XS,S,M,L,XL';
+    return [
+        ['tisort-atlet', 'GS Yeşil Arma Tişört', 'Göğsünde büyük bakır renkli GS armalı, koyu yeşil tişört.',
+            '<p>Koyu yeşil zemin üzerinde göğsü kaplayan <strong>bakır tonlarındaki büyük GS arması</strong> ile dikkat çeken tişört. Rahat kesimi sayesinde antrenmanda da günlük hayatta da kullanılabilir.</p><h3>Detaylar</h3><ul><li>Bisiklet yaka, kısa kol</li><li>Rahat kesim</li><li>Arka yüz düz, baskısız</li></ul>',
+            "Büyük GS arma baskısı\nBisiklet yaka\nRahat kesim", 2549.90, null, 40, $S, 'forma', '#1F5A3A', 1,
+            ['gs-yesil-arma-tisort-on', 'gs-yesil-arma-tisort-arka']],
+        ['tisort-atlet', 'GS Siyah Logo Tişört', 'Göğüste küçük turuncu GS logolu, sade siyah tişört.',
+            '<p>Her kombine uyan <strong>sade siyah tişört</strong>. Sol göğüsteki küçük turuncu GS logosu ince bir marka dokunuşu katar.</p><h3>Detaylar</h3><ul><li>Bisiklet yaka, kısa kol</li><li>Sol göğüste küçük GS logosu</li><li>Rahat kesim</li></ul>',
+            "Küçük GS logo\nBisiklet yaka\nRahat kesim", 2549.90, null, 60, $S, 'forma', '#111315', 0,
+            ['gs-siyah-logo-tisort-on', 'gs-siyah-logo-tisort-arka']],
+        ['tisort-atlet', 'GS Uzun Kollu Antrenman Tişörtü', 'Reglan kollu, GS logolu siyah uzun kollu tişört.',
+            '<p>Serin havalarda antrenmanın ve ısınmanın vazgeçilmezi. <strong>Reglan kol kesimi</strong> omuzlarda geniş hareket alanı sağlar, tek başına ya da mont altında giyilebilir.</p><h3>Detaylar</h3><ul><li>Reglan uzun kol</li><li>Sol göğüste GS logosu</li><li>Bisiklet yaka</li></ul>',
+            "Reglan uzun kol\nGS logo\nBisiklet yaka", 2749.90, null, 35, $S, 'forma', '#111315', 0,
+            ['gs-uzun-kollu-antrenman-tisortu-on', 'gs-uzun-kollu-antrenman-tisortu-arka']],
+        ['tisort-atlet', 'GS Yeşil Kolsuz Atlet', 'Büyük GS armalı, unisex koyu yeşil kolsuz antrenman atleti.',
+            '<p>Salon ve sıcak hava antrenmanları için <strong>unisex kolsuz atlet</strong>. Geniş kol oyuntusu kollarınızı serbest bırakır; ön yüzdeki bakır renkli büyük GS arması güçlü bir görünüm verir.</p><h3>Detaylar</h3><ul><li>Unisex kalıp</li><li>Geniş kol oyuntusu</li><li>Büyük GS arma baskısı</li></ul>',
+            "Unisex kalıp\nGeniş kol oyuntusu\nBüyük GS arma", 2549.90, null, 30, $S, 'forma', '#1F5A3A', 0,
+            ['gs-yesil-kolsuz-atlet-on', 'gs-yesil-kolsuz-atlet-arka']],
+        ['mont', 'GS Yeşil Kapüşonlu Rüzgârlık', 'Tam fermuarlı, kapüşonlu, GS armalı yeşil rüzgârlık.',
+            '<p>Rüzgârlı ve serin günler için hafif, <strong>kapüşonlu ve tam fermuarlı</strong> rüzgârlık. Lastikli kol ağızları ve bel rüzgârın içeri girmesini engeller.</p><p>Sol göğüsteki bakır tonlu GS arması koyu yeşil renkle şık bir uyum yakalar.</p><h3>Detaylar</h3><ul><li>Kapüşon ve tam boy fermuar</li><li>Fermuarlı iki yan cep</li><li>Lastikli kol ağzı ve bel</li></ul>',
+            "Kapüşonlu\nTam boy fermuar\nFermuarlı yan cepler\nLastikli kol ağzı ve bel", 3299.90, 3799.90, 25, $S, 'mont', '#1F5A3A', 1,
+            ['gs-yesil-kapusonlu-ruzgarlik-on', 'gs-yesil-kapusonlu-ruzgarlik-arka']],
+        ['kadin', 'GS Kadın Eşofman Takımı', 'Turuncu biyeli, vücuda oturan siyah kadın eşofman takımı.',
+            '<p>Antrenmanda ve günlük hayatta şık ve rahat bir görünüm için <strong>uzun kollu üst ve jogger alttan oluşan</strong> kadın eşofman takımı. Kollar ve paçalar boyunca uzanan turuncu biyeler siluete sportif bir hava katar.</p><h3>Detaylar</h3><ul><li>Uzun kollu üst + jogger alt</li><li>Turuncu biye detayları</li><li>Üstte ve altta GS logosu</li><li>Manşetli paça</li></ul>',
+            "Üst + alt takım\nTuruncu biye detayı\nGS logolu\nManşetli paça", 4299.90, 4799.90, 20, $K, 'esofman', '#111315', 1,
+            ['gs-kadin-esofman-takimi-on', 'gs-kadin-esofman-takimi-arka']],
+        ['kadin', 'GS Kadın Yüksek Bel Tayt', 'Yüksek belli, GS logolu siyah antrenman taytı.',
+            '<p>Yoga, pilates ve fitness için <strong>yüksek belli tayt</strong>. Geniş bel bandı hareket sırasında yerinde kalır ve karın bölgesini toparlar.</p><h3>Detaylar</h3><ul><li>Geniş, yüksek bel bandı</li><li>Bilekte biten tam boy</li><li>Belde küçük GS logosu</li></ul>',
+            "Yüksek bel\nGeniş bel bandı\nTam boy", 2649.90, null, 35, $K, 'sort', '#111315', 0,
+            ['gs-kadin-yuksek-bel-tayt-on', 'gs-kadin-yuksek-bel-tayt-arka']],
+        ['kadin', 'GS Kadın Spor Sütyeni', 'Sporcu sırtlı, GS logolu siyah spor sütyeni.',
+            '<p>Antrenman boyunca destek ve rahatlık için tasarlanan <strong>sporcu sırtlı (racerback)</strong> spor sütyeni. Geniş alt bant yerinde kalır, sırt kesimi kolların serbestçe hareket etmesini sağlar.</p><h3>Detaylar</h3><ul><li>Racerback sırt kesimi</li><li>Geniş alt bant</li><li>Önde GS logosu</li></ul>',
+            "Racerback sırt\nGeniş alt bant\nGS logo", 2549.90, null, 30, $K, 'forma', '#111315', 0,
+            ['gs-kadin-spor-sutyeni-on', 'gs-kadin-spor-sutyeni-arka']],
+        ['alt-giyim', 'GS Slim Fit Antrenman Eşofman Altı', 'Antrasit renkli, dar kesim antrenman eşofman altı.',
+            '<p>Antrenmandan şehre kadar her yerde şık duran <strong>dar kesim (slim fit)</strong> eşofman altı. Antrasit rengi ve paçaya doğru daralan kesimiyle modern bir görünüm sunar.</p><h3>Detaylar</h3><ul><li>Slim fit kesim</li><li>Lastikli bel</li><li>Yan cepler</li><li>Bacakta GS logosu</li></ul>',
+            "Slim fit kesim\nLastikli bel\nYan cepler", 2799.90, null, 30, $S, 'sort', '#3A3F44', 0,
+            ['gs-slim-fit-antrenman-esofman-alti-on', 'gs-slim-fit-antrenman-esofman-alti-arka']],
+        ['aksesuar', 'GS Performans Futbol Çorabı', 'Turuncu şimşek desenli, GS logolu uzun futbol çorabı.',
+            '<p>Sahada fark edilmek isteyenler için <strong>dize kadar uzanan futbol çorabı</strong>. Siyah zemin üzerindeki turuncu ve krem şimşek deseni ile GS logosu takım kombininizi tamamlar.</p><h3>Detaylar</h3><ul><li>Dize kadar uzun boy</li><li>Şimşek desen ve GS logosu</li></ul>',
+            "Uzun boy\nŞimşek desen\nGS logo", 2549.90, null, 50, '36-39,40-43,44-46', 'sort', '#111315', 0,
+            ['gs-performans-futbol-coraplari-on', 'gs-performans-futbol-coraplari-arka']],
+        ['aksesuar', 'GS Pirinç Arma Bileklik', 'Pirinç plakalı, kabartma GS armalı silikon bileklik.',
+            '<p>Sporda da günlük hayatta da takabileceğiniz <strong>silikon bileklik</strong>. Ön yüzdeki antik pirinç plakada kabartma GS arması bulunur.</p><h3>Detaylar</h3><ul><li>Esnek silikon kayış</li><li>Kabartma armalı pirinç plaka</li><li>Ayarlanabilir delikli kapama</li></ul>',
+            "Silikon kayış\nPirinç plaka\nKabartma GS arma\nAyarlanabilir", 2549.90, null, 40, '', 'canta', '#111315', 0,
+            ['gs-pirinc-arma-bileklik', 'gs-pirinc-arma-bileklik-2']],
+        ['motorsport', 'GS Motorsport Korumalı Sürüş Montu', 'Sırt koruma bölmeli, deri detaylı siyah sürüş montu.',
+            '<p>Pist günleri ve uzun sürüşler için tasarlanan <strong>sürüş montu</strong>. Ön yüzdeki deri paneller ve dik yaka sportif bir görünüm verir; sırttaki belirgin koruma bölmesi ve omuz-dirsek pedleri vücudu destekler.</p><p>Arkada büyük GS logosu ve gri yansıtıcı şeritler bulunur.</p><h3>Detaylar</h3><ul><li>Sırt koruma bölmesi, omuz ve dirsek pedleri</li><li>Fermuarlı cepler</li><li>Cırt bantlı ayarlanabilir bel ve kol ağzı</li><li>Yansıtıcı şerit detayları</li></ul>',
+            "Sırt koruma bölmesi\nOmuz ve dirsek pedleri\nAyarlanabilir bel\nYansıtıcı detaylar", 9999.90, 11499.90, 10, $S, 'mont', '#111315', 1,
+            ['gs-motorsport-korumali-surus-montu-on', 'gs-motorsport-korumali-surus-montu-arka']],
+        ['motorsport', 'GS Motorsport Sürüş Botu', 'Kaval ve bilek korumalı, cırt bantlı siyah sürüş botu.',
+            '<p>Pistte ve yolda ayaklarınızı koruyan <strong>uzun konçlu sürüş botu</strong>. Kaval ve bilek bölgesindeki sert paneller darbelere karşı destek sağlar; cırt bantlı kayış konçu bacağınıza göre ayarlar.</p><h3>Detaylar</h3><ul><li>Kaval ve bilek koruma panelleri</li><li>Cırt bantlı ayar kayışı</li><li>Kaymaz, kalın taban</li><li>Altın ve kırmızı GS logoları</li></ul>',
+            "Kaval ve bilek koruması\nCırt bantlı ayar\nKaymaz taban", 5999.90, null, 12, '39,40,41,42,43,44,45,46', 'ayakkabi', '#111315', 0,
+            ['gs-motorsport-surus-botu']],
+        ['motorsport', 'GS Motorsport Sert Kabuk Çanta', 'Karbon desenli, sert kabuklu ve fermuarlı ekipman çantası.',
+            '<p>Eldiven, şapka ve küçük ekipmanlarınızı darbelere karşı koruyan <strong>sert kabuklu çanta</strong>. Karbon desenli kabuğu şeklini korur, çift fermuarlı kapağı kolayca açılır.</p><h3>Detaylar</h3><ul><li>Sert, şeklini koruyan kabuk</li><li>Çift fermuarlı kapak</li><li>Taşıma tutamağı</li><li>Altın ve kırmızı GS logosu</li></ul>',
+            "Sert kabuk\nKarbon desen\nÇift fermuar\nTaşıma tutamağı", 3499.90, null, 15, '', 'canta', '#111315', 0,
+            ['gs-motorsport-sert-kabuk-canta']],
+        ['motorsport', 'GS Motorsport Şapka', 'Önde altın-kırmızı GS işlemeli siyah beyzbol şapkası.',
+            '<p>Tribünde ve pit alanında takımınızı gösterin. Siyah <strong>beyzbol şapkasının</strong> önünde altın ve kırmızı tonlarında GS logosu bulunur.</p><h3>Detaylar</h3><ul><li>Kavisli siperlik</li><li>Önde GS logosu</li></ul>',
+            "Kavisli siperlik\nGS logo", 2549.90, null, 40, '', 'canta', '#111315', 0,
+            ['gs-motorsport-sapka']],
     ];
 }

@@ -89,7 +89,7 @@ Yalnızca Süper Admin'e açık menüler panelde **SA** etiketiyle işaretlidir.
 
 ## 4. Sitede neler var?
 
-- **Mağaza:** 9 kategori (Motorsport dâhil), 26 ürün (en düşük fiyat 2.549,90 ₺; panel 2.500 ₺ altını kabul etmez), net KDV dâhil fiyatlar,
+- **Mağaza:** 11 kategori (Tişört & Atlet, Kadın, Motorsport dâhil), 41 ürün (en düşük fiyat 2.549,90 ₺; panel 2.500 ₺ altını kabul etmez), net KDV dâhil fiyatlar,
   ürüne tıklayınca fotoğraf galerisi ve açıklama / özellikler / kargo-iade sekmeleri, beden seçimi, stok uyarısı, arama, sıralama, indirimler.
 - **Ürün fotoğrafları:** GS Jogger Eşofman Altı, GS Hakiki Deri Kemer, GS Heritage FG Krampon ve GS Antrenman Şortu gerçek
   fotoğraflarıyla gelir (`assets/urunler/`). Panelden yüklenen fotoğraflar kareye tamamlanıp küçültülerek `uploads/` klasörüne
