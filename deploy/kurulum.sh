@@ -38,7 +38,17 @@ servis() { # servis <restart|reload|enable> <ad>
 }
 
 sunucu_ip() { curl -fs4 --max-time 8 https://api.ipify.org 2>/dev/null || hostname -I | awk '{print $1}'; }
-dns_ip() { getent ahostsv4 "$1" 2>/dev/null | awk 'NR==1{print $1}'; }
+# Önbelleğe takılmamak için doğrudan alan adının kendi ad sunucusuna sorar (dig yoksa sistem çözücüsü)
+dns_ip() {
+    local ip="" ns=""
+    if command -v dig >/dev/null 2>&1; then
+        ns="$(dig +short +time=3 +tries=2 NS "$DOMAIN" @1.1.1.1 2>/dev/null | head -1)"
+        [ -n "$ns" ] && ip="$(dig +short +time=3 +tries=2 A "$1" @"$ns" 2>/dev/null | grep -E '^[0-9.]+$' | tail -1)"
+        [ -n "$ip" ] || ip="$(dig +short +time=3 +tries=2 A "$1" @1.1.1.1 2>/dev/null | grep -E '^[0-9.]+$' | tail -1)"
+    fi
+    [ -n "$ip" ] || ip="$(getent ahostsv4 "$1" 2>/dev/null | awk 'NR==1{print $1}')"
+    echo "$ip"
+}
 dns_hazir() { local ip; ip="$(sunucu_ip)"; [ "$(dns_ip "$DOMAIN")" = "$ip" ] && [ "$(dns_ip "www.$DOMAIN")" = "$ip" ]; }
 
 kodu_indir() {
@@ -70,7 +80,7 @@ paketler() {
     apt-get update -y
     [ "$TEST_MODE" = 1 ] || apt-get upgrade -y
     apt-get install -y apache2 libapache2-mod-php php-cli php-sqlite3 php-gd php-mbstring \
-        sqlite3 rsync curl ca-certificates ufw fail2ban unattended-upgrades
+        sqlite3 rsync curl ca-certificates ufw fail2ban unattended-upgrades bind9-dnsutils
     a2enmod rewrite headers >/dev/null
 }
 
@@ -201,16 +211,18 @@ guncelle() {
 ssl_kur() {
     [ -n "${1:-}" ] && DOMAIN="$1"
     adim "SSL sertifikası kuruluyor: $DOMAIN ve www.$DOMAIN"
+    command -v dig >/dev/null 2>&1 || apt-get install -y bind9-dnsutils >/dev/null
     local ip; ip="$(sunucu_ip)"
-    if ! dns_hazir; then
+    if [ "${ZORLA:-0}" != 1 ] && ! dns_hazir; then
         kirmizi "Alan adı henüz bu sunucuyu göstermiyor."
         echo "  $DOMAIN      -> $(dns_ip "$DOMAIN" || true)   (olması gereken: $ip)"
         echo "  www.$DOMAIN  -> $(dns_ip "www.$DOMAIN" || true)   (olması gereken: $ip)"
-        echo "Natro > Alan Adı Yönetimi > DNS Yönetimi'nden A kayıtlarını düzeltin, 15-60 dk bekleyip tekrar deneyin."
+        echo "DNS kayıtlarını kontrol edin, 15-60 dk bekleyip tekrar deneyin."
+        echo "Kayıtların doğru olduğundan eminseniz kontrolü atlamak için:  ZORLA=1 bash kurulum.sh ssl"
         return 1
     fi
     grep -q "ServerName ${DOMAIN}" /etc/apache2/sites-available/gssportif.conf || apache_ayar
-    apt-get install -y certbot python3-certbot-apache
+    apt-get install -y certbot python3-certbot-apache bind9-dnsutils
     certbot --apache --non-interactive --agree-tos --redirect --register-unsafely-without-email -d "$DOMAIN" -d "www.$DOMAIN"
     runuser -u www-data -- php -r 'require "'"$APP_DIR"'/app/bootstrap.php"; save_setting("site_url", "https://www.'"$DOMAIN"'");'
     yesil "SSL kuruldu: https://www.$DOMAIN (sertifika otomatik yenilenir)"
