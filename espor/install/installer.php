@@ -86,7 +86,8 @@ function install_run(array $config, array $admin): void
         'notify_email' => $email,
         'mail_driver' => 'mail', 'smtp_host' => 'mail.kurumsaleposta.com', 'smtp_port' => '465', 'smtp_secure' => 'ssl', 'smtp_user' => 'info@gssportiffaaliyetler.com', 'smtp_pass' => '', 'smtp_from' => 'info@gssportiffaaliyetler.com',
         'force_https' => '0',
-        'db_version' => '5',
+        'db_version' => '6',
+        'paytr_mode' => 'off', 'paytr_merchant_id' => '', 'paytr_merchant_key' => '', 'paytr_merchant_salt' => '', 'paytr_installment' => '1',
     ];
     foreach ($defaults as $k => $v) {
         if (!row('SELECT skey FROM settings WHERE skey = ?', [$k])) {

@@ -155,6 +155,17 @@ function schema_sql(string $driver): array
             amount DECIMAL(12,2) NOT NULL,
             created_at DATETIME NOT NULL
         )$tail",
+        "CREATE TABLE IF NOT EXISTS payment_attempts (
+            id $pk,
+            order_id $int NOT NULL,
+            oid VARCHAR(64) NOT NULL UNIQUE,
+            amount INT NOT NULL,
+            status VARCHAR(12) NOT NULL DEFAULT 'started',
+            test_mode TINYINT NOT NULL DEFAULT 0,
+            ip VARCHAR(45) NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL
+        )$tail",
         "CREATE TABLE IF NOT EXISTS settings (
             skey VARCHAR(80) NOT NULL PRIMARY KEY,
             svalue TEXT NULL
@@ -165,5 +176,6 @@ function schema_sql(string $driver): array
         "CREATE INDEX idx_packages_service ON packages (service_id)",
         "CREATE INDEX idx_messages_ticket ON messages (ticket_no)",
         "CREATE INDEX idx_vouchers_email ON vouchers (customer_email)",
+        "CREATE INDEX idx_attempts_order ON payment_attempts (order_id)",
     ];
 }

@@ -57,7 +57,10 @@ if (request_is_https()) {
 }
 
 // Güvenlik başlıkları
-header('X-Frame-Options: SAMEORIGIN');
+// Ödeme sonuç sayfası PayTR çerçevesinden dönüşte açılabildiği için çerçeve kısıtı uygulanmaz
+if (basename($_SERVER['SCRIPT_NAME'] ?? '') !== 'odeme-sonuc.php') {
+    header('X-Frame-Options: SAMEORIGIN');
+}
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 
@@ -65,7 +68,7 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 // Yönetim paneli, giriş ve banka dönüş adresi her zaman açıktır.
 if (PHP_SAPI !== 'cli' && maintenance_active()) {
     $__script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
-    $__open = str_contains($__script, '/admin/') || in_array(basename($__script), ['odeme-sonuc.php', 'robots.php'], true);
+    $__open = str_contains($__script, '/admin/') || in_array(basename($__script), ['odeme-sonuc.php', 'paytr-bildirim.php', 'robots.php'], true);
     if (!$__open && !can('panel.access')) {
         require __DIR__ . '/maintenance.php';
         exit;

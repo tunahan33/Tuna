@@ -2,6 +2,7 @@
 /** Site ve sanal POS ayarları - YALNIZCA SÜPER ADMIN */
 require __DIR__ . '/_init.php';
 $u = require_perm('settings.edit');
+require dirname(__DIR__) . '/includes/payment.php';
 
 $groups = [
     'general' => ['Genel', [
@@ -16,6 +17,13 @@ $groups = [
         'company_phone' => ['Telefon', 'text'], 'company_email' => ['E-posta', 'email'],
         'tax_office' => ['Vergi Dairesi', 'text'], 'tax_number' => ['Vergi No / T.C. Kimlik No (şahıs şirketi)', 'text'],
         'mersis_number' => ['MERSİS No (şahıs şirketinde "-" yazılabilir)', 'text'], 'kep_address' => ['KEP Adresi', 'text'],
+    ]],
+    'pos' => ['Ödeme (PayTR)', [
+        'paytr_mode' => ['Çalışma Modu', 'select', ['off' => 'KAPALI (kartla ödeme gösterilmez)', 'test' => 'TEST (PayTR test modu, yalnızca panel personeli görür)', 'live' => 'CANLI (gerçek tahsilat)']],
+        'paytr_merchant_id' => ['Mağaza No (merchant_id)', 'text'],
+        'paytr_merchant_key' => ['Mağaza Parola (merchant_key)', 'secret'],
+        'paytr_merchant_salt' => ['Mağaza Gizli Anahtar (merchant_salt)', 'secret'],
+        'paytr_installment' => ['Taksit', 'select', ['1' => 'Yalnızca tek çekim', '0' => 'Taksit açık (PayTR panelindeki tüm seçenekler)', '3' => 'En fazla 3 taksit', '6' => 'En fazla 6 taksit', '9' => 'En fazla 9 taksit', '12' => 'En fazla 12 taksit']],
     ]],
     'mail' => ['E-posta (SMTP)', [
         'mail_driver' => ['Gönderim Yöntemi', 'select', ['mail' => 'PHP mail() - hostingin varsayılan gönderimi', 'smtp' => 'SMTP - e-posta hesabı ile doğrulamalı gönderim (önerilen)']],
@@ -98,6 +106,9 @@ if (is_post()) {
     }
     if ($changed) {
         log_activity('Site ayarlarını değiştirdi', $groups[$tab][0] . ': ' . implode(', ', $changed), 'settings');
+        if (in_array('Çalışma Modu', $changed, true)) {
+            log_activity('Ödeme modunu değiştirdi', 'PayTR: ' . strtoupper(paytr_mode()), 'settings');
+        }
     }
     flash('success', 'Ayarlar kaydedildi.');
     redirect('admin/settings.php?tab=' . $tab);
@@ -122,6 +133,8 @@ $checks = [
     ['Sepet/ödeme sayfasında sözleşme onay kutuları', true],
     ['Alt bilgide kart logoları ve güvenli ödeme ibaresi', true],
     ['İletişim sayfası ve iletişim formu', true],
+    ['PayTR mağaza bilgileri girildi', paytr_configured()],
+    ['PayTR canlı modda', paytr_mode() === 'live'],
 ];
 $ok = count(array_filter($checks, fn($c) => $c[1]));
 
@@ -184,6 +197,14 @@ admin_header('Site & Ödeme Ayarları', '<span class="lock-tag">★ Yalnızca S�
 <?php else: ?>
     <form method="post" class="panel form">
         <?= csrf_field() ?>
+        <?php if ($tab === 'pos'): ?>
+            <div class="info-box">
+                Mevcut mod: <strong><?= strtoupper(paytr_mode()) ?></strong><?= paytr_mode() !== 'off' && !paytr_configured() ? ' · <b>Mağaza bilgileri eksik, kartla ödeme kapalı.</b>' : '' ?><br>
+                Bilgiler: PayTR Mağaza Paneli → <b>Destek &amp; Kurulum → Entegrasyon Bilgileri</b>.<br>
+                PayTR panelinde <b>Destek &amp; Kurulum → Ayarlar → Bildirim URL</b> alanına şu adresi girin: <code><?= e(url('paytr-bildirim.php')) ?></code><br>
+                Önce <b>TEST</b> modunda (yalnızca personel görür) PayTR test kartıyla deneyin, ardından <b>CANLI</b>'ya alın.
+            </div>
+        <?php endif; ?>
         <?php foreach ($groups[$tab][1] as $key => $def): ?>
             <label><?= e($def[0]) ?>
                 <?php if ($def[1] === 'textarea'): ?>

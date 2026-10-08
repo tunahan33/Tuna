@@ -15,7 +15,7 @@ $contractVars = [
     'alici_telefon' => '(Sipariş sırasında doldurulur)', 'alici_eposta' => '(Sipariş sırasında doldurulur)',
     'hizmet_adi' => '(Seçilen koçluk)', 'paket_adi' => '(Seçilen paket)', 'paket_sure' => '(Paket süresi)',
     'toplam_tutar' => '(Paket fiyatı, KDV dahil)', 'siparis_tarihi' => '(Sipariş tarihi)',
-    'odeme_sekli' => 'Kredi kartı / banka kartı ile tek çekim (3D Secure)',
+    'odeme_sekli' => 'Kredi kartı / banka kartı ile ödeme (PayTR güvenli ödeme altyapısı, 3D Secure)',
 ];
 $groups = [
     'Kurumsal' => ['hakkimizda', 'insan-kaynaklari'],

@@ -119,19 +119,25 @@ Sipariş no + iade tutarı girilir; “%10 ekle” işaretliyse çek tutarı iad
 - Kalan bakiye sonraki siparişlerde kullanılabilir; bakiye yalnızca ödeme onaylanınca düşer.
 - Müşteri çeklerini **Hesabım** sayfasında görür. Tüm işlemler aktivite akışına yazılır.
 
-## Müşteri nasıl öder?
+## Müşteri nasıl öder? (PayTR)
 
-Paket → **Satın Al** → fatura bilgileri → sözleşme onayı ve ödeme paneli.
+Paket → **Satın Al** → fatura bilgileri → sözleşme onayı → **Güvenli Ödeme**: PayTR'ın kart formu sayfada açılır
+(iframe). Kart bilgileri yalnızca PayTR'a girilir, sitenin sunucusuna gelmez.
 
-Şu anda **bağlı bir ödeme sağlayıcısı yoktur**: müşteri siparişini oluşturup sözleşmeleri onaylayabilir, sipariş
-“Ödeme Bekliyor” olarak kaydedilir ve ödeme panelinde “Online ödeme çok yakında aktif” bilgisi görünür; kartla tahsilat yapılmaz.
-Bekleyen siparişler Panel → **Siparişler**'de görünür; ekip müşteriyle iletişime geçebilir. Site dışında alınan bir ödemeyi
-onaylamak için siparişin durumunu **Ödendi** yapın (yalnızca admin / süper admin): müşteriye onay e-postası gider,
-sipariş satış raporlarına girer. Tamamı iade çekiyle karşılanan siparişler ödeme olmadan tamamlanır.
+Ödeme sonucu PayTR sunucusundan `paytr-bildirim.php` adresine imzalı olarak gelir; imza ve tutar doğrulanınca sipariş
+**Ödendi** olur, müşteriye ve size e-posta gider. Müşterinin dönüş sayfası ödemeyi onaylamaz, yalnızca bilgi verir.
 
-**Ödeme sağlayıcısı bağlamak:** `includes/payment.php` dosyasındaki `payment_provider_active()` ve sağlayıcının yönlendirme
-adımı doldurulur; dönüş adresi olarak `odeme-sonuc.php` kullanılır ve sonuç `finalize_order()` ile siparişe işlenir.
-Başvuru için gereken yasal sayfaların durumu Panel → Site & Ödeme Ayarları'ndaki **Sanal POS / Ödeme Kuruluşu Başvuru Kontrolü** listesindedir.
+**Kurulum (bir kez):**
+1. PayTR Mağaza Paneli → **Destek & Kurulum → Entegrasyon Bilgileri**: Mağaza No, Mağaza Parola, Mağaza Gizli Anahtar.
+2. Site paneli → Site & Ödeme Ayarları → **Ödeme (PayTR)** sekmesine bu üç bilgiyi girin, modu **TEST** yapın.
+3. PayTR Mağaza Paneli → **Destek & Kurulum → Ayarlar → Bildirim URL**:
+   `https://www.gssportiffaaliyetler.com/paytr-bildirim.php`
+4. TEST modunda (yalnızca panel personeli görür) PayTR test kartıyla bir sipariş verin; sipariş “Ödendi” olmalı.
+5. Modu **CANLI** yapın. Taksit seçeneği aynı sekmeden açılabilir (varsayılan: tek çekim).
+
+Mod **KAPALI** iken veya bilgiler eksikken ödeme panelinde “Online ödeme yakında aktif” görünür; sipariş
+“Ödeme Bekliyor” olarak kaydedilir. Site dışında alınan ödemeyi onaylamak için siparişin durumunu **Ödendi** yapın
+(admin / süper admin). İadeler PayTR Mağaza Paneli'nden yapılır, ardından sipariş durumu “İade Edildi” yapılır.
 
 ## Sunucuya kurulum (gssportiffaaliyetler.com)
 

@@ -65,8 +65,52 @@ if ($orderNo = input('siparis')) {
             flash('info', 'Online ödeme altyapımız çok yakında aktif olacak. Siparişiniz “Ödeme Bekliyor” olarak kaydedildi; ekibimiz sizinle iletişime geçecek.');
             redirect('odeme.php?siparis=' . urlencode($order['order_no']));
         }
-        // Ödeme sağlayıcısı bağlandığında: payment_start($order) müşteriyi güvenli ödeme sayfasına yönlendirir.
-        redirect('odeme.php?siparis=' . urlencode($order['order_no']));
+
+        // PayTR güvenli ödeme formu (iframe)
+        $order = row('SELECT * FROM orders WHERE id = ?', [$order['id']]);
+        $pt = paytr_get_token($order);
+        if (isset($pt['error'])) {
+            log_activity('Ödeme başlatılamadı', $order['order_no'] . ' · ' . $pt['error'], 'order', (int) $order['id']);
+            flash('error', 'Ödeme sayfası şu anda açılamadı. Lütfen birkaç dakika sonra tekrar deneyin' . (can('panel.access') ? ' (' . $pt['error'] . ')' : '') . '.');
+            redirect('odeme.php?siparis=' . urlencode($order['order_no']));
+        }
+        log_activity('Ödeme sayfasını açtı', $order['order_no'] . ' · ' . money($order['amount']) . ' · PayTR' . (paytr_mode() === 'test' ? ' TEST' : ''), 'order', (int) $order['id']);
+        $pageTitle = 'Güvenli Ödeme';
+        require __DIR__ . '/includes/header.php';
+        ?>
+        <section class="section"><div class="container">
+            <ol class="checkout-steps"><li class="done">Fatura Bilgileri</li><li class="done">Sözleşme</li><li class="active">Güvenli Ödeme</li></ol>
+            <div class="checkout-grid">
+                <div class="card paytr-card">
+                    <?php if (paytr_mode() === 'test'): ?><div class="alert alert-info"><b>TEST MODU:</b> Gerçek tahsilat yapılmaz; yalnızca panel personeli görür. PayTR test kartı bilgilerini kullanın.</div><?php endif; ?>
+                    <div class="pay-panel-head">
+                        <span class="pay-lock"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="1"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+                        <div><strong>Kart Bilgileri</strong><small>PayTR güvenli ödeme · 3D Secure · Kart bilgileri sitemizde saklanmaz</small></div>
+                    </div>
+                    <div class="paytr-frame">
+                        <script src="https://www.paytr.com/js/iframeResizer.min.js"></script>
+                        <iframe src="<?= e(PAYTR_IFRAME_URL . $pt['token']) ?>" id="paytriframe" frameborder="0" scrolling="no" style="width:100%;min-height:520px" title="PayTR güvenli ödeme"></iframe>
+                        <script>if (window.iFrameResize) iFrameResize({}, '#paytriframe');</script>
+                    </div>
+                </div>
+                <aside class="card summary">
+                    <h3>Sipariş Özeti</h3>
+                    <dl>
+                        <dt>Sipariş No</dt><dd><?= e($order['order_no']) ?></dd>
+                        <dt>Hizmet</dt><dd><?= e($order['service_title']) ?></dd>
+                        <dt>Paket</dt><dd><?= e($order['package_name']) ?></dd>
+                    </dl>
+                    <?php if (!empty($order['voucher_code'])): ?>
+                        <dl class="voucher-lines"><dt>Paket bedeli</dt><dd><?= money((float) $order['amount'] + (float) $order['voucher_amount']) ?></dd><dt>İade çeki</dt><dd>− <?= money($order['voucher_amount']) ?></dd></dl>
+                    <?php endif; ?>
+                    <div class="summary-total"><span>Ödenecek (KDV dahil)</span><strong><?= money($order['amount']) ?></strong></div>
+                    <p class="small muted">Ödeme onaylandığında sonuç sayfasına yönlendirilir ve e-posta ile bilgilendirilirsiniz.</p>
+                </aside>
+            </div>
+        </div></section>
+        <?php
+        require __DIR__ . '/includes/footer.php';
+        exit;
     }
 
     $vars = contract_vars($order);
@@ -76,7 +120,7 @@ if ($orderNo = input('siparis')) {
     require __DIR__ . '/includes/header.php';
     ?>
     <section class="section"><div class="container">
-        <ol class="checkout-steps"><li class="done">Fatura Bilgileri</li><li class="active">Sözleşme ve Ödeme</li><li>Onay</li></ol>
+        <ol class="checkout-steps"><li class="done">Fatura Bilgileri</li><li class="active">Sözleşme</li><li>Güvenli Ödeme</li></ol>
         <div class="checkout-grid">
             <div class="card">
                 <h2 class="h3">Sözleşmeler</h2>
@@ -95,14 +139,14 @@ if ($orderNo = input('siparis')) {
                     <div class="pay-panel">
                         <div class="pay-panel-head">
                             <span class="pay-lock"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="1"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
-                            <div><strong>Kredi / Banka Kartı ile Ödeme</strong><small>3D Secure · 256-bit SSL · Kart bilgileri sitemizde saklanmaz</small></div>
+                            <div><strong>Kredi / Banka Kartı ile Ödeme</strong><small><?= paytr_installment()[0] === 1 ? 'Tek çekim' : 'Tek çekim veya taksit' ?> · PayTR güvenli ödeme · 3D Secure · Kart bilgileri sitemizde saklanmaz</small></div>
                             <img src="<?= asset('img/payment-logos.svg') ?>" alt="Visa, Mastercard, Troy, 3D Secure" class="pay-panel-logos">
                         </div>
                         <?php if (!$live && !$free): ?>
                             <div class="pay-soon"><strong>Online ödeme çok yakında aktif</strong><span>Siparişiniz <b><?= e($order['order_no']) ?></b> numarasıyla “Ödeme Bekliyor” olarak kaydedildi. Ödeme altyapımız açıldığında <a href="<?= url('hesabim.php') ?>">Hesabım</a> sayfasından tamamlayabilirsiniz; dilerseniz <a href="<?= url('iletisim.php?konu=' . urlencode('Sipariş ' . $order['order_no'])) ?>">bize yazın</a>, ekibimiz sizinle iletişime geçsin.</span></div>
                         <?php endif; ?>
                         <div class="pay-total-row"><span>Ödenecek Tutar <small>KDV dahil</small></span><strong><?= money($order['amount']) ?></strong></div>
-                        <button class="btn btn-primary btn-lg btn-block" <?= !$live && !$free ? 'disabled' : '' ?>><?= $free ? 'İade Çeki ile Siparişi Tamamla' : ($live ? money($order['amount']) . ' · Güvenli Ödemeye Geç' : 'Online Ödeme Yakında Aktif') ?></button>
+                        <button class="btn btn-primary btn-lg btn-block" <?= !$live && !$free ? 'disabled' : '' ?>><?= $free ? 'İade Çeki ile Siparişi Tamamla' : ($live ? money($order['amount']) . ' · Kart ile Öde' : 'Online Ödeme Yakında Aktif') ?></button>
                     </div>
                 </form>
             </div>
@@ -190,7 +234,7 @@ $pageTitle = 'Ödeme - Fatura Bilgileri';
 require __DIR__ . '/includes/header.php';
 ?>
 <section class="section"><div class="container">
-    <ol class="checkout-steps"><li class="active">Fatura Bilgileri</li><li>Sözleşme ve Ödeme</li><li>Onay</li></ol>
+    <ol class="checkout-steps"><li class="active">Fatura Bilgileri</li><li>Sözleşme</li><li>Güvenli Ödeme</li></ol>
     <div class="checkout-grid">
         <div class="card">
             <h2 class="h3">Fatura ve İletişim Bilgileri</h2>

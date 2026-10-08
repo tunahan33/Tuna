@@ -449,3 +449,8 @@
 .site .pay-total-row strong { font-family: var(--font-mono); font-size: 1.6rem; color: var(--signal); }
 .site .btn[disabled] { background: var(--panel-3); color: var(--dim); opacity: 1; }
 .site .result-card.wait .result-icon { background: var(--signal); color: #111; }
+
+/* PayTR ödeme çerçevesi */
+.site .paytr-card .pay-panel-head { margin-bottom: 1rem; }
+.site .paytr-frame { background: #fff; padding: .5rem; clip-path: polygon(var(--cut-sm) 0, 100% 0, 100% calc(100% - var(--cut-sm)), calc(100% - var(--cut-sm)) 100%, 0 100%, 0 var(--cut-sm)); }
+.site .paytr-frame iframe { display: block; border: 0; }

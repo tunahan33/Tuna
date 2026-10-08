@@ -4,7 +4,7 @@
  * bir kez çalışır; db_version ayarı hangi adımların uygulandığını tutar.
  */
 
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 /** Firma bilgileri (vergi levhası) — yalnızca panelden henüz doldurulmamış alanlara yazılır */
 const COMPANY_DEFAULTS = [
@@ -65,6 +65,9 @@ function db_upgrade(): void
     }
     if ($ver < 5) {
         db_upgrade_v5();
+    }
+    if ($ver < 6) {
+        db_upgrade_v6();
     }
     save_setting('db_version', (string) DB_VERSION);
 }
@@ -153,6 +156,39 @@ function db_upgrade_v5(): void
         }
         if ($new !== $p['content']) {
             q('UPDATE pages SET content = ?, updated_at = ? WHERE id = ?', [$new, now(), $p['id']]);
+        }
+    }
+}
+
+/** v6: PayTR — ödeme denemeleri tablosu ve varsayılan ayarlar */
+function db_upgrade_v6(): void
+{
+    $mysql = (config('db.driver') ?? 'mysql') === 'mysql';
+    $pk = $mysql ? 'INT UNSIGNED AUTO_INCREMENT PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT';
+    $int = $mysql ? 'INT UNSIGNED' : 'INTEGER';
+    $tail = $mysql ? ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci' : '';
+    db()->exec("CREATE TABLE IF NOT EXISTS payment_attempts (id $pk, order_id $int NOT NULL, oid VARCHAR(64) NOT NULL UNIQUE, amount INT NOT NULL, status VARCHAR(12) NOT NULL DEFAULT 'started', test_mode TINYINT NOT NULL DEFAULT 0, ip VARCHAR(45) NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL)$tail");
+    try {
+        db()->exec('CREATE INDEX idx_attempts_order ON payment_attempts (order_id)');
+    } catch (Throwable $e) {
+    }
+    $pairs = [
+        ['ödeme işlemi için ödeme hizmet sağlayıcısına,', 'ödeme işlemi için ödeme kuruluşu PayTR Ödeme ve Elektronik Para Kuruluşu A.Ş.\'ye,'],
+        ['Ödemeleriniz lisanslı ödeme hizmet sağlayıcısının altyapısı üzerinden alınır.', 'Ödemeleriniz, Türkiye Cumhuriyet Merkez Bankası lisanslı ödeme kuruluşu <strong>PayTR</strong> altyapısı üzerinden alınır.'],
+        ['Sitemizdeki tüm ödemeler lisanslı ödeme hizmet sağlayıcısının altyapısı üzerinden,', 'Sitemizdeki tüm ödemeler lisanslı ödeme kuruluşu <strong>PayTR</strong> altyapısı üzerinden,'],
+        ['5.3. Kartla ödemeler, lisanslı ödeme hizmet sağlayıcısının altyapısı üzerinden', '5.3. Kartla ödemeler, lisanslı ödeme kuruluşu PayTR Ödeme ve Elektronik Para Kuruluşu A.Ş. altyapısı üzerinden'],
+        ['doğrudan ödeme hizmet sağlayıcısının güvenli ödeme sayfasında girilir', 'doğrudan PayTR\'ın güvenli ödeme formuna girilir'],
+        ['ödeme işleminin gerçekleştirilmesi için ödeme hizmet sağlayıcısı ve hizmetin', 'ödeme işleminin gerçekleştirilmesi için ödeme kuruluşu PayTR ve hizmetin'],
+    ];
+    foreach (rows('SELECT id, content FROM pages') as $p) {
+        $new = str_replace(array_column($pairs, 0), array_column($pairs, 1), $p['content']);
+        if ($new !== $p['content']) {
+            q('UPDATE pages SET content = ?, updated_at = ? WHERE id = ?', [$new, now(), $p['id']]);
+        }
+    }
+    foreach (['paytr_mode' => 'off', 'paytr_installment' => '1'] as $k => $v) {
+        if (setting($k) === '') {
+            save_setting($k, $v);
         }
     }
 }
