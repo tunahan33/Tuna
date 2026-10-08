@@ -9,5 +9,5 @@
   <rect x="210.5" y="0.5" width="89" height="35" rx="5" fill="#fff" stroke="#d9dce0"/>
   <path d="M224 9 l8 3 v6 c0 5-3.5 8-8 9.5c-4.5-1.5-8-4.5-8-9.5v-6z" fill="#2B2F33"/><path d="M220.5 18l2.5 2.5 4.5-5" stroke="#FDB913" stroke-width="2" fill="none"/>
   <text x="238" y="16" font-family="Arial,sans-serif" font-weight="700" font-size="10" fill="#2B2F33">3D SECURE</text>
-  <text x="238" y="28" font-family="Arial,sans-serif" font-size="8.5" fill="#6B7178">Garanti BBVA</text>
+  <text x="238" y="28" font-family="Arial,sans-serif" font-size="8.5" fill="#6B7178">Güvenli Ödeme</text>
 </svg>

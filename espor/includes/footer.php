@@ -57,7 +57,7 @@ $__socials = array_filter(['Instagram' => setting('instagram'), 'YouTube' => set
     <div class="container footer-pay">
         <div class="secure-note">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-            Ödemeleriniz <strong>Garanti BBVA</strong> güvencesiyle <strong>3D Secure</strong> ve 256-bit SSL ile korunur. Kart bilgileriniz sitemizde saklanmaz.
+            Ödemeleriniz <strong>3D Secure</strong> doğrulaması ve 256-bit SSL ile korunur. Kart bilgileriniz sitemizde saklanmaz.
         </div>
         <img src="<?= asset('img/payment-logos.svg') ?>" alt="Visa, Mastercard, Troy, 3D Secure" height="32" class="pay-logos">
     </div>

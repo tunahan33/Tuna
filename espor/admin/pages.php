@@ -2,7 +2,7 @@
 require __DIR__ . '/_init.php';
 $u = require_perm('pages.edit');
 $pages = rows('SELECT p.*, u.name AS editor FROM pages p LEFT JOIN users u ON u.id = p.updated_by ORDER BY sort_order');
-admin_header('Sayfalar & Sözleşmeler', 'Garanti sanal POS başvurusu için gerekli yasal metinler');
+admin_header('Sayfalar & Sözleşmeler', 'Satış ve sanal POS başvurusu için gerekli yasal metinler');
 ?>
 <div class="info-box">Metinlerdeki <code>{{firma_unvan}}</code>, <code>{{firma_adres}}</code>, <code>{{vergi_no}}</code> gibi alanlar <?= can('settings.edit') ? '<a href="settings.php">Site Ayarları</a>' : 'Site Ayarları' ?>'ndaki firma bilgileriyle otomatik doldurulur. Sözleşmelerdeki <code>{{alici_ad}}</code>, <code>{{paket_adi}}</code>, <code>{{toplam_tutar}}</code> alanları ödeme sırasında siparişe göre doldurulur.</div>
 <section class="panel">

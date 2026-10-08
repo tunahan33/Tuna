@@ -202,7 +202,6 @@ function log_activity(string $action, string $details = '', ?string $entity = nu
 
 const ORDER_STATUSES = [
     'pending'    => ['Ödeme Bekliyor', 'gray'],
-    'awaiting_transfer' => ['Havale Bekleniyor', 'yellow'],
     'paid'       => ['Ödendi', 'green'],
     'processing' => ['Koçluk Sürüyor', 'blue'],
     'completed'  => ['Tamamlandı', 'dark'],

@@ -83,14 +83,10 @@ function install_run(array $config, array $admin): void
         'kep_address' => '-',
         'working_hours' => 'Her gün 10:00 - 23:00 · Canlı destek',
         'instagram' => '', 'linkedin' => '', 'youtube' => '', 'discord' => '', 'twitch' => '',
-        'pos_mode' => 'demo',
-        'garanti_merchant_id' => '', 'garanti_terminal_id' => '', 'garanti_prov_user' => 'PROVAUT',
-        'garanti_prov_password' => '', 'garanti_store_key' => '', 'garanti_security_level' => '3D_OOS_PAY',
         'notify_email' => $email,
         'mail_driver' => 'mail', 'smtp_host' => 'mail.kurumsaleposta.com', 'smtp_port' => '465', 'smtp_secure' => 'ssl', 'smtp_user' => 'info@gssportiffaaliyetler.com', 'smtp_pass' => '', 'smtp_from' => 'info@gssportiffaaliyetler.com',
         'force_https' => '0',
-        'db_version' => '4',
-        'havale_enabled' => '1', 'bank_name' => '', 'bank_holder' => 'İSKELET MEDYA LİMİTED ŞİRKETİ', 'bank_iban' => '',
+        'db_version' => '5',
     ];
     foreach ($defaults as $k => $v) {
         if (!row('SELECT skey FROM settings WHERE skey = ?', [$k])) {

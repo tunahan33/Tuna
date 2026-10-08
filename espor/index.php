@@ -66,7 +66,7 @@ require __DIR__ . '/includes/header.php';
         </div>
         <ol class="steps-grid">
             <li><span>01</span><h4>Paketini seç</h4><p>Koçluk türünü ve paketini incele; fiyatlar nettir, KDV dahildir.</p></li>
-            <li><span>02</span><h4>Güvenle öde</h4><p>Garanti BBVA 3D Secure altyapısıyla kredi veya banka kartınla öde.</p></li>
+            <li><span>02</span><h4>Güvenle öde</h4><p>3D Secure korumalı güvenli ödeme ile kredi veya banka kartınla öde.</p></li>
             <li><span>03</span><h4>Koçun seni arasın</h4><p>24 saat içinde koçun ulaşır, VOD analiziyle ilk dersi planlar.</p></li>
             <li><span>04</span><h4>Gelişimini ölç</h4><p>Canlı dersler, analizler ve paket sonu istatistik raporuyla ilerle.</p></li>
         </ol>
@@ -114,7 +114,7 @@ require __DIR__ . '/includes/header.php';
         <ul class="why-list">
             <li><strong>VOD analizi</strong><span>Maç kayıtların zaman damgalı olarak incelenir, hataların tek tek işaretlenir.</span></li>
             <li><strong>Net fiyat</strong><span>Tüm paket fiyatları sitede açıkça yazılıdır, KDV dahildir, sürpriz ücret yoktur.</span></li>
-            <li><strong>Güvenli ödeme</strong><span>Garanti BBVA sanal POS, 3D Secure ve SSL koruması.</span></li>
+            <li><strong>Güvenli ödeme</strong><span>3D Secure doğrulaması ve 256-bit SSL koruması.</span></li>
             <li><strong>Yasal güvence</strong><span>Mesafeli satış sözleşmesi, açık iade ve iade çeki koşulları.</span></li>
         </ul>
     </div>

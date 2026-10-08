@@ -83,8 +83,7 @@ if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="alert alert-success">Kurulum başarıyla tamamlandı!</div>
         <ol class="steps">
             <li>Güvenlik için FTP / Dosya Yöneticisi ile <code>install</code> klasörünü silin.</li>
-            <li>Yönetim panelinde <strong>Site Ayarları</strong>'ndan firma ünvanı, adres, vergi ve MERSİS bilgilerinizi girin (Garanti başvurusu için zorunludur).</li>
-            <li>Garanti BBVA'dan gelen Üye İşyeri No, Terminal No, Provizyon Şifresi ve 3D Store Key bilgilerini <strong>Ödeme (Sanal POS)</strong> sekmesine girin.</li>
+            <li>Yönetim panelinde <strong>Site Ayarları</strong>'ndan firma ünvanı, adres, vergi ve MERSİS bilgilerinizi girin (sanal POS / ödeme kuruluşu başvurusu için zorunludur).</li>
         </ol>
         <a class="btn btn-primary" href="../admin/login.php">Yönetim Paneline Giriş Yap</a>
     <?php else: ?>

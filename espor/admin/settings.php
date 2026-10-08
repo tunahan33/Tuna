@@ -1,7 +1,6 @@
 <?php
 /** Site ve sanal POS ayarları - YALNIZCA SÜPER ADMIN */
 require __DIR__ . '/_init.php';
-require dirname(__DIR__) . '/includes/garanti.php';
 $u = require_perm('settings.edit');
 
 $groups = [
@@ -17,16 +16,6 @@ $groups = [
         'company_phone' => ['Telefon', 'text'], 'company_email' => ['E-posta', 'email'],
         'tax_office' => ['Vergi Dairesi', 'text'], 'tax_number' => ['Vergi No / T.C. Kimlik No (şahıs şirketi)', 'text'],
         'mersis_number' => ['MERSİS No (şahıs şirketinde "-" yazılabilir)', 'text'], 'kep_address' => ['KEP Adresi', 'text'],
-    ]],
-    'pos' => ['Ödeme (Garanti & Havale)', [
-        'pos_mode' => ['Çalışma Modu', 'select', ['demo' => 'DEMO (banka bağlantısı yok, test simülasyonu)', 'test' => 'TEST (Garanti test ortamı)', 'prod' => 'CANLI (gerçek tahsilat)']],
-        'garanti_security_level' => ['3D Modeli', 'select', ['3D_OOS_PAY' => '3D OOS Pay - Bankanın ortak ödeme sayfası (önerilen)', '3D_PAY' => '3D Pay - Kart formu sitede, veriler doğrudan bankaya']],
-        'garanti_merchant_id' => ['Üye İşyeri No (Merchant ID)', 'text'], 'garanti_terminal_id' => ['Terminal No (Terminal ID)', 'text'],
-        'garanti_prov_user' => ['Provizyon Kullanıcısı', 'text'], 'garanti_prov_password' => ['Provizyon Şifresi', 'secret'],
-        'garanti_store_key' => ['3D Secure Anahtarı (Store Key)', 'secret'],
-        'havale_enabled' => ['Havale / EFT ile Ödeme', 'select', ['1' => 'Açık (IBAN girildiyse müşteriye gösterilir)', '0' => 'Kapalı']],
-        'bank_name' => ['Banka Adı (Havale/EFT)', 'text'], 'bank_holder' => ['Hesap Sahibi (ticari ünvanla aynı olmalı)', 'text'],
-        'bank_iban' => ['IBAN (TR ile başlayan 26 karakter)', 'text'],
     ]],
     'mail' => ['E-posta (SMTP)', [
         'mail_driver' => ['Gönderim Yöntemi', 'select', ['mail' => 'PHP mail() - hostingin varsayılan gönderimi', 'smtp' => 'SMTP - e-posta hesabı ile doğrulamalı gönderim (önerilen)']],
@@ -109,15 +98,12 @@ if (is_post()) {
     }
     if ($changed) {
         log_activity('Site ayarlarını değiştirdi', $groups[$tab][0] . ': ' . implode(', ', $changed), 'settings');
-        if (in_array('Çalışma Modu', $changed, true)) {
-            log_activity('Ödeme modunu değiştirdi', 'Yeni mod: ' . strtoupper(trim($_POST['pos_mode'])), 'settings');
-        }
     }
     flash('success', 'Ayarlar kaydedildi.');
     redirect('admin/settings.php?tab=' . $tab);
 }
 
-// Garanti başvuru kontrol listesi
+// Sanal POS / ödeme kuruluşu başvurusu kontrol listesi
 $https = str_starts_with(config('base_url'), 'https://');
 $filled = fn($k) => ($v = trim(setting($k))) !== '' && $v !== '-' && !str_contains($v, 'girin') && !str_contains($v, '___');
 $checks = [
@@ -136,7 +122,6 @@ $checks = [
     ['Sepet/ödeme sayfasında sözleşme onay kutuları', true],
     ['Alt bilgide kart logoları ve güvenli ödeme ibaresi', true],
     ['İletişim sayfası ve iletişim formu', true],
-    ['Garanti terminal bilgileri girildi', $filled('garanti_merchant_id') && $filled('garanti_terminal_id') && $filled('garanti_prov_password') && $filled('garanti_store_key')],
 ];
 $ok = count(array_filter($checks, fn($c) => $c[1]));
 
@@ -199,12 +184,6 @@ admin_header('Site & Ödeme Ayarları', '<span class="lock-tag">★ Yalnızca S�
 <?php else: ?>
     <form method="post" class="panel form">
         <?= csrf_field() ?>
-        <?php if ($tab === 'pos'): ?>
-            <div class="info-box">
-                Mevcut mod: <strong><?= strtoupper(pos_mode()) ?></strong>. Garanti BBVA başvurunuz onaylandığında size iletilen bilgileri girin, önce <b>TEST</b> modunda deneyin, ardından <b>CANLI</b>'ya alın.<br>
-                Bankaya bildirmeniz gereken dönüş adresi (Success/Error URL): <code><?= e(url('odeme-sonuc.php')) ?></code>
-            </div>
-        <?php endif; ?>
         <?php foreach ($groups[$tab][1] as $key => $def): ?>
             <label><?= e($def[0]) ?>
                 <?php if ($def[1] === 'textarea'): ?>
@@ -231,7 +210,7 @@ admin_header('Site & Ödeme Ayarları', '<span class="lock-tag">★ Yalnızca S�
     </section>
     <?php else: ?>
     <section class="panel">
-        <div class="panel-head"><h2>Garanti Sanal POS Başvuru Kontrolü</h2><span class="badge <?= $ok === count($checks) ? 'badge-green' : 'badge-yellow' ?>"><?= $ok ?>/<?= count($checks) ?></span></div>
+        <div class="panel-head"><h2>Sanal POS / Ödeme Kuruluşu Başvuru Kontrolü</h2><span class="badge <?= $ok === count($checks) ? 'badge-green' : 'badge-yellow' ?>"><?= $ok ?>/<?= count($checks) ?></span></div>
         <ul class="checks">
             <?php foreach ($checks as [$l, $v]): ?><li class="<?= $v ? 'ok' : 'no' ?>"><span><?= $v ? '✓' : '!' ?></span><?= e($l) ?></li><?php endforeach; ?>
         </ul>

@@ -434,15 +434,18 @@
     .ticker-track, .site .hero-emblem::before, .site .hero-emblem::after { animation: none; }
 }
 
-/* Ödeme yöntemi seçimi ve havale bilgileri */
-.site .pay-methods { display: grid; gap: .5rem; margin: .4rem 0 1rem; }
-.site .pay-method { display: flex; gap: .8rem; align-items: flex-start; padding: .9rem 1rem; border: 1px solid var(--edge-hi); background: #0A0C0F; cursor: pointer; font-family: var(--font) !important; text-transform: none !important; letter-spacing: 0 !important; font-size: .92rem !important; }
-.site .pay-method:has(input:checked) { border-color: var(--signal); background: rgba(255, 194, 26, .06); box-shadow: inset 3px 0 0 var(--signal); }
-.site .pay-method input { width: 18px; height: 18px; margin-top: .2rem; accent-color: var(--strike); flex: none; }
-.site .pay-method strong { display: block; color: #fff; font-family: var(--font-head); text-transform: uppercase; letter-spacing: .04em; }
-.site .pay-method small { color: var(--dim); }
-.site .bank-wrap { display: flex; justify-content: center; margin: 1.2rem 0; }
-.site .bank-box { border: 1px dashed var(--signal); background: rgba(255, 194, 26, .05); text-align: left; font-size: .95rem; }
-.site .bank-box th { color: var(--dim); font-family: var(--font-mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 500; padding: .55rem 1rem !important; }
-.site .bank-box td { padding: .55rem 1rem; color: #fff; font-family: var(--font-mono); }
+/* Ödeme paneli */
+.site .pay-panel { margin-top: 1.2rem; border: 1px solid var(--edge-hi); background: #0A0C0F; padding: 1.2rem; clip-path: polygon(var(--cut-sm) 0, 100% 0, 100% calc(100% - var(--cut-sm)), calc(100% - var(--cut-sm)) 100%, 0 100%, 0 var(--cut-sm)); }
+.site .pay-panel-head { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; padding-bottom: 1rem; border-bottom: 1px dashed var(--edge-hi); }
+.site .pay-panel-head strong { display: block; color: #fff; font-family: var(--font-head); text-transform: uppercase; letter-spacing: .04em; }
+.site .pay-panel-head small { color: var(--dim); font-family: var(--font-mono); font-size: .68rem; letter-spacing: .04em; text-transform: uppercase; }
+.site .pay-lock { width: 42px; height: 42px; display: grid; place-items: center; background: var(--signal); color: #111; flex: none; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
+.site .pay-panel-logos { height: 26px; width: auto; margin-left: auto; }
+.site .pay-soon { margin: 1rem 0 0; padding: .9rem 1rem; border-left: 3px solid var(--signal); background: rgba(255, 194, 26, .07); display: grid; gap: .3rem; font-size: .9rem; color: #D2D6DC; }
+.site .pay-soon strong { color: var(--signal); font-family: var(--font-mono); font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; }
+.site .pay-total-row { display: flex; justify-content: space-between; align-items: baseline; margin: 1.1rem 0 .9rem; }
+.site .pay-total-row span { font-family: var(--font-mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); }
+.site .pay-total-row small { color: #6F7783; margin-left: .3rem; }
+.site .pay-total-row strong { font-family: var(--font-mono); font-size: 1.6rem; color: var(--signal); }
+.site .btn[disabled] { background: var(--panel-3); color: var(--dim); opacity: 1; }
 .site .result-card.wait .result-icon { background: var(--signal); color: #111; }

@@ -1,7 +1,7 @@
 <?php
-/** Ödeme akışı: 1) Fatura bilgileri  2) Sözleşme onayı  3) Garanti BBVA 3D ödeme */
+/** Ödeme akışı: 1) Fatura bilgileri  2) Sözleşme onayı ve ödeme (bkz. includes/payment.php) */
 require __DIR__ . '/includes/bootstrap.php';
-require __DIR__ . '/includes/garanti.php';
+require __DIR__ . '/includes/payment.php';
 
 $user = require_login();
 
@@ -15,7 +15,7 @@ function contract_vars(array $o): array
         'paket_sure' => $o['_duration'] ?? '-',
         'toplam_tutar' => money($o['amount']) . (!empty($o['voucher_code']) ? ' (Paket bedeli ' . money((float) $o['amount'] + (float) $o['voucher_amount']) . ', ' . money($o['voucher_amount']) . ' iade çeki ile ödenmiştir)' : ''),
         'siparis_tarihi' => tr_date($o['created_at']),
-        'odeme_sekli' => payment_methods_text($o),
+        'odeme_sekli' => payment_methods_text(),
     ];
 }
 
@@ -26,27 +26,17 @@ if ($orderNo = input('siparis')) {
         flash('error', 'Sipariş bulunamadı.');
         redirect('hesabim.php');
     }
-    if (!in_array($order['status'], ['pending', 'failed', 'awaiting_transfer'], true)) {
+    if (!in_array($order['status'], ['pending', 'failed'], true)) {
         redirect('odeme-sonuc.php?no=' . urlencode($order['order_no']) . '&t=' . order_access_token($order));
     }
 
     if (is_post() && input('action') === 'pay') {
         verify_csrf();
         if (!input('accept_pre') || !input('accept_contract') || !input('accept_start')) {
-            flash('error', 'Ödemeye geçmek için tüm sözleşme onaylarını işaretlemelisiniz.');
+            flash('error', 'Devam etmek için tüm sözleşme onaylarını işaretlemelisiniz.');
             redirect('odeme.php?siparis=' . urlencode($order['order_no']));
         }
-        $method = input('payment_method') === 'havale' ? 'havale' : 'kart';
-        if (($method === 'havale' && !transfer_payment_available()) || ($method === 'kart' && !card_payment_available())) {
-            flash('error', 'Seçilen ödeme yöntemi şu anda kullanılamıyor. Lütfen başka bir yöntem seçin veya bizimle iletişime geçin.');
-            redirect('odeme.php?siparis=' . urlencode($order['order_no']));
-        }
-        // Havale seçip sonradan kartla ödemek isteyen sipariş tekrar ödeme bekliyor durumuna alınır
-        if ($order['status'] === 'awaiting_transfer') {
-            q("UPDATE orders SET status = 'pending', updated_at = ? WHERE id = ?", [now(), $order['id']]);
-            $order['status'] = 'pending';
-        }
-        // Başarısız bir denemeden sonra bankaya yeni sipariş numarası ile gidilir
+        // Başarısız bir denemeden sonra yeni sipariş numarası ile devam edilir
         if ($order['status'] === 'failed') {
             $newNo = generate_order_no();
             q('UPDATE orders SET order_no = ?, status = ?, updated_at = ? WHERE id = ?', [$newNo, 'pending', now(), $order['id']]);
@@ -56,7 +46,7 @@ if ($orderNo = input('siparis')) {
         q('UPDATE orders SET contract_accepted_at = ?, ip = ?, updated_at = ? WHERE id = ?', [now(), client_ip(), now(), $order['id']]);
         $order['ip'] = client_ip();
 
-        // İade çeki ödeme anında tekrar kontrol edilir (başka siparişte kullanılmış olabilir)
+        // İade çeki onay anında tekrar kontrol edilir (başka siparişte kullanılmış olabilir)
         if (!empty($order['voucher_code'])) {
             [$v, $use, $verr] = voucher_check($order['voucher_code'], $order['customer_email'], (float) $order['amount'] + (float) $order['voucher_amount']);
             if ($verr || abs($use - (float) $order['voucher_amount']) > 0.009) {
@@ -70,52 +60,13 @@ if ($orderNo = input('siparis')) {
             }
         }
 
-        // Havale / EFT: sipariş "Havale Bekleniyor" durumuna alınır, ödeme panelden onaylanır
-        if ($method === 'havale') {
-            q("UPDATE orders SET status = 'awaiting_transfer', payment_method = 'havale', updated_at = ? WHERE id = ?", [now(), $order['id']]);
-            $order = row('SELECT * FROM orders WHERE id = ?', [$order['id']]);
-            log_activity('Havale ile ödemeyi seçti', $order['order_no'] . ' · ' . money($order['amount']), 'order', (int) $order['id']);
-            send_mail($order['customer_email'], 'Siparişiniz alındı, ödeme bilgileri - ' . $order['order_no'],
-                '<p>Merhaba ' . e($order['customer_name']) . ',</p><p><b>' . e($order['service_title']) . ' - ' . e($order['package_name']) . '</b> siparişiniz alındı. '
-                . 'Ödemenizi aşağıdaki hesaba <b>açıklama kısmına sipariş numaranızı yazarak</b> yapabilirsiniz:</p>' . transfer_info_html($order)
-                . '<p>Ödemeniz hesabımıza geçtiğinde (genellikle aynı iş günü) siparişiniz onaylanır ve koçunuz sizinle iletişime geçer. 3 iş günü içinde ödemesi yapılmayan siparişler iptal edilir.</p>');
-            send_mail(setting('notify_email'), 'Havale bekleyen sipariş: ' . $order['order_no'] . ' (' . money($order['amount']) . ')',
-                '<p>' . e($order['customer_name']) . ' - ' . e($order['service_title']) . ' / ' . e($order['package_name']) . '</p><p>Ödeme hesaba geçince panelden siparişi “Ödendi” durumuna alın.</p>');
-            redirect('odeme-sonuc.php?no=' . urlencode($order['order_no']) . '&t=' . order_access_token($order));
+        if (!payment_provider_active()) {
+            log_activity('Ödeme adımına ulaştı', $order['order_no'] . ' · ' . money($order['amount']) . ' · Online ödeme henüz aktif değil', 'order', (int) $order['id']);
+            flash('info', 'Online ödeme altyapımız çok yakında aktif olacak. Siparişiniz “Ödeme Bekliyor” olarak kaydedildi; ekibimiz sizinle iletişime geçecek.');
+            redirect('odeme.php?siparis=' . urlencode($order['order_no']));
         }
-        q("UPDATE orders SET payment_method = 'kart' WHERE id = ?", [$order['id']]);
-        log_activity('Ödemeye yönlendirildi', $order['order_no'] . ' · ' . money($order['amount']) . ' · Mod: ' . pos_mode(), 'order', (int) $order['id']);
-
-        $mode = pos_mode();
-        $pageTitle = 'Güvenli Ödeme';
-        require __DIR__ . '/includes/header.php';
-        echo '<section class="section"><div class="container narrow-sm"><div class="card center">';
-        if ($mode === 'demo') {
-            echo '<h1 class="h2">Demo Ödeme</h1><p>Site şu anda <b>demo modunda</b>. Garanti BBVA bilgileri girildiğinde bu adımda bankanın 3D Secure ödeme sayfası açılır.</p>';
-            echo '<form method="post" action="' . url('odeme-demo.php') . '" class="form">' . csrf_field() . '<input type="hidden" name="order_no" value="' . e($order['order_no']) . '">';
-            echo '<button name="result" value="success" class="btn btn-primary btn-block">Başarılı Ödeme Simüle Et</button> <button name="result" value="fail" class="btn btn-outline btn-block">Başarısız Ödeme Simüle Et</button></form>';
-        } elseif (garanti_security_level() === '3D_OOS_PAY') {
-            echo '<h1 class="h2">Bankaya yönlendiriliyorsunuz…</h1><p>Garanti BBVA güvenli ödeme sayfası açılıyor. Lütfen bekleyin.</p>';
-            echo '<form id="bankForm" method="post" action="' . e(garanti_endpoint()) . '">';
-            foreach (garanti_form_fields($order) as $k => $v) echo '<input type="hidden" name="' . e($k) . '" value="' . e($v) . '">';
-            echo '<button class="btn btn-primary">Ödeme sayfasına git</button></form><script>document.getElementById("bankForm").submit();</script>';
-        } else {
-            echo '<h1 class="h2">Kart Bilgileri</h1><p class="small muted">Kart bilgileriniz doğrudan Garanti BBVA\'ya iletilir, sitemizde saklanmaz.</p>';
-            echo '<form method="post" action="' . e(garanti_endpoint()) . '" class="form card-form" autocomplete="on">';
-            foreach (garanti_form_fields($order) as $k => $v) echo '<input type="hidden" name="' . e($k) . '" value="' . e($v) . '">';
-            echo '<label>Kart Üzerindeki İsim<input name="cardholdername" autocomplete="cc-name" required></label>';
-            echo '<label>Kart Numarası<input name="cardnumber" inputmode="numeric" autocomplete="cc-number" pattern="[0-9 ]{15,19}" maxlength="19" required data-card-number></label>';
-            echo '<div class="grid-3"><label>Ay<select name="cardexpiredatemonth" required>';
-            for ($m = 1; $m <= 12; $m++) echo '<option>' . sprintf('%02d', $m) . '</option>';
-            echo '</select></label><label>Yıl<select name="cardexpiredateyear" required>';
-            for ($y = (int) date('y'); $y <= (int) date('y') + 12; $y++) echo '<option>' . sprintf('%02d', $y) . '</option>';
-            echo '</select></label><label>CVV<input name="cardcvv2" inputmode="numeric" pattern="[0-9]{3,4}" maxlength="4" autocomplete="cc-csc" required></label></div>';
-            echo '<div class="pay-total">Ödenecek Tutar: <strong>' . money($order['amount']) . '</strong></div>';
-            echo '<button class="btn btn-primary btn-block btn-lg">Ödemeyi Tamamla</button></form>';
-        }
-        echo '<img src="' . asset('img/payment-logos.svg') . '" alt="" height="30" class="mt-1"></div></div></section>';
-        require __DIR__ . '/includes/footer.php';
-        exit;
+        // Ödeme sağlayıcısı bağlandığında: payment_start($order) müşteriyi güvenli ödeme sayfasına yönlendirir.
+        redirect('odeme.php?siparis=' . urlencode($order['order_no']));
     }
 
     $vars = contract_vars($order);
@@ -125,11 +76,11 @@ if ($orderNo = input('siparis')) {
     require __DIR__ . '/includes/header.php';
     ?>
     <section class="section"><div class="container">
-        <ol class="checkout-steps"><li class="done">Fatura Bilgileri</li><li class="active">Sözleşme ve Onay</li><li>Güvenli Ödeme</li></ol>
+        <ol class="checkout-steps"><li class="done">Fatura Bilgileri</li><li class="active">Sözleşme ve Ödeme</li><li>Onay</li></ol>
         <div class="checkout-grid">
             <div class="card">
                 <h2 class="h3">Sözleşmeler</h2>
-                <?php if ($order['status'] === 'failed'): ?><div class="alert alert-error">Önceki ödeme denemesi başarısız oldu: <?= e($order['payment_message']) ?>. Tekrar deneyebilirsiniz.</div><?php endif; ?>
+                <?php if ($order['status'] === 'failed'): ?><div class="alert alert-error">Önceki ödeme denemesi tamamlanamadı: <?= e($order['payment_message']) ?>.</div><?php endif; ?>
                 <h4>Ön Bilgilendirme Formu</h4>
                 <div class="contract-box prose"><?= fill_placeholders($pre, $vars) ?></div>
                 <h4>Mesafeli Satış Sözleşmesi</h4>
@@ -137,27 +88,22 @@ if ($orderNo = input('siparis')) {
                 <form method="post" class="form mt-1">
                     <?= csrf_field() ?>
                     <input type="hidden" name="action" value="pay">
-                    <?php $cardOk = card_payment_available(); $transferOk = transfer_payment_available(); $defMethod = $order['payment_method'] === 'havale' && $transferOk ? 'havale' : ($cardOk ? 'kart' : 'havale'); ?>
-                    <h4>Ödeme Yöntemi</h4>
-                    <?php if (!$cardOk && !$transferOk): ?>
-                        <div class="alert alert-info">Online ödeme altyapımız kısa süre içinde aktif olacaktır. Siparişinizi tamamlamak için lütfen <a href="<?= url('iletisim.php?konu=' . urlencode('Sipariş ' . $order['order_no'])) ?>">bizimle iletişime geçin</a>.</div>
-                    <?php else: ?>
-                    <div class="pay-methods">
-                        <?php if ($cardOk): ?>
-                        <label class="pay-method"><input type="radio" name="payment_method" value="kart" <?= $defMethod === 'kart' ? 'checked' : '' ?>>
-                            <span><strong>Kredi / Banka Kartı</strong><small>Garanti BBVA 3D Secure ile anında onay<?= pos_mode() === 'demo' ? ' · <b>DEMO: yalnızca personel görür, gerçek tahsilat yapılmaz</b>' : '' ?></small></span></label>
-                        <?php endif; ?>
-                        <?php if ($transferOk): ?>
-                        <label class="pay-method"><input type="radio" name="payment_method" value="havale" <?= $defMethod === 'havale' ? 'checked' : '' ?>>
-                            <span><strong>Havale / EFT</strong><small><?= e(setting('bank_name')) ?> hesabımıza; ödemeniz hesaba geçince siparişiniz onaylanır</small></span></label>
-                        <?php endif; ?>
-                    </div>
-                    <?php endif; ?>
                     <label class="check"><input type="checkbox" name="accept_pre" value="1" required> <span>Ön Bilgilendirme Formu'nu okudum ve onaylıyorum.</span></label>
                     <label class="check"><input type="checkbox" name="accept_contract" value="1" required> <span>Mesafeli Satış Sözleşmesi'ni ve <a href="<?= url('sayfa.php?s=iade-ve-iade-ceki-kosullari') ?>" target="_blank">İade ve İade Çeki Koşulları</a>'nı okudum, kabul ediyorum.</span></label>
                     <label class="check"><input type="checkbox" name="accept_start" value="1" required> <span>Hizmetin cayma süresi içinde başlatılmasını talep ediyorum; hizmet başladıktan sonra cayma hakkımın kalmayacağını biliyorum.</span></label>
-                    <button class="btn btn-primary btn-lg btn-block" <?= !$cardOk && !$transferOk && (float) $order['amount'] > 0 ? 'disabled' : '' ?>><?= (float) $order['amount'] > 0 ? money($order['amount']) . ' · Siparişi Onayla' : 'İade Çeki ile Siparişi Tamamla' ?></button>
-                    <p class="small muted center">Kartla ödemede Garanti BBVA 3D Secure sayfasına yönlendirilirsiniz; Havale/EFT seçerseniz hesap bilgileri gösterilir.</p>
+                    <?php $free = (float) $order['amount'] <= 0; $live = payment_provider_active(); ?>
+                    <div class="pay-panel">
+                        <div class="pay-panel-head">
+                            <span class="pay-lock"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="1"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+                            <div><strong>Kredi / Banka Kartı ile Ödeme</strong><small>3D Secure · 256-bit SSL · Kart bilgileri sitemizde saklanmaz</small></div>
+                            <img src="<?= asset('img/payment-logos.svg') ?>" alt="Visa, Mastercard, Troy, 3D Secure" class="pay-panel-logos">
+                        </div>
+                        <?php if (!$live && !$free): ?>
+                            <div class="pay-soon"><strong>Online ödeme çok yakında aktif</strong><span>Siparişiniz <b><?= e($order['order_no']) ?></b> numarasıyla “Ödeme Bekliyor” olarak kaydedildi. Ödeme altyapımız açıldığında <a href="<?= url('hesabim.php') ?>">Hesabım</a> sayfasından tamamlayabilirsiniz; dilerseniz <a href="<?= url('iletisim.php?konu=' . urlencode('Sipariş ' . $order['order_no'])) ?>">bize yazın</a>, ekibimiz sizinle iletişime geçsin.</span></div>
+                        <?php endif; ?>
+                        <div class="pay-total-row"><span>Ödenecek Tutar <small>KDV dahil</small></span><strong><?= money($order['amount']) ?></strong></div>
+                        <button class="btn btn-primary btn-lg btn-block" <?= !$live && !$free ? 'disabled' : '' ?>><?= $free ? 'İade Çeki ile Siparişi Tamamla' : ($live ? money($order['amount']) . ' · Güvenli Ödemeye Geç' : 'Online Ödeme Yakında Aktif') ?></button>
+                    </div>
                 </form>
             </div>
             <aside class="card summary">
@@ -171,7 +117,7 @@ if ($orderNo = input('siparis')) {
                 <?php if (!empty($order['voucher_code'])): ?>
                     <dl class="voucher-lines"><dt>Paket bedeli</dt><dd><?= money((float) $order['amount'] + (float) $order['voucher_amount']) ?></dd><dt>İade çeki <small><?= e($order['voucher_code']) ?></small></dt><dd>− <?= money($order['voucher_amount']) ?></dd></dl>
                 <?php endif; ?>
-                <div class="summary-total"><span><?= !empty($order['voucher_code']) ? 'Kartla ödenecek' : 'Toplam (KDV dahil)' ?></span><strong><?= money($order['amount']) ?></strong></div>
+                <div class="summary-total"><span><?= !empty($order['voucher_code']) ? 'Ödenecek' : 'Toplam (KDV dahil)' ?></span><strong><?= money($order['amount']) ?></strong></div>
                 <a class="small" href="<?= url('odeme.php?paket=' . (int) $order['package_id']) ?>">← Bilgileri düzenle</a>
             </aside>
         </div>
@@ -221,7 +167,7 @@ if (is_post()) {
         flash('error', $err);
     } else {
         // Aynı paket için bekleyen sipariş varsa güncelle, yoksa yeni oluştur
-        $existing = row("SELECT * FROM orders WHERE user_id = ? AND package_id = ? AND status IN ('pending','failed','awaiting_transfer') ORDER BY id DESC LIMIT 1", [$user['id'], $pkg['id']]);
+        $existing = row("SELECT * FROM orders WHERE user_id = ? AND package_id = ? AND status IN ('pending','failed') ORDER BY id DESC LIMIT 1", [$user['id'], $pkg['id']]);
         $data = ['voucher_code' => $f['voucher_code'] !== '' ? $f['voucher_code'] : null, 'voucher_amount' => $voucherUse > 0 ? $voucherUse : null] + $f
             + ['amount' => round((float) $pkg['price'] - $voucherUse, 2), 'package_name' => $pkg['name'], 'service_title' => $pkg['service_title'], 'updated_at' => now(), 'ip' => client_ip()];
         if ($existing) {
@@ -244,7 +190,7 @@ $pageTitle = 'Ödeme - Fatura Bilgileri';
 require __DIR__ . '/includes/header.php';
 ?>
 <section class="section"><div class="container">
-    <ol class="checkout-steps"><li class="active">Fatura Bilgileri</li><li>Sözleşme ve Onay</li><li>Güvenli Ödeme</li></ol>
+    <ol class="checkout-steps"><li class="active">Fatura Bilgileri</li><li>Sözleşme ve Ödeme</li><li>Onay</li></ol>
     <div class="checkout-grid">
         <div class="card">
             <h2 class="h3">Fatura ve İletişim Bilgileri</h2>

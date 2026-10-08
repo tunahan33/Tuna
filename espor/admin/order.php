@@ -24,13 +24,12 @@ if (is_post()) {
     $action = input('action');
     if ($action === 'status' && can('orders.status')) {
         $new = input('status');
-        if ($new === 'paid' && in_array($o['status'], ['pending', 'awaiting_transfer', 'failed'], true) && can('orders.cancel')) {
-            // Havale/EFT veya elden ödeme onayı: ödeme tarihi, iade çeki ve müşteri e-postası tek noktadan işlenir
-            require_once dirname(__DIR__) . '/includes/garanti.php';
-            $method = $o['payment_method'] === 'havale' ? 'Havale/EFT' : 'Manuel';
-            finalize_order($o, true, $method . ' ödemesi onaylandı (' . $u['name'] . ')', strtoupper($method === 'Havale/EFT' ? 'HAVALE' : 'MANUEL') . '-' . date('ymd'), ['mode' => 'manual', 'by' => $u['name']]);
-            insert('order_notes', ['order_id' => $id, 'user_id' => $u['id'], 'user_name' => $u['name'], 'note' => $method . ' ödemesi onaylandı: ' . ORDER_STATUSES[$o['status']][0] . ' → Ödendi', 'created_at' => now()]);
-            log_activity('Ödemeyi onayladı', $o['order_no'] . ' · ' . $method . ' · ' . money($o['amount']), 'order', $id);
+        if ($new === 'paid' && in_array($o['status'], ['pending', 'failed'], true) && can('orders.cancel')) {
+            // Site dışında alınan ödemenin onayı: ödeme tarihi, iade çeki ve müşteri e-postası tek noktadan işlenir
+            require_once dirname(__DIR__) . '/includes/payment.php';
+            finalize_order($o, true, 'Ödeme panelden onaylandı (' . $u['name'] . ')', 'MANUEL-' . date('ymd'), ['mode' => 'manual', 'by' => $u['name']]);
+            insert('order_notes', ['order_id' => $id, 'user_id' => $u['id'], 'user_name' => $u['name'], 'note' => 'Ödeme panelden onaylandı: ' . ORDER_STATUSES[$o['status']][0] . ' → Ödendi', 'created_at' => now()]);
+            log_activity('Ödemeyi onayladı', $o['order_no'] . ' · Manuel · ' . money($o['amount']), 'order', $id);
             flash('success', 'Ödeme onaylandı, müşteriye bilgilendirme e-postası gönderildi.');
         } elseif ($new !== $o['status'] && in_array($new, allowed_statuses($o), true)) {
             q('UPDATE orders SET status = ?, updated_at = ? WHERE id = ?', [$new, now(), $id]);
@@ -78,7 +77,7 @@ admin_header('Sipariş ' . $o['order_no'], status_badge($o['status']) . ' · ' .
             <dl class="dl-grid">
                 <dt>Hizmet</dt><dd><?= e($o['service_title']) ?></dd>
                 <dt>Paket</dt><dd><?= e($o['package_name']) ?></dd>
-                <dt>Ödeme Yöntemi</dt><dd><?= e(['havale' => 'Havale / EFT', 'kart' => 'Kredi / Banka Kartı', 'iade_ceki' => 'İade Çeki', 'garanti' => 'Kredi / Banka Kartı'][$o['payment_method'] ?? ''] ?? '-') ?><?= $o['status'] === 'awaiting_transfer' ? ' · <strong>Hesaba geçince durumu “Ödendi” yapın</strong>' : '' ?></dd>
+                <dt>Ödeme Yöntemi</dt><dd><?= e(['kart' => 'Kredi / Banka Kartı', 'iade_ceki' => 'İade Çeki'][$o['payment_method'] ?? ''] ?? ($o['status'] === 'paid' && str_starts_with((string) $o['payment_ref'], 'MANUEL') ? 'Panelden onaylandı' : '-')) ?></dd>
                 <dt>Tutar</dt><dd><strong class="big"><?= money($o['amount']) ?></strong> <small class="muted">KDV dahil</small></dd>
                 <?php if ($o['voucher_code']): ?><dt>İade Çeki</dt><dd><?= money($o['voucher_amount']) ?> <small class="muted">(<?= e($o['voucher_code']) ?>) · kartla ödenen: <?= money($o['amount']) ?></small></dd><?php endif; ?>
                 <?php if (can('vouchers.manage') && in_array($o['status'], ['paid', 'processing', 'cancelled', 'refunded'], true)): ?><dt></dt><dd><a class="btn btn-xs btn-outline" href="<?= url('admin/vouchers.php?siparis=' . urlencode($o['order_no'])) ?>">Bu sipariş için iade çeki tanımla</a></dd><?php endif; ?>
@@ -121,7 +120,7 @@ admin_header('Sipariş ' . $o['order_no'], status_badge($o['status']) . ' · ' .
                 <select name="status"><?php foreach ($allowed as $s): ?><option value="<?= $s ?>" <?= $s === $o['status'] ? 'selected' : '' ?>><?= e(ORDER_STATUSES[$s][0]) ?></option><?php endforeach; ?></select>
                 <button class="btn btn-dark btn-sm">Güncelle</button>
             </form>
-            <?php if (can('orders.cancel')): ?><p class="small muted">İade için tutarı Garanti BBVA Sanal POS ekranından iade edip durumu “İade Edildi” yapın.</p><?php endif; ?>
+            <?php if (can('orders.cancel')): ?><p class="small muted">İade için tutarı ödemenin alındığı yerden iade edip durumu “İade Edildi” yapın; dilerseniz İade Çekleri'nden iade çeki tanımlayın.</p><?php endif; ?>
         </section>
         <?php endif; ?>
         <?php if ($u['role'] === 'sales' && !$o['assigned_to']): ?>

@@ -1,6 +1,6 @@
 # GS Sportif Faaliyetler – E-Spor Koçluk Sitesi
 
-Sarı · kırmızı · antrasit temalı, Garanti BBVA Sanal POS uyumlu e-spor koçluk sitesi ve rol bazlı yönetim paneli.
+Sarı · kırmızı · antrasit temalı e-spor koçluk sitesi ve rol bazlı yönetim paneli.
 Saf PHP 8 + SQLite/MySQL; framework, Composer veya Node.js gerekmez. Her paylaşımlı hostinge kurulabilir.
 
 ## Bilgisayarında görmek ve yayınlamadan düzenlemek (VS Code)
@@ -96,7 +96,7 @@ Her şeyi sıfırlamak için: **Run Task → Siteyi sıfırla**.
 | Yeni süper admin atama | ✓ | – | – | – | – |
 | **Günlük sipariş ve satış raporu (gün gün, tek tek, Excel)** | ✓ | – | – | – | – |
 | **Aktivite akışı (kim, ne zaman, ne yaptı)** | ✓ | – | – | – | – |
-| **Site ve sanal POS ayarları** | ✓ | – | – | – | – |
+| **Site ayarları** | ✓ | – | – | – | – |
 
 **Yetki verme:** Panel → **Kullanıcılar & Yetkiler**. Siteye kaydolan her üye listede görünür; “Rol / Yetki” sütunundan
 Admin, Editör, Satış Temsilcisi veya Üye seçip **Kaydet**'e basmak yeterlidir (süper admin, Süper Admin de seçebilir; onay istenir).
@@ -121,26 +121,17 @@ Sipariş no + iade tutarı girilir; “%10 ekle” işaretliyse çek tutarı iad
 
 ## Müşteri nasıl öder?
 
-Paket → **Satın Al** → fatura bilgileri → sözleşme onayı ve **ödeme yöntemi** seçimi:
+Paket → **Satın Al** → fatura bilgileri → sözleşme onayı ve ödeme paneli.
 
-- **Kredi / Banka Kartı:** Garanti BBVA 3D Secure sayfasında ödenir, sipariş anında “Ödendi” olur.
-  Garanti bilgileri girilene kadar (DEMO modu) bu seçenek müşterilere gösterilmez; yalnızca panel personeli test için görür.
-- **Havale / EFT:** Panel → Site & Ödeme Ayarları → **Ödeme (Garanti & Havale)** sekmesine banka adı ve IBAN girilince açılır.
-  Müşteriye IBAN, tutar ve açıklama olarak yazacağı sipariş numarası gösterilir ve e-postayla gönderilir; sipariş
-  “Havale Bekleniyor” durumunda bekler. Para hesaba geçince Panel → Siparişler → sipariş → durumu **Ödendi** yapın
-  (yalnızca admin / süper admin); müşteriye onay e-postası gider ve sipariş satış raporlarına girer.
-- Hiçbir yöntem açık değilse ödeme düğmesi pasif olur ve müşteri iletişime yönlendirilir.
+Şu anda **bağlı bir ödeme sağlayıcısı yoktur**: müşteri siparişini oluşturup sözleşmeleri onaylayabilir, sipariş
+“Ödeme Bekliyor” olarak kaydedilir ve ödeme panelinde “Online ödeme çok yakında aktif” bilgisi görünür; kartla tahsilat yapılmaz.
+Bekleyen siparişler Panel → **Siparişler**'de görünür; ekip müşteriyle iletişime geçebilir. Site dışında alınan bir ödemeyi
+onaylamak için siparişin durumunu **Ödendi** yapın (yalnızca admin / süper admin): müşteriye onay e-postası gider,
+sipariş satış raporlarına girer. Tamamı iade çekiyle karşılanan siparişler ödeme olmadan tamamlanır.
 
-## Garanti BBVA Sanal POS başvurusu
-
-Panel → **Site & Ödeme Ayarları** sayfasının sağındaki **Garanti Sanal POS Başvuru Kontrolü** listesi eksikleri gösterir.
-Başvurudan önce:
-1. Alan adı + SSL (https) ile siteyi yayına al (aşağıya bak).
-2. Firma Bilgileri sekmesinde ünvan, adres, telefon, vergi dairesi/no, MERSİS, KEP bilgilerini gir.
-3. Bankaya bildirilecek dönüş adresi: `https://alanadiniz.com/odeme-sonuc.php`
-4. Onay gelince Ödeme sekmesine Üye İşyeri No, Terminal No, Provizyon şifresi ve 3D Store Key gir; modu **TEST**, denemeler bitince **CANLI** yap.
-
-Kart bilgileri hiçbir zaman sunucuya gelmez ve saklanmaz (3D OOS Pay: kart bankanın sayfasında girilir).
+**Ödeme sağlayıcısı bağlamak:** `includes/payment.php` dosyasındaki `payment_provider_active()` ve sağlayıcının yönlendirme
+adımı doldurulur; dönüş adresi olarak `odeme-sonuc.php` kullanılır ve sonuç `finalize_order()` ile siparişe işlenir.
+Başvuru için gereken yasal sayfaların durumu Panel → Site & Ödeme Ayarları'ndaki **Sanal POS / Ödeme Kuruluşu Başvuru Kontrolü** listesindedir.
 
 ## Sunucuya kurulum (gssportiffaaliyetler.com)
 
@@ -169,7 +160,6 @@ yayılınca (15 dk – birkaç saat) `bash kurulum.sh ssl` komutunu çalıştır
 **4. Sonraki güncellemeler:** `bash kurulum.sh guncelle` (önce yedek alır; ayarlar, siparişler ve üyeler korunur).
 
 Veritabanı şifresi sunucuda `/root/gssportif-bilgiler.txt`, gece yedekleri `/var/backups/gssportif/` klasöründedir.
-Garanti BBVA'ya bildirilecek dönüş adresi: `https://www.gssportiffaaliyetler.com/odeme-sonuc.php`
 
 > Güvenlik: kurulumdan sonra sunucuda `passwd` yazarak root şifresini en az 16 karakterli güçlü bir şifreyle değiştir.
 
