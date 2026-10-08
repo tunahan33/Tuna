@@ -18,6 +18,14 @@ $groups = [
         'tax_office' => ['Vergi Dairesi', 'text'], 'tax_number' => ['Vergi No / T.C. Kimlik No (şahıs şirketi)', 'text'],
         'mersis_number' => ['MERSİS No (şahıs şirketinde "-" yazılabilir)', 'text'], 'kep_address' => ['KEP Adresi', 'text'],
     ]],
+    'transfer' => ['Havale / EFT', [
+        'transfer_enabled' => ['Havale / EFT ile ödeme', 'select', ['1' => 'Açık - müşteriler havale ile ödeyebilir', '0' => 'Kapalı']],
+        'bank_name' => ['Banka Adı', 'text'],
+        'bank_account_holder' => ['Hesap Sahibi (ünvanla aynı olmalı)', 'text'],
+        'bank_iban' => ['IBAN (TR ile başlayan 26 karakter)', 'text'],
+        'bank_note' => ['Müşteriye gösterilecek not', 'textarea'],
+        'transfer_days' => ['Ödeme için süre (gün; sonra sipariş iptal edilebilir)', 'text'],
+    ]],
     'pos' => ['Ödeme (Garanti Sanal POS)', [
         'pos_mode' => ['Çalışma Modu', 'select', ['demo' => 'DEMO (banka bağlantısı yok, test simülasyonu)', 'test' => 'TEST (Garanti test ortamı)', 'prod' => 'CANLI (gerçek tahsilat)']],
         'garanti_security_level' => ['3D Modeli', 'select', ['3D_OOS_PAY' => '3D OOS Pay - Bankanın ortak ödeme sayfası (önerilen)', '3D_PAY' => '3D Pay - Kart formu sitede, veriler doğrudan bankaya']],
@@ -99,6 +107,11 @@ if (is_post()) {
         $val = trim((string) ($_POST[$key] ?? ''));
         if ($def[1] === 'secret' && $val === '') continue; // boş bırakılırsa mevcut korunur
         if ($def[1] === 'select' && !isset($def[2][$val])) continue;
+        if ($key === 'bank_iban' && $val !== '') {
+            $val = strtoupper(preg_replace('/\s+/', '', $val));
+            if (!preg_match('/^TR\d{24}$/', $val)) { flash('error', 'IBAN TR ile başlamalı ve 26 karakter olmalıdır.'); continue; }
+            $val = trim(chunk_split($val, 4, ' '));
+        }
         if ($val !== setting($key)) {
             save_setting($key, mb_substr($val, 0, 2000));
             $changed[] = $def[1] === 'secret' ? $def[0] . ' (gizli)' : $def[0];

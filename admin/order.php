@@ -32,6 +32,13 @@ if (is_post()) {
         } else {
             flash('error', 'Bu durum değişikliği için yetkiniz yok.');
         }
+    } elseif ($action === 'confirm_transfer' && can('orders.cancel') && $o['status'] === 'transfer') {
+        require_once dirname(__DIR__) . '/includes/garanti.php';
+        $ref = mb_substr(trim(input('transfer_ref')) ?: 'HAVALE', 0, 100);
+        finalize_order($o, true, 'Havale / EFT ödemesi onaylandı (' . $u['name'] . ')', $ref, ['method' => 'havale', 'confirmed_by' => $u['name']]);
+        insert('order_notes', ['order_id' => $id, 'user_id' => $u['id'], 'user_name' => $u['name'], 'note' => 'Havale ödemesi hesaba ulaştı, onaylandı. Ref: ' . $ref, 'created_at' => now()]);
+        log_activity('Havale ödemesini onayladı', $o['order_no'] . ' · ' . money($o['amount']) . ' · Ref: ' . $ref, 'order', $id);
+        flash('success', 'Ödeme onaylandı, sipariş “Ödendi” oldu ve müşteriye e-posta gönderildi.');
     } elseif ($action === 'note' && ($note = input('note')) !== '') {
         insert('order_notes', ['order_id' => $id, 'user_id' => $u['id'], 'user_name' => $u['name'], 'note' => mb_substr($note, 0, 2000), 'created_at' => now()]);
         log_activity('Siparişe not ekledi', $o['order_no'] . ': ' . mb_strimwidth($note, 0, 80, '…'), 'order', $id);
@@ -103,6 +110,18 @@ admin_header('Sipariş ' . $o['order_no'], status_badge($o['status']) . ' · ' .
         <?php endif; ?>
     </div>
     <div>
+        <?php if ($o['status'] === 'transfer'): ?>
+        <section class="panel transfer-panel">
+            <h3>🏦 Havale Bekleniyor</h3>
+            <p class="small">Müşteri <strong><?= money($o['amount']) ?></strong> tutarını açıklamaya <strong><?= e($o['order_no']) ?></strong> yazarak havale edecek. Banka hesabınızı kontrol edin.</p>
+            <?php if (can('orders.cancel')): ?>
+            <form method="post" class="form" data-confirm="Ödemenin hesaba ulaştığını onaylıyor musunuz?"><?= csrf_field() ?><input type="hidden" name="action" value="confirm_transfer">
+                <input name="transfer_ref" placeholder="Dekont / işlem no (isteğe bağlı)">
+                <button class="btn btn-primary btn-sm">Havale Ulaştı — Ödendi Yap</button>
+            </form>
+            <?php else: ?><p class="small muted">Ödeme onayını Admin veya Süper Admin yapar.</p><?php endif; ?>
+        </section>
+        <?php endif; ?>
         <?php if (can('orders.status') && ($allowed = allowed_statuses($o))): ?>
         <section class="panel">
             <h3>Durumu Güncelle</h3>

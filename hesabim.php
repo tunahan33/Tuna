@@ -56,6 +56,9 @@ require __DIR__ . '/includes/header.php';
                         <td><?= status_badge($o['status']) ?></td>
                         <td><?php if (in_array($o['status'], ['pending', 'failed'], true)): ?><a class="btn btn-primary btn-xs" href="<?= url('odeme.php?siparis=' . urlencode($o['order_no'])) ?>">Öde</a><?php endif; ?></td>
                     </tr>
+                    <?php if ($o['status'] === 'transfer'): ?>
+                    <tr><td colspan="6"><div class="small"><strong>Havale bekleniyor.</strong> Ödemenizi aşağıdaki hesaba yapabilirsiniz:</div><?= transfer_info_html($o) ?></td></tr>
+                    <?php endif; ?>
                 <?php endforeach; ?>
                 </tbody>
             </table></div>

@@ -24,7 +24,7 @@ if ($orderNo = input('siparis')) {
         flash('error', 'Sipariş bulunamadı.');
         redirect('hesabim.php');
     }
-    if (!in_array($order['status'], ['pending', 'failed'], true)) {
+    if (!in_array($order['status'], ['pending', 'failed', 'transfer'], true)) {
         redirect('odeme-sonuc.php?no=' . urlencode($order['order_no']) . '&t=' . order_access_token($order));
     }
 
@@ -33,6 +33,25 @@ if ($orderNo = input('siparis')) {
         if (!input('accept_pre') || !input('accept_contract') || !input('accept_start')) {
             flash('error', 'Ödemeye geçmek için tüm sözleşme onaylarını işaretlemelisiniz.');
             redirect('odeme.php?siparis=' . urlencode($order['order_no']));
+        }
+        $method = input('method') === 'transfer' ? 'transfer' : 'card';
+        if (($method === 'card' && !card_payment_available()) || ($method === 'transfer' && !transfer_enabled())) {
+            flash('error', 'Seçtiğiniz ödeme yöntemi şu anda kullanılamıyor. Lütfen diğer yöntemi seçin veya bizimle iletişime geçin.');
+            redirect('odeme.php?siparis=' . urlencode($order['order_no']));
+        }
+        if ($method === 'transfer') {
+            q('UPDATE orders SET status = ?, payment_method = ?, contract_accepted_at = ?, ip = ?, updated_at = ? WHERE id = ?', ['transfer', 'havale', now(), client_ip(), now(), $order['id']]);
+            $order = row('SELECT * FROM orders WHERE id = ?', [$order['id']]);
+            log_activity('Havale / EFT ile ödemeyi seçti', $order['order_no'] . ' · ' . money($order['amount']), 'order', (int) $order['id']);
+            send_mail($order['customer_email'], 'Siparişiniz alındı - Havale bilgileri (' . $order['order_no'] . ')',
+                '<p>Merhaba ' . e($order['customer_name']) . ',</p><p><b>' . e($order['service_title']) . ' - ' . e($order['package_name']) . '</b> siparişiniz alındı. Ödemenizi aşağıdaki hesaba yapabilirsiniz:</p>' . transfer_info_html($order));
+            send_mail(setting('notify_email'), 'Havale bekleyen sipariş: ' . $order['order_no'] . ' (' . money($order['amount']) . ')',
+                '<p>' . e($order['customer_name']) . ' · ' . e($order['customer_phone']) . '</p><p>' . e($order['service_title']) . ' / ' . e($order['package_name']) . '</p><p>Ödeme hesaba geçince panelden “Havale ulaştı” ile onaylayın.</p>');
+            redirect('odeme-sonuc.php?no=' . urlencode($order['order_no']) . '&t=' . order_access_token($order));
+        }
+        if ($order['status'] === 'transfer') {
+            q('UPDATE orders SET status = ?, payment_method = NULL, updated_at = ? WHERE id = ?', ['pending', now(), $order['id']]);
+            $order['status'] = 'pending';
         }
         // Başarısız bir denemeden sonra bankaya yeni sipariş numarası ile gidilir
         if ($order['status'] === 'failed') {
@@ -50,7 +69,7 @@ if ($orderNo = input('siparis')) {
         require __DIR__ . '/includes/header.php';
         echo '<section class="section"><div class="container narrow-sm"><div class="card center">';
         if ($mode === 'demo') {
-            echo '<h1 class="h2">Demo Ödeme</h1><p>Site şu anda <b>demo modunda</b>. Garanti BBVA bilgileri girildiğinde bu adımda bankanın 3D Secure ödeme sayfası açılır.</p>';
+            echo '<h1 class="h2">Demo Ödeme (Yalnızca Personel)</h1><p>Site <b>demo modunda</b>. Bu ekranı yalnızca yönetim paneli yetkisi olan personel görür; müşteriler kartla ödeme seçeneğini Garanti bilgileri girilene kadar göremez.</p>';
             echo '<form method="post" action="' . url('odeme-demo.php') . '" class="form">' . csrf_field() . '<input type="hidden" name="order_no" value="' . e($order['order_no']) . '">';
             echo '<button name="result" value="success" class="btn btn-primary btn-block">Başarılı Ödeme Simüle Et</button> <button name="result" value="fail" class="btn btn-outline btn-block">Başarısız Ödeme Simüle Et</button></form>';
         } elseif (garanti_security_level() === '3D_OOS_PAY') {
@@ -99,8 +118,22 @@ if ($orderNo = input('siparis')) {
                     <label class="check"><input type="checkbox" name="accept_pre" value="1" required> <span>Ön Bilgilendirme Formu'nu okudum ve onaylıyorum.</span></label>
                     <label class="check"><input type="checkbox" name="accept_contract" value="1" required> <span>Mesafeli Satış Sözleşmesi'ni ve <a href="<?= url('sayfa.php?s=iptal-ve-iade-kosullari') ?>" target="_blank">İptal ve İade Koşulları</a>'nı okudum, kabul ediyorum.</span></label>
                     <label class="check"><input type="checkbox" name="accept_start" value="1" required> <span>Hizmetin cayma süresi içinde başlatılmasını talep ediyorum; hizmet başladıktan sonra cayma hakkımın kalmayacağını biliyorum.</span></label>
-                    <button class="btn btn-primary btn-lg btn-block"><?= money($order['amount']) ?> Öde</button>
-                    <p class="small muted center">Ödeme sayfasında Garanti BBVA 3D Secure doğrulaması yapılacaktır.</p>
+                    <?php $cardOk = card_payment_available(); $trOk = transfer_enabled(); ?>
+                    <h3 class="mt-1">Ödeme Yöntemi</h3>
+                    <?php if (!$cardOk && !$trOk): ?>
+                        <div class="alert alert-info">Online ödeme altyapımız kısa süre içinde aktif olacak. Siparişinizi tamamlamak için lütfen <a href="<?= url('iletisim.php') ?>">bizimle iletişime geçin</a> ya da <?= e(setting('company_phone')) ?> numarasını arayın.</div>
+                    <?php else: ?>
+                        <div class="pay-methods">
+                            <?php if ($cardOk): ?>
+                                <label><input type="radio" name="method" value="card" <?= $order['status'] !== 'transfer' || !$trOk ? 'checked' : '' ?> required><span><strong>💳 Kredi / Banka Kartı</strong><small>Garanti BBVA 3D Secure ile anında onay<?= pos_mode() === 'demo' ? ' · DEMO (yalnızca personel)' : '' ?></small></span></label>
+                            <?php endif; ?>
+                            <?php if ($trOk): ?>
+                                <label><input type="radio" name="method" value="transfer" <?= !$cardOk || $order['status'] === 'transfer' ? 'checked' : '' ?> required><span><strong>🏦 Havale / EFT</strong><small><?= e(setting('bank_name')) ?> hesabımıza ödeme; ödemeniz ulaştığında siparişiniz onaylanır</small></span></label>
+                            <?php endif; ?>
+                        </div>
+                        <button class="btn btn-primary btn-lg btn-block"><?= money($order['amount']) ?> Siparişi Tamamla</button>
+                        <p class="small muted center">Kartla ödemede Garanti BBVA 3D Secure doğrulaması yapılır. Kart bilgileriniz sitemizde saklanmaz.</p>
+                    <?php endif; ?>
                 </form>
             </div>
             <aside class="card summary">

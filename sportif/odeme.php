@@ -73,8 +73,10 @@ if ($orderNo = input('siparis')) {
         $pageTitle = 'Güvenli Ödeme';
         require __DIR__ . '/includes/header.php';
         echo '<section class="section"><div class="container narrow-sm"><div class="card center">';
-        if (pos_mode() === 'demo') {
-            echo '<h1 class="h2">Demo Ödeme</h1><p>Mağaza şu anda <b>demo modunda</b>. Garanti BBVA bilgileri girildiğinde bu adımda bankanın 3D Secure ödeme sayfası açılır.</p>';
+        if (pos_mode() === 'demo' && !can('panel.access')) {
+            echo '<h1 class="h2">Online ödeme yakında</h1><p>Kartla ödeme altyapımız kısa süre içinde aktif olacak. Siparişinizi tamamlamak için lütfen bizimle iletişime geçin: <b>' . e(setting('company_phone')) . '</b> · <a href="' . url('iletisim.php') . '">İletişim formu</a></p>';
+        } elseif (pos_mode() === 'demo') {
+            echo '<h1 class="h2">Demo Ödeme (Yalnızca Personel)</h1><p>Mağaza <b>demo modunda</b>. Bu ekranı yalnızca personel görür; Garanti BBVA bilgileri girildiğinde bu adımda bankanın 3D Secure ödeme sayfası açılır.</p>';
             echo '<form method="post" action="' . url('odeme-demo.php') . '" class="form">' . csrf_field() . '<input type="hidden" name="order_no" value="' . e($order['order_no']) . '">';
             echo '<button name="result" value="success" class="btn btn-primary btn-block">Başarılı Ödeme Simüle Et</button> <button name="result" value="fail" class="btn btn-outline btn-block">Başarısız Ödeme Simüle Et</button></form>';
         } elseif (garanti_security_level() === '3D_OOS_PAY') {

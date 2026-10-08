@@ -39,11 +39,15 @@ $pageTitle = $ok ? 'Ödeme Başarılı' : 'Ödeme Sonucu';
 require __DIR__ . '/includes/header.php';
 ?>
 <section class="section"><div class="container narrow-sm">
-    <div class="card center result-card <?= $ok ? 'ok' : 'fail' ?>">
-        <div class="result-icon"><?= $ok ? '✓' : '!' ?></div>
+    <div class="card center result-card <?= $ok ? 'ok' : ($order['status'] === 'transfer' ? 'wait' : 'fail') ?>">
+        <div class="result-icon"><?= $ok ? '✓' : ($order['status'] === 'transfer' ? '🏦' : '!') ?></div>
         <?php if ($ok): ?>
             <h1 class="h2">Ödemeniz alındı, teşekkürler!</h1>
             <p><b><?= e($order['service_title']) ?> - <?= e($order['package_name']) ?></b> siparişiniz onaylandı. Danışmanınız en geç 3 iş günü içinde sizinle iletişime geçecek.</p>
+        <?php elseif ($order['status'] === 'transfer'): ?>
+            <h1 class="h2">Siparişiniz alındı, ödemenizi bekliyoruz</h1>
+            <p><b><?= e($order['service_title']) ?> - <?= e($order['package_name']) ?></b> için ödemenizi aşağıdaki hesaba havale / EFT ile yapabilirsiniz. Bu bilgiler e-posta adresinize de gönderildi.</p>
+            <?= transfer_info_html($order) ?>
         <?php elseif ($order['status'] === 'pending'): ?>
             <h1 class="h2">Ödeme bekleniyor</h1>
             <p>Siparişiniz için henüz ödeme tamamlanmadı.</p>
@@ -56,7 +60,7 @@ require __DIR__ . '/includes/header.php';
             <dt>Tutar</dt><dd><?= money($order['amount']) ?></dd>
             <dt>Durum</dt><dd><?= status_badge($order['status']) ?></dd>
         </dl>
-        <?php if ($ok): ?>
+        <?php if ($ok || $order['status'] === 'transfer'): ?>
             <a class="btn btn-primary" href="<?= url('hesabim.php') ?>">Siparişlerim</a>
         <?php else: ?>
             <a class="btn btn-primary" href="<?= url('odeme.php?siparis=' . urlencode($order['order_no'])) ?>">Tekrar Dene</a>

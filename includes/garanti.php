@@ -129,7 +129,7 @@ function garanti_error_message(array $post): string
 /** Ödeme sonucunu siparişe işler (banka ve demo modu ortak) */
 function finalize_order(array $order, bool $success, string $message, ?string $ref, array $raw = []): array
 {
-    if (!in_array($order['status'], ['pending', 'failed'], true)) {
+    if (!in_array($order['status'], ['pending', 'failed', 'transfer'], true)) {
         return $order; // tekrar işlenmesin
     }
     // Hassas alanları kaydetme

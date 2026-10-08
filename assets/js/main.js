@@ -86,3 +86,12 @@
         });
     }
 })();
+
+// Kopyala butonları (IBAN, sipariş no)
+document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-copy]');
+    if (!b || !navigator.clipboard) return;
+    navigator.clipboard.writeText(b.getAttribute('data-copy')).then(function () {
+        var t = b.textContent; b.textContent = 'Kopyalandı ✓'; setTimeout(function () { b.textContent = t; }, 1500);
+    });
+});

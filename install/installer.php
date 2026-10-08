@@ -89,6 +89,8 @@ function install_run(array $config, array $admin): void
         'notify_email' => $email,
         'mail_driver' => 'mail', 'smtp_host' => 'mail.gsprojeler.com', 'smtp_port' => '465', 'smtp_secure' => 'ssl', 'smtp_user' => 'info@gsprojeler.com', 'smtp_pass' => '', 'smtp_from' => 'info@gsprojeler.com',
         'force_https' => '0',
+        'transfer_enabled' => '0', 'bank_name' => '', 'bank_account_holder' => '', 'bank_iban' => '', 'transfer_days' => '3',
+        'bank_note' => 'Ödemeniz hesabımıza ulaştığında siparişiniz onaylanır ve e-posta ile bilgilendirilirsiniz. Ödeme 3 gün içinde yapılmazsa sipariş iptal edilebilir.',
     ];
     foreach ($defaults as $k => $v) {
         if (!row('SELECT skey FROM settings WHERE skey = ?', [$k])) {

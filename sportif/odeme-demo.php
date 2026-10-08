@@ -4,7 +4,8 @@ require __DIR__ . '/includes/bootstrap.php';
 require __DIR__ . '/includes/garanti.php';
 
 $user = require_login();
-if (pos_mode() !== 'demo' || !is_post()) {
+// Demo simülasyonu yalnızca yönetim paneli yetkisi olan personel içindir; müşteriler kullanamaz.
+if (pos_mode() !== 'demo' || !is_post() || !can('panel.access')) {
     http_response_code(403);
     exit('Demo ödeme kapalı.');
 }
