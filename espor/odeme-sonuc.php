@@ -35,15 +35,21 @@ if (!$order || !hash_equals(order_access_token($order), (string) input('t'))) {
     exit('Sipariş bulunamadı.');
 }
 $ok = in_array($order['status'], SALE_STATUSES, true);
-$pageTitle = $ok ? 'Ödeme Başarılı' : 'Ödeme Sonucu';
+$pageTitle = $ok ? 'Ödeme Başarılı' : ($order['status'] === 'awaiting_transfer' ? 'Havale Bilgileri' : 'Ödeme Sonucu');
 require __DIR__ . '/includes/header.php';
 ?>
 <section class="section"><div class="container narrow-sm">
-    <div class="card center result-card <?= $ok ? 'ok' : 'fail' ?>">
-        <div class="result-icon"><?= $ok ? '✓' : '!' ?></div>
+    <?php $wait = $order['status'] === 'awaiting_transfer'; ?>
+    <div class="card center result-card <?= $ok ? 'ok' : ($wait ? 'wait' : 'fail') ?>">
+        <div class="result-icon"><?= $ok ? '✓' : ($wait ? '⧗' : '!') ?></div>
         <?php if ($ok): ?>
             <h1 class="h2">Ödemeniz alındı, teşekkürler!</h1>
             <p><b><?= e($order['service_title']) ?> - <?= e($order['package_name']) ?></b> siparişiniz onaylandı. Koçunuz en geç 24 saat içinde sizinle iletişime geçerek ilk dersinizi planlayacak.</p>
+        <?php elseif ($order['status'] === 'awaiting_transfer'): ?>
+            <h1 class="h2">Siparişiniz alındı</h1>
+            <p><b><?= e($order['service_title']) ?> - <?= e($order['package_name']) ?></b> siparişinizi tamamlamak için ödemenizi aşağıdaki hesaba yapın. <b>Açıklama kısmına sipariş numaranızı yazmayı unutmayın.</b></p>
+            <div class="bank-wrap"><?= transfer_info_html($order) ?></div>
+            <p class="small muted">Ödemeniz hesabımıza geçtiğinde (genellikle aynı iş günü) siparişiniz onaylanır, e-posta ile bilgilendirilirsiniz ve koçunuz sizinle iletişime geçer. 3 iş günü içinde ödemesi yapılmayan siparişler iptal edilir. Bu bilgiler e-posta adresinize de gönderildi.</p>
         <?php elseif ($order['status'] === 'pending'): ?>
             <h1 class="h2">Ödeme bekleniyor</h1>
             <p>Siparişiniz için henüz ödeme tamamlanmadı.</p>
@@ -58,6 +64,9 @@ require __DIR__ . '/includes/header.php';
         </dl>
         <?php if ($ok): ?>
             <a class="btn btn-primary" href="<?= url('hesabim.php') ?>">Siparişlerim</a>
+        <?php elseif ($order['status'] === 'awaiting_transfer'): ?>
+            <a class="btn btn-primary" href="<?= url('hesabim.php') ?>">Siparişlerim</a>
+            <?php if (card_payment_available()): ?><a class="btn btn-outline" href="<?= url('odeme.php?siparis=' . urlencode($order['order_no'])) ?>">Kartla Ödemek İstiyorum</a><?php endif; ?>
         <?php else: ?>
             <a class="btn btn-primary" href="<?= url('odeme.php?siparis=' . urlencode($order['order_no'])) ?>">Tekrar Dene</a>
             <a class="btn btn-outline" href="<?= url('iletisim.php') ?>">Destek Al</a>

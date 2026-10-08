@@ -56,7 +56,7 @@ require __DIR__ . '/includes/header.php';
                         <td><?= e($o['service_title']) ?><br><small class="muted"><?= e($o['package_name']) ?></small></td>
                         <td><?= money($o['amount']) ?><?= $o['voucher_code'] ? '<br><small class="muted">+ ' . money($o['voucher_amount']) . ' iade çeki</small>' : '' ?></td>
                         <td><?= status_badge($o['status']) ?></td>
-                        <td><?php if (in_array($o['status'], ['pending', 'failed'], true)): ?><a class="btn btn-primary btn-xs" href="<?= url('odeme.php?siparis=' . urlencode($o['order_no'])) ?>">Öde</a><?php endif; ?></td>
+                        <td><?php if ($o['status'] === 'awaiting_transfer'): ?><a class="btn btn-primary btn-xs" href="<?= url('odeme-sonuc.php?no=' . urlencode($o['order_no']) . '&t=' . order_access_token($o)) ?>">Ödeme Bilgileri</a><?php elseif (in_array($o['status'], ['pending', 'failed'], true)): ?><a class="btn btn-primary btn-xs" href="<?= url('odeme.php?siparis=' . urlencode($o['order_no'])) ?>">Öde</a><?php endif; ?></td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>

@@ -4,7 +4,7 @@
  * bir kez çalışır; db_version ayarı hangi adımların uygulandığını tutar.
  */
 
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 /** Firma bilgileri (vergi levhası) — yalnızca panelden henüz doldurulmamış alanlara yazılır */
 const COMPANY_DEFAULTS = [
@@ -60,6 +60,9 @@ function db_upgrade(): void
     if ($ver < 3) {
         db_upgrade_v3();
     }
+    if ($ver < 4) {
+        db_upgrade_v4();
+    }
     save_setting('db_version', (string) DB_VERSION);
 }
 
@@ -93,4 +96,32 @@ function db_upgrade_v3(): void
     q('UPDATE packages SET price = 25000 WHERE price < 25000');
     q('UPDATE packages SET old_price = NULL WHERE old_price IS NOT NULL AND old_price <= price');
     log_activity('Sistem güncellemesi', 'Firma bilgileri (vergi levhası) ve yeni paket fiyatları uygulandı', 'system', null, ['id' => null, 'name' => 'Sistem', 'role' => 'system']);
+}
+
+/** v4: Havale/EFT ile ödeme — varsayılan ayarlar ve sözleşmelerdeki ödeme/iade maddeleri */
+function db_upgrade_v4(): void
+{
+    if (setting('havale_enabled') === '') {
+        save_setting('havale_enabled', '1');
+    }
+    if (setting_is_placeholder((string) setting('bank_holder'))) {
+        save_setting('bank_holder', (string) setting('company_title'));
+    }
+    $pairs = [
+        ['<strong>Ödeme Şekli:</strong> Kredi kartı / banka kartı ile tek çekim (Garanti BBVA Sanal POS, 3D Secure)', '<strong>Ödeme Şekli:</strong> {{odeme_sekli}}'],
+        ['Onaylanan iadeler, en geç <strong>14 gün</strong> içinde ödemenin yapıldığı kredi kartına / banka kartına Garanti BBVA sanal POS üzerinden iade edilir.', 'Onaylanan iadeler, en geç <strong>14 gün</strong> içinde kartla yapılan ödemelerde ödemenin yapıldığı kredi kartına / banka kartına Garanti BBVA sanal POS üzerinden, Havale/EFT ile yapılan ödemelerde ise Alıcı adına kayıtlı IBAN\'a iade edilir.'],
+        ['Nakit veya havale ile iade yapılmaz.', 'Nakit iade yapılmaz.'],
+        ['tahsil edilen bedeli, ödemede kullanılan karta iade eder.', 'tahsil edilen bedeli kartla yapılan ödemelerde ödemede kullanılan karta, Havale/EFT ile yapılan ödemelerde Alıcı\'nın bildireceği kendi adına kayıtlı IBAN\'a iade eder.'],
+        ['5.3. Ödeme işlemi Garanti BBVA sanal POS altyapısı ile 3D Secure doğrulamalı olarak gerçekleştirilir. Kart bilgileri Satıcı tarafından görülmez ve saklanmaz.', '5.3. Kartla ödemeler Garanti BBVA sanal POS altyapısı ile 3D Secure doğrulamalı olarak gerçekleştirilir; kart bilgileri Satıcı tarafından görülmez ve saklanmaz. Havale/EFT ile ödemelerde sözleşme, bedelin Satıcı hesabına geçtiği tarihte ifaya başlanır; 3 iş günü içinde ödemesi yapılmayan siparişler iptal edilir.'],
+        ['Visa, Mastercard ve Troy logolu tüm kredi kartları ve banka kartları ile Garanti BBVA güvencesinde 3D Secure doğrulamalı ödeme yapabilirsiniz. Kart bilgileriniz sitemizde saklanmaz.', 'Visa, Mastercard ve Troy logolu tüm kredi kartları ve banka kartları ile Garanti BBVA güvencesinde 3D Secure doğrulamalı ödeme yapabilirsiniz. Kart bilgileriniz sitemizde saklanmaz. Dilerseniz Havale/EFT ile de ödeyebilirsiniz; banka hesap bilgilerimiz ödeme adımında ve e-posta ile iletilir.'],
+    ];
+    foreach (rows('SELECT id, content FROM pages') as $p) {
+        $new = $p['content'];
+        foreach ($pairs as [$a, $b]) {
+            $new = str_replace($a, $b, $new);
+        }
+        if ($new !== $p['content']) {
+            q('UPDATE pages SET content = ?, updated_at = ? WHERE id = ?', [$new, now(), $p['id']]);
+        }
+    }
 }

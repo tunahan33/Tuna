@@ -18,12 +18,15 @@ $groups = [
         'tax_office' => ['Vergi Dairesi', 'text'], 'tax_number' => ['Vergi No / T.C. Kimlik No (şahıs şirketi)', 'text'],
         'mersis_number' => ['MERSİS No (şahıs şirketinde "-" yazılabilir)', 'text'], 'kep_address' => ['KEP Adresi', 'text'],
     ]],
-    'pos' => ['Ödeme (Garanti Sanal POS)', [
+    'pos' => ['Ödeme (Garanti & Havale)', [
         'pos_mode' => ['Çalışma Modu', 'select', ['demo' => 'DEMO (banka bağlantısı yok, test simülasyonu)', 'test' => 'TEST (Garanti test ortamı)', 'prod' => 'CANLI (gerçek tahsilat)']],
         'garanti_security_level' => ['3D Modeli', 'select', ['3D_OOS_PAY' => '3D OOS Pay - Bankanın ortak ödeme sayfası (önerilen)', '3D_PAY' => '3D Pay - Kart formu sitede, veriler doğrudan bankaya']],
         'garanti_merchant_id' => ['Üye İşyeri No (Merchant ID)', 'text'], 'garanti_terminal_id' => ['Terminal No (Terminal ID)', 'text'],
         'garanti_prov_user' => ['Provizyon Kullanıcısı', 'text'], 'garanti_prov_password' => ['Provizyon Şifresi', 'secret'],
         'garanti_store_key' => ['3D Secure Anahtarı (Store Key)', 'secret'],
+        'havale_enabled' => ['Havale / EFT ile Ödeme', 'select', ['1' => 'Açık (IBAN girildiyse müşteriye gösterilir)', '0' => 'Kapalı']],
+        'bank_name' => ['Banka Adı (Havale/EFT)', 'text'], 'bank_holder' => ['Hesap Sahibi (ticari ünvanla aynı olmalı)', 'text'],
+        'bank_iban' => ['IBAN (TR ile başlayan 26 karakter)', 'text'],
     ]],
     'mail' => ['E-posta (SMTP)', [
         'mail_driver' => ['Gönderim Yöntemi', 'select', ['mail' => 'PHP mail() - hostingin varsayılan gönderimi', 'smtp' => 'SMTP - e-posta hesabı ile doğrulamalı gönderim (önerilen)']],

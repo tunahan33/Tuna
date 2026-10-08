@@ -126,10 +126,49 @@ function garanti_error_message(array $post): string
     return mb_substr($msg ?: 'Ödeme banka tarafından onaylanmadı.', 0, 500);
 }
 
+/**
+ * Kartla ödeme müşteriye açık mı? DEMO modunda (Garanti bilgileri girilmeden) gerçek tahsilat
+ * olmadığından kart seçeneği yalnızca panel personeline test amacıyla gösterilir.
+ */
+function card_payment_available(): bool
+{
+    return pos_mode() !== 'demo' || can('panel.access');
+}
+
+/** Havale/EFT seçeneği açık ve IBAN girilmiş mi? */
+function transfer_payment_available(): bool
+{
+    return setting('havale_enabled', '1') === '1' && strlen(preg_replace('/\s+/', '', setting('bank_iban'))) >= 26;
+}
+
+/** Sözleşmelerde gösterilen ödeme şekli metni */
+function payment_methods_text(?array $order = null): string
+{
+    if ($order && ($order['payment_method'] ?? '') === 'havale') {
+        return 'Havale / EFT (' . setting('bank_name') . ', ' . setting('bank_iban') . ')';
+    }
+    $m = [];
+    if (pos_mode() !== 'demo') $m[] = 'Kredi kartı / banka kartı ile tek çekim (Garanti BBVA Sanal POS, 3D Secure)';
+    if (transfer_payment_available()) $m[] = 'Havale / EFT';
+    return $m ? implode(' veya ', $m) . ' — ödeme adımında Alıcı tarafından seçilir' : 'Kredi kartı / banka kartı (Garanti BBVA Sanal POS, 3D Secure) veya Havale / EFT';
+}
+
+/** Havale bilgileri kutusu (sonuç sayfası ve e-posta) */
+function transfer_info_html(array $order): string
+{
+    return '<table class="bank-box" style="border-collapse:collapse">'
+        . '<tr><th style="text-align:left;padding:4px 12px 4px 0">Banka</th><td>' . e(setting('bank_name')) . '</td></tr>'
+        . '<tr><th style="text-align:left;padding:4px 12px 4px 0">Hesap Sahibi</th><td>' . e(setting('bank_holder') ?: setting('company_title')) . '</td></tr>'
+        . '<tr><th style="text-align:left;padding:4px 12px 4px 0">IBAN</th><td><strong data-copy>' . e(setting('bank_iban')) . '</strong></td></tr>'
+        . '<tr><th style="text-align:left;padding:4px 12px 4px 0">Tutar</th><td><strong>' . money($order['amount']) . '</strong></td></tr>'
+        . '<tr><th style="text-align:left;padding:4px 12px 4px 0">Açıklama</th><td><strong data-copy>' . e($order['order_no']) . '</strong></td></tr>'
+        . '</table>';
+}
+
 /** Ödeme sonucunu siparişe işler (banka ve demo modu ortak) */
 function finalize_order(array $order, bool $success, string $message, ?string $ref, array $raw = []): array
 {
-    if (!in_array($order['status'], ['pending', 'failed'], true)) {
+    if (!in_array($order['status'], ['pending', 'failed', 'awaiting_transfer'], true)) {
         return $order; // tekrar işlenmesin
     }
     // Hassas alanları kaydetme

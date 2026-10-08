@@ -15,6 +15,7 @@ function contract_vars(array $o): array
         'paket_sure' => $o['_duration'] ?? '-',
         'toplam_tutar' => money($o['amount']) . (!empty($o['voucher_code']) ? ' (Paket bedeli ' . money((float) $o['amount'] + (float) $o['voucher_amount']) . ', ' . money($o['voucher_amount']) . ' iade çeki ile ödenmiştir)' : ''),
         'siparis_tarihi' => tr_date($o['created_at']),
+        'odeme_sekli' => payment_methods_text($o),
     ];
 }
 
@@ -25,7 +26,7 @@ if ($orderNo = input('siparis')) {
         flash('error', 'Sipariş bulunamadı.');
         redirect('hesabim.php');
     }
-    if (!in_array($order['status'], ['pending', 'failed'], true)) {
+    if (!in_array($order['status'], ['pending', 'failed', 'awaiting_transfer'], true)) {
         redirect('odeme-sonuc.php?no=' . urlencode($order['order_no']) . '&t=' . order_access_token($order));
     }
 
@@ -34,6 +35,16 @@ if ($orderNo = input('siparis')) {
         if (!input('accept_pre') || !input('accept_contract') || !input('accept_start')) {
             flash('error', 'Ödemeye geçmek için tüm sözleşme onaylarını işaretlemelisiniz.');
             redirect('odeme.php?siparis=' . urlencode($order['order_no']));
+        }
+        $method = input('payment_method') === 'havale' ? 'havale' : 'kart';
+        if (($method === 'havale' && !transfer_payment_available()) || ($method === 'kart' && !card_payment_available())) {
+            flash('error', 'Seçilen ödeme yöntemi şu anda kullanılamıyor. Lütfen başka bir yöntem seçin veya bizimle iletişime geçin.');
+            redirect('odeme.php?siparis=' . urlencode($order['order_no']));
+        }
+        // Havale seçip sonradan kartla ödemek isteyen sipariş tekrar ödeme bekliyor durumuna alınır
+        if ($order['status'] === 'awaiting_transfer') {
+            q("UPDATE orders SET status = 'pending', updated_at = ? WHERE id = ?", [now(), $order['id']]);
+            $order['status'] = 'pending';
         }
         // Başarısız bir denemeden sonra bankaya yeni sipariş numarası ile gidilir
         if ($order['status'] === 'failed') {
@@ -58,6 +69,21 @@ if ($orderNo = input('siparis')) {
                 redirect('odeme-sonuc.php?no=' . urlencode($order['order_no']) . '&t=' . order_access_token($order));
             }
         }
+
+        // Havale / EFT: sipariş "Havale Bekleniyor" durumuna alınır, ödeme panelden onaylanır
+        if ($method === 'havale') {
+            q("UPDATE orders SET status = 'awaiting_transfer', payment_method = 'havale', updated_at = ? WHERE id = ?", [now(), $order['id']]);
+            $order = row('SELECT * FROM orders WHERE id = ?', [$order['id']]);
+            log_activity('Havale ile ödemeyi seçti', $order['order_no'] . ' · ' . money($order['amount']), 'order', (int) $order['id']);
+            send_mail($order['customer_email'], 'Siparişiniz alındı, ödeme bilgileri - ' . $order['order_no'],
+                '<p>Merhaba ' . e($order['customer_name']) . ',</p><p><b>' . e($order['service_title']) . ' - ' . e($order['package_name']) . '</b> siparişiniz alındı. '
+                . 'Ödemenizi aşağıdaki hesaba <b>açıklama kısmına sipariş numaranızı yazarak</b> yapabilirsiniz:</p>' . transfer_info_html($order)
+                . '<p>Ödemeniz hesabımıza geçtiğinde (genellikle aynı iş günü) siparişiniz onaylanır ve koçunuz sizinle iletişime geçer. 3 iş günü içinde ödemesi yapılmayan siparişler iptal edilir.</p>');
+            send_mail(setting('notify_email'), 'Havale bekleyen sipariş: ' . $order['order_no'] . ' (' . money($order['amount']) . ')',
+                '<p>' . e($order['customer_name']) . ' - ' . e($order['service_title']) . ' / ' . e($order['package_name']) . '</p><p>Ödeme hesaba geçince panelden siparişi “Ödendi” durumuna alın.</p>');
+            redirect('odeme-sonuc.php?no=' . urlencode($order['order_no']) . '&t=' . order_access_token($order));
+        }
+        q("UPDATE orders SET payment_method = 'kart' WHERE id = ?", [$order['id']]);
         log_activity('Ödemeye yönlendirildi', $order['order_no'] . ' · ' . money($order['amount']) . ' · Mod: ' . pos_mode(), 'order', (int) $order['id']);
 
         $mode = pos_mode();
@@ -111,11 +137,27 @@ if ($orderNo = input('siparis')) {
                 <form method="post" class="form mt-1">
                     <?= csrf_field() ?>
                     <input type="hidden" name="action" value="pay">
+                    <?php $cardOk = card_payment_available(); $transferOk = transfer_payment_available(); $defMethod = $order['payment_method'] === 'havale' && $transferOk ? 'havale' : ($cardOk ? 'kart' : 'havale'); ?>
+                    <h4>Ödeme Yöntemi</h4>
+                    <?php if (!$cardOk && !$transferOk): ?>
+                        <div class="alert alert-info">Online ödeme altyapımız kısa süre içinde aktif olacaktır. Siparişinizi tamamlamak için lütfen <a href="<?= url('iletisim.php?konu=' . urlencode('Sipariş ' . $order['order_no'])) ?>">bizimle iletişime geçin</a>.</div>
+                    <?php else: ?>
+                    <div class="pay-methods">
+                        <?php if ($cardOk): ?>
+                        <label class="pay-method"><input type="radio" name="payment_method" value="kart" <?= $defMethod === 'kart' ? 'checked' : '' ?>>
+                            <span><strong>Kredi / Banka Kartı</strong><small>Garanti BBVA 3D Secure ile anında onay<?= pos_mode() === 'demo' ? ' · <b>DEMO: yalnızca personel görür, gerçek tahsilat yapılmaz</b>' : '' ?></small></span></label>
+                        <?php endif; ?>
+                        <?php if ($transferOk): ?>
+                        <label class="pay-method"><input type="radio" name="payment_method" value="havale" <?= $defMethod === 'havale' ? 'checked' : '' ?>>
+                            <span><strong>Havale / EFT</strong><small><?= e(setting('bank_name')) ?> hesabımıza; ödemeniz hesaba geçince siparişiniz onaylanır</small></span></label>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
                     <label class="check"><input type="checkbox" name="accept_pre" value="1" required> <span>Ön Bilgilendirme Formu'nu okudum ve onaylıyorum.</span></label>
                     <label class="check"><input type="checkbox" name="accept_contract" value="1" required> <span>Mesafeli Satış Sözleşmesi'ni ve <a href="<?= url('sayfa.php?s=iade-ve-iade-ceki-kosullari') ?>" target="_blank">İade ve İade Çeki Koşulları</a>'nı okudum, kabul ediyorum.</span></label>
                     <label class="check"><input type="checkbox" name="accept_start" value="1" required> <span>Hizmetin cayma süresi içinde başlatılmasını talep ediyorum; hizmet başladıktan sonra cayma hakkımın kalmayacağını biliyorum.</span></label>
-                    <button class="btn btn-primary btn-lg btn-block"><?= (float) $order['amount'] > 0 ? money($order['amount']) . ' Öde' : 'İade Çeki ile Siparişi Tamamla' ?></button>
-                    <p class="small muted center">Ödeme sayfasında Garanti BBVA 3D Secure doğrulaması yapılacaktır.</p>
+                    <button class="btn btn-primary btn-lg btn-block" <?= !$cardOk && !$transferOk && (float) $order['amount'] > 0 ? 'disabled' : '' ?>><?= (float) $order['amount'] > 0 ? money($order['amount']) . ' · Siparişi Onayla' : 'İade Çeki ile Siparişi Tamamla' ?></button>
+                    <p class="small muted center">Kartla ödemede Garanti BBVA 3D Secure sayfasına yönlendirilirsiniz; Havale/EFT seçerseniz hesap bilgileri gösterilir.</p>
                 </form>
             </div>
             <aside class="card summary">
@@ -179,7 +221,7 @@ if (is_post()) {
         flash('error', $err);
     } else {
         // Aynı paket için bekleyen sipariş varsa güncelle, yoksa yeni oluştur
-        $existing = row("SELECT * FROM orders WHERE user_id = ? AND package_id = ? AND status IN ('pending','failed') ORDER BY id DESC LIMIT 1", [$user['id'], $pkg['id']]);
+        $existing = row("SELECT * FROM orders WHERE user_id = ? AND package_id = ? AND status IN ('pending','failed','awaiting_transfer') ORDER BY id DESC LIMIT 1", [$user['id'], $pkg['id']]);
         $data = ['voucher_code' => $f['voucher_code'] !== '' ? $f['voucher_code'] : null, 'voucher_amount' => $voucherUse > 0 ? $voucherUse : null] + $f
             + ['amount' => round((float) $pkg['price'] - $voucherUse, 2), 'package_name' => $pkg['name'], 'service_title' => $pkg['service_title'], 'updated_at' => now(), 'ip' => client_ip()];
         if ($existing) {

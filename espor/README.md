@@ -119,6 +119,18 @@ Sipariş no + iade tutarı girilir; “%10 ekle” işaretliyse çek tutarı iad
 - Kalan bakiye sonraki siparişlerde kullanılabilir; bakiye yalnızca ödeme onaylanınca düşer.
 - Müşteri çeklerini **Hesabım** sayfasında görür. Tüm işlemler aktivite akışına yazılır.
 
+## Müşteri nasıl öder?
+
+Paket → **Satın Al** → fatura bilgileri → sözleşme onayı ve **ödeme yöntemi** seçimi:
+
+- **Kredi / Banka Kartı:** Garanti BBVA 3D Secure sayfasında ödenir, sipariş anında “Ödendi” olur.
+  Garanti bilgileri girilene kadar (DEMO modu) bu seçenek müşterilere gösterilmez; yalnızca panel personeli test için görür.
+- **Havale / EFT:** Panel → Site & Ödeme Ayarları → **Ödeme (Garanti & Havale)** sekmesine banka adı ve IBAN girilince açılır.
+  Müşteriye IBAN, tutar ve açıklama olarak yazacağı sipariş numarası gösterilir ve e-postayla gönderilir; sipariş
+  “Havale Bekleniyor” durumunda bekler. Para hesaba geçince Panel → Siparişler → sipariş → durumu **Ödendi** yapın
+  (yalnızca admin / süper admin); müşteriye onay e-postası gider ve sipariş satış raporlarına girer.
+- Hiçbir yöntem açık değilse ödeme düğmesi pasif olur ve müşteri iletişime yönlendirilir.
+
 ## Garanti BBVA Sanal POS başvurusu
 
 Panel → **Site & Ödeme Ayarları** sayfasının sağındaki **Garanti Sanal POS Başvuru Kontrolü** listesi eksikleri gösterir.

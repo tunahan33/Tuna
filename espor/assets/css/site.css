@@ -433,3 +433,16 @@
 @media (prefers-reduced-motion: reduce) {
     .ticker-track, .site .hero-emblem::before, .site .hero-emblem::after { animation: none; }
 }
+
+/* Ödeme yöntemi seçimi ve havale bilgileri */
+.site .pay-methods { display: grid; gap: .5rem; margin: .4rem 0 1rem; }
+.site .pay-method { display: flex; gap: .8rem; align-items: flex-start; padding: .9rem 1rem; border: 1px solid var(--edge-hi); background: #0A0C0F; cursor: pointer; font-family: var(--font) !important; text-transform: none !important; letter-spacing: 0 !important; font-size: .92rem !important; }
+.site .pay-method:has(input:checked) { border-color: var(--signal); background: rgba(255, 194, 26, .06); box-shadow: inset 3px 0 0 var(--signal); }
+.site .pay-method input { width: 18px; height: 18px; margin-top: .2rem; accent-color: var(--strike); flex: none; }
+.site .pay-method strong { display: block; color: #fff; font-family: var(--font-head); text-transform: uppercase; letter-spacing: .04em; }
+.site .pay-method small { color: var(--dim); }
+.site .bank-wrap { display: flex; justify-content: center; margin: 1.2rem 0; }
+.site .bank-box { border: 1px dashed var(--signal); background: rgba(255, 194, 26, .05); text-align: left; font-size: .95rem; }
+.site .bank-box th { color: var(--dim); font-family: var(--font-mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 500; padding: .55rem 1rem !important; }
+.site .bank-box td { padding: .55rem 1rem; color: #fff; font-family: var(--font-mono); }
+.site .result-card.wait .result-icon { background: var(--signal); color: #111; }

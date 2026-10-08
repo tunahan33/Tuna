@@ -24,7 +24,15 @@ if (is_post()) {
     $action = input('action');
     if ($action === 'status' && can('orders.status')) {
         $new = input('status');
-        if ($new !== $o['status'] && in_array($new, allowed_statuses($o), true)) {
+        if ($new === 'paid' && in_array($o['status'], ['pending', 'awaiting_transfer', 'failed'], true) && can('orders.cancel')) {
+            // Havale/EFT veya elden ödeme onayı: ödeme tarihi, iade çeki ve müşteri e-postası tek noktadan işlenir
+            require_once dirname(__DIR__) . '/includes/garanti.php';
+            $method = $o['payment_method'] === 'havale' ? 'Havale/EFT' : 'Manuel';
+            finalize_order($o, true, $method . ' ödemesi onaylandı (' . $u['name'] . ')', strtoupper($method === 'Havale/EFT' ? 'HAVALE' : 'MANUEL') . '-' . date('ymd'), ['mode' => 'manual', 'by' => $u['name']]);
+            insert('order_notes', ['order_id' => $id, 'user_id' => $u['id'], 'user_name' => $u['name'], 'note' => $method . ' ödemesi onaylandı: ' . ORDER_STATUSES[$o['status']][0] . ' → Ödendi', 'created_at' => now()]);
+            log_activity('Ödemeyi onayladı', $o['order_no'] . ' · ' . $method . ' · ' . money($o['amount']), 'order', $id);
+            flash('success', 'Ödeme onaylandı, müşteriye bilgilendirme e-postası gönderildi.');
+        } elseif ($new !== $o['status'] && in_array($new, allowed_statuses($o), true)) {
             q('UPDATE orders SET status = ?, updated_at = ? WHERE id = ?', [$new, now(), $id]);
             insert('order_notes', ['order_id' => $id, 'user_id' => $u['id'], 'user_name' => $u['name'], 'note' => 'Durum değiştirildi: ' . ORDER_STATUSES[$o['status']][0] . ' → ' . ORDER_STATUSES[$new][0], 'created_at' => now()]);
             log_activity('Sipariş durumu değiştirdi', $o['order_no'] . ': ' . ORDER_STATUSES[$o['status']][0] . ' → ' . ORDER_STATUSES[$new][0], 'order', $id);
@@ -70,6 +78,7 @@ admin_header('Sipariş ' . $o['order_no'], status_badge($o['status']) . ' · ' .
             <dl class="dl-grid">
                 <dt>Hizmet</dt><dd><?= e($o['service_title']) ?></dd>
                 <dt>Paket</dt><dd><?= e($o['package_name']) ?></dd>
+                <dt>Ödeme Yöntemi</dt><dd><?= e(['havale' => 'Havale / EFT', 'kart' => 'Kredi / Banka Kartı', 'iade_ceki' => 'İade Çeki', 'garanti' => 'Kredi / Banka Kartı'][$o['payment_method'] ?? ''] ?? '-') ?><?= $o['status'] === 'awaiting_transfer' ? ' · <strong>Hesaba geçince durumu “Ödendi” yapın</strong>' : '' ?></dd>
                 <dt>Tutar</dt><dd><strong class="big"><?= money($o['amount']) ?></strong> <small class="muted">KDV dahil</small></dd>
                 <?php if ($o['voucher_code']): ?><dt>İade Çeki</dt><dd><?= money($o['voucher_amount']) ?> <small class="muted">(<?= e($o['voucher_code']) ?>) · kartla ödenen: <?= money($o['amount']) ?></small></dd><?php endif; ?>
                 <?php if (can('vouchers.manage') && in_array($o['status'], ['paid', 'processing', 'cancelled', 'refunded'], true)): ?><dt></dt><dd><a class="btn btn-xs btn-outline" href="<?= url('admin/vouchers.php?siparis=' . urlencode($o['order_no'])) ?>">Bu sipariş için iade çeki tanımla</a></dd><?php endif; ?>
