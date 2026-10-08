@@ -1,7 +1,10 @@
 <?php
 /**
  * Ödeme: 1) Teslimat bilgileri  2) Sözleşmeler + kart bilgileri  → sipariş oluşturulur.
- * Not: Bu sürüm DEMO ödeme kullanır; kart bilgisi hiçbir yerde saklanmaz.
+ * Ödeme yöntemi Panel > Mağaza Ayarları > Ödeme bölümünden seçilir:
+ *  - PayTR: sipariş "Ödeme Bekleniyor" olarak açılır, kart bilgileri PayTR'nin güvenli sayfasına girilir (odeme-paytr.php)
+ *  - Demo: kart doğrulanır ama çekim yapılmaz (deneme amaçlı)
+ * Her iki durumda da kart bilgisi sitemizde saklanmaz.
  * Gerçek satışa geçerken bankanızın / ödeme kuruluşunuzun (iyzico, PayTR, banka sanal POS) entegrasyonu eklenir.
  */
 require __DIR__ . '/app/bootstrap.php';
@@ -12,6 +15,7 @@ if (!$s['lines']) {
     redirect('sepet.php');
 }
 $u = current_user();
+$paytr = paytr_enabled();
 $step = isset($_SESSION['checkout']) && input('adim') !== '1' ? 2 : 1;
 $buyer = $_SESSION['checkout'] ?? [
     'name' => $u['name'] ?? '', 'email' => $u['email'] ?? '', 'phone' => $u['phone'] ?? '',
@@ -43,10 +47,12 @@ if (is_post()) {
     $exp = (string) input('card_exp');
     $errors = [];
     if (!input('accept_contract') || !input('accept_info')) $errors[] = 'Ön Bilgilendirme Formu ve Mesafeli Satış Sözleşmesi\'ni onaylamanız gerekir.';
-    if (!luhn_ok($card)) $errors[] = 'Kart numarası geçersiz.';
-    if (!preg_match('#^(0[1-9]|1[0-2])/(\d{2})$#', $exp, $m) || mktime(0, 0, 0, (int) $m[1] + 1, 1, 2000 + (int) $m[2]) <= time()) $errors[] = 'Son kullanma tarihi geçersiz.';
-    if (!preg_match('/^\d{3,4}$/', (string) input('card_cvv'))) $errors[] = 'CVV geçersiz.';
-    if (mb_strlen((string) input('card_name')) < 4) $errors[] = 'Kart üzerindeki ismi girin.';
+    if (!$paytr) {
+        if (!luhn_ok($card)) $errors[] = 'Kart numarası geçersiz.';
+        if (!preg_match('#^(0[1-9]|1[0-2])/(\d{2})$#', $exp, $m) || mktime(0, 0, 0, (int) $m[1] + 1, 1, 2000 + (int) $m[2]) <= time()) $errors[] = 'Son kullanma tarihi geçersiz.';
+        if (!preg_match('/^\d{3,4}$/', (string) input('card_cvv'))) $errors[] = 'CVV geçersiz.';
+        if (mb_strlen((string) input('card_name')) < 4) $errors[] = 'Kart üzerindeki ismi girin.';
+    }
     if ($errors) {
         flash('error', implode(' ', $errors));
         redirect('odeme.php');
@@ -55,9 +61,11 @@ if (is_post()) {
     $pdo = db();
     $pdo->beginTransaction();
     try {
-        // Stok kontrolü ve düşümü
+        // Stok kontrolü; demo ödemede stok hemen düşer, PayTR'de ödeme onaylanınca (paytr-bildirim.php) düşer
         foreach ($s['lines'] as $l) {
-            $ok = q('UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?', [$l['qty'], $l['product']['id'], $l['qty']])->rowCount();
+            $ok = $paytr
+                ? (int) val('SELECT stock >= ? FROM products WHERE id = ?', [$l['qty'], $l['product']['id']])
+                : q('UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?', [$l['qty'], $l['product']['id'], $l['qty']])->rowCount();
             if (!$ok) {
                 throw new RuntimeException($l['product']['name'] . ' için yeterli stok kalmadı.');
             }
@@ -66,23 +74,27 @@ if (is_post()) {
         $oid = insert('orders', [
             'order_no' => $no, 'user_id' => $u['id'] ?? null, 'customer_name' => $buyer['name'], 'email' => mb_strtolower($buyer['email']),
             'phone' => $buyer['phone'], 'city' => $buyer['city'], 'district' => $buyer['district'], 'address' => $buyer['address'], 'note' => $buyer['note'],
-            'subtotal' => $s['subtotal'], 'shipping' => $s['shipping'], 'total' => $s['total'], 'status' => 'yeni',
-            'card_last4' => substr($card, -4), 'created_at' => now(), 'updated_at' => now(),
+            'subtotal' => $s['subtotal'], 'shipping' => $s['shipping'], 'total' => $s['total'], 'status' => $paytr ? 'odeme_bekliyor' : 'yeni',
+            'card_last4' => $paytr ? null : substr($card, -4), 'created_at' => now(), 'updated_at' => now(),
         ]);
         foreach ($s['lines'] as $l) {
             insert('order_items', ['order_id' => $oid, 'product_id' => $l['product']['id'], 'name' => $l['product']['name'], 'size' => $l['size'], 'price' => $l['product']['price'], 'qty' => $l['qty']]);
         }
-        order_history($oid, 'Sipariş oluşturuldu, ödeme alındı (kart ****' . substr($card, -4) . ')', $buyer['name']);
+        order_history($oid, $paytr ? 'Sipariş oluşturuldu, PayTR ödeme sayfasına yönlendirildi' : 'Sipariş oluşturuldu, ödeme alındı (DEMO, kart ****' . substr($card, -4) . ')', $buyer['name']);
         $pdo->commit();
     } catch (Throwable $ex) {
         $pdo->rollBack();
         flash('error', $ex instanceof RuntimeException ? $ex->getMessage() : 'Sipariş oluşturulamadı, lütfen tekrar deneyin.');
         redirect('sepet.php');
     }
-    log_activity('Sipariş verdi', $no . ' · ' . money($s['total']), 'admin/siparis.php?id=' . $oid, $u ?? ['id' => null, 'name' => $buyer['name'], 'role' => 'ziyaretci']);
-    unset($_SESSION['cart'], $_SESSION['checkout']);
     $_SESSION['last_order'] = $no;
-    redirect('siparis-tamam.php');
+    if ($paytr) {
+        // Sepet, ödeme onaylanınca boşaltılır (siparis-tamam.php)
+        redirect('odeme-paytr.php?no=' . urlencode($no));
+    }
+    log_activity('Sipariş verdi', $no . ' · ' . money($s['total']) . ' · DEMO ödeme', 'admin/siparis.php?id=' . $oid, $u ?? ['id' => null, 'name' => $buyer['name'], 'role' => 'ziyaretci']);
+    unset($_SESSION['cart'], $_SESSION['checkout']);
+    redirect('siparis-tamam.php?no=' . urlencode($no));
 }
 
 if ($step === 1 && isset($_SESSION['checkout_draft'])) {
@@ -149,17 +161,24 @@ require __DIR__ . '/app/header.php';
                     <div class="contract-box"><?= contract('mesafeli-satis-sozlesmesi', $buyer, $s) ?></div>
                     <label class="check"><input type="checkbox" name="accept_contract" value="1" required> <span>Mesafeli Satış Sözleşmesi'ni okudum ve kabul ediyorum.</span></label>
 
-                    <h2 style="margin-top:14px">Kart Bilgileri</h2>
-                    <p class="alert alert-info small" style="margin:0">DEMO ödeme: Gerçek çekim yapılmaz. Deneme için <strong>4242 4242 4242 4242</strong>, ileri bir tarih ve herhangi bir CVV kullanabilirsiniz.</p>
-                    <div class="card-visual"><div>GS SPORTİF</div><div class="num" data-card-num>•••• •••• •••• ••••</div><div data-card-name>AD SOYAD</div></div>
-                    <label>Kart Üzerindeki İsim<input name="card_name" required autocomplete="cc-name"></label>
-                    <label>Kart Numarası<input name="card_number" inputmode="numeric" required autocomplete="cc-number" placeholder="0000 0000 0000 0000"></label>
-                    <div class="grid-2">
-                        <label>Son Kullanma (AA/YY)<input name="card_exp" inputmode="numeric" required autocomplete="cc-exp" placeholder="12/29"></label>
-                        <label>CVV<input name="card_cvv" inputmode="numeric" maxlength="4" required autocomplete="cc-csc" placeholder="000"></label>
-                    </div>
-                    <div class="secure-note">🔒 Kart bilgileriniz şifreli iletilir ve sitemizde saklanmaz.</div>
-                    <button class="btn btn-primary btn-lg"><?= money($s['total']) ?> Öde ve Siparişi Tamamla</button>
+                    <?php if ($paytr): ?>
+                        <h2 style="margin-top:14px">Ödeme</h2>
+                        <div class="secure-note">🔒 Kart bilgilerinizi bir sonraki adımda <strong>PayTR</strong> güvenli ödeme sayfasına gireceksiniz. 3D Secure ile doğrulanır, taksit seçenekleri orada gösterilir. Kart bilgileriniz sitemize iletilmez.</div>
+                        <?php if (paytr_test_mode()): ?><p class="alert alert-info small" style="margin:0">PayTR TEST modu açık: gerçek para çekilmez.</p><?php endif; ?>
+                        <button class="btn btn-primary btn-lg"><?= money($s['total']) ?> Ödemeye Geç →</button>
+                    <?php else: ?>
+                        <h2 style="margin-top:14px">Kart Bilgileri</h2>
+                        <p class="alert alert-info small" style="margin:0">DEMO ödeme: Gerçek çekim yapılmaz. Deneme için <strong>4242 4242 4242 4242</strong>, ileri bir tarih ve herhangi bir CVV kullanabilirsiniz.</p>
+                        <div class="card-visual"><div>GS SPORTİF</div><div class="num" data-card-num>•••• •••• •••• ••••</div><div data-card-name>AD SOYAD</div></div>
+                        <label>Kart Üzerindeki İsim<input name="card_name" required autocomplete="cc-name"></label>
+                        <label>Kart Numarası<input name="card_number" inputmode="numeric" required autocomplete="cc-number" placeholder="0000 0000 0000 0000"></label>
+                        <div class="grid-2">
+                            <label>Son Kullanma (AA/YY)<input name="card_exp" inputmode="numeric" required autocomplete="cc-exp" placeholder="12/29"></label>
+                            <label>CVV<input name="card_cvv" inputmode="numeric" maxlength="4" required autocomplete="cc-csc" placeholder="000"></label>
+                        </div>
+                        <div class="secure-note">🔒 Kart bilgileriniz şifreli iletilir ve sitemizde saklanmaz.</div>
+                        <button class="btn btn-primary btn-lg"><?= money($s['total']) ?> Öde ve Siparişi Tamamla</button>
+                    <?php endif; ?>
                 </form>
             <?php endif; ?>
             </div>

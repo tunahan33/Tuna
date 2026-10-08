@@ -79,7 +79,7 @@ paketler() {
     adim "Sistem güncelleniyor ve paketler kuruluyor (birkaç dakika sürebilir)"
     apt-get update -y
     [ "$TEST_MODE" = 1 ] || apt-get upgrade -y
-    apt-get install -y apache2 libapache2-mod-php php-cli php-sqlite3 php-gd php-mbstring \
+    apt-get install -y apache2 libapache2-mod-php php-cli php-sqlite3 php-gd php-mbstring php-curl \
         sqlite3 rsync curl ca-certificates ufw fail2ban unattended-upgrades bind9-dnsutils
     a2enmod rewrite headers >/dev/null
 }
@@ -200,6 +200,8 @@ kurulum() {
 guncelle() {
     [ -d "$APP_DIR" ] || { kirmizi "Önce kurulum yapın: bash kurulum.sh"; exit 1; }
     [ -f "$APP_DIR/data/gs.sqlite" ] && /usr/local/bin/gssportif-yedek 2>/dev/null && yesil "Güncelleme öncesi yedek alındı."
+    # Yeni sürümlerin ihtiyaç duyduğu PHP eklentileri (PayTR bağlantısı için curl)
+    dpkg -s php-curl >/dev/null 2>&1 || { apt-get install -y php-curl >/dev/null && servis restart apache2; }
     kodu_indir
     izinler
     # Veritabanı güncellemeleri (app/migrate.php) siteyi ilk açışta kendiliğinden çalışır; hemen tetikle

@@ -33,6 +33,12 @@ if (is_post()) {
             if (!$o['assigned_to']) {
                 $data['assigned_to'] = $u['id'];
             }
+            // Ödemesi beklenen sipariş elle onaylanırsa (ör. havale) stok şimdi düşer
+            if (in_array($o['status'], ['odeme_bekliyor', 'odeme_basarisiz'], true) && in_array($new, SALE_STATUSES, true)) {
+                foreach (rows('SELECT product_id, qty FROM order_items WHERE order_id = ?', [$o['id']]) as $i) {
+                    q('UPDATE products SET stock = MAX(0, stock - ?) WHERE id = ?', [$i['qty'], $i['product_id']]);
+                }
+            }
             // İptal / iadede stok geri eklenir
             if ($cancelLike && in_array($o['status'], SALE_STATUSES, true)) {
                 foreach (rows('SELECT product_id, qty FROM order_items WHERE order_id = ?', [$o['id']]) as $i) {

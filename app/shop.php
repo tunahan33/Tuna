@@ -8,6 +8,8 @@ const ORDER_STATUSES = [
     'teslim'      => ['Teslim Edildi', 'green'],
     'iptal'       => ['İptal Edildi', 'gray'],
     'iade'        => ['İade Edildi', 'red'],
+    'odeme_bekliyor'  => ['Ödeme Bekleniyor', 'gray'],
+    'odeme_basarisiz' => ['Ödeme Başarısız', 'red'],
 ];
 
 /** Satış sayılan durumlar (raporlarda ciro hesabına girer) */

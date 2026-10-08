@@ -134,11 +134,18 @@ Yalnızca Süper Admin'e açık menüler panelde **SA** etiketiyle işaretlidir.
 Yedekler `/var/backups/gssportif/` klasöründedir (her gece 03:30, son 14 gün).
 Alan adı: **gssportifurunler.net** (Natro). Natro > Alan Adı Yönetimi > DNS Yönetimi’nde `@` ve `www` için **A kaydı** = sunucu IP’si olmalı; DNS hazırsa kurulum SSL’i kendisi kurar, değilse yayıldıktan sonra `bash kurulum.sh ssl` çalıştırın.
 
-## 6. Ödeme
+## 6. Ödeme (PayTR)
 
-Ödeme şu an **DEMO** modundadır: kart doğrulanır ama para çekilmez, kart bilgisi hiçbir yerde saklanmaz.
-Gerçek satış için bankanızın sanal POS'u veya bir ödeme kuruluşu (iyzico, PayTR vb.) entegrasyonu `odeme.php` içine eklenir.
-Başvurudan önce vergi levhanızdaki faaliyet kodunun internetten perakende satışı (NACE 47.91) kapsadığından emin olun.
+Ödeme yöntemi panelden seçilir: **Mağaza Ayarları → Ödeme (PayTR)**. Varsayılan **Demo**'dur (gerçek çekim yapılmaz).
+
+1. PayTR Mağaza Paneli'nden **Mağaza No (merchant_id)**, **Merchant Key** ve **Merchant Salt** bilgilerini alın, panele girin.
+2. PayTR Mağaza Paneli'nde **Bildirim URL** olarak `https://www.gssportifurunler.net/paytr-bildirim.php` adresini tanımlayın.
+3. Ödeme yöntemini **PayTR** yapın, **TEST modu** açıkken PayTR'nin test kartlarıyla bir sipariş deneyin.
+4. Sorunsuzsa TEST modunu kapatın; canlı ödeme başlar.
+
+Akış: müşteri sözleşmeleri onaylar → sipariş **Ödeme Bekleniyor** olarak açılır → PayTR'nin güvenli ödeme formu (iframe) açılır,
+kart bilgileri doğrudan PayTR'ye girilir → PayTR sonucu `paytr-bildirim.php`'ye imzalı olarak bildirir → sipariş **Yeni Sipariş** olur
+ve stok düşer. Başarısız ödemede müşteri **Tekrar Dene** ile yeniden ödeyebilir. Kart bilgisi sitede hiçbir zaman işlenmez veya saklanmaz.
 
 ## Klasör yapısı
 
