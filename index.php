@@ -19,7 +19,7 @@ require __DIR__ . '/includes/header.php';
             <ul class="hero-stats">
                 <li><strong><?= count($services) ?></strong><span>Danışmanlık alanı</span></li>
                 <li><strong>3 iş günü</strong><span>İçinde hizmete başlangıç</span></li>
-                <li><strong>3D Secure</strong><span>Güvenli ödeme</span></li>
+                <li><strong>Net fiyat</strong><span>KDV dahil, sürpriz yok</span></li>
             </ul>
         </div>
         <div class="hero-visual" aria-hidden="true">
@@ -60,7 +60,7 @@ require __DIR__ . '/includes/header.php';
         </div>
         <ol class="steps-grid">
             <li><span>01</span><h4>Paketinizi seçin</h4><p>Hizmet ve paket içeriklerini inceleyin; fiyatlar nettir, KDV dahildir.</p></li>
-            <li><span>02</span><h4>Güvenle ödeyin</h4><p>Garanti BBVA 3D Secure altyapısıyla kredi/banka kartınızla ödeme yapın.</p></li>
+            <li><span>02</span><h4>Siparişinizi oluşturun</h4><p>Sözleşmeleri onaylayın; ekibimiz ödeme ve başlangıç planı için sizi arasın.</p></li>
             <li><span>03</span><h4>Danışmanınız arasın</h4><p>En geç 3 iş günü içinde danışmanınız sizinle iletişime geçer.</p></li>
             <li><span>04</span><h4>Gelişimi takip edin</h4><p>Program, rapor ve görüşmelerle hedefinize adım adım ilerleyin.</p></li>
         </ol>
@@ -91,7 +91,7 @@ require __DIR__ . '/includes/header.php';
         <ul class="why-list">
             <li><strong>Uzman kadro</strong><span>Alanında deneyimli antrenör, diyetisyen, psikolog ve proje uzmanları.</span></li>
             <li><strong>Net fiyat</strong><span>Tüm paket fiyatları sitede açıkça yazılıdır, sürpriz ücret yoktur.</span></li>
-            <li><strong>Güvenli ödeme</strong><span>Garanti BBVA sanal POS, 3D Secure ve SSL koruması.</span></li>
+            <li><strong>Güvenli altyapı</strong><span>SSL ile şifreli bağlantı ve KVKK uyumlu veri koruma.</span></li>
             <li><strong>Yasal güvence</strong><span>Mesafeli satış sözleşmesi, açık iptal ve iade koşulları.</span></li>
         </ul>
     </div>

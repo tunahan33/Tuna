@@ -25,6 +25,11 @@ if (is_post()) {
     if ($action === 'status' && can('orders.status')) {
         $new = input('status');
         if ($new !== $o['status'] && in_array($new, allowed_statuses($o), true)) {
+            if (in_array($new, SALE_STATUSES, true) && !$o['paid_at']) {
+                // Ödeme alındı: ödeme tarihi kaydedilir (raporlar bu tarihe göre çalışır) ve müşteriye e-posta gider
+                require_once dirname(__DIR__) . '/includes/payment.php';
+                mark_order_paid($o, 'Ödeme alındı (' . $u['name'] . ')', mb_substr(trim(input('payment_ref')), 0, 100) ?: 'MANUEL');
+            }
             q('UPDATE orders SET status = ?, updated_at = ? WHERE id = ?', [$new, now(), $id]);
             insert('order_notes', ['order_id' => $id, 'user_id' => $u['id'], 'user_name' => $u['name'], 'note' => 'Durum değiştirildi: ' . ORDER_STATUSES[$o['status']][0] . ' → ' . ORDER_STATUSES[$new][0], 'created_at' => now()]);
             log_activity('Sipariş durumu değiştirdi', $o['order_no'] . ': ' . ORDER_STATUSES[$o['status']][0] . ' → ' . ORDER_STATUSES[$new][0], 'order', $id);
@@ -32,13 +37,6 @@ if (is_post()) {
         } else {
             flash('error', 'Bu durum değişikliği için yetkiniz yok.');
         }
-    } elseif ($action === 'confirm_transfer' && can('orders.cancel') && $o['status'] === 'transfer') {
-        require_once dirname(__DIR__) . '/includes/garanti.php';
-        $ref = mb_substr(trim(input('transfer_ref')) ?: 'HAVALE', 0, 100);
-        finalize_order($o, true, 'Havale / EFT ödemesi onaylandı (' . $u['name'] . ')', $ref, ['method' => 'havale', 'confirmed_by' => $u['name']]);
-        insert('order_notes', ['order_id' => $id, 'user_id' => $u['id'], 'user_name' => $u['name'], 'note' => 'Havale ödemesi hesaba ulaştı, onaylandı. Ref: ' . $ref, 'created_at' => now()]);
-        log_activity('Havale ödemesini onayladı', $o['order_no'] . ' · ' . money($o['amount']) . ' · Ref: ' . $ref, 'order', $id);
-        flash('success', 'Ödeme onaylandı, sipariş “Ödendi” oldu ve müşteriye e-posta gönderildi.');
     } elseif ($action === 'note' && ($note = input('note')) !== '') {
         insert('order_notes', ['order_id' => $id, 'user_id' => $u['id'], 'user_name' => $u['name'], 'note' => mb_substr($note, 0, 2000), 'created_at' => now()]);
         log_activity('Siparişe not ekledi', $o['order_no'] . ': ' . mb_strimwidth($note, 0, 80, '…'), 'order', $id);
@@ -110,26 +108,15 @@ admin_header('Sipariş ' . $o['order_no'], status_badge($o['status']) . ' · ' .
         <?php endif; ?>
     </div>
     <div>
-        <?php if ($o['status'] === 'transfer'): ?>
-        <section class="panel transfer-panel">
-            <h3>🏦 Havale Bekleniyor</h3>
-            <p class="small">Müşteri <strong><?= money($o['amount']) ?></strong> tutarını açıklamaya <strong><?= e($o['order_no']) ?></strong> yazarak havale edecek. Banka hesabınızı kontrol edin.</p>
-            <?php if (can('orders.cancel')): ?>
-            <form method="post" class="form" data-confirm="Ödemenin hesaba ulaştığını onaylıyor musunuz?"><?= csrf_field() ?><input type="hidden" name="action" value="confirm_transfer">
-                <input name="transfer_ref" placeholder="Dekont / işlem no (isteğe bağlı)">
-                <button class="btn btn-primary btn-sm">Havale Ulaştı — Ödendi Yap</button>
-            </form>
-            <?php else: ?><p class="small muted">Ödeme onayını Admin veya Süper Admin yapar.</p><?php endif; ?>
-        </section>
-        <?php endif; ?>
         <?php if (can('orders.status') && ($allowed = allowed_statuses($o))): ?>
         <section class="panel">
             <h3>Durumu Güncelle</h3>
             <form method="post" class="form"><?= csrf_field() ?><input type="hidden" name="action" value="status">
                 <select name="status"><?php foreach ($allowed as $s): ?><option value="<?= $s ?>" <?= $s === $o['status'] ? 'selected' : '' ?>><?= e(ORDER_STATUSES[$s][0]) ?></option><?php endforeach; ?></select>
+                <?php if (!$o['paid_at']): ?><input name="payment_ref" placeholder="Ödeme referansı / dekont no (Ödendi yaparken, isteğe bağlı)"><?php endif; ?>
                 <button class="btn btn-dark btn-sm">Güncelle</button>
             </form>
-            <?php if (can('orders.cancel')): ?><p class="small muted">İade için tutarı Garanti BBVA Sanal POS ekranından iade edip durumu “İade Edildi” yapın.</p><?php endif; ?>
+            <?php if (can('orders.cancel')): ?><p class="small muted">Ödeme alındığında durumu “Ödendi” yapın: ödeme tarihi kaydedilir ve müşteriye onay e-postası gider. İade yaptıysanız durumu “İade Edildi” yapın.</p><?php endif; ?>
         </section>
         <?php endif; ?>
         <?php if ($u['role'] === 'sales' && !$o['assigned_to']): ?>

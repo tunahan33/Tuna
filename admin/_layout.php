@@ -4,7 +4,7 @@
 function admin_menu(): array
 {
     $newMsgs = can('messages.view') ? (int) val("SELECT COUNT(*) FROM messages WHERE status = 'new'") : 0;
-    $newOrders = can('orders.view') ? (int) val("SELECT COUNT(*) FROM orders WHERE status IN ('paid','transfer')") : 0;
+    $newOrders = can('orders.view') ? (int) val("SELECT COUNT(*) FROM orders WHERE status = 'paid' OR (status = 'pending' AND contract_accepted_at IS NOT NULL)") : 0;
     return [
         ['Genel', [
             ['index.php', 'Kontrol Paneli', 'grid', 'panel.access'],

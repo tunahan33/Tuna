@@ -35,7 +35,7 @@ for ($i = 0; $i < 60; $i++) {
         'service_title' => $p['st'], 'package_name' => $p['name'], 'amount' => $p['price'], 'customer_name' => $name,
         'customer_email' => slugify($name) . '@ornek.com', 'customer_phone' => '05' . random_int(300000000, 599999999),
         'customer_address' => 'Örnek Mah. Spor Cad. No:' . random_int(1, 99), 'customer_city' => 'İstanbul', 'invoice_type' => 'bireysel',
-        'status' => $st, 'payment_method' => 'garanti', 'payment_ref' => in_array($st, SALE_STATUSES) ? 'DEMO-' . random_int(100000, 999999) : null,
+        'status' => $st, 'payment_method' => 'iletisim', 'payment_ref' => in_array($st, SALE_STATUSES) ? 'DEMO-' . random_int(100000, 999999) : null,
         'payment_message' => $st === 'failed' ? 'Yetersiz bakiye (DEMO)' : (in_array($st, SALE_STATUSES) ? 'Onaylandı' : null),
         'assigned_to' => in_array($st, ['processing', 'completed']) ? $ids['sales'] : null, 'contract_accepted_at' => $created, 'ip' => '127.0.0.1',
         'paid_at' => in_array($st, SALE_STATUSES) ? date('Y-m-d H:i:s', $ts + 120) : null, 'created_at' => $created, 'updated_at' => $created,

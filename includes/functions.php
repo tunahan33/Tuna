@@ -202,7 +202,6 @@ function log_activity(string $action, string $details = '', ?string $entity = nu
 
 const ORDER_STATUSES = [
     'pending'    => ['Ödeme Bekliyor', 'gray'],
-    'transfer'   => ['Havale Bekleniyor', 'yellow'],
     'paid'       => ['Ödendi', 'green'],
     'processing' => ['Hizmet Sürüyor', 'blue'],
     'completed'  => ['Tamamlandı', 'dark'],
@@ -381,39 +380,4 @@ function maintenance_active(): bool
     }
     $until = setting('maintenance_until');
     return $until === '' || strtotime($until) > time();
-}
-
-
-/* ---------- Havale / EFT ---------- */
-
-function transfer_enabled(): bool
-{
-    return setting('transfer_enabled', '0') === '1' && trim(setting('bank_iban')) !== '';
-}
-
-/** Kart ödemesi müşteriye açık mı? Demo modunda yalnızca personel test edebilir. */
-function card_payment_available(): bool
-{
-    require_once __DIR__ . '/garanti.php';
-    return pos_mode() !== 'demo' || can('panel.access');
-}
-
-function transfer_info_html(array $order): string
-{
-    $rows = [
-        'Banka' => setting('bank_name'),
-        'Hesap Sahibi' => setting('bank_account_holder'),
-        'IBAN' => setting('bank_iban'),
-        'Tutar' => money($order['amount']),
-        'Açıklama' => $order['order_no'],
-    ];
-    $html = '<div class="transfer-box"><table>';
-    foreach ($rows as $k => $v) {
-        if ($v === '') continue;
-        $copy = in_array($k, ['IBAN', 'Açıklama'], true) ? ' <button type="button" class="copy-btn" data-copy="' . e($k === 'IBAN' ? str_replace(' ', '', $v) : $v) . '">Kopyala</button>' : '';
-        $html .= '<tr><th>' . e($k) . '</th><td><strong>' . e($v) . '</strong>' . $copy . '</td></tr>';
-    }
-    $html .= '</table><p class="small">⚠ Lütfen açıklama kısmına <strong>' . e($order['order_no']) . '</strong> sipariş numarasını yazın. '
-        . e(setting('bank_note', 'Ödemeniz hesabımıza ulaştığında siparişiniz onaylanır ve e-posta ile bilgilendirilirsiniz.')) . '</p></div>';
-    return $html;
 }
