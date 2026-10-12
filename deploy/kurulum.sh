@@ -84,10 +84,9 @@ paketler() {
     a2enmod rewrite headers >/dev/null
 }
 
-apache_ayar() {
-    adim "Apache ayarlanıyor ($DOMAIN)"
-    cat > /etc/apache2/sites-available/gssportif.conf <<CONF
-<VirtualHost *:80>
+# Sitenin Apache ayarları (80 ve 443 portlarında ortak)
+vhost_govde() {
+    cat <<CONF
     ServerName ${DOMAIN}
     ServerAlias www.${DOMAIN}
     DocumentRoot ${APP_DIR}
@@ -109,8 +108,12 @@ apache_ayar() {
     ServerSignature Off
     ErrorLog \${APACHE_LOG_DIR}/gssportif-error.log
     CustomLog \${APACHE_LOG_DIR}/gssportif-access.log combined
-</VirtualHost>
 CONF
+}
+
+apache_ayar() {
+    adim "Apache ayarlanıyor ($DOMAIN)"
+    { echo '<VirtualHost *:80>'; vhost_govde; echo '</VirtualHost>'; } > /etc/apache2/sites-available/gssportif.conf
     grep -q '^ServerTokens Prod' /etc/apache2/conf-available/security.conf 2>/dev/null || \
         sed -i 's/^ServerTokens .*/ServerTokens Prod/' /etc/apache2/conf-available/security.conf 2>/dev/null || true
     a2dissite 000-default >/dev/null 2>&1 || true
