@@ -188,7 +188,11 @@ function paytr_get_token(array $order): array
 {
     $oid = $order['order_no'] . 'P' . strtoupper(bin2hex(random_bytes(3)));
     $amount = paytr_amount($order['amount']);
-    $basket = base64_encode(json_encode([[mb_substr($order['service_title'] . ' - ' . $order['package_name'], 0, 100), number_format((float) $order['amount'], 2, '.', ''), 1]], JSON_UNESCAPED_UNICODE));
+    // Sepet: iade çeki yoksa her paket ayrı satır; varsa tutarlar tutsun diye tek satır
+    $lines = empty($order['voucher_code'])
+        ? array_map(fn($i) => [mb_substr($i['service_title'] . ' - ' . $i['package_name'], 0, 100), number_format((float) $i['price'], 2, '.', ''), 1], order_items($order))
+        : [[mb_substr('Sipariş ' . $order['order_no'] . ' (iade çeki düşülmüş)', 0, 100), number_format((float) $order['amount'], 2, '.', ''), 1]];
+    $basket = base64_encode(json_encode($lines, JSON_UNESCAPED_UNICODE));
     [$noInst, $maxInst] = paytr_installment();
     $test = paytr_mode() === 'test' ? '1' : '0';
     $ip = client_ip();
@@ -264,7 +268,8 @@ function finalize_order(array $order, bool $success, string $message, ?string $r
         log_activity('Ödeme alındı', $order['order_no'] . ' · ' . $order['package_name'] . ' · ' . money($order['amount']), 'order', (int) $order['id'], $customer);
 
         send_mail($order['customer_email'], 'Siparişiniz onaylandı - ' . $order['order_no'],
-            '<p>Merhaba ' . e($order['customer_name']) . ',</p><p><b>' . e($order['service_title']) . ' - ' . e($order['package_name']) . '</b> siparişiniz için ödemeniz başarıyla alındı.</p>'
+            '<p>Merhaba ' . e($order['customer_name']) . ',</p><p>Siparişiniz için ödemeniz başarıyla alındı:</p><ul>'
+            . implode('', array_map(fn($i) => '<li>' . e($i['service_title']) . ' – <b>' . e($i['package_name']) . '</b> (' . money($i['price']) . ')</li>', order_items($order))) . '</ul>'
             . '<p>Sipariş No: <b>' . e($order['order_no']) . '</b><br>Tutar: <b>' . money($order['amount']) . '</b> (KDV dahil)'
             . (!empty($order['voucher_code']) ? '<br>İade çeki ile ödenen: <b>' . money($order['voucher_amount']) . '</b> (' . e($order['voucher_code']) . ')' : '') . '</p>'
             . '<p>Koçunuz en geç 24 saat içinde sizinle iletişime geçerek ilk dersinizi planlayacaktır.</p>');

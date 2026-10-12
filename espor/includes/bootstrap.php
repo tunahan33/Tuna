@@ -17,6 +17,7 @@ require __DIR__ . '/functions.php';
 require __DIR__ . '/auth.php';
 require __DIR__ . '/vouchers.php';
 require __DIR__ . '/upgrade.php';
+require __DIR__ . '/cart.php';
 
 date_default_timezone_set(config('timezone') ?: 'Europe/Istanbul');
 mb_internal_encoding('UTF-8');

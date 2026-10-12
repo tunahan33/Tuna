@@ -9,6 +9,10 @@ if (!$order || !hash_equals(order_access_token($order), (string) input('t'))) {
     exit('Sipariş bulunamadı.');
 }
 $ok = in_array($order['status'], SALE_STATUSES, true);
+// Bu sepetten verilen sipariş onaylandıysa sepet boşaltılır
+if ($ok && (int) ($_SESSION['checkout_order'] ?? 0) === (int) $order['id']) {
+    cart_clear();
+}
 $durum = (string) input('durum');
 $refresh = (int) input('r');
 // PayTR müşteriyi başarılı ödemeden sonra buraya döndürür; onay bildirimi birkaç saniye gecikebilir
@@ -23,7 +27,7 @@ require __DIR__ . '/includes/header.php';
         <div class="result-icon"><?= $ok ? '✓' : ($wait ? '⧗' : '!') ?></div>
         <?php if ($ok): ?>
             <h1 class="h2">Siparişiniz onaylandı, teşekkürler!</h1>
-            <p><b><?= e($order['service_title']) ?> - <?= e($order['package_name']) ?></b> siparişiniz onaylandı. Koçunuz en geç 24 saat içinde sizinle iletişime geçerek ilk dersinizi planlayacak.</p>
+            <p><b><?= e(count(order_items($order)) > 1 ? count(order_items($order)) . ' koçluk paketi' : $order['service_title'] . ' - ' . $order['package_name']) ?></b> içeren siparişiniz onaylandı. Koçunuz en geç 24 saat içinde sizinle iletişime geçerek ilk dersinizi planlayacak.</p>
         <?php elseif ($processing): ?>
             <h1 class="h2">Ödemeniz işleniyor…</h1>
             <p>Bankanızdan onay bekleniyor. Bu sayfa birkaç saniye içinde kendiliğinden yenilenecek; lütfen kapatmayın.</p>

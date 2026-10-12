@@ -252,7 +252,7 @@ function widget_render(string $slug, array $state): void
                         <dt>Son Güncelleme</dt><dd><?= tr_date($r['updated_at']) ?></dd>
                     </dl>
                     <?php if ($r['status'] === 'pending' || $r['status'] === 'failed'): ?>
-                        <p class="small">Ödemeniz tamamlanmamış görünüyor. <a href="<?= url('odeme.php?paket=' . (int) $r['package_id']) ?>">Yeniden satın almak için tıklayın</a>.</p>
+                        <p class="small">Ödemeniz tamamlanmamış görünüyor. <a href="<?= url('hesabim.php') ?>">Hesabım sayfasından ödemeyi tamamlayabilirsiniz</a>.</p>
                     <?php elseif (in_array($r['status'], ['paid', 'processing'], true)): ?>
                         <p class="small">Koçunuz sizinle iletişime geçmediyse lütfen <a href="<?= url('iletisim.php?konu=' . urlencode('Sipariş ' . $r['order_no'])) ?>">bize yazın</a>.</p>
                     <?php endif; ?>

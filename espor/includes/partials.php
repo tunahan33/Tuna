@@ -20,8 +20,30 @@ function package_card(array $p, bool $showService = false): string
         </ul>
         <div class="pkg-actions">
             <button type="button" class="btn btn-outline btn-block" data-open-package="<?= (int) $p['id'] ?>">Detayları İncele</button>
-            <a class="btn btn-primary btn-block" href="<?= url('odeme.php?paket=' . (int) $p['id']) ?>">Satın Al</a>
+            <?= cart_button((int) $p['id']) ?>
         </div>
     </article>
     <?php return ob_get_clean();
+}
+
+/** Sepete ekle düğmesi (paket sepetteyse sepete gider) */
+function cart_button(int $id, bool $large = false, bool $buyNow = false): string
+{
+    $cls = 'btn btn-primary btn-block' . ($large ? ' btn-lg' : '');
+    if (cart_has($id)) {
+        return '<a class="btn btn-dark btn-block' . ($large ? ' btn-lg' : '') . ' in-cart" href="' . url('sepet.php') . '">✓ Sepette · Sepete Git</a>';
+    }
+    $back = basename($_SERVER['SCRIPT_NAME'] ?? 'index.php');
+    if ($back === 'paket.php') {
+        $back = 'paketler.php';
+    }
+    $qs = $_SERVER['QUERY_STRING'] ?? '';
+    $geri = $back . ($qs !== '' && $back !== 'paketler.php' ? '?' . $qs : '');
+    $html = '<form method="post" action="' . url('sepet.php') . '" class="cart-form">' . csrf_field()
+        . '<input type="hidden" name="action" value="add"><input type="hidden" name="paket" value="' . $id . '"><input type="hidden" name="geri" value="' . e($geri) . '">'
+        . '<button class="' . $cls . '">Sepete Ekle</button>';
+    if ($buyNow) {
+        $html .= '<button class="btn btn-outline btn-block' . ($large ? ' btn-lg' : '') . '" name="go" value="odeme">Hemen Satın Al</button>';
+    }
+    return $html . '</form>';
 }

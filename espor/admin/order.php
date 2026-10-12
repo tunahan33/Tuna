@@ -75,8 +75,7 @@ admin_header('Sipariş ' . $o['order_no'], status_badge($o['status']) . ' · ' .
         <section class="panel">
             <div class="panel-head"><h2>Sipariş Bilgileri</h2><a href="orders.php" class="btn btn-xs btn-outline">← Liste</a></div>
             <dl class="dl-grid">
-                <dt>Hizmet</dt><dd><?= e($o['service_title']) ?></dd>
-                <dt>Paket</dt><dd><?= e($o['package_name']) ?></dd>
+                <dt>Paketler</dt><dd><ul class="order-items"><?php foreach (order_items($o) as $it): ?><li><span><?= e($it['service_title']) ?> · <strong><?= e($it['package_name']) ?></strong><?= !empty($it['duration']) ? ' <small class="muted">(' . e($it['duration']) . ')</small>' : '' ?></span><b><?= money($it['price']) ?></b></li><?php endforeach; ?></ul></dd>
                 <dt>Ödeme Yöntemi</dt><dd><?= e(['kart' => 'Kredi / Banka Kartı', 'iade_ceki' => 'İade Çeki'][$o['payment_method'] ?? ''] ?? ($o['status'] === 'paid' && str_starts_with((string) $o['payment_ref'], 'MANUEL') ? 'Panelden onaylandı' : '-')) ?></dd>
                 <dt>Tutar</dt><dd><strong class="big"><?= money($o['amount']) ?></strong> <small class="muted">KDV dahil</small></dd>
                 <?php if ($o['voucher_code']): ?><dt>İade Çeki</dt><dd><?= money($o['voucher_amount']) ?> <small class="muted">(<?= e($o['voucher_code']) ?>) · kartla ödenen: <?= money($o['amount']) ?></small></dd><?php endif; ?>

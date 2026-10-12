@@ -1,6 +1,7 @@
 <?php
 /** Paket detayı: tam sayfa veya ?ajax=1 ile açılır pencere (modal) içeriği */
 require __DIR__ . '/includes/bootstrap.php';
+require __DIR__ . '/includes/partials.php';
 
 $p = row('SELECT p.*, s.title AS service_title, s.slug AS service_slug FROM packages p JOIN services s ON s.id = p.service_id WHERE p.id = ? AND p.is_active = 1 AND s.is_active = 1', [(int) input('id')]);
 $ajax = input('ajax') === '1';
@@ -30,7 +31,7 @@ ob_start(); ?>
             <?php if ($p['old_price'] && $p['old_price'] > $p['price']): ?><del><?= money($p['old_price']) ?></del><?php endif; ?>
             <strong><?= money($p['price']) ?></strong><small>KDV dahil · Tek çekim</small>
         </div>
-        <a class="btn btn-primary btn-lg" href="<?= url('odeme.php?paket=' . (int) $p['id']) ?>">Hemen Satın Al</a>
+        <div class="pkg-detail-actions"><?= cart_button((int) $p['id'], true, true) ?></div>
     </div>
     <p class="small muted">Satın alma öncesi <a href="<?= url('sayfa.php?s=on-bilgilendirme-formu') ?>" target="_blank">Ön Bilgilendirme Formu</a>, <a href="<?= url('sayfa.php?s=mesafeli-satis-sozlesmesi') ?>" target="_blank">Mesafeli Satış Sözleşmesi</a> ve <a href="<?= url('sayfa.php?s=iade-ve-iade-ceki-kosullari') ?>" target="_blank">İade ve İade Çeki Koşulları</a>'nı inceleyebilirsiniz.</p>
 </div>

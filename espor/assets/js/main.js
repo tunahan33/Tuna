@@ -156,4 +156,42 @@
             });
         });
     });
+
+    // Sepete ekle: sayfa yenilenmeden (Hemen Satın Al düğmesi normal gönderilir)
+    document.addEventListener('submit', function (e) {
+        var f = e.target.closest && e.target.closest('.cart-form');
+        if (!f) return;
+        var page = location.pathname.split('/').pop() || 'index.php';
+        f.querySelector('input[name=geri]').value = page + location.search;
+        var sub = e.submitter;
+        if (sub && sub.name === 'go') return;
+        if (!window.fetch || !window.FormData) return;
+        e.preventDefault();
+        var btn = f.querySelector('button:not([name=go])');
+        if (btn) btn.disabled = true;
+        fetch(f.getAttribute('action'), { method: 'POST', body: new FormData(f), credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                document.querySelectorAll('[data-cart-count]').forEach(function (c) { c.textContent = d.count; c.hidden = d.count < 1; });
+                document.querySelectorAll('.cart-form input[name=paket][value="' + f.querySelector('input[name=paket]').value + '"]').forEach(function (inp) {
+                    var form = inp.closest('.cart-form');
+                    var a = document.createElement('a');
+                    a.className = 'btn btn-dark btn-block in-cart' + (form.querySelector('.btn-lg') ? ' btn-lg' : '');
+                    a.href = d.cart;
+                    a.textContent = '✓ Sepette · Sepete Git';
+                    form.replaceWith(a);
+                });
+                toast(d.message, d.cart);
+            })
+            .catch(function () { if (btn) btn.disabled = false; f.submit(); });
+    });
+    function toast(msg, href) {
+        var t = document.querySelector('.cart-toast');
+        if (!t) { t = document.createElement('div'); t.className = 'cart-toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+        t.innerHTML = '';
+        var s = document.createElement('span'); s.textContent = msg; t.appendChild(s);
+        var a = document.createElement('a'); a.href = href; a.className = 'btn btn-yellow btn-sm'; a.textContent = 'Sepete Git'; t.appendChild(a);
+        t.classList.add('show');
+        clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('show'); }, 4000);
+    }
 })();

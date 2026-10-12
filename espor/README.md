@@ -108,6 +108,17 @@ Her süper admin kendi bilgilerini yalnızca **Profilim** sayfasından değişti
 
 Yetkiler `includes/auth.php` dosyasındaki `PERMISSIONS` tablosundan değiştirilebilir.
 
+## Sepet
+
+Müşteri istediği kadar koçluk paketini sepete ekleyip tek ödemeyle alabilir:
+
+- Paket kartlarındaki ve paket detayındaki **Sepete Ekle** düğmesi sayfayı yenilemeden ekler; üst menüdeki sepet simgesi
+  paket sayısını gösterir. Detaydaki **Hemen Satın Al** paketi sepete ekleyip doğrudan ödemeye geçirir.
+- **Sepetim** (`sepet.php`) sayfasında paketler listelenir, tek tek kaldırılabilir veya sepet boşaltılabilir. Fiyatlar her
+  zaman güncel paket fiyatından hesaplanır; satıştan kaldırılan paket sepetten otomatik düşer.
+- Ödeme adımında tüm paketler özet, sözleşme ve PayTR/Akbank sepetinde ayrı ayrı yer alır. Ödeme onaylanınca sepet boşalır.
+- Panelde sipariş detayında paketler tek tek görünür; raporlar paket/koçluk bazında sepet kalemlerinden hesaplanır.
+
 ## İade çekleri
 
 Müşteri kart iadesi yerine iade çeki isterse: Panel → **İade Çekleri** (veya sipariş detayındaki **Bu sipariş için iade çeki tanımla**).

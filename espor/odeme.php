@@ -7,16 +7,31 @@ $user = require_login();
 
 function contract_vars(array $o): array
 {
+    $items = order_items($o);
+    $multi = count($items) > 1;
     return [
         'alici_ad' => $o['invoice_type'] === 'kurumsal' && $o['company_name'] ? $o['company_name'] . ' (' . $o['customer_name'] . ')' : $o['customer_name'],
         'alici_adres' => $o['customer_address'] . ($o['customer_city'] ? ' / ' . $o['customer_city'] : ''),
         'alici_telefon' => $o['customer_phone'], 'alici_eposta' => $o['customer_email'],
-        'hizmet_adi' => $o['service_title'], 'paket_adi' => $o['package_name'],
-        'paket_sure' => $o['_duration'] ?? '-',
-        'toplam_tutar' => money($o['amount']) . (!empty($o['voucher_code']) ? ' (Paket bedeli ' . money((float) $o['amount'] + (float) $o['voucher_amount']) . ', ' . money($o['voucher_amount']) . ' iade çeki ile ödenmiştir)' : ''),
+        'hizmet_adi' => $multi ? 'E-spor koçluk hizmetleri (' . count($items) . ' paket, aşağıda listelenmiştir)' : $items[0]['service_title'],
+        'paket_adi' => $multi
+            ? implode('; ', array_map(fn($i) => $i['service_title'] . ' – ' . $i['package_name'] . ' (' . money($i['price']) . ')', $items))
+            : $items[0]['package_name'],
+        'paket_sure' => implode('; ', array_filter(array_map(fn($i) => ($multi ? $i['package_name'] . ': ' : '') . ($i['duration'] ?: ''), $items), fn($x) => trim($x, ': ') !== '')) ?: '-',
+        'toplam_tutar' => money($o['amount']) . (!empty($o['voucher_code']) ? ' (Sipariş bedeli ' . money((float) $o['amount'] + (float) $o['voucher_amount']) . ', ' . money($o['voucher_amount']) . ' iade çeki ile ödenmiştir)' : ''),
         'siparis_tarihi' => tr_date($o['created_at']),
         'odeme_sekli' => payment_methods_text(),
     ];
+}
+
+/** Sipariş özeti kutusundaki paket listesi */
+function summary_items_html(array $items): string
+{
+    $h = '<ul class="summary-items">';
+    foreach ($items as $i) {
+        $h .= '<li><span><small>' . e($i['service_title']) . '</small>' . e($i['package_name'] ?? $i['name']) . '</span><b>' . money($i['price']) . '</b></li>';
+    }
+    return $h . '</ul>';
 }
 
 /* ---------- 2. ve 3. adım: mevcut sipariş ---------- */
@@ -51,7 +66,7 @@ if ($orderNo = input('siparis')) {
             [$v, $use, $verr] = voucher_check($order['voucher_code'], $order['customer_email'], (float) $order['amount'] + (float) $order['voucher_amount']);
             if ($verr || abs($use - (float) $order['voucher_amount']) > 0.009) {
                 flash('error', ($verr ?: 'İade çeki bakiyeniz değişmiş.') . ' Lütfen bilgileri tekrar onaylayın.');
-                redirect('odeme.php?paket=' . (int) $order['package_id']);
+                redirect('odeme.php');
             }
             if ((float) $order['amount'] <= 0) {
                 q("UPDATE orders SET payment_method = 'iade_ceki' WHERE id = ?", [$order['id']]);
@@ -127,11 +142,10 @@ if ($orderNo = input('siparis')) {
                     <h3>Sipariş Özeti</h3>
                     <dl>
                         <dt>Sipariş No</dt><dd><?= e($order['order_no']) ?></dd>
-                        <dt>Hizmet</dt><dd><?= e($order['service_title']) ?></dd>
-                        <dt>Paket</dt><dd><?= e($order['package_name']) ?></dd>
                     </dl>
+                    <?= summary_items_html(order_items($order)) ?>
                     <?php if (!empty($order['voucher_code'])): ?>
-                        <dl class="voucher-lines"><dt>Paket bedeli</dt><dd><?= money((float) $order['amount'] + (float) $order['voucher_amount']) ?></dd><dt>İade çeki</dt><dd>− <?= money($order['voucher_amount']) ?></dd></dl>
+                        <dl class="voucher-lines"><dt>Sipariş bedeli</dt><dd><?= money((float) $order['amount'] + (float) $order['voucher_amount']) ?></dd><dt>İade çeki</dt><dd>− <?= money($order['voucher_amount']) ?></dd></dl>
                     <?php endif; ?>
                     <div class="summary-total"><span>Ödenecek (KDV dahil)</span><strong><?= money($order['amount']) ?></strong></div>
                     <p class="small muted">Ödeme onaylandığında sonuç sayfasına yönlendirilir ve e-posta ile bilgilendirilirsiniz.</p>
@@ -184,15 +198,14 @@ if ($orderNo = input('siparis')) {
                 <h3>Sipariş Özeti</h3>
                 <dl>
                     <dt>Sipariş No</dt><dd><?= e($order['order_no']) ?></dd>
-                    <dt>Hizmet</dt><dd><?= e($order['service_title']) ?></dd>
-                    <dt>Paket</dt><dd><?= e($order['package_name']) ?></dd>
                     <dt>Fatura</dt><dd><?= e($vars['alici_ad']) ?><br><small><?= e($vars['alici_adres']) ?></small></dd>
                 </dl>
+                <?= summary_items_html(order_items($order)) ?>
                 <?php if (!empty($order['voucher_code'])): ?>
-                    <dl class="voucher-lines"><dt>Paket bedeli</dt><dd><?= money((float) $order['amount'] + (float) $order['voucher_amount']) ?></dd><dt>İade çeki <small><?= e($order['voucher_code']) ?></small></dt><dd>− <?= money($order['voucher_amount']) ?></dd></dl>
+                    <dl class="voucher-lines"><dt>Sipariş bedeli</dt><dd><?= money((float) $order['amount'] + (float) $order['voucher_amount']) ?></dd><dt>İade çeki <small><?= e($order['voucher_code']) ?></small></dt><dd>− <?= money($order['voucher_amount']) ?></dd></dl>
                 <?php endif; ?>
                 <div class="summary-total"><span><?= !empty($order['voucher_code']) ? 'Ödenecek' : 'Toplam (KDV dahil)' ?></span><strong><?= money($order['amount']) ?></strong></div>
-                <a class="small" href="<?= url('odeme.php?paket=' . (int) $order['package_id']) ?>">← Bilgileri düzenle</a>
+                <a class="small" href="<?= url('odeme.php') ?>">← Sepeti / bilgileri düzenle</a>
             </aside>
         </div>
     </div></section>
@@ -201,12 +214,18 @@ if ($orderNo = input('siparis')) {
     exit;
 }
 
-/* ---------- 1. adım: fatura bilgileri ---------- */
-$pkg = row('SELECT p.*, s.title AS service_title FROM packages p JOIN services s ON s.id = p.service_id WHERE p.id = ? AND p.is_active = 1 AND s.is_active = 1', [(int) input('paket')]);
-if (!$pkg) {
-    flash('error', 'Paket bulunamadı.');
-    redirect('paketler.php');
+/* ---------- 1. adım: fatura bilgileri (sepetteki paketler) ---------- */
+// Eski "Satın Al" bağlantıları: paketi sepete ekleyip ödemeye devam et
+if (($pid = (int) input('paket')) > 0) {
+    cart_add($pid);
+    redirect('odeme.php');
 }
+$items = cart_items();
+if (!$items) {
+    flash('info', 'Sepetiniz boş. Ödemeye geçmek için önce paket ekleyin.');
+    redirect('sepet.php');
+}
+$cartTotal = cart_total($items);
 $last = row('SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC LIMIT 1', [$user['id']]) ?? [];
 $f = [
     'customer_name' => $last['customer_name'] ?? $user['name'], 'customer_email' => $last['customer_email'] ?? $user['email'],
@@ -233,26 +252,34 @@ if (is_post()) {
     elseif ($f['identity_no'] !== '' && !preg_match('/^\d{11}$/', $f['identity_no'])) $err = 'T.C. kimlik numarası 11 haneli olmalıdır.';
 
     if (!$err && $f['voucher_code'] !== '') {
-        [$v, $voucherUse, $err] = voucher_check($f['voucher_code'], $f['customer_email'], (float) $pkg['price']);
+        [$v, $voucherUse, $err] = voucher_check($f['voucher_code'], $f['customer_email'], $cartTotal);
         $f['voucher_code'] = $v ? $v['code'] : $f['voucher_code'];
     }
 
     if ($err) {
         flash('error', $err);
     } else {
-        // Aynı paket için bekleyen sipariş varsa güncelle, yoksa yeni oluştur
-        $existing = row("SELECT * FROM orders WHERE user_id = ? AND package_id = ? AND status IN ('pending','failed') ORDER BY id DESC LIMIT 1", [$user['id'], $pkg['id']]);
+        // Bu sepet için açılmış, henüz ödenmemiş sipariş varsa güncellenir; yoksa yeni sipariş oluşturulur
+        $existing = !empty($_SESSION['checkout_order'])
+            ? row("SELECT * FROM orders WHERE id = ? AND user_id = ? AND status IN ('pending','failed')", [(int) $_SESSION['checkout_order'], $user['id']])
+            : null;
         $data = ['voucher_code' => $f['voucher_code'] !== '' ? $f['voucher_code'] : null, 'voucher_amount' => $voucherUse > 0 ? $voucherUse : null] + $f
-            + ['amount' => round((float) $pkg['price'] - $voucherUse, 2), 'package_name' => $pkg['name'], 'service_title' => $pkg['service_title'], 'updated_at' => now(), 'ip' => client_ip()];
+            + order_summary_fields($items)
+            + ['amount' => round($cartTotal - $voucherUse, 2), 'package_id' => (int) $items[0]['id'], 'updated_at' => now(), 'ip' => client_ip()];
         if ($existing) {
             update('orders', $data, (int) $existing['id']);
             $no = $existing['order_no'];
             $oid = (int) $existing['id'];
+            q('DELETE FROM order_items WHERE order_id = ?', [$oid]);
         } else {
             $no = generate_order_no();
-            $oid = insert('orders', $data + ['order_no' => $no, 'user_id' => $user['id'], 'package_id' => $pkg['id'], 'status' => 'pending', 'created_at' => now()]);
-            log_activity('Sipariş oluşturdu', $no . ' · ' . $pkg['service_title'] . ' / ' . $pkg['name'] . ' · ' . money($pkg['price']), 'order', $oid);
+            $oid = insert('orders', $data + ['order_no' => $no, 'user_id' => $user['id'], 'status' => 'pending', 'created_at' => now()]);
+            log_activity('Sipariş oluşturdu', $no . ' · ' . count($items) . ' paket · ' . implode(', ', array_column($items, 'name')) . ' · ' . money($cartTotal), 'order', $oid);
         }
+        foreach ($items as $it) {
+            insert('order_items', ['order_id' => $oid, 'package_id' => (int) $it['id'], 'service_title' => $it['service_title'], 'package_name' => $it['name'], 'duration' => $it['duration'], 'price' => $it['price']]);
+        }
+        $_SESSION['checkout_order'] = $oid;
         if (!$user['phone'] && $f['customer_phone']) {
             q('UPDATE users SET phone = ? WHERE id = ?', [$f['customer_phone'], $user['id']]);
         }
@@ -300,14 +327,10 @@ require __DIR__ . '/includes/header.php';
         </div>
         <aside class="card summary">
             <h3>Sipariş Özeti</h3>
-            <dl>
-                <dt>Hizmet</dt><dd><?= e($pkg['service_title']) ?></dd>
-                <dt>Paket</dt><dd><?= e($pkg['name']) ?></dd>
-                <dt>Süre</dt><dd><?= e($pkg['duration']) ?><?= $pkg['sessions'] ? ' · ' . e($pkg['sessions']) : '' ?></dd>
-            </dl>
-            <ul class="check-list small"><?php foreach (features_list($pkg['features']) as $x): ?><li><?= e($x) ?></li><?php endforeach; ?></ul>
-            <div class="summary-total"><span>Toplam (KDV dahil)</span><strong><?= money($pkg['price']) ?></strong></div>
-            <p class="small muted">İade çeki kodunuz varsa sonraki adımda tutardan düşülür.</p>
+            <?= summary_items_html($items) ?>
+            <div class="summary-total"><span>Toplam (KDV dahil)</span><strong><?= money($cartTotal) ?></strong></div>
+            <a class="small" href="<?= url('sepet.php') ?>">← Sepeti düzenle</a>
+            <p class="small muted">İade çeki kodunuz varsa formdaki “İade çeki kodum var” alanına yazın; tutardan düşülür.</p>
             <img src="<?= asset('img/payment-logos.svg') ?>" alt="Visa, Mastercard, Troy, 3D Secure" class="w100 mt-1">
         </aside>
     </div>

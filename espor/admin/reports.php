@@ -96,8 +96,10 @@ foreach (rows("SELECT DATE(paid_at) AS d, SUM(amount) AS t FROM orders WHERE sta
     if (isset($days[$r['d']])) $days[$r['d']]['refunded'] = (float) $r['t'];
 }
 $tot = ['orders' => array_sum(array_column($days, 'orders')), 'sales' => array_sum(array_column($days, 'sales')), 'revenue' => array_sum(array_column($days, 'revenue')), 'failed' => array_sum(array_column($days, 'failed'))];
-$byService = rows("SELECT service_title, COUNT(*) AS c, SUM(amount) AS t FROM orders WHERE status IN ($in) AND paid_at BETWEEN ? AND ? GROUP BY service_title ORDER BY t DESC", $range);
-$byPackage = rows("SELECT service_title, package_name, COUNT(*) AS c, SUM(amount) AS t FROM orders WHERE status IN ($in) AND paid_at BETWEEN ? AND ? GROUP BY service_title, package_name ORDER BY t DESC LIMIT 10", $range);
+// Paket bazında: her kalemin geliri, sipariş tutarının (iade çeki düşülmüş) kalem fiyatına oranla payıdır
+$itemRevenue = "i.price * o.amount / (SELECT SUM(x.price) FROM order_items x WHERE x.order_id = o.id)";
+$byService = rows("SELECT i.service_title, COUNT(*) AS c, SUM($itemRevenue) AS t FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.status IN ($in) AND o.paid_at BETWEEN ? AND ? GROUP BY i.service_title ORDER BY t DESC", $range);
+$byPackage = rows("SELECT i.service_title, i.package_name, COUNT(*) AS c, SUM($itemRevenue) AS t FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.status IN ($in) AND o.paid_at BETWEEN ? AND ? GROUP BY i.service_title, i.package_name ORDER BY t DESC LIMIT 10", $range);
 $byRep = rows("SELECT COALESCE(u.name, 'Atanmamış') AS n, COUNT(*) AS c, SUM(o.amount) AS t FROM orders o LEFT JOIN users u ON u.id = o.assigned_to WHERE o.status IN ($in) AND o.paid_at BETWEEN ? AND ? GROUP BY u.name ORDER BY t DESC", $range);
 
 if (input('export') === 'csv') {

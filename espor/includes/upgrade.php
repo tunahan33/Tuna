@@ -4,7 +4,7 @@
  * bir kez çalışır; db_version ayarı hangi adımların uygulandığını tutar.
  */
 
-const DB_VERSION = 7;
+const DB_VERSION = 8;
 
 /** Firma bilgileri (vergi levhası) — yalnızca panelden henüz doldurulmamış alanlara yazılır */
 const COMPANY_DEFAULTS = [
@@ -71,6 +71,9 @@ function db_upgrade(): void
     }
     if ($ver < 7) {
         db_upgrade_v7();
+    }
+    if ($ver < 8) {
+        db_upgrade_v8();
     }
     save_setting('db_version', (string) DB_VERSION);
 }
@@ -223,4 +226,22 @@ function db_upgrade_v7(): void
             q('UPDATE pages SET content = ?, updated_at = ? WHERE id = ?', [$new, now(), $p['id']]);
         }
     }
+}
+
+/** v8: Sepet — sipariş kalemleri tablosu; mevcut tek paketli siparişler kaleme dönüştürülür */
+function db_upgrade_v8(): void
+{
+    $mysql = (config('db.driver') ?? 'mysql') === 'mysql';
+    $pk = $mysql ? 'INT UNSIGNED AUTO_INCREMENT PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT';
+    $int = $mysql ? 'INT UNSIGNED' : 'INTEGER';
+    $tail = $mysql ? ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci' : '';
+    db()->exec("CREATE TABLE IF NOT EXISTS order_items (id $pk, order_id $int NOT NULL, package_id $int NULL, service_title VARCHAR(160) NOT NULL, package_name VARCHAR(160) NOT NULL, duration VARCHAR(80) NULL, price DECIMAL(12,2) NOT NULL)$tail");
+    try {
+        db()->exec('CREATE INDEX idx_items_order ON order_items (order_id)');
+    } catch (Throwable $e) {
+    }
+    q('INSERT INTO order_items (order_id, package_id, service_title, package_name, duration, price)
+       SELECT o.id, o.package_id, o.service_title, o.package_name, p.duration, o.amount + COALESCE(o.voucher_amount, 0)
+       FROM orders o LEFT JOIN packages p ON p.id = o.package_id
+       WHERE NOT EXISTS (SELECT 1 FROM order_items i WHERE i.order_id = o.id)');
 }

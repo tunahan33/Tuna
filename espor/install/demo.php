@@ -44,6 +44,7 @@ for ($i = 0; $i < 60; $i++) {
         'assigned_to' => in_array($st, ['processing', 'completed']) ? $ids['sales'] : null, 'contract_accepted_at' => $created, 'ip' => '127.0.0.1',
         'paid_at' => in_array($st, SALE_STATUSES) ? date('Y-m-d H:i:s', $ts + 120) : null, 'created_at' => $created, 'updated_at' => $created,
     ]);
+    insert('order_items', ['order_id' => $oid, 'package_id' => $p['id'], 'service_title' => $p['st'], 'package_name' => $p['name'], 'duration' => $p['duration'], 'price' => $p['price']]);
     insert('activity_log', ['user_id' => $ids['member'], 'user_name' => $name, 'user_role' => 'member', 'action' => in_array($st, SALE_STATUSES) ? 'Ödeme alındı' : 'Sipariş oluşturdu', 'entity' => 'order', 'entity_id' => $oid, 'details' => $p['st'] . ' / ' . $p['name'] . ' · ' . money($p['price']), 'ip' => '127.0.0.1', 'created_at' => $created]);
 }
 insert('messages', ['type' => 'iletisim', 'name' => 'Takım Kaptanı Ali', 'email' => 'ali@ornektakim.com', 'phone' => '0533 111 22 33', 'subject' => 'Takım & Turnuva Koçluğu', 'message' => 'Üniversite Valorant takımımız için sezon hazırlık paketi hakkında bilgi almak istiyoruz.', 'status' => 'new', 'ip' => '127.0.0.1', 'created_at' => now()]);

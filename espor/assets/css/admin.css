@@ -202,3 +202,5 @@ tr.dim td { color: #A5AAB0; }
 .users-table .actions { white-space: normal; width: 120px; }
 .users-table .actions .btn { display: block; width: 100%; margin: 0 0 .25rem; }
 .users-table .actions form { display: block; }
+.order-items { list-style: none; padding: 0; margin: 0; display: grid; gap: .3rem; }
+.order-items li { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px dashed var(--line); padding-bottom: .3rem; }

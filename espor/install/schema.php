@@ -87,6 +87,15 @@ function schema_sql(string $driver): array
             created_at DATETIME NOT NULL,
             updated_at DATETIME NOT NULL
         )$tail",
+        "CREATE TABLE IF NOT EXISTS order_items (
+            id $pk,
+            order_id $int NOT NULL,
+            package_id $int NULL,
+            service_title VARCHAR(160) NOT NULL,
+            package_name VARCHAR(160) NOT NULL,
+            duration VARCHAR(80) NULL,
+            price DECIMAL(12,2) NOT NULL
+        )$tail",
         "CREATE TABLE IF NOT EXISTS order_notes (
             id $pk,
             order_id $int NOT NULL,
@@ -178,5 +187,6 @@ function schema_sql(string $driver): array
         "CREATE INDEX idx_messages_ticket ON messages (ticket_no)",
         "CREATE INDEX idx_vouchers_email ON vouchers (customer_email)",
         "CREATE INDEX idx_attempts_order ON payment_attempts (order_id)",
+        "CREATE INDEX idx_items_order ON order_items (order_id)",
     ];
 }

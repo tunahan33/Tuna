@@ -31,7 +31,8 @@ if ($f['mine']) {
     $params[] = $u['id'];
 }
 if ($f['service'] !== '') {
-    $where[] = 'service_title = ?';
+    $where[] = '(service_title = ? OR EXISTS (SELECT 1 FROM order_items i WHERE i.order_id = orders.id AND i.service_title = ?))';
+    $params[] = $f['service'];
     $params[] = $f['service'];
 }
 $w = implode(' AND ', $where);

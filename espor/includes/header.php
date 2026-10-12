@@ -54,6 +54,11 @@ $__current = basename($_SERVER['SCRIPT_NAME'] ?? '');
             <a href="<?= url('sayfa.php?s=hakkimizda') ?>" class="<?= ($__current === 'sayfa.php' && ($_GET['s'] ?? '') === 'hakkimizda') ? 'active' : '' ?>">Hakkımızda</a>
             <a href="<?= url('sayfa.php?s=sikca-sorulan-sorular') ?>" class="<?= ($__current === 'sayfa.php' && ($_GET['s'] ?? '') === 'sikca-sorulan-sorular') ? 'active' : '' ?>">SSS</a>
             <a href="<?= url('iletisim.php') ?>" class="<?= $__current === 'iletisim.php' ? 'active' : '' ?>">İletişim</a>
+            <?php $__cc = cart_count(); ?>
+            <a href="<?= url('sepet.php') ?>" class="nav-cart <?= $__current === 'sepet.php' ? 'active' : '' ?>" aria-label="Sepetim (<?= $__cc ?> paket)" data-cart-link>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 11.2a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20 8H6.2"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
+                <span class="nav-cart-label">Sepet</span><em class="cart-count" data-cart-count <?= $__cc ? '' : 'hidden' ?>><?= $__cc ?></em>
+            </a>
             <?php if ($__user): ?>
                 <?php if (can('panel.access', $__user)): ?>
                     <a class="btn btn-dark btn-sm" href="<?= url('admin/') ?>">Yönetim Paneli</a>
