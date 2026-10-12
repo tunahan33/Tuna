@@ -119,25 +119,31 @@ Sipariş no + iade tutarı girilir; “%10 ekle” işaretliyse çek tutarı iad
 - Kalan bakiye sonraki siparişlerde kullanılabilir; bakiye yalnızca ödeme onaylanınca düşer.
 - Müşteri çeklerini **Hesabım** sayfasında görür. Tüm işlemler aktivite akışına yazılır.
 
-## Müşteri nasıl öder? (PayTR)
+## Müşteri nasıl öder? (PayTR ve Akbank)
 
-Paket → **Satın Al** → fatura bilgileri → sözleşme onayı → **Güvenli Ödeme**: PayTR'ın kart formu sayfada açılır
-(iframe). Kart bilgileri yalnızca PayTR'a girilir, sitenin sunucusuna gelmez.
+Panel → Site & Ödeme Ayarları → **Ödeme (PayTR & Akbank)** sekmesindeki **Aktif Ödeme Altyapısı** seçimi, müşterinin
+kartının hangisinden çekileceğini belirler. Müşteri her zaman tek bir “Kart ile Öde” düğmesi görür; kart bilgileri
+yalnızca PayTR'ın / Akbank'ın sayfasında girilir, sitenin sunucusuna gelmez.
 
-Ödeme sonucu PayTR sunucusundan `paytr-bildirim.php` adresine imzalı olarak gelir; imza ve tutar doğrulanınca sipariş
-**Ödendi** olur, müşteriye ve size e-posta gider. Müşterinin dönüş sayfası ödemeyi onaylamaz, yalnızca bilgi verir.
+| | PayTR | Akbank Sanal POS |
+|---|---|---|
+| Ödeme ekranı | Sitede açılan PayTR formu (iframe) | Akbank'ın güvenli ödeme sayfası (3D Pay Hosting) |
+| Sonuç | PayTR sunucusundan `paytr-bildirim.php`'ye imzalı bildirim | Müşteri `akbank-donus.php`'ye imzalı (HMAC-SHA512) döner |
+| Taksit | Panelden açılabilir | Tek çekim |
+| Bilgiler | Mağaza No, Mağaza Parola, Mağaza Gizli Anahtar | Güvenli İşyeri No (Merchant Safe ID), Terminal Safe ID, Secret Key |
 
-**Kurulum (bir kez):**
-1. PayTR Mağaza Paneli → **Destek & Kurulum → Entegrasyon Bilgileri**: Mağaza No, Mağaza Parola, Mağaza Gizli Anahtar.
-2. Site paneli → Site & Ödeme Ayarları → **Ödeme (PayTR)** sekmesine bu üç bilgiyi girin, modu **TEST** yapın.
-3. PayTR Mağaza Paneli → **Destek & Kurulum → Ayarlar → Bildirim URL**:
-   `https://www.gssportiffaaliyetler.com/paytr-bildirim.php`
-4. TEST modunda (yalnızca panel personeli görür) PayTR test kartıyla bir sipariş verin; sipariş “Ödendi” olmalı.
-5. Modu **CANLI** yapın. Taksit seçeneği aynı sekmeden açılabilir (varsayılan: tek çekim).
+**Akbank bilgileri:** Akbank Sanal POS paneli → Yönetim → Üye İşyeri Bilgileri (Güvenli İşyeri Numarası),
+Terminal İşlemleri (Terminal Safe ID), Güvenlik Anahtarları (Secret Key). Dönüş adresi her ödemede otomatik gönderilir.
+**PayTR bilgileri:** Mağaza Paneli → Destek & Kurulum → Entegrasyon Bilgileri; Bildirim URL:
+`https://www.gssportiffaaliyetler.com/paytr-bildirim.php`
 
-Mod **KAPALI** iken veya bilgiler eksikken ödeme panelinde “Online ödeme yakında aktif” görünür; sipariş
-“Ödeme Bekliyor” olarak kaydedilir. Site dışında alınan ödemeyi onaylamak için siparişin durumunu **Ödendi** yapın
-(admin / süper admin). İadeler PayTR Mağaza Paneli'nden yapılır, ardından sipariş durumu “İade Edildi” yapılır.
+**Modlar:** KAPALI · TEST ORTAMI (sağlayıcının test bilgileriyle) · **CANLI - YALNIZCA PERSONEL** (gerçek kartla deneme,
+müşteriler görmez) · CANLI (herkese açık). Yeni bir altyapıyı önce “yalnızca personel” modunda kendi kartınızla küçük
+bir tutarla deneyin, sipariş “Ödendi” olunca CANLI'ya alın.
+
+Doğrulanamayan (imzası tutmayan veya başka iş yerine ait) dönüşler siparişi değiştirmez ve aktivite akışına
+“Ödeme doğrulama hatası” olarak yazılır. İadeler PayTR / Akbank panelinden yapılır, ardından sipariş durumu
+“İade Edildi” yapılır. Site dışında alınan ödemeyi onaylamak için siparişin durumunu **Ödendi** yapın (admin / süper admin).
 
 ## Sunucuya kurulum (gssportiffaaliyetler.com)
 

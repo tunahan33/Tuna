@@ -4,7 +4,7 @@
  * bir kez çalışır; db_version ayarı hangi adımların uygulandığını tutar.
  */
 
-const DB_VERSION = 6;
+const DB_VERSION = 7;
 
 /** Firma bilgileri (vergi levhası) — yalnızca panelden henüz doldurulmamış alanlara yazılır */
 const COMPANY_DEFAULTS = [
@@ -68,6 +68,9 @@ function db_upgrade(): void
     }
     if ($ver < 6) {
         db_upgrade_v6();
+    }
+    if ($ver < 7) {
+        db_upgrade_v7();
     }
     save_setting('db_version', (string) DB_VERSION);
 }
@@ -189,6 +192,35 @@ function db_upgrade_v6(): void
     foreach (['paytr_mode' => 'off', 'paytr_installment' => '1'] as $k => $v) {
         if (setting($k) === '') {
             save_setting($k, $v);
+        }
+    }
+}
+
+/** v7: Akbank Sanal POS — sağlayıcı sütunu, varsayılan ayarlar, sözleşmelerde Akbank adı */
+function db_upgrade_v7(): void
+{
+    try {
+        db()->exec("ALTER TABLE payment_attempts ADD provider VARCHAR(12) NOT NULL DEFAULT 'paytr'");
+    } catch (Throwable $e) {
+        // sütun zaten var
+    }
+    foreach (['payment_provider' => 'paytr', 'akbank_mode' => 'off'] as $k => $v) {
+        if (setting($k) === '') {
+            save_setting($k, $v);
+        }
+    }
+    $pairs = [
+        ['ödeme işlemi için ödeme kuruluşu PayTR Ödeme ve Elektronik Para Kuruluşu A.Ş.\'ye,', 'ödeme işlemi için ödeme hizmet sağlayıcılarımız Akbank T.A.Ş. ve PayTR Ödeme ve Elektronik Para Kuruluşu A.Ş.\'ye,'],
+        ['Ödemeleriniz, Türkiye Cumhuriyet Merkez Bankası lisanslı ödeme kuruluşu <strong>PayTR</strong> altyapısı üzerinden alınır.', 'Ödemeleriniz <strong>Akbank</strong> sanal POS veya Türkiye Cumhuriyet Merkez Bankası lisanslı ödeme kuruluşu <strong>PayTR</strong> altyapısı üzerinden alınır.'],
+        ['Sitemizdeki tüm ödemeler lisanslı ödeme kuruluşu <strong>PayTR</strong> altyapısı üzerinden,', 'Sitemizdeki tüm ödemeler <strong>Akbank</strong> sanal POS veya lisanslı ödeme kuruluşu <strong>PayTR</strong> altyapısı üzerinden,'],
+        ['5.3. Kartla ödemeler, lisanslı ödeme kuruluşu PayTR Ödeme ve Elektronik Para Kuruluşu A.Ş. altyapısı üzerinden', '5.3. Kartla ödemeler, Akbank T.A.Ş. sanal POS veya lisanslı ödeme kuruluşu PayTR Ödeme ve Elektronik Para Kuruluşu A.Ş. altyapısı üzerinden'],
+        ['doğrudan PayTR\'ın güvenli ödeme formuna girilir', 'doğrudan Akbank\'ın veya PayTR\'ın güvenli ödeme sayfasına girilir'],
+        ['ödeme işleminin gerçekleştirilmesi için ödeme kuruluşu PayTR ve hizmetin', 'ödeme işleminin gerçekleştirilmesi için ödeme hizmet sağlayıcılarımız (Akbank, PayTR) ve hizmetin'],
+    ];
+    foreach (rows('SELECT id, content FROM pages') as $p) {
+        $new = str_replace(array_column($pairs, 0), array_column($pairs, 1), $p['content']);
+        if ($new !== $p['content']) {
+            q('UPDATE pages SET content = ?, updated_at = ? WHERE id = ?', [$new, now(), $p['id']]);
         }
     }
 }

@@ -159,6 +159,7 @@ function schema_sql(string $driver): array
             id $pk,
             order_id $int NOT NULL,
             oid VARCHAR(64) NOT NULL UNIQUE,
+            provider VARCHAR(12) NOT NULL DEFAULT 'paytr',
             amount INT NOT NULL,
             status VARCHAR(12) NOT NULL DEFAULT 'started',
             test_mode TINYINT NOT NULL DEFAULT 0,

@@ -29,7 +29,9 @@ if (config('debug')) {
     ini_set('display_errors', '0');
 }
 
-if (session_status() === PHP_SESSION_NONE) {
+// Bankadan dönüş (başka alan adından POST) oturum çerezi taşımaz; orada yeni oturum açılıp
+// müşterinin mevcut oturumu ezilmesin diye oturum başlatılmaz.
+if (session_status() === PHP_SESSION_NONE && !defined('GSE_NO_SESSION')) {
     $secure = str_starts_with(config('base_url'), 'https://');
     session_name('gse_session');
     session_set_cookie_params([
@@ -68,7 +70,7 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 // Yönetim paneli, giriş ve banka dönüş adresi her zaman açıktır.
 if (PHP_SAPI !== 'cli' && maintenance_active()) {
     $__script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
-    $__open = str_contains($__script, '/admin/') || in_array(basename($__script), ['odeme-sonuc.php', 'paytr-bildirim.php', 'robots.php'], true);
+    $__open = str_contains($__script, '/admin/') || in_array(basename($__script), ['odeme-sonuc.php', 'paytr-bildirim.php', 'akbank-donus.php', 'robots.php'], true);
     if (!$__open && !can('panel.access')) {
         require __DIR__ . '/maintenance.php';
         exit;

@@ -5,6 +5,7 @@
  * Ödeme sonucu yalnızca bu adreste, PayTR imzası doğrulanarak siparişe işlenir.
  * PayTR, yanıt olarak düz metin "OK" görene kadar bildirimi tekrarlar.
  */
+define('GSE_NO_SESSION', true); // sunucudan sunucuya bildirim, oturum gerekmez
 require __DIR__ . '/includes/bootstrap.php';
 require __DIR__ . '/includes/payment.php';
 

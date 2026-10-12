@@ -66,15 +66,45 @@ if ($orderNo = input('siparis')) {
             redirect('odeme.php?siparis=' . urlencode($order['order_no']));
         }
 
-        // PayTR güvenli ödeme formu (iframe)
         $order = row('SELECT * FROM orders WHERE id = ?', [$order['id']]);
+        $modeNote = ['test' => ' TEST', 'staff' => ' (personel denemesi)'][payment_mode()] ?? '';
+
+        // Akbank: müşteri Akbank'ın güvenli ödeme sayfasına yönlendirilir
+        if (payment_provider() === 'akbank') {
+            $fields = akbank_form_fields($order);
+            log_activity('Ödeme sayfasını açtı', $order['order_no'] . ' · ' . money($order['amount']) . ' · Akbank' . $modeNote, 'order', (int) $order['id']);
+            $pageTitle = 'Güvenli Ödeme';
+            require __DIR__ . '/includes/header.php';
+            ?>
+            <section class="section"><div class="container narrow-sm">
+                <ol class="checkout-steps"><li class="done">Fatura Bilgileri</li><li class="done">Sözleşme</li><li class="active">Güvenli Ödeme</li></ol>
+                <div class="card center">
+                    <?php if (payment_mode() !== 'live'): ?><div class="alert alert-info"><b><?= payment_mode() === 'test' ? 'TEST ORTAMI' : 'PERSONEL DENEMESİ' ?>:</b> Bu ödeme seçeneğini yalnızca panel personeli görür.<?= payment_mode() === 'staff' ? ' Gerçek tahsilat yapılır.' : '' ?></div><?php endif; ?>
+                    <span class="pay-lock" style="margin:0 auto 1rem"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="1"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+                    <h1 class="h2">Akbank güvenli ödeme sayfasına yönlendiriliyorsunuz…</h1>
+                    <p>Kart bilgilerinizi Akbank'ın 3D Secure ödeme sayfasında gireceksiniz; bilgileriniz sitemizde saklanmaz.</p>
+                    <div class="pay-total-row"><span>Ödenecek Tutar <small>KDV dahil</small></span><strong><?= money($order['amount']) ?></strong></div>
+                    <form id="bankForm" method="post" action="<?= e(akbank_gateway_url()) ?>">
+                        <?php foreach ($fields as $k => $v): ?><input type="hidden" name="<?= e($k) ?>" value="<?= e($v) ?>"><?php endforeach; ?>
+                        <button class="btn btn-primary btn-lg btn-block">Ödeme Sayfasına Git</button>
+                    </form>
+                    <img src="<?= asset('img/payment-logos.svg') ?>" alt="Visa, Mastercard, Troy, 3D Secure" class="pay-panel-logos mt-1">
+                </div>
+            </div></section>
+            <script>setTimeout(function () { document.getElementById('bankForm').submit(); }, 600);</script>
+            <?php
+            require __DIR__ . '/includes/footer.php';
+            exit;
+        }
+
+        // PayTR güvenli ödeme formu (iframe)
         $pt = paytr_get_token($order);
         if (isset($pt['error'])) {
             log_activity('Ödeme başlatılamadı', $order['order_no'] . ' · ' . $pt['error'], 'order', (int) $order['id']);
             flash('error', 'Ödeme sayfası şu anda açılamadı. Lütfen birkaç dakika sonra tekrar deneyin' . (can('panel.access') ? ' (' . $pt['error'] . ')' : '') . '.');
             redirect('odeme.php?siparis=' . urlencode($order['order_no']));
         }
-        log_activity('Ödeme sayfasını açtı', $order['order_no'] . ' · ' . money($order['amount']) . ' · PayTR' . (paytr_mode() === 'test' ? ' TEST' : ''), 'order', (int) $order['id']);
+        log_activity('Ödeme sayfasını açtı', $order['order_no'] . ' · ' . money($order['amount']) . ' · PayTR' . $modeNote, 'order', (int) $order['id']);
         $pageTitle = 'Güvenli Ödeme';
         require __DIR__ . '/includes/header.php';
         ?>
@@ -82,7 +112,7 @@ if ($orderNo = input('siparis')) {
             <ol class="checkout-steps"><li class="done">Fatura Bilgileri</li><li class="done">Sözleşme</li><li class="active">Güvenli Ödeme</li></ol>
             <div class="checkout-grid">
                 <div class="card paytr-card">
-                    <?php if (paytr_mode() === 'test'): ?><div class="alert alert-info"><b>TEST MODU:</b> Gerçek tahsilat yapılmaz; yalnızca panel personeli görür. PayTR test kartı bilgilerini kullanın.</div><?php endif; ?>
+                    <?php if (paytr_mode() === 'test'): ?><div class="alert alert-info"><b>TEST MODU:</b> Gerçek tahsilat yapılmaz; yalnızca panel personeli görür. PayTR test kartı bilgilerini kullanın.</div><?php elseif (paytr_mode() === 'staff'): ?><div class="alert alert-info"><b>PERSONEL DENEMESİ:</b> Bu ödeme seçeneğini yalnızca panel personeli görür; gerçek tahsilat yapılır.</div><?php endif; ?>
                     <div class="pay-panel-head">
                         <span class="pay-lock"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="1"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
                         <div><strong>Kart Bilgileri</strong><small>PayTR güvenli ödeme · 3D Secure · Kart bilgileri sitemizde saklanmaz</small></div>
@@ -139,7 +169,7 @@ if ($orderNo = input('siparis')) {
                     <div class="pay-panel">
                         <div class="pay-panel-head">
                             <span class="pay-lock"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="1"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
-                            <div><strong>Kredi / Banka Kartı ile Ödeme</strong><small><?= paytr_installment()[0] === 1 ? 'Tek çekim' : 'Tek çekim veya taksit' ?> · PayTR güvenli ödeme · 3D Secure · Kart bilgileri sitemizde saklanmaz</small></div>
+                            <div><strong>Kredi / Banka Kartı ile Ödeme</strong><small><?= payment_single_shot() ? 'Tek çekim' : 'Tek çekim veya taksit' ?> · <?= e(payment_provider_name()) ?> güvenli ödeme · 3D Secure · Kart bilgileri sitemizde saklanmaz</small></div>
                             <img src="<?= asset('img/payment-logos.svg') ?>" alt="Visa, Mastercard, Troy, 3D Secure" class="pay-panel-logos">
                         </div>
                         <?php if (!$live && !$free): ?>

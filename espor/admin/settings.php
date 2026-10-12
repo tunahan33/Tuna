@@ -18,12 +18,17 @@ $groups = [
         'tax_office' => ['Vergi Dairesi', 'text'], 'tax_number' => ['Vergi No / T.C. Kimlik No (şahıs şirketi)', 'text'],
         'mersis_number' => ['MERSİS No (şahıs şirketinde "-" yazılabilir)', 'text'], 'kep_address' => ['KEP Adresi', 'text'],
     ]],
-    'pos' => ['Ödeme (PayTR)', [
-        'paytr_mode' => ['Çalışma Modu', 'select', ['off' => 'KAPALI (kartla ödeme gösterilmez)', 'test' => 'TEST (PayTR test modu, yalnızca panel personeli görür)', 'live' => 'CANLI (gerçek tahsilat)']],
-        'paytr_merchant_id' => ['Mağaza No (merchant_id)', 'text'],
-        'paytr_merchant_key' => ['Mağaza Parola (merchant_key)', 'secret'],
-        'paytr_merchant_salt' => ['Mağaza Gizli Anahtar (merchant_salt)', 'secret'],
-        'paytr_installment' => ['Taksit', 'select', ['1' => 'Yalnızca tek çekim', '0' => 'Taksit açık (PayTR panelindeki tüm seçenekler)', '3' => 'En fazla 3 taksit', '6' => 'En fazla 6 taksit', '9' => 'En fazla 9 taksit', '12' => 'En fazla 12 taksit']],
+    'pos' => ['Ödeme (PayTR & Akbank)', [
+        'payment_provider' => ['Aktif Ödeme Altyapısı (müşterinin kartı bundan çekilir)', 'select', ['paytr' => 'PayTR', 'akbank' => 'Akbank Sanal POS']],
+        'akbank_mode' => ['Akbank · Çalışma Modu', 'select', ['off' => 'KAPALI', 'test' => 'TEST ORTAMI (bankanın/PayTR test bilgileriyle, yalnızca personel görür)', 'staff' => 'CANLI - YALNIZCA PERSONEL (gerçek kartla deneme)', 'live' => 'CANLI (herkese açık, gerçek tahsilat)']],
+        'akbank_merchant_safe_id' => ['Akbank · Güvenli İşyeri Numarası (Merchant Safe ID)', 'text'],
+        'akbank_terminal_safe_id' => ['Akbank · Terminal Safe ID', 'text'],
+        'akbank_secret_key' => ['Akbank · Güvenlik Anahtarı (Secret Key)', 'secret'],
+        'paytr_mode' => ['PayTR · Çalışma Modu', 'select', ['off' => 'KAPALI', 'test' => 'TEST ORTAMI (bankanın/PayTR test bilgileriyle, yalnızca personel görür)', 'staff' => 'CANLI - YALNIZCA PERSONEL (gerçek kartla deneme)', 'live' => 'CANLI (herkese açık, gerçek tahsilat)']],
+        'paytr_merchant_id' => ['PayTR · Mağaza No (merchant_id)', 'text'],
+        'paytr_merchant_key' => ['PayTR · Mağaza Parola (merchant_key)', 'secret'],
+        'paytr_merchant_salt' => ['PayTR · Mağaza Gizli Anahtar (merchant_salt)', 'secret'],
+        'paytr_installment' => ['PayTR · Taksit', 'select', ['1' => 'Yalnızca tek çekim', '0' => 'Taksit açık (PayTR panelindeki tüm seçenekler)', '3' => 'En fazla 3 taksit', '6' => 'En fazla 6 taksit', '9' => 'En fazla 9 taksit', '12' => 'En fazla 12 taksit']],
     ]],
     'mail' => ['E-posta (SMTP)', [
         'mail_driver' => ['Gönderim Yöntemi', 'select', ['mail' => 'PHP mail() - hostingin varsayılan gönderimi', 'smtp' => 'SMTP - e-posta hesabı ile doğrulamalı gönderim (önerilen)']],
@@ -106,8 +111,8 @@ if (is_post()) {
     }
     if ($changed) {
         log_activity('Site ayarlarını değiştirdi', $groups[$tab][0] . ': ' . implode(', ', $changed), 'settings');
-        if (in_array('Çalışma Modu', $changed, true)) {
-            log_activity('Ödeme modunu değiştirdi', 'PayTR: ' . strtoupper(paytr_mode()), 'settings');
+        if (array_intersect($changed, ['Aktif Ödeme Altyapısı (müşterinin kartı bundan çekilir)', 'Akbank · Çalışma Modu', 'PayTR · Çalışma Modu'])) {
+            log_activity('Ödeme ayarını değiştirdi', 'Aktif: ' . payment_provider_name() . ' · Akbank: ' . strtoupper(provider_mode('akbank')) . ' · PayTR: ' . strtoupper(provider_mode('paytr')), 'settings');
         }
     }
     flash('success', 'Ayarlar kaydedildi.');
@@ -133,8 +138,8 @@ $checks = [
     ['Sepet/ödeme sayfasında sözleşme onay kutuları', true],
     ['Alt bilgide kart logoları ve güvenli ödeme ibaresi', true],
     ['İletişim sayfası ve iletişim formu', true],
-    ['PayTR mağaza bilgileri girildi', paytr_configured()],
-    ['PayTR canlı modda', paytr_mode() === 'live'],
+    ['Aktif ödeme altyapısının (' . payment_provider_name() . ') bilgileri girildi', provider_configured(payment_provider())],
+    ['Aktif ödeme altyapısı canlı modda (herkese açık)', payment_live_public()],
 ];
 $ok = count(array_filter($checks, fn($c) => $c[1]));
 
@@ -197,12 +202,12 @@ admin_header('Site & Ödeme Ayarları', '<span class="lock-tag">★ Yalnızca S�
 <?php else: ?>
     <form method="post" class="panel form">
         <?= csrf_field() ?>
-        <?php if ($tab === 'pos'): ?>
+        <?php if ($tab === 'pos'): $ap = payment_provider(); ?>
             <div class="info-box">
-                Mevcut mod: <strong><?= strtoupper(paytr_mode()) ?></strong><?= paytr_mode() !== 'off' && !paytr_configured() ? ' · <b>Mağaza bilgileri eksik, kartla ödeme kapalı.</b>' : '' ?><br>
-                Bilgiler: PayTR Mağaza Paneli → <b>Destek &amp; Kurulum → Entegrasyon Bilgileri</b>.<br>
-                PayTR panelinde <b>Destek &amp; Kurulum → Ayarlar → Bildirim URL</b> alanına şu adresi girin: <code><?= e(url('paytr-bildirim.php')) ?></code><br>
-                Önce <b>TEST</b> modunda (yalnızca personel görür) PayTR test kartıyla deneyin, ardından <b>CANLI</b>'ya alın.
+                <b>Şu an müşteriler:</b> <?= payment_live_public() ? payment_provider_name() . ' ile kartla ödeyebiliyor.' : 'kartla ödeyemiyor (' . payment_provider_name() . ' modu: ' . strtoupper(payment_mode()) . (provider_configured($ap) ? '' : ', bilgiler eksik') . ').' ?><br>
+                <b>Akbank:</b> Sanal POS paneli → Yönetim → Üye İşyeri Bilgileri (Güvenli İşyeri Numarası), Terminal İşlemleri (Terminal Safe ID), Güvenlik Anahtarları (Secret Key). Dönüş adresi otomatik gönderilir: <code><?= e(url('akbank-donus.php')) ?></code><br>
+                <b>PayTR:</b> Mağaza Paneli → Destek &amp; Kurulum → Entegrasyon Bilgileri. Bildirim URL: <code><?= e(url('paytr-bildirim.php')) ?></code><br>
+                Yeni bir altyapıyı önce <b>CANLI - YALNIZCA PERSONEL</b> modunda kendi kartınızla küçük bir tutarla deneyin, sonra <b>CANLI</b>'ya alın.
             </div>
         <?php endif; ?>
         <?php foreach ($groups[$tab][1] as $key => $def): ?>
