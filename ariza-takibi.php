@@ -65,7 +65,7 @@ require __DIR__ . '/app/header.php';
                     <label>E-posta *<input type="email" name="email" value="<?= e(input('email', current_user()['email'] ?? '')) ?>" required></label>
                     <label>Telefon<input name="phone" value="<?= e(input('phone')) ?>"></label>
                     <label>Sipariş Numarası<input name="order_no" value="<?= e(input('order_no')) ?>" placeholder="Biliyorsanız"></label>
-                    <label>Arızalı Ürün *<input name="product" value="<?= e(input('product')) ?>" required placeholder="Örn. GS Strike FG Krampon"></label>
+                    <label>Arızalı Ürün *<input name="product" value="<?= e(input('product')) ?>" required placeholder="Örn. Heritage FG Krampon"></label>
                     <label>Satın Alma Tarihi<input type="date" name="purchase_date" value="<?= e(input('purchase_date')) ?>"></label>
                 </div>
                 <label>Arızanın Açıklaması *<textarea name="message" rows="5" required minlength="20" placeholder="Sorunu ve ne zaman ortaya çıktığını kısaca anlatın"><?= e(input('message')) ?></textarea></label>

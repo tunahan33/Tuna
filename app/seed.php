@@ -11,7 +11,7 @@ function seed_database(): void
     // Ayarlar (Panel > Ayarlar'dan değiştirilir)
     $settings = [
         'site_name'          => 'GS Sportif Ürünler',
-        'site_slogan'        => 'Sarı-kırmızı ruhun sportif adresi',
+        'site_slogan'        => 'Sporun ve stilin buluştuğu adres',
         'site_url'           => 'https://www.gssportifurunler.net',
         'company_title'      => 'Nida Coşkun',
         'company_address'    => 'Mecidiyeköy Mah. Eski Osmanlı Sk. Arıkan İş Merkezi No: 30 İç Kapı No: 10 Şişli / İstanbul',

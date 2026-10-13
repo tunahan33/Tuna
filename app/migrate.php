@@ -4,7 +4,7 @@
  * Mevcut verileriniz (siparişler, üyeler, değişiklikleriniz) korunur.
  */
 
-const DB_VERSION = 7;
+const DB_VERSION = 8;
 
 function migrate_database(PDO $pdo): void
 {
@@ -176,7 +176,93 @@ function migrate_database(PDO $pdo): void
         q("UPDATE settings SET svalue = 'info@gssportifurunler.net' WHERE skey = 'company_email' AND svalue LIKE '%alanadiniz%'");
     }
 
+    // v8: Kulübü çağrıştıran ifadeler (GS önekleri, "sarı-kırmızı ruh", kuruluş yılı) nötr ifadelerle değiştirilir.
+    // Mağaza adı "GS Sportif Ürünler" korunur. Panelden yazılan metinlerde de yalnızca bu ifadeler değişir.
+    if ($current < 8) {
+        neutralize_brand_texts();
+    }
+
     save_setting('db_version', (string) DB_VERSION);
+}
+
+/** v8: Ürün, kategori, sayfa ve ayar metinlerindeki kulübü çağrıştıran ifadeleri nötr ifadelerle değiştirir */
+function neutralize_text(string $s): string
+{
+    static $map = [
+        // Tam cümleler (önce uzun ifadeler)
+        'GS Retro 1905 Forması' => 'Retro Klasik Forma',
+        'GS Resmi Maç Topu' => 'Profesyonel Maç Topu',
+        'küçük turuncu GS logosu ince bir marka dokunuşu' => 'küçük turuncu logo ince bir marka dokunuşu',
+        'Kuruluş yılı anısına pamuklu retro forma.' => 'Klasik futbol dönemine selam veren pamuklu retro forma.',
+        'Kulübün köklü tarihine selam: 1905 retro forma' => 'Klasik futbolun ruhuna selam: retro forma',
+        'sahada ve tribünde sarı-kırmızı ruhu taşıyanlar için' => 'sporu yaşam tarzı hâline getirenler için',
+        'Sarı-kırmızı ruhun sportif adresi' => 'Sporun ve stilin buluştuğu adres',
+        'Sarı-kırmızı ruhu taşıyan tüm sportif ürünler' => 'Sahaya, piste ve güne hazır tüm sportif ürünler',
+        'Sarı-kırmızı ekibe katılın.' => 'Enerjik ekibimize katılın.',
+        'sarı-kırmızı ruhu üzerinizde taşıyın' => 'sporun enerjisini üzerinizde taşıyın',
+        'Sarı-kırmızı' => 'Kırmızı-sarı',
+        'sarı-kırmızı' => 'kırmızı-sarı',
+        // Arma / logo ifadeleri
+        'GS Motorsport arması' => 'Motorsport arması',
+        'GS arması' => 'kalkan amblemi',
+        'GS armalı' => 'amblemli',
+        'GS arma' => 'amblem',
+        'GS amblemli' => 'amblemli',
+        'GS amblem' => 'amblem',
+        'GS logosu' => 'marka logosu',
+        'GS logolu' => 'logolu',
+        'GS logo' => 'logo',
+        'GS işlemeli' => 'logo işlemeli',
+    ];
+    $s = strtr($s, $map);
+    // Ürün adlarındaki "GS " öneki (mağaza adı "GS Sportif" hariç)
+    return preg_replace('/(^|[\s>"(])GS (?!Sportif)(?=\p{Lu})/u', '$1', $s);
+}
+
+function neutralize_brand_texts(): void
+{
+    foreach (rows('SELECT id, slug, name, short_desc, description, features FROM products') as $p) {
+        $new = [];
+        foreach (['name', 'short_desc', 'description', 'features'] as $f) {
+            $v = neutralize_text((string) $p[$f]);
+            if ($f === 'features') { // her satır büyük harfle başlasın ("GS logo" → "Logo")
+                $v = preg_replace_callback('/^\p{Ll}/mu', fn($m) => mb_strtoupper($m[0]), $v);
+            }
+            if ($v !== (string) $p[$f]) {
+                $new[$f] = $v;
+            }
+        }
+        // Ürün adresindeki "gs-" öneki de kaldırılır (aynı adres başka üründe yoksa)
+        if (str_starts_with($p['slug'], 'gs-')) {
+            $slug = slugify($new['name'] ?? $p['name']);
+            if ($slug !== '' && !val('SELECT 1 FROM products WHERE slug = ? AND id <> ?', [$slug, $p['id']])) {
+                $new['slug'] = $slug;
+            }
+        }
+        if ($new) {
+            update('products', $new, (int) $p['id']);
+        }
+    }
+    foreach (rows('SELECT id, name, description FROM categories') as $c) {
+        $new = array_filter(['name' => neutralize_text((string) $c['name']), 'description' => neutralize_text((string) $c['description'])],
+            fn($v, $k) => $v !== (string) $c[$k], ARRAY_FILTER_USE_BOTH);
+        if ($new) {
+            update('categories', $new, (int) $c['id']);
+        }
+    }
+    foreach (rows('SELECT id, title, content FROM pages') as $pg) {
+        $new = array_filter(['title' => neutralize_text($pg['title']), 'content' => neutralize_text($pg['content'])],
+            fn($v, $k) => $v !== $pg[$k], ARRAY_FILTER_USE_BOTH);
+        if ($new) {
+            update('pages', $new, (int) $pg['id']);
+        }
+    }
+    foreach (['site_slogan', 'announcement'] as $k) {
+        $v = setting($k);
+        if ($v !== '' && neutralize_text($v) !== $v) {
+            save_setting($k, neutralize_text($v));
+        }
+    }
 }
 
 /** Fotoğraflı ürünler: [kategori id, ad, kısa açıklama, açıklama, özellikler, fiyat, eski fiyat, stok, bedenler, çizim, renk, öne çıkan, fotoğraflar] */

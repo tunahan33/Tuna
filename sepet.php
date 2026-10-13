@@ -29,7 +29,7 @@ require __DIR__ . '/app/header.php';
     <div class="container">
         <h1>Sepetim</h1>
         <?php if (!$s['lines']): ?>
-            <div class="card empty"><h3>Sepetiniz boş</h3><p class="muted">Hemen alışverişe başlayın, sarı-kırmızı ruhu üzerinizde taşıyın.</p><a class="btn btn-primary" href="<?= url('urunler.php') ?>">Ürünleri Keşfet</a></div>
+            <div class="card empty"><h3>Sepetiniz boş</h3><p class="muted">Hemen alışverişe başlayın, sporun enerjisini üzerinizde taşıyın.</p><a class="btn btn-primary" href="<?= url('urunler.php') ?>">Ürünleri Keşfet</a></div>
         <?php else: ?>
         <div class="two-col">
             <div class="card">

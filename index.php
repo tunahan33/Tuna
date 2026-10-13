@@ -17,7 +17,7 @@ require __DIR__ . '/app/header.php';
     <div class="container hero-row">
         <div>
             <span class="eyebrow">YENİ SEZON</span>
-            <h1>Sahada da tribünde de <span>sarı-kırmızı</span> gurur.</h1>
+            <h1>Sahada da sokakta da <span>sportif</span> stil.</h1>
             <p>Tişörtler, eşofmanlar, kramponlar ve motorsport ürünleri. <?= e(money(setting('free_shipping_limit'))) ?> üzeri kargo bedava, 14 gün ücretsiz iade.</p>
             <div class="hero-actions">
                 <a class="btn btn-yellow btn-lg" href="<?= url('urunler.php') ?>">Alışverişe Başla</a>

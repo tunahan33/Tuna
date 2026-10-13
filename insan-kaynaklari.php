@@ -23,7 +23,7 @@ $page = row("SELECT * FROM pages WHERE slug = 'insan-kaynaklari'");
 $title = 'İnsan Kaynakları';
 require __DIR__ . '/app/header.php';
 ?>
-<section class="page-head"><div class="container"><nav class="crumbs"><a href="<?= url() ?>">Ana Sayfa</a> / İnsan Kaynakları</nav><h1>İnsan Kaynakları</h1><p>Sarı-kırmızı ekibe katılın.</p></div></section>
+<section class="page-head"><div class="container"><nav class="crumbs"><a href="<?= url() ?>">Ana Sayfa</a> / İnsan Kaynakları</nav><h1>İnsan Kaynakları</h1><p>Enerjik ekibimize katılın.</p></div></section>
 <section class="section-sm">
     <div class="container two-col">
         <article class="prose"><?= fill_placeholders($page['content'] ?? '') ?></article>

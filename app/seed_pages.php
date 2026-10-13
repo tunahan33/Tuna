@@ -10,7 +10,7 @@ $alici = '<p><strong>Adı Soyadı:</strong> {{alici_ad}}<br><strong>Teslimat Adr
 $urunler = '{{urun_listesi}}<p><strong>Ara Toplam:</strong> {{ara_toplam}}<br><strong>Kargo:</strong> {{kargo_bedeli}}<br><strong>Toplam (KDV dâhil):</strong> {{toplam_tutar}}<br><strong>Ödeme Şekli:</strong> Kredi kartı / banka kartı<br><strong>Sipariş Tarihi:</strong> {{siparis_tarihi}}</p>';
 
 return [
-    'hakkimizda' => ['Hakkımızda', '<p class="lead"><strong>{{site_adi}}</strong>, sahada ve tribünde sarı-kırmızı ruhu taşıyanlar için kaliteli spor ürünleri sunan bir e-ticaret mağazasıdır.</p>
+    'hakkimizda' => ['Hakkımızda', '<p class="lead"><strong>{{site_adi}}</strong>, sporu yaşam tarzı hâline getirenler için kaliteli spor ürünleri sunan bir e-ticaret mağazasıdır.</p>
 <p>Maç formalarından antrenman eşofmanlarına, kramponlardan maç toplarına kadar tüm ürünlerimizi dayanıklılık, konfor ve performans odağıyla seçiyoruz. Her ürünü depomuzda kontrol edip özenle paketleyerek kapınıza kadar ulaştırıyoruz.</p>
 <h3>Değerlerimiz</h3>
 <ul><li><strong>Kalite:</strong> Teknik kumaşlar, sağlam dikiş, uzun ömürlü ürünler.</li><li><strong>Şeffaflık:</strong> Net fiyat, gizli ücret yok. Tüm fiyatlara KDV dâhildir.</li><li><strong>Güven:</strong> 3D Secure ile güvenli ödeme, 14 gün içinde koşulsuz iade.</li><li><strong>Hız:</strong> Siparişleriniz {{kargo_suresi}} içinde kargoda.</li></ul>

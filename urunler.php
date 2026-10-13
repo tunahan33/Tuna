@@ -31,7 +31,7 @@ require __DIR__ . '/app/header.php';
     <div class="container">
         <nav class="crumbs"><a href="<?= url() ?>">Ana Sayfa</a> / <?= e($title) ?></nav>
         <h1><?= e($title) ?></h1>
-        <p><?= e($cat['description'] ?? 'Sarı-kırmızı ruhu taşıyan tüm sportif ürünler') ?></p>
+        <p><?= e($cat['description'] ?? 'Sahaya, piste ve güne hazır tüm sportif ürünler') ?></p>
     </div>
 </section>
 <section class="section-sm">
