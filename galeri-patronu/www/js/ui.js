@@ -186,9 +186,11 @@
   };
   G.onFeed = (text, kind) => {
     $("tickerT").textContent = text;
+    if (UI.skipping) return;
     if (["good", "bad", "level", "news"].includes(kind)) UI.toast(text, kind);
   };
   G.onOffer = (c, car) => {
+    if (UI.skipping) return;
     if (UI.sheet && UI.sheet.kind === "cust" && UI.sheet.id === c.id) return;
     UI.toast(`Yeni teklif: ${c.name}, ${G.carName(car)} için ${G.fmtS(c.offer)}. Dokun ve cevap ver.`, "offer", { a: "cust", id: c.id });
   };
@@ -213,7 +215,8 @@
     if (sp.dataset.v !== want) {
       sp.dataset.v = want;
       sp.innerHTML = [["0", "❚❚", "Durdur"], ["1", "1×", "Normal hız"], ["2", "2×", "İki kat hız"], ["4", "4×", "Dört kat hız"]]
-        .map(([v, l, a]) => `<button type="button" data-a="speed" data-v="${v}" aria-label="${a}" aria-pressed="${want === v}">${l}</button>`).join("");
+        .map(([v, l, a]) => `<button type="button" data-a="speed" data-v="${v}" aria-label="${a}" aria-pressed="${want === v}">${l}</button>`).join("")
+        + `<button type="button" data-a="skip" aria-label="Günü bitir" title="Günü bitir">⏭</button>`;
     }
   }
 
@@ -287,9 +290,12 @@
       <div class="segctl" role="group">${[["ilan", "İlanlar"], ["ihale", "İhale"], ["trend", "Piyasa"]]
         .map(([k, l]) => `<button type="button" data-a="sub" data-k="piyasa" data-v="${k}" aria-pressed="${sub === k}">${l}</button>`).join("")}</div>`;
     if (sub === "ilan") {
-      const ls = s.listings.filter(l => !l.done).sort((a, b) => (b.ultra ? 2 : 0) + isNew(b) - (a.ultra ? 2 : 0) - isNew(a));
+      const all = s.listings.filter(l => !l.done);
+      const ls = filterListings(all);
       const nd = G.nextDrop();
-      html += `<div class="card ilan-info"><div class="row"><div><b>Bugün ${ls.length} ilan</b><p class="small muted">${nd ? `Sıradaki yeni ilanlar saat ${G.clock(nd)}'de düşer.` : "Bugün yeni ilan düşmeyecek."} Her sabah bütün ilanlar yenilenir.</p></div>${adBtn("ilan", "+4 ilan")}</div></div>`;
+      html += `<div class="card ilan-info"><div class="row"><div><b>Bugün ${all.length} ilan</b><p class="small muted">${nd ? `Sıradaki yeni ilanlar saat ${G.clock(nd)}'de düşer.` : "Bugün yeni ilan düşmeyecek."} Her sabah bütün ilanlar yenilenir.</p></div>${adBtn("ilan", "+4 ilan")}</div></div>`;
+      html += listingFilters(all, ls.length);
+      if (all.length && !ls.length) return html + `<div class="empty"><b>Bu filtreye uyan ilan yok</b>Filtreleri gevşet ya da sıfırla.<div style="margin-top:10px"><button class="btn" type="button" data-a="lf-reset">Filtreleri sıfırla</button></div></div>`;
       if (!ls.length) return html + `<div class="empty"><b>Şu an bakılacak ilan kalmadı</b>${nd ? `Saat ${G.clock(nd)}'de yeni ilanlar gelecek.` : "Yarın sabah yeni ilanlar gelecek."}</div>`;
       html += `<div class="rows">${ls.map(listingRow).join("")}</div>`;
     } else if (sub === "ihale") {
@@ -309,6 +315,35 @@
     }
     return html;
   };
+
+  // ---- İlan filtresi ----
+  UI.lf = UI.lf || { seg: "all", sort: "yeni", deal: false, afford: false };
+  const LF_SORT = [["yeni", "Önerilen"], ["ucuz", "En ucuz"], ["pahali", "En pahalı"], ["kar", "En kârlı"], ["km", "En az km"], ["yil", "En yeni model"]];
+  function filterListings(all) {
+    const f = UI.lf, s = S();
+    let ls = all.filter(l => {
+      if (f.seg !== "all" && G.M[l.car.m].seg !== f.seg) return false;
+      if (f.deal && G.dealLabel(l.last, G.value(l.car, false)).c !== "good") return false;
+      if (f.afford && l.last > s.money) return false;
+      return true;
+    });
+    const gain = l => G.value(l.car, false) - l.last;
+    const sorts = {
+      yeni: (a, b) => (b.ultra ? 2 : 0) + isNew(b) - (a.ultra ? 2 : 0) - isNew(a),
+      ucuz: (a, b) => a.last - b.last, pahali: (a, b) => b.last - a.last,
+      kar: (a, b) => gain(b) - gain(a), km: (a, b) => G.realKm(a.car, false) - G.realKm(b.car, false), yil: (a, b) => b.car.year - a.car.year
+    };
+    return ls.sort(sorts[f.sort] || sorts.yeni);
+  }
+  function listingFilters(all, shown) {
+    const f = UI.lf;
+    const segs = Object.keys(G.SEGMENTS).filter(k => all.some(l => G.M[l.car.m].seg === k));
+    const on = f.seg !== "all" || f.deal || f.afford || f.sort !== "yeni";
+    return `<div class="filters">
+      <label class="fsel"><span>Segment</span><select id="lfSeg" data-ch="seg"><option value="all">Tümü (${all.length})</option>${segs.map(k => `<option value="${k}" ${f.seg === k ? "selected" : ""}>${G.SEGMENTS[k].name} (${all.filter(l => G.M[l.car.m].seg === k).length})</option>`).join("")}</select></label>
+      <label class="fsel"><span>Sırala</span><select id="lfSort" data-ch="sort">${LF_SORT.map(([k, l]) => `<option value="${k}" ${f.sort === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <div class="ftog"><button type="button" class="btn sm ${f.deal ? "pri" : ""}" data-a="lf-tog" data-v="deal" aria-pressed="${f.deal}">Sadece fırsatlar</button><button type="button" class="btn sm ${f.afford ? "pri" : ""}" data-a="lf-tog" data-v="afford" aria-pressed="${f.afford}">Kasama uygun</button>${on ? `<button type="button" class="btn sm" data-a="lf-reset">Sıfırla</button>` : ""}<span class="muted small">${shown}/${all.length} ilan</span></div></div>`;
+  }
 
   const isNew = l => (l.day === S().day && l.born > G.OPEN && S().min - l.born < 120 ? 1 : 0);
   function listingRow(l) {
@@ -730,6 +765,17 @@
       <button class="btn pri block" type="button" data-a="offline-claim">${G.fmtS(o.amount)} al</button>`;
   };
 
+  SHEETS.skip = function () {
+    const s = S();
+    const offers = s.custs.filter(c => c.state === "offer").length;
+    const sales = G.staffOf("satis").length;
+    return head("Günü bitir", `Saat ${G.clock(s.min)} · kapanışa ${G.fmtDur(G.CLOSE - s.min)} var`) + `
+      <div class="card"><p class="small">Zaman 19:00'a kadar hızla akar: atölye işleri ilerler, müşteriler gelir, ilan saatlerinde yeni ilanlar düşer.</p>
+        ${offers ? `<p class="small ${sales ? "" : "neg"}">${offers} müşteri teklif bekliyor. ${sales ? "Satış danışmanın onlarla ilgilenecek." : "Danışmanın olmadığı için cevapsız kalırlarsa beklemekten sıkılıp gidebilirler."}</p>` : ""}
+        <p class="small muted">Danışmanın yoksa gün içinde gelen yeni müşterilerin teklifleri de cevapsız kalır.</p></div>
+      <div class="btns big-btns"><button class="btn pri" type="button" data-a="skip-go">Günü bitir</button><button class="btn" type="button" data-a="close">Vazgeç</button></div>`;
+  };
+
   SHEETS.feed = function () {
     return head("Galeri defteri", "Son olaylar") + `<div class="card">${S().feed.map(f => `<div class="small"><span class="muted">${esc(f.t)}</span><br>${esc(f.text)}</div>`).join("") || '<p class="muted">Henüz kayıt yok.</p>'}</div>`;
   };
@@ -753,7 +799,7 @@
     const s = S();
     switch (UI.tab) {
       case "galeri": return "g" + s.day + Math.floor(s.min / 20) + s.cars.map(c => `${c.id}.${c.status}.${c.price}.${c.show}.${Math.round(c.clean / 20)}.${c.inspected}.${c.motor}.${c.body}.${c.inter}.${c.painted}.${c.issues.filter(i => i.fixed).length}`).join() + "|" + s.custs.map(c => c.id + c.state + c.carId).join() + "|" + s.jobs.map(j => j.id + "." + Math.ceil(j.left / 30)).join() + "|" + JSON.stringify(s.upg) + JSON.stringify(s.fac) + s.loc + G.boostActive() + Math.round(s.money / 50000) + G.ustas().map(u => u.resting + "" + Math.round(u.energy / 35)).join();
-      case "piyasa": return "p" + s.day + UI.sub.piyasa + s.listings.map(l => l.id + "." + l.done + "." + l.last).join() + "|" + Math.floor(s.min / 60) + G.adLeft("ilan") + "|" + s.auction.idx + s.auction.finished + "|" + Math.round(s.money / 10000) + "|" + G.carCount();
+      case "piyasa": return "p" + s.day + UI.sub.piyasa + s.listings.map(l => l.id + "." + l.done + "." + l.last).join() + "|" + Math.floor(s.min / 60) + G.adLeft("ilan") + JSON.stringify(UI.lf) + "|" + s.auction.idx + s.auction.finished + "|" + Math.round(s.money / 10000) + "|" + G.carCount();
       case "musteri": return "m" + s.custs.map(c => `${c.id}.${c.state}.${c.offer}`).join() + "|" + s.lost.length + "|" + s.today.sales + G.boostActive() + G.adLeft("boost") + (s.min < G.CLOSE - 60);
       case "atolye": return "a" + s.jobs.map(j => j.id).join() + "|" + JSON.stringify(s.upg) + JSON.stringify(s.fac) + s.staff.length + G.adLeft("rush") + G.restFree() + G.ustas().map(u => u.resting + "" + G.buffActive(u) + Math.round(u.energy / 35)).join();
       case "patron": return "b" + s.day + UI.sub.patron + Math.round(s.money / 1000) + s.staff.length + s.cands.length + JSON.stringify(s.upg) + JSON.stringify(s.fac) + (s.lux || []).join() + UI.luxCat + G.partyReady() + G.partyActive() + s.loan + s.ads + s.loc + s.level + s.quests.length + Math.round(s.rep) + s.today.sales + UI.armed + s.maxDisc;
@@ -941,6 +987,10 @@
     },
     disc: el => { S().maxDisc = +el.dataset.v / 100; UI.render(); },
     fac: el => UI.open("fac", el.dataset.v),
+    skip: () => { const s = S(); if (!s.started || s.summary || UI.blocking()) return; UI.open("skip"); },
+    "skip-go": () => { UI.sheet = null; UI.skipping = true; try { G.skipDay(); } finally { UI.skipping = false; } G.save(); UI.render(); },
+    "lf-tog": el => { UI.lf[el.dataset.v] = !UI.lf[el.dataset.v]; UI.render(); },
+    "lf-reset": () => { UI.lf = { seg: "all", sort: "yeni", deal: false, afford: false }; UI.render(); },
     "offline-claim": () => { G.claimOffline(UI.offline, 1); UI.offline = null; UI.sheet = S().summary ? { kind: "summary" } : null; G.save(); UI.render(); },
     "ad-offline": () => { const o = UI.offline; if (!o) return; UI.watch("offline", () => { G.claimOffline(o, 2); UI.offline = null; UI.sheet = S().summary ? { kind: "summary" } : null; }); },
     luxcat: el => { UI.luxCat = el.dataset.v; UI.armed = null; UI.render(); },
@@ -1027,6 +1077,12 @@
     document.addEventListener("keydown", e => {
       if ((e.key === "Enter" || e.key === " ") && e.target.matches("article[data-a]")) { e.preventDefault(); ACT[e.target.dataset.a](e.target); }
       if (e.key === "Escape") UI.close();
+    });
+    document.addEventListener("change", e => {
+      const k = e.target.dataset && e.target.dataset.ch;
+      if (!k) return;
+      UI.lf[k] = e.target.value;
+      UI.render();
     });
     document.addEventListener("input", e => {
       const el = e.target;

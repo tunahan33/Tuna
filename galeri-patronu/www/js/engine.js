@@ -1066,6 +1066,12 @@
   };
   G.partyCost = () => { const y = G.bestOf("yat"); return y ? R.r1k(150000 + y.party * 150000) : 0; };
 
+  // Günü bitir: saat 19:00'a kadar zamanı hızla ilerletir (atölye, müşteriler ve olaylar normal işler)
+  G.skipDay = function () {
+    let guard = 2000;
+    while (!S.summary && guard-- > 0) G.minute();
+  };
+
   // ---- Ultra lüks ilanlar ----
   G.ULTRA_CHANCE = 0.12; // her sabah ultra lüks ilan çıkma ihtimali (gün içinde her ilan saatinde %3 daha): ortalama 4 günde bir
   G.ultraListed = () => S.cars.some(c => c.price > 0 && c.status === "lot" && G.M[c.m].seg === "ultra");

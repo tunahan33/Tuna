@@ -3,7 +3,7 @@
   "use strict";
   const UI = G.UI;
   const SAVE_KEY = "galeri-patronu-v1";
-  const MIN_PER_SEC = 10; // 1× hızda bir oyun günü (09:00–19:00) yaklaşık 60 saniye sürer
+  const MIN_PER_SEC = 4; // 1× hızda bir oyun günü (09:00–19:00) yaklaşık 2,5 dakika sürer
 
   G.save = function () {
     if (!G.S || !G.S.started) return;

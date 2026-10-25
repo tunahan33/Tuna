@@ -298,6 +298,14 @@ ul.facl li.up { color: var(--good); font-weight: 600; }
 .energy b { font-family: var(--font-num); color: var(--ink); text-align: right; }
 .energy .bar { margin: 0; }
 
+/* İlan filtresi */
+.filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fsel { display: grid; gap: 3px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; min-width: 0; }
+.fsel select { font-size: 14px; text-transform: none; letter-spacing: 0; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; min-width: 0; width: 100%; }
+.ftog { grid-column: 1 / -1; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.ftog .muted { margin-left: auto; }
+.speed button[data-a="skip"] { color: var(--ink); border-left: 1px solid var(--line); }
+
 /* Ultra lüks ve pasif gelir */
 .chip.gold { background: linear-gradient(90deg, #d4a72c, #f3d46b); color: #2a1f00; }
 .crow.ultra { border: 2px solid #d4a72c; background: linear-gradient(90deg, color-mix(in srgb, #d4a72c 14%, var(--surface)), var(--surface) 60%); }
