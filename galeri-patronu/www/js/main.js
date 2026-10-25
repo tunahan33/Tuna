@@ -50,7 +50,7 @@
     if (G.Ads) G.Ads.init();
     const saved = (hotData && hotData.state) || loadSaved();
     if (saved) {
-      G.S = saved;
+      G.S = G.migrate(saved);
       G.S.paused = true; // oyuncu dönünce kendisi başlatsın
       if (G.S.summary) UI.sheet = { kind: "summary" };
     } else {

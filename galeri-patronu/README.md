@@ -22,6 +22,29 @@ Oyun saf HTML, CSS ve JavaScript ile yazıldı (kütüphane yok). Aynı kod tara
 
 Bir oyun günü (09:00–19:00) normal hızda yaklaşık 1 dakika sürer; 2× ve 4× hız ile duraklatma var.
 
+## Tesisler (20 seviye)
+
+| Tesis | Ne kazandırır |
+|---|---|
+| **Galeri binası** | Müşteri trafiği (+%3/seviye), müşterinin ödemeye razı olduğu fiyat (+%0,4/seviye), vitrin yerleri (2. seviyede açılır, her 3 seviyede +1). Spot ışık, neon tabela, LED ekran ve altın cephe sahnede görünür. |
+| **Yıkama ünitesi** | İçeride ucuz ve hızlı yıkama, her sabah otomatik yıkanan araçlar (her 2 seviyede +1), daha geç kirlenme, 5. seviyeden sonra cila ile ek müşteri ilgisi. 10. seviyede köpük tüneli. |
+| **Usta çardağı** | Ustalar çalıştıkça yorulur ve yavaşlar. Çardağa gönderilen usta enerjisini toplar; en az 30 dakika dinlenen usta çardaktan çıkınca bir süre çok daha hızlı çalışır (×1,33'ten ×2'ye, 1,5 saatten 4,5 saate). Seviyeyle çardağın kapasitesi ve dinlenme hızı artar; 10. seviyede yorulan usta kendisi molaya gider. |
+| **Ön otopark** | Her 2 seviyede +1 park yeri, 4. seviyede aydınlatma (hırsızlık riski yarıya iner), 6. seviyede tente (araçların bir kısmı doludan korunur), 10. seviyede asfalt ve çizgili park yerleri. |
+
+### Denge ayarı
+
+Her tesisin n. seviyesi için gereken oyuncu seviyesi = başlangıç + yuvarla((n − 1) × 1,15); fiyat = taban × 1,3^(n − 1). Böylece tesisler oyuncunun seviyesiyle birlikte büyür ve 20. seviye oyuncunun 23–25. seviyesine denk gelir. Değerler `www/js/data.js` içindeki `G.FAC_STEP`, `G.FAC_GROWTH` ve her tesisin `start` ile `base` alanlarından değiştirilir.
+
+| Tesis seviyesi | Galeri | Yıkama | Çardak | Otopark |
+|---|---|---|---|---|
+| 1 | oyuncu sv. 2 · 60 bin ₺ | sv. 1 · 40 bin ₺ | sv. 3 · 50 bin ₺ | sv. 1 · 30 bin ₺ |
+| 5 | sv. 7 · 171 bin ₺ | sv. 6 · 114 bin ₺ | sv. 8 · 143 bin ₺ | sv. 6 · 86 bin ₺ |
+| 10 | sv. 12 · 636 bin ₺ | sv. 11 · 424 bin ₺ | sv. 13 · 530 bin ₺ | sv. 11 · 318 bin ₺ |
+| 15 | sv. 18 · 2,36 milyon ₺ | sv. 17 · 1,57 milyon ₺ | sv. 19 · 1,97 milyon ₺ | sv. 17 · 1,18 milyon ₺ |
+| 20 | sv. 24 · 8,77 milyon ₺ | sv. 23 · 5,85 milyon ₺ | sv. 25 · 7,31 milyon ₺ | sv. 23 · 4,39 milyon ₺ |
+
+Basit bir bot oyuncuyla 240 günlük simülasyonda oyuncu 21. seviyeye, tesisler 17–18. seviyeye ulaştı. Tesisler hep seviye kilidinin 0–2 altında ilerledi; yani tempoyu para değil oyuncu seviyesi belirliyor.
+
 ## Reklam modeli
 
 Oyun ücretsiz; gelir Google AdMob reklamlarından gelir. Oyuncuyu reklama boğmamak için kurallar kodda sabit:

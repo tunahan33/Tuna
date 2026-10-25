@@ -56,7 +56,8 @@
       v: 1, name: name || "Patron Otomotiv",
       money: 1200000, day: 1, min: OPEN, speed: 1, paused: true,
       rep: 30, xp: 0, level: 1, loc: 0,
-      upg: { wash: 0, bays: 0, paint: 0, pdr: 0, expert: 0, showroom: 0, cafe: 0, security: 0 },
+      upg: { bays: 0, paint: 0, pdr: 0, expert: 0, cafe: 0, security: 0 },
+      fac: { galeri: 0, yikama: 0, cardak: 0, otopark: 0 },
       ads: 0, maxDisc: 0.05,
       staff: [], cands: [], candDay: 0,
       cars: [], listings: [], auction: null,
@@ -97,12 +98,12 @@
 
   // ---- Seviye ve sınırlar ----
   G.loc = () => G.LOCS[S.loc];
-  G.capacity = () => G.loc().cap;
+  G.capacity = () => G.loc().cap + G.facEff("otopark").cap;
   G.carCount = () => S.cars.length;
   G.spaceLeft = () => G.capacity() - G.carCount();
-  G.showSlots = () => (S.upg.showroom ? G.UPGRADES.showroom.levels[S.upg.showroom - 1].slots : 0);
+  G.showSlots = () => G.facEff("galeri").slots;
   G.showUsed = () => S.cars.filter(c => c.show).length;
-  G.xpNeed = l => Math.round(120 * Math.pow(l, 1.55));
+  G.xpNeed = l => Math.round(100 * Math.pow(l, 1.45));
   G.segUnlocked = seg => G.SEGMENTS[seg].lvl <= S.level;
   G.staffOf = role => S.staff.filter(s => s.role === role);
   G.skillSum = role => G.staffOf(role).reduce((a, s) => a + s.skill, 0);
@@ -119,6 +120,119 @@
       if (locs.length) extra.push(`${locs.join(", ")} kiralanabilir`);
       G.feed(`Seviye ${S.level}! ${extra.length ? extra.join("; ") + "." : "Yeni geliştirmeler açıldı."}`, "level");
     }
+  };
+
+  // ---- Tesisler ----
+  G.facLevel = key => (S.fac && S.fac[key]) || 0;
+  G.facReq = (key, n) => G.FACILITIES[key].start + Math.round((n - 1) * G.FAC_STEP);
+  G.facCost = (key, n) => { const c = G.FACILITIES[key].base * Math.pow(G.FAC_GROWTH, n - 1); return c < 1e6 ? R.r1k(c) : Math.round(c / 1e4) * 1e4; };
+  // Bir tesisin n. seviyedeki etkileri
+  G.facEff = function (key, n) {
+    if (n == null) n = G.facLevel(key);
+    switch (key) {
+      case "galeri": return { traffic: 1 + 0.03 * n, pay: 1 + 0.004 * n, slots: n >= 2 ? Math.floor((n + 1) / 3) + G.loc().prestige : 0 };
+      case "yikama": return { on: n > 0, cost: Math.max(300, 1200 - 45 * n), mins: Math.max(15, 60 - Math.round(2.25 * n)), auto: Math.floor(n / 2), decay: 1 - 0.025 * n, shine: n >= 5 ? 0.012 * n : 0 };
+      case "cardak": return { cap: n ? 1 + Math.floor(n / 5) : 0, rest: 30 + 5 * n, buffMult: 1.3 + 0.035 * n, buffMins: Math.round(90 + 9 * n), auto: n >= 10 };
+      case "otopark": return { cap: Math.floor(n / 2), light: n >= 4, covered: n >= 6 ? Math.min(0.8, 0.3 + 0.025 * (n - 6)) : 0, asphalt: n >= 10, shine: 0.006 * n };
+    }
+    return {};
+  };
+  // Kullanıcıya gösterilen etki satırları
+  G.facLines = function (key, n) {
+    const e = G.facEff(key, n);
+    const pc = x => "%" + Math.round(x * 100);
+    switch (key) {
+      case "galeri": return [`Müşteri trafiği +${pc(e.traffic - 1)}`, `Müşterinin ödemeye razı olduğu fiyat +${pc(e.pay - 1).replace("%", "%")}`, e.slots ? `${e.slots} araçlık vitrin` : "Vitrin yok (2. seviyede açılır)"];
+      case "yikama": return e.on ? [`Yıkama ${G.fmt(e.cost)}, ${e.mins} dakika`, e.auto ? `Her sabah ${e.auto} araç kendiliğinden yıkanır` : "Otomatik yıkama yok (2. seviyede açılır)", `Araçlar ${pc(1 - e.decay)} daha geç kirlenir`, e.shine ? `Cila: temiz araca ilgi +${pc(e.shine)}` : "Cila yok (5. seviyede açılır)"] : ["Yıkama dış serviste: 3.000 ₺, 3 saat"];
+      case "cardak": return e.cap ? [`Aynı anda ${e.cap} usta dinlenebilir`, `Dinlenirken saatte +${Math.round(e.rest)} enerji`, `Çardaktan dinç çıkan usta ${G.fmtDur(e.buffMins)} boyunca ×${e.buffMult.toFixed(2).replace(".", ",")} hızlı`, e.auto ? "Otomatik mola açık" : "Otomatik mola 10. seviyede"] : ["Çardak yok: ustalar gün içinde dinlenemez"];
+      case "otopark": return [`+${e.cap} park yeri`, e.light ? "Aydınlatma: hırsızlık riski yarıya iner" : "Aydınlatma 4. seviyede", e.covered ? `Tente: araçların ${pc(e.covered)} kadarı doludan korunur` : "Tente 6. seviyede", e.asphalt ? `Asfalt zemin: araçlara ilgi +${pc(e.shine)}` : `Zemin: araçlara ilgi +${pc(e.shine)}`];
+    }
+    return [];
+  };
+  G.facNext = function (key) {
+    const n = G.facLevel(key) + 1;
+    if (n > G.FAC_MAX) return null;
+    return { n, cost: G.facCost(key, n), req: G.facReq(key, n) };
+  };
+  G.buyFac = function (key) {
+    const nx = G.facNext(key);
+    if (!nx) return { ok: false, msg: "Bu tesis en üst seviyede." };
+    if (S.level < nx.req) return { ok: false, msg: `Bunun için oyuncu seviyen ${nx.req} olmalı.` };
+    if (S.money < nx.cost) return { ok: false, msg: "Kasada yeterli para yok." };
+    S.money -= nx.cost;
+    S.today.invest += nx.cost;
+    S.fac[key] = nx.n;
+    G.addXp(10 * nx.n);
+    const mark = G.FACILITIES[key].marks[nx.n];
+    G.feed(`${G.FACILITIES[key].name} ${nx.n}. seviyeye çıktı${mark ? `: ${mark}` : ""}.`, mark ? "level" : "info");
+    G.checkQuests();
+    return { ok: true };
+  };
+
+  // ---- Ustalar: yorgunluk ve çardak ----
+  G.ustas = () => G.staffOf("usta");
+  G.buffActive = u => !!(u.buff && u.buff.day === S.day && S.min < u.buff.until);
+  G.restingCount = () => G.ustas().filter(u => u.resting).length;
+  G.restFree = () => G.facEff("cardak").cap - G.restingCount();
+  G.workRate = function () {
+    let power = 0;
+    for (const u of G.ustas()) {
+      if (u.resting) continue;
+      const e = u.energy == null ? 100 : u.energy;
+      power += u.skill * (0.25 + 0.75 * e / 100) * (G.buffActive(u) ? u.buff.mult : 1);
+    }
+    return power ? 1 + 0.2 * power : 0.7;
+  };
+  const ustaJob = j => j.inhouse && (j.where === "bay" || j.where === "pdr");
+  G.jobRate = j => (ustaJob(j) ? G.workRate() : 1);
+  G.jobEta = j => j.left / G.jobRate(j);
+  G.sendRest = function (u, auto) {
+    if (!G.facLevel("cardak")) return { ok: false, msg: "Önce usta çardağı kurmalısın." };
+    if (u.resting) return { ok: false };
+    if (G.restFree() <= 0) return { ok: false, msg: "Çardak dolu." };
+    u.resting = true;
+    u.restMins = 0;
+    u.buff = null;
+    if (auto) G.feed(`${u.name} yoruldu, çardağa çay içmeye gitti.`, "info");
+    return { ok: true };
+  };
+  G.recall = function (u, auto) {
+    if (!u.resting) return { ok: false };
+    u.resting = false;
+    const e = G.facEff("cardak");
+    if ((u.restMins || 0) >= 30) {
+      u.buff = { day: S.day, until: Math.min(G.CLOSE, S.min + e.buffMins), mult: e.buffMult };
+      G.feed(`${u.name} çardaktan dinç çıktı: ${G.fmtDur(e.buffMins)} boyunca ×${e.buffMult.toFixed(2).replace(".", ",")} hızlı çalışacak.`, auto ? "good" : "info");
+    }
+    return { ok: true };
+  };
+  function ustaMinute() {
+    const ustas = G.ustas();
+    if (!ustas.length) return;
+    const working = S.jobs.filter(ustaJob).length;
+    const active = ustas.filter(u => !u.resting);
+    const load = active.length ? Math.min(1, working / active.length) : 0;
+    const ce = G.facEff("cardak");
+    for (const u of ustas) {
+      if (u.energy == null) u.energy = 100;
+      if (u.resting) {
+        u.energy = Math.min(100, u.energy + ce.rest / 60);
+        u.restMins = (u.restMins || 0) + 1;
+        if (u.energy >= 100) G.recall(u, true);
+      } else if (load) u.energy = Math.max(0, u.energy - 0.25 * load);
+    }
+    if (ce.auto) for (const u of active) if (u.energy < 30 && G.restFree() > 0) G.sendRest(u, true);
+  }
+
+  // Eski kayıtları yeni tesis sistemine taşır
+  G.migrate = function (st) {
+    if (!st.fac) {
+      st.fac = { galeri: [0, 5, 11, 20, 20][st.upg.showroom || 0] || 0, yikama: st.upg.wash ? 3 : 0, cardak: 0, otopark: 0 };
+    }
+    delete st.upg.showroom;
+    delete st.upg.wash;
+    for (const x of st.staff) if (x.role === "usta" && x.energy == null) x.energy = 100;
+    return st;
   };
 
   G.addRep = function (d) { S.rep = R.clamp(S.rep + d, 0, 100); };
@@ -455,11 +569,6 @@
 
   // ---- Atölye ----
   G.baysFree = () => S.upg.bays - S.jobs.filter(j => j.inhouse && j.where === "bay").length;
-  G.jobTimeMult = function (inhouse) {
-    if (!inhouse) return 1.6;
-    const sk = G.skillSum("usta");
-    return sk ? 1 / (1 + 0.1 * sk) : 1.4;
-  };
 
   G.jobOptions = function (car) {
     const md = G.M[car.m];
@@ -468,17 +577,19 @@
     const add = (type, extra) => {
       const d = G.JOBS[type];
       let inhouse = false, why = "";
-      if (d.where === "wash") inhouse = S.upg.wash > 0;
+      if (d.where === "wash") inhouse = G.facLevel("yikama") > 0;
       else if (d.where === "paint") inhouse = S.upg.paint > 0 && G.baysFree() > 0;
       else if (d.where === "pdr") { inhouse = true; if (!S.upg.pdr) why = "Boyasız göçük seti gerekir"; }
       else inhouse = G.baysFree() > 0;
       let cost = extra && extra.cost != null ? extra.cost : d.cost(v);
       let hours = extra && extra.hours ? extra.hours : d.hours;
-      if (type === "clean" && inhouse) { cost = 1000; hours = 1; }
+      if (type === "clean" && inhouse) { const we = G.facEff("yikama"); cost = we.cost; hours = we.mins / 60; }
       else if (inhouse && type !== "pdr") cost *= 0.65;
       cost = R.r100(cost);
-      const mins = Math.round(hours * 60 * (type === "clean" ? 1 : G.jobTimeMult(inhouse)));
-      out.push(Object.assign({ type, name: d.name, cost, mins, inhouse, why }, extra || {}));
+      // work: iş miktarı (dakika); dış serviste 1,6 kat sürer, içeride ustaların hızına bağlıdır
+      const work = Math.round(hours * 60 * (inhouse || type === "clean" ? 1 : 1.6));
+      const mins = Math.round(inhouse && type !== "clean" ? work / G.workRate() : work);
+      out.push(Object.assign({ type, name: d.name, cost, mins, work, inhouse, why }, extra || {}));
     };
     add("clean");
     const p = G.parts(car, false);
@@ -510,7 +621,7 @@
     car.status = "shop";
     car.show = false;
     const where = G.JOBS[opt.type].where === "wash" ? "wash" : G.JOBS[opt.type].where === "pdr" ? "pdr" : "bay";
-    S.jobs.push({ id: G.nid(), carId: car.id, type: opt.type, issue: opt.issue || null, name: opt.name, left: opt.mins, total: opt.mins, inhouse: opt.inhouse, where, cost: opt.cost });
+    S.jobs.push({ id: G.nid(), carId: car.id, type: opt.type, issue: opt.issue || null, name: opt.name, left: opt.work, total: opt.work, inhouse: opt.inhouse, where, cost: opt.cost });
     return { ok: true };
   };
 
@@ -635,7 +746,7 @@
       if (ratio > 1.25) continue;
       const priceS = R.clamp(1.25 - ratio, 0.04, 0.6) / 0.35;
       const cond = G.cond(car, false) / 100;
-      const looks = 0.62 + 0.25 * car.clean / 100 + (car.show ? 0.35 : 0);
+      const looks = 0.62 + 0.25 * car.clean / 100 + (car.show ? 0.35 : 0) + (car.clean >= 80 ? G.facEff("yikama").shine : 0) + G.facEff("otopark").shine;
       const picky = Math.max(0.2, 1 - t.picky * (0.04 * car.painted + 0.09 * car.replaced + (car.tramer > 0 ? 0.05 : 0)));
       const fit = 0.55 + 0.45 * Math.min(1, car.price / (c.budget * 0.6));
       const lux = (md.seg === "luks" || md.seg === "spor") && !car.show ? 0.6 : 1;
@@ -652,7 +763,7 @@
   function makeOffer(c, car) {
     const t = G.CT[c.type], md = G.M[car.m];
     const mv = G.value(car, false), tv = G.value(car, true);
-    c.max = R.r1k(Math.min(c.budget * 1.08, mv * R.rand(1.0, 1.08) * (car.show ? 1.03 : 1) * (1 + S.rep / 1000)));
+    c.max = R.r1k(Math.min(c.budget * 1.08, mv * R.rand(1.0, 1.08) * (car.show ? 1.03 : 1) * (1 + S.rep / 1000) * G.facEff("galeri").pay));
     // titiz müşteri kendi ekspertizini yaptırır
     if (R.chance(t.picky * 0.5) && tv < mv) { c.max = R.r1k(Math.min(c.max, tv * 1.02)); c.checked = true; }
     let offer;
@@ -737,7 +848,7 @@
       S.today.commission += com;
       S.today.expenses += com;
     }
-    G.addXp(Math.round(20 + Math.max(0, profit) / 4000) * (wholesale ? 0.5 : 1));
+    G.addXp(Math.round(20 + Math.max(0, profit) / 2500) * (wholesale ? 0.5 : 1));
     if (!wholesale) {
       const hidden = car.issues.filter(is => !is.known && !is.fixed && G.ISSUES[is.id].part !== undefined);
       if (hidden.length && !c.checked && R.chance(0.65)) {
@@ -785,6 +896,7 @@
   };
   G.hire = function (cand) {
     if (S.staff.length >= G.loc().staff) return { ok: false, msg: `Bu konumda en fazla ${G.loc().staff} çalışan olabilir.` };
+    if (cand.role === "usta") cand.energy = 100;
     S.staff.push(cand);
     S.cands = S.cands.filter(x => x !== cand);
     G.feed(`${cand.name} ${G.ROLES[cand.role].name.toLocaleLowerCase("tr-TR")} olarak işe başladı.`, "info");
@@ -918,6 +1030,10 @@
     if (prep) { const o = G.recommendJob(prep); out.push({ text: `${G.carName(prep)}: ${o.name.toLocaleLowerCase("tr-TR")} değerini artırır`, a: "car", id: prep.id, btn: "Hazırla" }); }
     if (G.spaceLeft() > 0 && S.listings.some(l => !l.done) && S.money > 150000) out.push({ text: `${G.spaceLeft()} boş park yerin var; piyasada ${S.listings.filter(l => !l.done).length} ilan seni bekliyor`, a: "tab", v: "piyasa", btn: "İlanlara bak" });
     if (S.auction && !S.auction.finished && S.auction.idx === 0 && !S.auction.live && G.spaceLeft() > 0) out.push({ text: `Günün ihalesinde ${S.auction.lots.length} araç var`, a: "auction", btn: "İhaleye gir" });
+    const tired = G.ustas().find(u => !u.resting && u.energy < 35);
+    if (tired && G.restFree() > 0) out.push({ text: `${tired.name} yorgun (enerji ${Math.round(tired.energy)}); çardakta dinlenirse dinç döner`, a: "rest", id: tired.id, btn: "Çardağa gönder" });
+    const fac = Object.keys(G.FACILITIES).map(k => ({ k, nx: G.facNext(k) })).filter(x => x.nx && x.nx.req <= S.level && S.money >= x.nx.cost * 2.5).sort((a, b) => a.nx.cost - b.nx.cost)[0];
+    if (fac) out.push({ text: `${G.FACILITIES[fac.k].name} ${fac.nx.n}. seviyeye yükseltilebilir (${G.fmtS(fac.nx.cost)})`, a: "fac", v: fac.k, btn: "Bak" });
     const next = G.LOCS[S.loc + 1];
     if (next && S.level >= next.lvl && S.money >= next.cost * 1.3) out.push({ text: `${next.name} adresine taşınabilirsin`, a: "tab", v: "patron", btn: "Bak" });
     return out.slice(0, 4);
@@ -929,12 +1045,13 @@
   G.minute = function () {
     S.min++;
     // atölye
-    for (const j of S.jobs.slice()) { j.left--; if (j.left <= 0) finishJob(j); }
+    ustaMinute();
+    for (const j of S.jobs.slice()) { j.left -= G.jobRate(j); if (j.left <= 0) finishJob(j); }
     // müşteri gelişi
     const L = G.loc();
     const listed = S.cars.filter(c => c.status === "lot" && c.price > 0).length;
     const stock = listed ? Math.min(1.5, 0.6 + listed * 0.12) : 0.25;
-    const perHour = 1.15 * L.traffic * G.ADS[S.ads].mult * (0.45 + S.rep / 90) * G.trafficMult() * stock * (G.boostActive() ? 2 : 1);
+    const perHour = 1.15 * L.traffic * G.ADS[S.ads].mult * (0.45 + S.rep / 90) * G.trafficMult() * stock * (G.boostActive() ? 2 : 1) * G.facEff("galeri").traffic;
     if (S.custs.length < 3 + L.prestige * 2 && R.chance(perHour / 60)) G.spawnCustomer();
     // müşteriler
     for (const c of S.custs.slice()) {
@@ -982,11 +1099,13 @@
     S.lost = [];
     for (const c of S.custs) if (c.state === "offer") G.addRep(-0.2);
     S.custs = [];
-    const wash = G.skillSum("yikama") * 4;
+    for (const u of G.ustas()) { u.resting = false; u.buff = null; u.energy = 100; } // gece herkes dinlenir
+    const we = G.facEff("yikama");
+    const wash = G.skillSum("yikama") * 4 + we.auto;
     let washed = 0;
     for (const car of S.cars) {
       car.days++;
-      car.clean = Math.max(0, car.clean - (car.show ? 4 : R.randi(8, 13)));
+      car.clean = Math.max(0, car.clean - (car.show ? 4 : R.randi(8, 13)) * we.decay);
       if (washed < wash && car.status === "lot") { car.clean = 100; washed++; }
     }
     for (const k of Object.keys(S.trend)) S.trend[k] = R.clamp(S.trend[k] * R.rand(0.985, 1.016) + (1 - S.trend[k]) * 0.05, 0.85, 1.18);
@@ -1020,11 +1139,13 @@
     const e = R.pick(pool);
     let text = e.text;
     if (e.instant === "dolu") {
-      const hit = S.cars.filter(c => !c.show && c.status === "lot");
+      const cov = G.facEff("otopark").covered;
+      const hit = S.cars.filter(c => !c.show && c.status === "lot" && !R.chance(cov));
       hit.forEach(c => { c.body = Math.max(10, c.body - R.randi(6, 14)); });
       text = hit.length ? `Açıkta duran ${hit.length} aracın kaportası göçük doldu. Boyasız göçük düzeltme işe yarar.` : "Neyse ki açıkta araç yoktu.";
     } else if (e.instant === "hirsiz") {
       if (S.upg.security) text = "Kameralar ve alarm hırsızları kaçırdı. Hasar yok.";
+      else if (G.facEff("otopark").light && R.chance(0.5)) text = "Otoparkın ışıkları hırsızları caydırdı. Hasar yok.";
       else {
         const car = R.pick(S.cars);
         if (car) { car.inter = Math.max(5, car.inter - 20); text = `${G.carTitle(car)} aracının teybi ve koltukları çalındı. Kamera ve alarm kurmayı düşün.`; }

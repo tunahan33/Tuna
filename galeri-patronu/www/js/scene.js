@@ -99,12 +99,47 @@
     return out + "</g>";
   }
 
-  function wash(x, active) {
-    const y = BASE - 40;
-    let out = `<g data-a="tab" data-v="atolye" class="hit"><path d="M${x} ${BASE} V${y + 8} Q${x} ${y} ${x + 8} ${y} H${x + 30} Q${x + 38} ${y} ${x + 38} ${y + 8} V${BASE}" fill="none" stroke="#2f7fc1" stroke-width="5"/>
-      <text x="${x + 19}" y="${y - 3}" text-anchor="middle" font-size="6" font-weight="700" fill="#2f7fc1" font-family="Saira Condensed, sans-serif">YIKAMA</text>`;
+  function wash(x, active, lvl) {
+    const y = BASE - 40, tunnel = lvl >= 10, w = tunnel ? 52 : 38;
+    const arch = ax => `<path d="M${ax} ${BASE} V${y + 8} Q${ax} ${y} ${ax + 8} ${y} H${ax + 30} Q${ax + 38} ${y} ${ax + 38} ${y + 8} V${BASE}" fill="none" stroke="#2f7fc1" stroke-width="5"/>`;
+    let out = `<g data-a="fac" data-v="yikama" class="hit">`;
+    if (tunnel) out += `<rect x="${x}" y="${y}" width="${w}" height="${BASE - y}" rx="8" fill="#cfe8f7" opacity=".7"/>` + arch(x + 14);
+    out += arch(x);
+    if (lvl >= 5) out += `<path d="M${x + 4} ${y + 6} l3 -4 l3 4 z M${x + 30} ${y + 6} l3 -4 l3 4 z" fill="#ffd23f"/>`;
+    out += `<text x="${x + w / 2}" y="${y - 3}" text-anchor="middle" font-size="6" font-weight="700" fill="#2f7fc1" font-family="Saira Condensed, sans-serif">${tunnel ? "KÖPÜK TÜNELİ" : "YIKAMA"}</text>`;
     if (active) for (let i = 0; i < 5; i++) out += `<circle class="drop" cx="${x + 8 + i * 5.5}" cy="${y + 12 + (i % 2) * 6}" r="1.6" fill="#7cc4f2" style="animation-delay:${i * 0.18}s"/>`;
     return out + "</g>";
+  }
+
+  // Usta çardağı: asmalı pergola, masa, dinlenen ustalar
+  function cardak(x, lvl, resting) {
+    const w = 54, top = BASE - 34;
+    let out = `<g data-a="fac" data-v="cardak" class="hit">`;
+    out += `<rect x="${x + 2}" y="${top}" width="3" height="34" fill="#8a5a33"/><rect x="${x + w - 5}" y="${top}" width="3" height="34" fill="#8a5a33"/>`;
+    out += `<rect x="${x - 2}" y="${top - 3}" width="${w + 4}" height="4" fill="#9b6a3e"/>`;
+    for (let i = x; i < x + w; i += 6) out += `<rect x="${i}" y="${top - 6}" width="2" height="9" fill="#7a4f2c"/>`;
+    const leaves = 6 + Math.min(14, lvl);
+    for (let i = 0; i < leaves; i++) out += `<circle cx="${(x + 2 + (i * 37) % (w - 2)).toFixed(1)}" cy="${(top - 5 + (i % 3) * 3).toFixed(1)}" r="${(2.6 + (i % 2)).toFixed(1)}" fill="${i % 3 ? "#3f8f46" : "#57a85a"}"/>`;
+    if (lvl >= 15) for (let i = 0; i < 4; i++) out += `<circle cx="${x + 10 + i * 11}" cy="${top + 2}" r="1.6" fill="#6b2d6b"/>`; // üzüm salkımı
+    out += `<rect x="${x + 18}" y="${BASE - 11}" width="18" height="2" fill="#7a4f2c"/><rect x="${x + 26}" y="${BASE - 9}" width="2" height="9" fill="#7a4f2c"/>`;
+    out += `<rect x="${x + 21}" y="${BASE - 14}" width="2" height="3" fill="#c0392b" opacity=".85"/><rect x="${x + 30}" y="${BASE - 14}" width="2" height="3" fill="#c0392b" opacity=".85"/>`;
+    if (lvl >= 20) out += `<path d="M${x + 6} ${top + 10} Q${x + 14} ${top + 18} ${x + 22} ${top + 10}" stroke="#e2742c" stroke-width="2" fill="none"/>`; // hamak
+    resting.slice(0, 5).forEach((u, i) => { out += person(x + 9 + i * 9 + (i > 1 ? 18 : 0), BASE, u.id || i, "sit"); });
+    out += `<text x="${x + w / 2}" y="${top - 10}" text-anchor="middle" font-size="6" font-weight="700" fill="#3f6b2f" font-family="Saira Condensed, sans-serif">ÇARDAK</text>`;
+    return out + "</g>";
+  }
+
+  // Galeri binasının seviye süsleri
+  function decor(x, w, tier, lvl) {
+    const h = [50, 66, 80, 98, 108][tier], y = BASE - h;
+    let out = "";
+    if (lvl >= 16) out += `<rect x="${x}" y="${y}" width="${w}" height="2.5" fill="#d4a72c"/><rect x="${x}" y="${BASE - 3}" width="${w}" height="3" fill="#d4a72c"/>`;
+    if (lvl >= 8) out += `<rect x="${x + 1}" y="${y + 1}" width="${w - 2}" height="${h - 2}" fill="none" stroke="#ff4fd8" stroke-width="1.2" opacity=".75"/>`;
+    if (lvl >= 12) out += `<rect x="${x + w - 40}" y="${y + 18}" width="32" height="14" rx="1.5" fill="#101418"/><text x="${x + w - 24}" y="${y + 28}" text-anchor="middle" font-size="7" font-weight="800" fill="#ffd23f" font-family="Saira Condensed, sans-serif" class="led">FIRSAT</text>`;
+    if (lvl >= 4) {
+      [x + 6, x + w - 6].forEach(lx => { out += `<path d="M${lx} ${y - 2} L${lx - 9} ${y - 26} L${lx + 9} ${y - 26} Z" fill="#fff6c8" opacity=".35"/><rect x="${lx - 2}" y="${y - 4}" width="4" height="4" rx="1" fill="#3c4650"/>`; });
+    }
+    return out;
   }
 
   function canopy(x, w, show) {
@@ -146,24 +181,30 @@
 
     // yerleşim: atölye | bina | (vitrin çadırı) | yıkama
     const gw = S.upg.bays ? S.upg.bays * 30 + 6 : 0;
-    const ww = S.upg.wash ? 40 : 0;
+    const wl = G.facLevel("yikama"), cl = G.facLevel("cardak"), gl = G.facLevel("galeri"), ol = G.facLevel("otopark");
+    const ww = wl ? (wl >= 10 ? 52 : 38) : 0;
+    const cw = cl ? 54 : 0;
     const canopyW = tier < 2 && G.showSlots() ? 94 : 0;
     const want = [110, 170, 230, 260, 280][tier];
-    const bw = Math.max(96, Math.min(want, W - 12 - gw - ww - canopyW - (gw ? 6 : 0) - (ww ? 6 : 0) - (canopyW ? 6 : 0)));
-    const total = gw + bw + canopyW + ww + (gw ? 6 : 0) + (canopyW ? 6 : 0) + (ww ? 6 : 0);
+    const gaps = [gw, ww, cw, canopyW].filter(Boolean).length * 6;
+    const bw = Math.max(90, Math.min(want, W - 8 - gw - ww - cw - canopyW - gaps));
+    const total = gw + bw + canopyW + ww + cw + gaps;
     let x = Math.round((W - total) / 2);
+    if (cw) { svg += cardak(x, cl, G.ustas().filter(u => u.resting)); x += cw + 6; }
     if (gw) { svg += garage(x, S.upg.bays, S.jobs); x += gw + 6; }
     const b = building(tier, x, bw, S.name, tier >= 2 ? show : (tier === 1 && !canopyW ? show : []));
-    svg += `<g data-a="tab" data-v="patron" class="hit">${b.svg}</g>`;
+    svg += `<g data-a="fac" data-v="galeri" class="hit">${b.svg}${decor(x, bw, tier, gl)}</g>`;
     if (S.upg.security) svg += `<rect x="${x + bw - 3}" y="${BASE - 58}" width="2" height="16" fill="#5d6873"/><rect x="${x + bw - 9}" y="${BASE - 60}" width="9" height="5" rx="1" fill="#2c3540"/><circle cx="${x + bw - 8}" cy="${BASE - 57.5}" r="1" fill="#e04a3f"/>`;
     x += bw + 6;
     if (canopyW) { svg += canopy(x, canopyW, show); x += canopyW + 6; }
-    if (ww) svg += wash(x, S.jobs.some(j => j.where === "wash"));
+    if (ww) svg += wash(x, S.jobs.some(j => j.where === "wash"), wl);
 
-    // park alanı
-    const ground = tier === 0 ? "#bfa27c" : "#9aa3ac";
-    svg += `<rect x="0" y="${BASE}" width="${W}" height="${roadY - BASE}" fill="${ground}"/>`;
-    svg += `<rect x="0" y="${BASE}" width="${W}" height="4" fill="${tier === 0 ? "#a88c68" : "#c3cad1"}"/>`;
+    // park alanı (otopark tesisi: zemin, ışık, tente)
+    const oe = G.facEff("otopark");
+    const dirt = tier === 0 && !oe.asphalt;
+    const ground = dirt ? "#bfa27c" : oe.asphalt ? "#828b94" : "#9aa3ac";
+    svg += `<rect x="0" y="${BASE}" width="${W}" height="${roadY - BASE}" fill="${ground}" data-a="fac" data-v="otopark" class="hit"/>`;
+    svg += `<rect x="0" y="${BASE}" width="${W}" height="4" fill="${dirt ? "#a88c68" : "#c3cad1"}"/>`;
     if (S.upg.cafe) svg += `<g transform="translate(${W - 26} ${BASE + 2})"><path d="M-12 0 Q0 -10 12 0 Z" fill="#e85d4a"/><rect x="-.6" y="0" width="1.2" height="9" fill="#5d6873"/><rect x="-6" y="8" width="12" height="1.5" fill="#5d6873"/></g>`;
     // flamalar
     const fy = BASE + 6;
@@ -179,7 +220,9 @@
     for (let i = 0; i < slots; i++) {
       const r = Math.floor(i / PER_ROW), col = i % PER_ROW;
       const sx = LOT_X + col * SLOT_W, sy = lotTop + r * ROW_H;
-      svg += `<path d="M${sx} ${sy + 22} v-6 M${sx + SLOT_W - 6} ${sy + 22} v-6" stroke="${tier === 0 ? "#e9dcc6" : "#eef2f5"}" stroke-width="1.2" opacity=".8"/>`;
+      svg += oe.asphalt
+        ? `<path d="M${sx} ${sy + 24} v-20 M${sx + SLOT_W - 6} ${sy + 24} v-20 M${sx} ${sy + 24} h${SLOT_W - 6}" stroke="#f4f6f8" stroke-width="1" fill="none" opacity=".85"/>`
+        : `<path d="M${sx} ${sy + 22} v-6 M${sx + SLOT_W - 6} ${sy + 22} v-6" stroke="${dirt ? "#e9dcc6" : "#eef2f5"}" stroke-width="1.2" opacity=".8"/>`;
       const car = lot[i];
       if (!car) continue;
       const cx = sx + 4, cy = sy + 3;
@@ -189,6 +232,16 @@
       svg += `<g data-a="car" data-id="${car.id}" class="hit">${carAt(car, cx, cy, CAR_S)}${tag}</g>`;
       const c = offerBy[car.id];
       if (c) svg += `<g data-a="cust" data-id="${c.id}" class="hit">${person(sx + SLOT_W - 8, sy + 22, c.id)}<g class="bubble"><rect x="${sx + SLOT_W - 12}" y="${sy - 7}" width="11" height="8" rx="3" fill="#ffffff" stroke="#1d8549"/><text x="${sx + SLOT_W - 6.5}" y="${sy - 0.8}" text-anchor="middle" font-size="6" font-weight="800" fill="#1d8549">₺</text></g></g>`;
+    }
+    // tente ilk sıranın üstünde, lambalar park alanının iki ucunda
+    if (oe.covered) {
+      const tw = Math.min(PER_ROW, slots) * SLOT_W - 4;
+      svg += `<g data-a="fac" data-v="otopark" class="hit" opacity=".9"><rect x="${LOT_X - 2}" y="${lotTop - 3}" width="${tw}" height="5" fill="#f7f3e8"/>`;
+      for (let i = LOT_X - 2; i < LOT_X - 2 + tw; i += 12) svg += `<rect x="${i}" y="${lotTop - 3}" width="6" height="5" fill="#2f6fd0"/>`;
+      svg += `<rect x="${LOT_X - 2}" y="${lotTop + 2}" width="1.5" height="22" fill="#7b8a94"/><rect x="${LOT_X - 3.5 + tw}" y="${lotTop + 2}" width="1.5" height="22" fill="#7b8a94"/></g>`;
+    }
+    if (oe.light) {
+      [4, W - 6].forEach(lx => { svg += `<rect x="${lx}" y="${lotTop - 8}" width="2" height="${roadY - lotTop + 6}" fill="#5d6873"/><rect x="${lx - 3}" y="${lotTop - 10}" width="8" height="3" rx="1.5" fill="#3c4650"/><circle cx="${lx + 1}" cy="${lotTop - 6}" r="2" fill="#fff3b0"/>`; });
     }
     // gezinen müşteriler
     S.custs.filter(c => c.state === "browse").slice(0, 6).forEach((c, i) => {

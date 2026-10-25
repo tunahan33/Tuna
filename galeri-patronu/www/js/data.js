@@ -144,14 +144,41 @@
   ];
 
   G.UPGRADES = {
-    wash:     { name: "Yıkama ünitesi",     desc: "Detaylı temizlik içeride yapılır: daha ucuz ve 1 saatte biter.",                levels: [{ cost: 60e3, lvl: 1 }] },
     bays:     { name: "Atölye bölmesi",     desc: "Mekanik ve iç onarımları kendi atölyende yaparsın: dış servisten %35 ucuz ve daha hızlı. Her bölme aynı anda bir iş.", levels: [{ cost: 150e3, lvl: 2 }, { cost: 400e3, lvl: 4 }, { cost: 900e3, lvl: 8 }, { cost: 2e6, lvl: 12 }] },
     paint:    { name: "Boya kabini",        desc: "Kaporta-boya işi içeride yapılır; usta işçilikle tek parça boya yeterli olur.",  levels: [{ cost: 350e3, lvl: 4 }] },
     pdr:      { name: "Boyasız göçük seti", desc: "Küçük göçükleri boyasız düzeltir; boyalı parça sayısı artmaz.",                 levels: [{ cost: 90e3, lvl: 2 }] },
     expert:   { name: "Ekspertiz cihazı",   desc: "Ekspertiz 500 ₺'ye düşer; ihaledeki araçları da kontrol edebilirsin.",          levels: [{ cost: 120e3, lvl: 3 }] },
-    showroom: { name: "Kapalı vitrin",      desc: "Vitrindeki araçlar daha çok ilgi görür, dolu ve hırsızlıktan korunur. Lüks müşteriler vitrine bakar.", levels: [{ cost: 200e3, lvl: 3, slots: 2 }, { cost: 650e3, lvl: 6, slots: 4 }, { cost: 1.6e6, lvl: 10, slots: 7 }, { cost: 4e6, lvl: 14, slots: 12 }] },
     cafe:     { name: "Müşteri köşesi",     desc: "Çay-kahve ve oturma alanı: müşteriler %35 daha sabırlı.",                       levels: [{ cost: 80e3, lvl: 2 }] },
     security: { name: "Kamera ve alarm",    desc: "Gece hırsızlık ve vandalizm olaylarını önler.",                                  levels: [{ cost: 50e3, lvl: 1 }] }
+  };
+
+  // Tesisler: her biri 20 seviye.
+  // Denge ayarı: n. seviye için gereken oyuncu seviyesi = start + yuvarla((n - 1) × 1,15); fiyat = base × 1,3^(n - 1).
+  // Böylece 20. seviye oyuncunun 23–25. seviyesine denk gelir ve her tesis oyuncuyla birlikte büyür.
+  G.FAC_MAX = 20;
+  G.FAC_STEP = 1.15;
+  G.FAC_GROWTH = 1.3;
+  G.FACILITIES = {
+    galeri: {
+      name: "Galeri binası", short: "Galeri", start: 2, base: 60e3,
+      desc: "Showroom'un vitrini, ışıkları ve dekoru. Daha çok müşteri çeker, vitrin yeri açar, müşteriler araca daha çok para verir.",
+      marks: { 2: "İlk vitrin yeri", 4: "Spot ışıklar", 8: "Neon tabela", 12: "LED reklam ekranı", 16: "Altın yaldızlı cephe", 20: "Efsane showroom" }
+    },
+    yikama: {
+      name: "Yıkama ünitesi", short: "Yıkama", start: 1, base: 40e3,
+      desc: "Araçları içeride yıkarsın: ucuz ve hızlı. Seviye arttıkça her sabah araçlar kendiliğinden yıkanır, cila ile temiz araç daha parlak durur.",
+      marks: { 1: "İçeride yıkama", 2: "Her sabah 1 araç otomatik yıkanır", 5: "Cila: temiz araç müşteriyi daha çok çeker", 10: "Köpük tüneli", 20: "Detaylı bakım merkezi" }
+    },
+    cardak: {
+      name: "Usta çardağı", short: "Çardak", start: 3, base: 50e3,
+      desc: "Ustaların çay içip dinlendiği asmalı çardak. Çalışan usta yorulur ve yavaşlar; çardağa gönderdiğin usta enerjisini toplar, çıkınca bir süre çok daha hızlı çalışır.",
+      marks: { 1: "1 kişilik çardak", 5: "2 kişilik", 10: "Otomatik mola: yorulan usta kendisi dinlenmeye gider", 15: "4 kişilik", 20: "5 kişilik, semaver ve hamak" }
+    },
+    otopark: {
+      name: "Ön otopark", short: "Otopark", start: 1, base: 30e3,
+      desc: "Galerinin önündeki park alanı. Her iki seviyede bir araçlık yer açılır; ışık, tente ve asfalt araçları korur ve daha iyi gösterir.",
+      marks: { 2: "+1 park yeri", 4: "Aydınlatma: hırsızlık riski yarıya iner", 6: "Tente: araçların bir kısmı doludan korunur", 10: "Asfalt ve çizgili park yerleri", 20: "+10 park yeri" }
+    }
   };
 
   G.ADS = [
@@ -163,7 +190,7 @@
 
   G.ROLES = {
     satis:    { name: "Satış danışmanı", base: 1300, desc: "Sen meşgulken teklifleri karşılar, pazarlık eder. Satıştan %1,5 prim alır." },
-    usta:     { name: "Usta",            base: 1600, desc: "Atölye işlerini hızlandırır. Usta olmadan içerideki işler yavaş ilerler." },
+    usta:     { name: "Usta",            base: 1600, desc: "Atölye işlerini hızlandırır. Çalıştıkça yorulur; çardakta dinlenir." },
     yikama:   { name: "Yıkamacı",        base: 750,  desc: "Her sabah araçları siler, temiz tutar." },
     muhasebe: { name: "Muhasebeci",      base: 1150, desc: "Günlük giderleri düşürür, vergi denetiminde ceza yemezsin." }
   };
@@ -211,11 +238,14 @@
     { id: "yirmibes",  text: "25 araç sat",                            reward: 250000,  check: S => S.stats.sold >= 25 },
     { id: "cadde",     text: "Cadde showroom'a taşın",                 reward: 300000,  check: S => S.loc >= 2 },
     { id: "kar500",    text: "Tek satıştan 500.000 ₺ kâr et",          reward: 400000,  check: S => S.stats.best >= 500000 },
+    { id: "tesis5",    text: "Bir tesisi 5. seviyeye çıkar",           reward: 150000,  check: S => Object.values(S.fac || {}).some(n => n >= 5) },
+    { id: "tesis10",   text: "Bir tesisi 10. seviyeye çıkar",          reward: 700000,  check: S => Object.values(S.fac || {}).some(n => n >= 10) },
     { id: "luks",      text: "Bir lüks araç sat",                      reward: 600000,  check: S => S.stats.luxSold >= 1 },
     { id: "plaza",     text: "Oto plazaya taşın",                      reward: 1000000, check: S => S.loc >= 3 },
     { id: "yuz",       text: "100 araç sat",                           reward: 1500000, check: S => S.stats.sold >= 100 },
     { id: "net50",     text: "Net değerini 50 milyon ₺'ye çıkar",      reward: 3000000, check: S => G.netWorth() >= 50e6 },
-    { id: "merkez",    text: "Otomotiv merkezini kur",                 reward: 5000000, check: S => S.loc >= 4 }
+    { id: "merkez",    text: "Otomotiv merkezini kur",                 reward: 5000000, check: S => S.loc >= 4 },
+    { id: "tesis20",   text: "Bütün tesisleri 20. seviyeye çıkar",     reward: 10000000, check: S => Object.values(S.fac || {}).length === 4 && Object.values(S.fac).every(n => n >= 20) }
   ];
 
   G.PLATE_CITIES = ["34", "06", "35", "16", "07", "41", "01", "42", "33", "27", "55", "61"];

@@ -2,7 +2,7 @@
 (function (G) {
   "use strict";
   const R = G.R;
-  const UI = G.UI = { tab: "galeri", sub: { piyasa: "ilan", patron: "durum" }, sheet: null, draft: {}, sort: "yeni", dragging: false, sig: "", sheetSig: "", armed: null };
+  const UI = G.UI = { tab: "galeri", sub: { piyasa: "ilan", patron: "tesis" }, sheet: null, draft: {}, sort: "yeni", dragging: false, sig: "", sheetSig: "", armed: null };
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
   const S = () => G.S;
@@ -152,7 +152,7 @@
   function carStatus(car) {
     const s = S();
     const job = car.status === "shop" ? s.jobs.find(j => j.carId === car.id) : null;
-    if (job) return `<span class="chip dark">Atölyede · ${G.fmtDur(job.left)}</span>`;
+    if (job) return `<span class="chip dark">Atölyede · ${G.fmtDur(G.jobEta(job))}</span>`;
     if (s.custs.some(c => c.carId === car.id && c.state === "offer")) return `<span class="chip warn">Teklif var</span>`;
     if (!car.price) return `<span class="chip bad">Fiyat yok</span>`;
     if (car.clean < 40) return `<span class="chip warn">Kirli</span>`;
@@ -275,22 +275,56 @@
     if (!s.jobs.length) html += `<div class="empty"><b>Atölyede iş yok</b>Galeride bir araca dokun; "Satışa hazırla" bölümü en kârlı işi önerir.</div>`;
     else html += `<div class="list">${s.jobs.map(j => {
       const car = s.cars.find(c => c.id === j.carId);
-      return `<div class="card job"><div class="row"><div><b>${esc(j.name)}</b><p class="small muted">${car ? esc(G.carTitle(car)) : ""} · ${j.inhouse ? "Kendi atölyen" : "Dış servis"}</p></div><div class="num small" data-jobt="${j.id}">${G.fmtDur(j.left)}</div></div>
+      return `<div class="card job"><div class="row"><div><b>${esc(j.name)}</b><p class="small muted">${car ? esc(G.carTitle(car)) : ""} · ${j.inhouse ? "Kendi atölyen" : "Dış servis"}</p></div><div class="num small" data-jobt="${j.id}">${G.fmtDur(G.jobEta(j))}</div></div>
         <div class="prog"><i data-job="${j.id}" style="width:${(1 - j.left / j.total) * 100}%"></i></div>
         ${adBtn("rush", "Reklam izle, hemen bitir", `data-id="${j.id}"`, "sm")}</div>`;
     }).join("")}</div>`;
+    html += ustaCard();
     html += `<div class="card"><h3>Atölye düzeni</h3><div class="kv">
-      <div><span>Bölme</span><b>${s.upg.bays}</b></div><div><span>Yıkama</span><b>${s.upg.wash ? "Var" : "Yok"}</b></div>
+      <div><span>Bölme</span><b>${s.upg.bays}</b></div><div><span>Yıkama</span><b>${G.facLevel("yikama") ? "Seviye " + G.facLevel("yikama") : "Yok"}</b></div>
       <div><span>Boya kabini</span><b>${s.upg.paint ? "Var" : "Yok"}</b></div><div><span>Göçük seti</span><b>${s.upg.pdr ? "Var" : "Yok"}</b></div></div>
       <p class="muted small">İşler galeri açıkken (09:00–19:00) ilerler. Usta olmadan kendi atölyende işler yavaş gider. Yeni ekipman Patron sekmesinde.</p></div>`;
     return html;
   };
 
+  function energyCls(e) { return e >= 60 ? "" : e >= 30 ? "warn" : "bad"; }
+  function ustaCard() {
+    const s = S(), us = G.ustas(), cl = G.facLevel("cardak"), ce = G.facEff("cardak");
+    let html = `<div class="card"><div class="row"><h3>Ustalar ve çardak</h3><span class="pill">Atölye hızı <b>×${G.workRate().toFixed(2).replace(".", ",")}</b></span></div>`;
+    if (!us.length) return html + `<p class="muted small">Ustan yok; içerideki işler yavaş ilerler. Patron → Personel'den usta al.</p></div>`;
+    html += `<p class="muted small">${cl ? `Çardak ${cl}. seviye · ${G.restingCount()}/${ce.cap} yer dolu · saatte +${Math.round(ce.rest)} enerji. Dinlenen usta en az 30 dakika kalırsa ${G.fmtDur(ce.buffMins)} boyunca ×${ce.buffMult.toFixed(2).replace(".", ",")} hızlı çalışır.${ce.auto ? " Otomatik mola açık." : ""}` : "Çalışan usta yorulur ve yavaşlar. Usta çardağı kurarsan gün içinde dinlendirebilirsin."}</p>`;
+    html += us.map(u => {
+      const e = Math.round(u.energy == null ? 100 : u.energy);
+      const st = u.resting ? `<span class="chip acc">Çardakta</span>` : G.buffActive(u) ? `<span class="chip good">Dinç ×${u.buff.mult.toFixed(2).replace(".", ",")} · ${G.fmtDur(u.buff.until - s.min)}</span>` : e < 35 ? `<span class="chip bad">Yorgun</span>` : `<span class="chip">Çalışıyor</span>`;
+      const btn = !cl ? "" : u.resting ? `<button class="btn sm" type="button" data-a="recall" data-id="${u.id}">Geri çağır</button>` : `<button class="btn sm ${e < 50 ? "pri" : ""}" type="button" data-a="rest" data-id="${u.id}" ${G.restFree() <= 0 ? "disabled" : ""}>Çardağa gönder</button>`;
+      return `<div class="opt"><div><b>${esc(u.name)}</b> <span class="chip">${"★".repeat(u.skill)}</span> ${st}
+        <div class="energy"><span>Enerji</span><div class="bar"><i class="${energyCls(e)}" data-energy="${u.id}" style="width:${e}%"></i></div><b data-energyt="${u.id}">${e}</b></div></div>${btn}</div>`;
+    }).join("");
+    return html + `</div>`;
+  }
+
+  // Tesis kartı (Patron → Tesisler)
+  function pips(n) { let h = ""; for (let i = 1; i <= G.FAC_MAX; i++) h += `<i class="${i <= n ? "on" : ""}"></i>`; return `<div class="pips" aria-label="${n}/${G.FAC_MAX}">${h}</div>`; }
+  function facCard(key) {
+    const s = S(), F = G.FACILITIES[key], n = G.facLevel(key), nx = G.facNext(key);
+    const lines = G.facLines(key, n);
+    let btn;
+    if (!nx) btn = `<span class="chip good">En üst seviye</span>`;
+    else if (nx.req > s.level) btn = `<span class="chip">Oyuncu seviyesi ${nx.req} gerekir</span>`;
+    else btn = `<button class="btn ${s.money >= nx.cost ? "pri" : ""}" type="button" data-a="facup" data-v="${key}" ${s.money >= nx.cost ? "" : "disabled"}>${n ? "Yükselt" : "Kur"} · ${G.fmtS(nx.cost)}</button>`;
+    return `<div class="card fac"><div class="row"><div><h3>${esc(F.name)}</h3><p class="muted small">Seviye ${n}/${G.FAC_MAX}</p></div><button class="btn sm" type="button" data-a="fac" data-v="${key}">Ayrıntı</button></div>
+      ${pips(n)}<ul class="facl">${lines.slice(0, 3).map(l => `<li>${esc(l)}</li>`).join("")}</ul><div class="row">${nx ? `<span class="small muted">Sonraki: ${G.facLines(key, nx.n).find((l, i) => l !== lines[i]) || ""}</span>` : "<span></span>"}${btn}</div></div>`;
+  }
+  function patronTesis() {
+    return `<p class="muted small" style="margin:0">Her tesis 20 seviyedir. Yeni seviyeler sen seviye atladıkça açılır; aldığın her seviye galeri görünümünde belirir.</p>` + Object.keys(G.FACILITIES).map(facCard).join("");
+  }
+
   VIEWS.patron = function () {
     const s = S(), sub = UI.sub.patron;
     let html = `<div class="vh"><div><h2>Patron masası</h2><p>${esc(G.loc().name)} · Seviye ${s.level}</p></div></div>
-      <div class="segctl" role="group">${[["durum", "Durum"], ["dukkan", "Dükkân"], ["personel", "Personel"], ["finans", "Tanıtım ve banka"]]
+      <div class="segctl" role="group">${[["tesis", "Tesisler"], ["durum", "Durum"], ["dukkan", "Adres"], ["personel", "Personel"], ["finans", "Banka"]]
         .map(([k, l]) => `<button type="button" data-a="sub" data-k="patron" data-v="${k}" aria-pressed="${sub === k}">${l}</button>`).join("")}</div>`;
+    if (sub === "tesis") html += patronTesis();
     if (sub === "durum") html += patronDurum();
     if (sub === "dukkan") html += patronDukkan();
     if (sub === "personel") html += patronPersonel();
@@ -340,7 +374,7 @@
         <div class="kv"><div><span>Kapasite</span><b>${N.cap} araç</b></div><div><span>Personel</span><b>${N.staff}</b></div><div><span>Kira</span><b>${G.fmt(N.rent)}</b></div><div><span>Taşınma</span><b>${G.fmtS(N.cost)}</b></div></div>
         <button class="btn pri block" type="button" data-a="move" ${ok ? "" : "disabled"}>${s.level < N.lvl ? `Seviye ${N.lvl} gerekir` : s.money < N.cost ? `Kasada ${G.fmtS(N.cost)} olmalı` : "Taşın"}</button></div>`;
     }
-    html += `<div class="card"><h3>Ekipman ve düzen</h3><p class="muted small">Aldığın her şey galeri görünümünde belirir.</p>${Object.keys(G.UPGRADES).map(k => {
+    html += `<div class="card"><h3>Ekipman</h3><p class="muted small">Galeri, yıkama, çardak ve otopark Tesisler bölümünde.</p>${Object.keys(G.UPGRADES).map(k => {
       const u = G.UPGRADES[k], n = G.upgNext(k), lv = s.upg[k];
       const lvTxt = u.levels.length > 1 ? ` <span class="chip">${lv}/${u.levels.length}</span>` : lv ? ` <span class="chip good">Kurulu</span>` : "";
       let btn;
@@ -400,7 +434,7 @@
     html += `<div class="hero">${UI.carSVG(car)}${car.price ? `<span class="sticker">${G.fmtS(car.price)}</span>` : ""}</div>
       <div class="tiles"><div><span>Piyasa değeri</span><b>${G.fmtS(mv)}</b></div><div><span>Maliyetin</span><b>${G.fmtS(cost)}</b></div><div><span>Durum</span><b class="${cs >= 70 ? "pos" : cs < 50 ? "neg" : ""}">${cs} · ${G.condLabel(cs)}</b></div></div>`;
     if (job) {
-      html += `<div class="card job"><div class="row"><b>Atölyede: ${esc(job.name)}</b><span class="num small" data-jobt="${job.id}">${G.fmtDur(job.left)}</span></div><div class="prog"><i data-job="${job.id}" style="width:${(1 - job.left / job.total) * 100}%"></i></div>
+      html += `<div class="card job"><div class="row"><b>Atölyede: ${esc(job.name)}</b><span class="num small" data-jobt="${job.id}">${G.fmtDur(G.jobEta(job))}</span></div><div class="prog"><i data-job="${job.id}" style="width:${(1 - job.left / job.total) * 100}%"></i></div>
         ${adBtn("rush", "Reklam izle, hemen bitir", `data-id="${job.id}"`, "sm")}<p class="muted small">Araç atölyedeyken müşteri göremez.</p></div>`;
     }
     // 1. fiyat
@@ -569,6 +603,27 @@
     return html;
   };
 
+  SHEETS.fac = function (key) {
+    const s = S(), F = G.FACILITIES[key];
+    if (!F) return null;
+    const n = G.facLevel(key), nx = G.facNext(key);
+    let html = head(F.name, `Seviye ${n}/${G.FAC_MAX}`);
+    html += `<div class="card"><p class="small">${esc(F.desc)}</p>${pips(n)}</div>`;
+    const cur = G.facLines(key, n);
+    html += `<div class="card"><h3>Şu an</h3><ul class="facl">${cur.map(l => `<li>${esc(l)}</li>`).join("")}</ul></div>`;
+    if (nx) {
+      const nl = G.facLines(key, nx.n);
+      html += `<div class="card"><h3>${nx.n}. seviyede</h3><ul class="facl">${nl.map((l, i) => `<li class="${l !== cur[i] ? "up" : ""}">${esc(l)}</li>`).join("")}</ul>
+        ${F.marks[nx.n] ? `<p class="pos small"><b>Yeni: ${esc(F.marks[nx.n])}</b></p>` : ""}
+        <div class="kv"><div><span>Fiyat</span><b>${G.fmtS(nx.cost)}</b></div><div><span>Gereken seviye</span><b class="${s.level >= nx.req ? "pos" : "neg"}">${nx.req} (sen ${s.level})</b></div></div>
+        <button class="btn pri block" type="button" data-a="facup" data-v="${key}" ${s.level >= nx.req && s.money >= nx.cost ? "" : "disabled"}>${s.level < nx.req ? `Oyuncu seviyesi ${nx.req} olunca açılır` : s.money < nx.cost ? `Kasada ${G.fmtS(nx.cost)} olmalı` : `${n ? "Yükselt" : "Kur"} · ${G.fmt(nx.cost)}`}</button></div>`;
+    }
+    // yol haritası: önemli seviyeler
+    const marks = Object.keys(F.marks).map(Number).sort((a, b) => a - b);
+    html += `<div class="card"><h3>Yol haritası</h3>${marks.map(m => `<div class="row small"><div><b class="${m <= n ? "pos" : ""}">${m}. seviye</b> · ${esc(F.marks[m])}</div><div class="muted">${m <= n ? "Açık" : `Oyuncu sv. ${G.facReq(key, m)} · ${G.fmtS(G.facCost(key, m))}`}</div></div>`).join("")}</div>`;
+    return html;
+  };
+
   SHEETS.feed = function () {
     return head("Galeri defteri", "Son olaylar") + `<div class="card">${S().feed.map(f => `<div class="small"><span class="muted">${esc(f.t)}</span><br>${esc(f.text)}</div>`).join("") || '<p class="muted">Henüz kayıt yok.</p>'}</div>`;
   };
@@ -591,11 +646,11 @@
   function viewSig() {
     const s = S();
     switch (UI.tab) {
-      case "galeri": return "g" + s.day + Math.floor(s.min / 20) + s.cars.map(c => `${c.id}.${c.status}.${c.price}.${c.show}.${Math.round(c.clean / 20)}.${c.inspected}.${c.motor}.${c.body}.${c.inter}.${c.painted}.${c.issues.filter(i => i.fixed).length}`).join() + "|" + s.custs.map(c => c.id + c.state + c.carId).join() + "|" + s.jobs.map(j => j.id + "." + Math.ceil(j.left / 30)).join() + "|" + JSON.stringify(s.upg) + s.loc + G.boostActive() + Math.round(s.money / 50000);
+      case "galeri": return "g" + s.day + Math.floor(s.min / 20) + s.cars.map(c => `${c.id}.${c.status}.${c.price}.${c.show}.${Math.round(c.clean / 20)}.${c.inspected}.${c.motor}.${c.body}.${c.inter}.${c.painted}.${c.issues.filter(i => i.fixed).length}`).join() + "|" + s.custs.map(c => c.id + c.state + c.carId).join() + "|" + s.jobs.map(j => j.id + "." + Math.ceil(j.left / 30)).join() + "|" + JSON.stringify(s.upg) + JSON.stringify(s.fac) + s.loc + G.boostActive() + Math.round(s.money / 50000) + G.ustas().map(u => u.resting + "" + Math.round(u.energy / 35)).join();
       case "piyasa": return "p" + s.day + UI.sub.piyasa + s.listings.map(l => l.id + "." + l.done + "." + l.last).join() + "|" + s.auction.idx + s.auction.finished + "|" + Math.round(s.money / 10000) + "|" + G.carCount();
       case "musteri": return "m" + s.custs.map(c => `${c.id}.${c.state}.${c.offer}`).join() + "|" + s.lost.length + "|" + s.today.sales + G.boostActive() + G.adLeft("boost") + (s.min < G.CLOSE - 60);
-      case "atolye": return "a" + s.jobs.map(j => j.id).join() + "|" + JSON.stringify(s.upg) + s.staff.length + G.adLeft("rush");
-      case "patron": return "b" + s.day + UI.sub.patron + Math.round(s.money / 1000) + s.staff.length + s.cands.length + JSON.stringify(s.upg) + s.loan + s.ads + s.loc + s.level + s.quests.length + Math.round(s.rep) + s.today.sales + UI.armed + s.maxDisc;
+      case "atolye": return "a" + s.jobs.map(j => j.id).join() + "|" + JSON.stringify(s.upg) + JSON.stringify(s.fac) + s.staff.length + G.adLeft("rush") + G.restFree() + G.ustas().map(u => u.resting + "" + G.buffActive(u) + Math.round(u.energy / 35)).join();
+      case "patron": return "b" + s.day + UI.sub.patron + Math.round(s.money / 1000) + s.staff.length + s.cands.length + JSON.stringify(s.upg) + JSON.stringify(s.fac) + s.loan + s.ads + s.loc + s.level + s.quests.length + Math.round(s.rep) + s.today.sales + UI.armed + s.maxDisc;
     }
     return "";
   }
@@ -615,6 +670,7 @@
     if (sh.kind === "cust") { const c = s.custs.find(x => x.id === sh.id); return c ? `${c.offer}${c.msgs.length}${c.rounds}${G.adLeft("tea")}` : "gone"; }
     if (sh.kind === "listing") { const l = s.listings.find(x => x.id === sh.id); return l ? `${l.msgs.length}${l.done}${l.car.inspected}${G.carCount()}${l.rounds}` : "x"; }
     if (sh.kind === "auction") { const a = s.auction; return a.live ? `${a.idx}${a.live.bid}${a.live.leader}${Math.ceil(a.live.timer * 10)}` : `${a.idx}${a.finished}${a.lots[a.idx] && a.lots[a.idx].car.inspected}`; }
+    if (sh.kind === "fac") return `${G.facLevel(sh.id)}${Math.round(s.money / 10000)}${s.level}`;
     if (sh.kind === "summary") { const sm = s.summary; return sm ? `${sm.day}${sm.bonusTaken}` : "x"; }
     return sh.kind;
   }
@@ -668,7 +724,9 @@
     if (sig !== UI.sig && !UI.dragging) { UI.sig = sig; const y = window.scrollY; $("view").innerHTML = VIEWS[UI.tab](); window.scrollTo(0, y); }
     renderNav();
     for (const el of document.querySelectorAll("[data-job]")) { const j = s.jobs.find(x => x.id === +el.dataset.job); if (j) el.style.width = ((1 - j.left / j.total) * 100) + "%"; }
-    for (const el of document.querySelectorAll("[data-jobt]")) { const j = s.jobs.find(x => x.id === +el.dataset.jobt); if (j) el.textContent = G.fmtDur(j.left); }
+    for (const el of document.querySelectorAll("[data-jobt]")) { const j = s.jobs.find(x => x.id === +el.dataset.jobt); if (j) el.textContent = G.fmtDur(G.jobEta(j)); }
+    for (const el of document.querySelectorAll("[data-energy]")) { const u = s.staff.find(x => x.id === +el.dataset.energy); if (u) { el.style.width = u.energy + "%"; el.className = energyCls(u.energy); } }
+    for (const el of document.querySelectorAll("[data-energyt]")) { const u = s.staff.find(x => x.id === +el.dataset.energyt); if (u) el.textContent = Math.round(u.energy); }
     for (const el of document.querySelectorAll("[data-pat]")) { const c = s.custs.find(x => x.id === +el.dataset.pat); if (c) el.style.width = (c.patience / c.patMax * 100) + "%"; }
     UI.renderSheet(false);
   };
@@ -765,6 +823,10 @@
       UI.armed = null; UI.render();
     },
     disc: el => { S().maxDisc = +el.dataset.v / 100; UI.render(); },
+    fac: el => UI.open("fac", el.dataset.v),
+    facup: el => { const r = G.buyFac(el.dataset.v); msg(r); if (r.ok) UI.toast(`${G.FACILITIES[el.dataset.v].name}: seviye ${G.facLevel(el.dataset.v)}`, "good"); UI.render(); },
+    rest: el => { const u = S().staff.find(x => x.id === +el.dataset.id); if (u) { msg(G.sendRest(u)); UI.render(); } },
+    recall: el => { const u = S().staff.find(x => x.id === +el.dataset.id); if (u) { G.recall(u); UI.render(); } },
     ads: el => { S().ads = +el.dataset.v; UI.render(); },
     borrow: el => { msg(G.borrow(+el.dataset.v)); UI.render(); },
     repay: el => { msg(G.repay(+el.dataset.v)); UI.render(); },
