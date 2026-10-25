@@ -87,7 +87,7 @@ Oyuncu 6. seviyeye gelince ilanlara arada bir ultra lüks koleksiyon aracı dü�
 
 ## Lüks alışveriş (Patron → Lüks)
 
-Patron kazandığı parayla kendine ev, araba, uçak ve yat alabilir. 18 eşyanın her birinin kendi çizimi, oyuncu seviyesi şartı, şöhret puanı, günlük bakım masrafı ve geri satış değeri vardır.
+Patron kazandığı parayla kendine ev, araba, uçak, yat ve mücevher alabilir, gelir getiren yatırımlar yapabilir. 28 eşyanın her birinin kendi çizimi, oyuncu seviyesi şartı, şöhret puanı, günlük bakım masrafı ve geri satış değeri vardır.
 
 | Kategori | Eşyalar | Özel fayda | Günlük bakım | Geri satış |
 |---|---|---|---|---|
@@ -95,6 +95,11 @@ Patron kazandığı parayla kendine ev, araba, uçak ve yat alabilir. 18 eşyan�
 | Araba | Stahl S5 (11 milyon) → Mirage Stallion GT → Nordik XR90 → Stahl S8 uzun şasi → Ferro Inferno (80 milyon) | En iyi araba galerinin önüne "PATRON" plakasıyla park eder | %0,032 | %70 |
 | Uçak | Tek motorlu uçak (30 milyon) → helikopter → hafif jet → uzun menzil jet (550 milyon) | Her sabah 2–8 ithal premium, spor, lüks ve elektrikli araç ilanı; uçak sahnenin gökyüzünde uçar | %0,048 | %75 |
 | Yat | Sürat teknesi (15 milyon) → ahşap gulet → motoryat → mega yat (875 milyon) | Haftada bir yat partisi: itibar artar, ertesi gün 1,45–1,9 kat müşteri ve zengin müşteri akını | %0,048 | %70 |
+
+| Mücevher | Altın kol saati (2,5 milyon) → İsviçre komplikasyonlu saat → pırlanta tektaş yüzük → zümrüt gerdanlık → nadir pembe elmas (160 milyon) | Değerini korur, sigortası ucuz | %0,01 | %85 |
+| Yatırım | Kiralık daire (12 milyon) → restoran → butik otel → alışveriş merkezi → futbol takımı (1,5 milyar) | **Her gün gelir getirir** ama gideri de vardır (gelirin yaklaşık dörtte biri; futbol takımında oyuncu maaşlarıyla daha fazla). Kendini yaklaşık 220 oyun gününde öder. Oyundan çıkınca pasif gelire de eklenir. | %0,15 (takım %0,25) | %85 |
+
+**Yatırım gelirleri:** kiralık daire günde 72 bin, restoran 270 bin, butik otel 660 bin, AVM 2,4 milyon ₺ getirir. Futbol takımı (galerinin adını taşır, ör. "Yıldızspor") her gün maça çıkar; galibiyette gelir %40 fazla, yenilgide %40 az olur, sonuç gün sonu haberlerinde görünür. Yatırımların net günlük kazancının dörtte biri, oyundan çıkılan her saat için pasif gelire eklenir. Futbol takımı sahnenin arka planında stadyum olarak görünür.
 
 **Şöhret** (sahip olunan eşyaların puanlarının toplamı) şunları verir: müşterinin ödemeye razı olduğu fiyat +%6'ya kadar, günde +0,5'e kadar itibar, 50 şöhrette bir ve 150 şöhrette iki kademe daha zengin müşteri tipi. Bakım masrafları kişisel gider olarak gün sonu raporunda ayrı satırda görünür ve işletmenin günlük netine sayılmaz. Lüks eşyaların geri satış değeri net değere eklenir. Bütün eşyaların toplam fiyatı yaklaşık 2,85 milyar ₺; geri satış ödenen fiyat üzerinden hesaplanır.
 

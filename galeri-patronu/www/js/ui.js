@@ -475,8 +475,8 @@
   function passiveCard() {
     const pr = G.passiveRate();
     return `<div class="card"><div class="row"><h3>Pasif gelir</h3><span class="pill">Saatte <b>${G.fmtS(pr.total)}</b></span></div>
-      <p class="muted small">Oyundan çıkınca galerin çalışmaya devam eder; döndüğünde en fazla ${G.OFFLINE_MAX_H} saatlik kazancı alırsın. Saatlik gelir son 7 günün ortalama satış kârına göre hesaplanır; satış danışmanları ve şöhret artırır.</p>
-      <div class="kv"><div><span>Temel</span><b>${G.fmtS(pr.base)}/sa</b></div><div><span>Danışman bonusu</span><b>+%${Math.round(pr.sales * 100)}</b></div><div><span>Şöhret bonusu</span><b>+%${Math.round(pr.fame * 100)}</b></div><div><span>Şimdiye kadar</span><b>${G.fmtS(S().stats.passive || 0)}</b></div></div></div>`;
+      <p class="muted small">Oyundan çıkınca galerin çalışmaya devam eder; döndüğünde en fazla ${G.OFFLINE_MAX_H} saatlik kazancı alırsın. Saatlik gelir son 7 günün ortalama satış kârına göre hesaplanır; satış danışmanları ve şöhret artırır, Lüks → Yatırım'daki işletmeler ayrıca ekler.</p>
+      <div class="kv"><div><span>Temel</span><b>${G.fmtS(pr.base)}/sa</b></div><div><span>Danışman bonusu</span><b>+%${Math.round(pr.sales * 100)}</b></div><div><span>Şöhret bonusu</span><b>+%${Math.round(pr.fame * 100)}</b></div><div><span>Yatırımlar</span><b>+${G.fmtS(pr.invest)}/sa</b></div><div><span>Şimdiye kadar</span><b>${G.fmtS(S().stats.passive || 0)}</b></div></div></div>`;
   }
   function patronDurum() {
     const s = S(), T = s.today;

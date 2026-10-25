@@ -200,6 +200,8 @@
     ev:    { name: "Ev",    upkeep: 0.00016, resale: 0.95, perk: "Evler en çok şöhreti verir ve değerini korur." },
     araba: { name: "Araba", upkeep: 0.00032, resale: 0.7,  perk: "En iyi araban galerinin önüne park eder; müşteriler patronun arabasını görür." },
     ucak:  { name: "Uçak",  upkeep: 0.00048, resale: 0.75, perk: "Yurt dışı bağlantısı: her sabah piyasaya ithal premium, spor ve lüks araç ilanları gelir." },
+    mucevher: { name: "Mücevher", upkeep: 0.0001, resale: 0.85, perk: "Mücevherler değerini korur, sigortası ucuzdur; şöhret kazandırır." },
+    yatirim:  { name: "Yatırım",  upkeep: 0.0015, resale: 0.85, perk: "Yatırımlar her gün gelir getirir ama bakım ve işletme gideri de vardır. Oyundan çıkınca da kazandırır." },
     yat:   { name: "Yat",   upkeep: 0.00048, resale: 0.7,  perk: "Haftada bir yat partisi: ertesi gün galeriye zengin müşteri akını ve itibar." }
   };
   G.LUXURY = [
@@ -220,6 +222,17 @@
     { id: "y1", cat: "yat", name: "Sürat teknesi",            desc: "Hafta sonu koy gezisi için.",                price: 15e6,   lvl: 7,  pres: 6,  party: 1 },
     { id: "y2", cat: "yat", name: "Ahşap gulet",              desc: "Bodrum yapımı, 4 kamaralı.",                 price: 75e6,  lvl: 12, pres: 18, party: 2 },
     { id: "y3", cat: "yat", name: "Motoryat",                 desc: "3 katlı, jakuzili.",                         price: 225e6,  lvl: 17, pres: 40, party: 3 },
+    { id: "m1", cat: "mucevher", name: "Altın kol saati",             desc: "18 ayar altın kasa, timsah deri kayış.",       price: 2.5e6, lvl: 4,  pres: 3 },
+    { id: "m2", cat: "mucevher", name: "İsviçre komplikasyonlu saat", desc: "Ay fazlı, dakika tekrarlı, 300 adet üretildi.", price: 9e6,   lvl: 8,  pres: 7 },
+    { id: "m3", cat: "mucevher", name: "Pırlanta tektaş yüzük",       desc: "4 karat, D renk, kusursuz berraklık.",         price: 18e6,  lvl: 10, pres: 10 },
+    { id: "m4", cat: "mucevher", name: "Zümrüt gerdanlık",            desc: "Kolombiya zümrütleri, el işi altın zincir.",   price: 45e6,  lvl: 14, pres: 18 },
+    { id: "m5", cat: "mucevher", name: "Nadir pembe elmas",           desc: "Müzayededen, dünyada benzeri yok.",            price: 160e6, lvl: 20, pres: 40 },
+    // Yatırımlar: income = günlük ortalama brüt gelir; bakım gideri kategori oranından (futbol takımında kendi oranı)
+    { id: "i1", cat: "yatirim", name: "Kiralık daire",     desc: "Kiracısı hazır, düzenli kira geliri.",            price: 12e6,   lvl: 5,  pres: 3,   income: 72000 },
+    { id: "i2", cat: "yatirim", name: "Restoran",          desc: "Boğaz kenarında balık restoranı.",                price: 45e6,   lvl: 9,  pres: 8,   income: 270000 },
+    { id: "i3", cat: "yatirim", name: "Butik otel",        desc: "24 odalı, Kapadokya'da taş otel.",               price: 110e6,  lvl: 13, pres: 15,  income: 660000 },
+    { id: "i4", cat: "yatirim", name: "Alışveriş merkezi", desc: "180 mağazalı AVM, sinema ve yemek katı.",        price: 400e6,  lvl: 19, pres: 30,  income: 2400000 },
+    { id: "i5", cat: "yatirim", name: "Futbol takımı",     desc: "Süper Lig kulübü: maç, bilet, yayın ve forma gelirleri. Oyuncu maaşları da senden.", price: 1.5e9, lvl: 25, pres: 150, income: 9000000, upkeep: 0.0025, football: true },
     { id: "y4", cat: "yat", name: "Mega yat",                 desc: "Helikopter pisti ve 12 kişilik mürettebat.", price: 875e6, lvl: 24, pres: 90, party: 4 }
   ];
   G.LX = {};
@@ -285,6 +298,8 @@
     { id: "tesis5",    text: "Bir tesisi 5. seviyeye çıkar",           reward: 150000,  check: S => Object.values(S.fac || {}).some(n => n >= 5) },
     { id: "tesis10",   text: "Bir tesisi 10. seviyeye çıkar",          reward: 700000,  check: S => Object.values(S.fac || {}).some(n => n >= 10) },
     { id: "ultra",     text: "Ultra lüks bir araç sat",                reward: 3000000, check: S => (S.stats.ultraSold || 0) >= 1 },
+    { id: "yatirim",   text: "İlk yatırımını yap",                     reward: 500000,  check: S => (S.lux || []).some(id => id[0] === "i") },
+    { id: "futbol",    text: "Bir futbol takımı satın al",             reward: 50000000, check: S => (S.lux || []).includes("i5") },
     { id: "lux1",      text: "İlk lüks alışverişini yap",              reward: 100000,  check: S => (S.lux || []).length >= 1 },
     { id: "luks",      text: "Bir lüks araç sat",                      reward: 600000,  check: S => S.stats.luxSold >= 1 },
     { id: "plaza",     text: "Oto plazaya taşın",                      reward: 1000000, check: S => S.loc >= 3 },

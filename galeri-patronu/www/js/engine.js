@@ -1003,7 +1003,37 @@
   G.luxPaid = x => (S.luxPaid && S.luxPaid[x.id]) || x.price;
   G.luxResale = x => R.r1k(G.luxPaid(x) * G.LUX_CATS[x.cat].resale);
   G.luxValue = () => G.luxOwned().reduce((a, x) => a + G.luxResale(x), 0);
-  G.luxUpkeep = () => Math.round(G.luxOwned().reduce((a, x) => a + x.price * G.LUX_CATS[x.cat].upkeep, 0));
+  G.itemUpkeep = x => Math.round(x.price * (x.upkeep || G.LUX_CATS[x.cat].upkeep));
+  G.luxUpkeep = () => G.luxOwned().reduce((a, x) => a + G.itemUpkeep(x), 0);
+  // Yatırımların beklenen günlük geliri ve net kazancı
+  G.investIncome = () => G.luxOwned().reduce((a, x) => a + (x.income || 0), 0);
+  G.investNet = () => G.luxOwned().filter(x => x.income).reduce((a, x) => a + x.income - G.itemUpkeep(x), 0);
+  G.teamName = () => (S.name.trim().split(/\s+/)[0] || "Patron") + "spor";
+  // Gün sonunda yatırım gelirleri; futbol takımının geliri maç sonucuna göre değişir
+  G.collectInvestments = function () {
+    let total = 0;
+    const news = [];
+    for (const x of G.luxOwned()) {
+      if (!x.income) continue;
+      let inc = x.income * R.rand(0.9, 1.1);
+      if (x.football) {
+        const r = Math.random();
+        const g1 = R.randi(0, 4), g2 = R.randi(0, 3);
+        let res, m;
+        if (r < 0.45) { res = "kazandı"; m = 1.4; } else if (r < 0.75) { res = "berabere kaldı"; m = 1; } else { res = "kaybetti"; m = 0.6; }
+        const a = res === "kazandı" ? Math.max(g1, g2 + 1) : res === "kaybetti" ? Math.min(g1, Math.max(0, g2 - 1)) : g2;
+        const b = res === "kazandı" ? Math.min(g2, a - 1) : res === "kaybetti" ? a + 1 + R.randi(0, 1) : g2;
+        inc = x.income * m * R.rand(0.9, 1.1);
+        S.stats.wins = (S.stats.wins || 0) + (res === "kazandı" ? 1 : 0);
+        news.push({ title: `${G.teamName()} ${res}: ${a}-${b}`, text: `Bilet, yayın ve sponsor geliri ${G.fmt(R.r1k(inc))}.` });
+        if (res === "kazandı") G.addRep(0.5);
+      }
+      total += inc;
+    }
+    total = R.r1k(total);
+    S.stats.investIncome = (S.stats.investIncome || 0) + total;
+    return { total, news };
+  };
   G.bestOf = cat => G.luxOwned().filter(x => x.cat === cat).sort((a, b) => b.price - a.price)[0] || null;
   G.buyLux = function (id) {
     const x = G.LX[id];
@@ -1131,7 +1161,8 @@
     const base = Math.max(2000 * S.level, avg * 0.12);
     const sales = G.staffOf("satis").length * 0.15;
     const fame = Math.min(0.5, G.prestige() * 0.001);
-    return { base: R.r100(base), sales, fame, total: R.r100(base * (1 + sales + fame)), avg: R.r1k(avg) };
+    const invest = R.r100(Math.max(0, G.investNet()) * 0.25);
+    return { base: R.r100(base), sales, fame, invest, total: R.r100(base * (1 + sales + fame) + invest), avg: R.r1k(avg) };
   };
   G.offlineReward = function (ms) {
     const mins = ms / 60000;
@@ -1272,15 +1303,18 @@
     // kişisel lüks eşyaların bakımı işletme netine sayılmaz ama kasadan düşer
     const luxUp = G.luxUpkeep();
     S.money -= luxUp;
+    const inv = G.collectInvestments();
+    S.money += inv.total;
     const T = S.today;
     const net = T.profit - T.expenses - T.spentWork;
     S.history.push({ day: S.day, revenue: T.revenue, profit: T.profit, expenses: T.expenses + T.spentWork, net, sales: T.sales });
     if (S.history.length > 30) S.history.shift();
     const summary = {
       day: S.day, today: Object.assign({}, T), net,
-      lines: [["Kira", L.rent], ["Maaşlar", salaries], ["Reklam", ads], ["Sigorta ve otopark", insurance], ["Kredi faizi", interest], ["Ek hesap faizi", overdraft], ["Muhasebe tasarrufu", -saved], ["Lüks bakım masrafı (kişisel)", luxUp]].filter(x => x[1]),
-      lost: S.lost.slice(0, 6), news: []
+      lines: [["Kira", L.rent], ["Maaşlar", salaries], ["Reklam", ads], ["Sigorta ve otopark", insurance], ["Kredi faizi", interest], ["Ek hesap faizi", overdraft], ["Muhasebe tasarrufu", -saved], ["Lüks bakım masrafı (kişisel)", luxUp], ["Yatırım gelirleri (kişisel)", -inv.total]].filter(x => x[1]),
+      lost: S.lost.slice(0, 6), news: [], invest: inv.total
     };
+    summary.news.push(...inv.news);
 
     // yeni gün
     S.day++;

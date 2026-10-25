@@ -313,6 +313,8 @@
         ? `<g class="fly" data-a="lux"><g transform="translate(0 ${py})"><rect x="-14" y="0" width="28" height="1.2" fill="#3c4650" class="rotor"/><path d="M-8 3 q2 -1 9 -1 q6 0 7 5 q-1 4 -7 4 h-5 q-4 0 -4 -4 z" fill="#1f4fa8"/><rect x="-16" y="5" width="9" height="2" fill="#1f4fa8"/></g></g>`
         : `<g class="fly" data-a="lux"><g transform="translate(0 ${py})"><path d="M-14 4 q1 -3 8 -3 h18 q5 0 7 3 q-2 3 -7 3 h-24 z" fill="#ffffff" stroke="#9aa3ac" stroke-width=".5"/><path d="M-12 2 l-3 -6 h3 l5 5 z" fill="${pl.id === "uc1" ? "#c8323a" : "#1f4fa8"}"/><path d="M-2 5 l6 6 h3 l-4 -6 z" fill="#c3cad1"/></g></g>`;
     }
+    // futbol takımı varsa uzakta stadyum ve ışıkları
+    if (G.owns("i5")) svg += `<g data-a="lux" opacity=".85"><path d="M300 ${BASE - 30} Q345 ${BASE - 52} 392 ${BASE - 30} V${BASE} H300 Z" fill="#c8323a"/><path d="M304 ${BASE - 31} Q345 ${BASE - 49} 388 ${BASE - 31}" stroke="#ffd23f" stroke-width="2" fill="none"/>${[302, 390].map(x => `<rect x="${x}" y="${BASE - 62}" width="1.6" height="32" fill="#5d6873"/><rect x="${x - 4}" y="${BASE - 66}" width="10" height="5" fill="#fff6c8"/>`).join("")}</g>`;
     if (tier >= 1) {
       svg += `<g fill="#b9c7d3" opacity="${tier >= 2 ? 0.9 : 0.5}">`;
       [[8, 40], [40, 62], [70, 30], [300, 54], [330, 70], [362, 44]].forEach(([bx, bh], i) => { svg += `<rect x="${bx}" y="${BASE - bh - 10}" width="${26 + (i % 2) * 6}" height="${bh + 10}"/>`; });
