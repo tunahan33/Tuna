@@ -87,17 +87,18 @@ Oyuncu 6. seviyeye gelince ilanlara arada bir ultra lüks koleksiyon aracı dü�
 
 ## Lüks alışveriş (Patron → Lüks)
 
-Patron kazandığı parayla kendine ev, araba, uçak, yat ve mücevher alabilir, gelir getiren yatırımlar yapabilir. 28 eşyanın her birinin kendi çizimi, oyuncu seviyesi şartı, şöhret puanı, günlük bakım masrafı ve geri satış değeri vardır.
+Patron kazandığı parayla kendine ev, araba, uçak, yat ve mücevher alabilir, gelir getiren yatırımlar yapabilir. 83 eşyanın her birinin kendi çizimi, oyuncu seviyesi şartı, şöhret puanı, günlük bakım masrafı ve geri satış değeri vardır.
 
-| Kategori | Eşyalar | Özel fayda | Günlük bakım | Geri satış |
-|---|---|---|---|---|
-| Ev | Mahalle dairesi (9 milyon) → site içinde 3+1 → Boğaz manzaralı rezidans → müstakil villa → sahil yalısı (450 milyon) | En çok şöhreti verir | %0,016 | %95 |
-| Araba | Stahl S5 (11 milyon) → Mirage Stallion GT → Nordik XR90 → Stahl S8 uzun şasi → Ferro Inferno (80 milyon) | En iyi araba galerinin önüne "PATRON" plakasıyla park eder | %0,032 | %70 |
-| Uçak | Tek motorlu uçak (30 milyon) → helikopter → hafif jet → uzun menzil jet (550 milyon) | Her sabah 2–8 ithal premium, spor, lüks ve elektrikli araç ilanı; uçak sahnenin gökyüzünde uçar | %0,048 | %75 |
-| Yat | Sürat teknesi (15 milyon) → ahşap gulet → motoryat → mega yat (875 milyon) | Haftada bir yat partisi: itibar artar, ertesi gün 1,45–1,9 kat müşteri ve zengin müşteri akını | %0,048 | %70 |
+| Kategori | Sayı | Fiyat aralığı (ucuzdan pahalıya) | Özel fayda | Günlük bakım | Geri satış |
+|---|---|---|---|---|---|
+| Ev | 13 | Stüdyo daire 4 milyon → mahalle dairesi, bahçeli ev, site, dağ evi, çiftlik evi, rezidans, penthouse, villa, tarihi köşk, yalı, özel ada → Avrupa'da şato 1,4 milyar | En çok şöhreti verir | %0,016 | %95 |
+| Araba | 26 | Anka Serçe 2,5 milyon → aile, SUV, elektrikli, premium, spor ve hiper otomobiller → Ferro Leggenda 250 milyon | En iyi araba galerinin önüne "PATRON" plakasıyla park eder | %0,032 | %70 |
+| Mücevher | 20 | Gümüş künye 150 bin → bilezik, saatler, küpeler, inci, yakut, pırlanta, antika sorguç, gerdanlık, mücevherli yumurta, pembe elmas, kraliyet tacı → Doğu Yıldızı elması 600 milyon | Değerini korur, sigortası ucuz | %0,01 | %85 |
+| Uçak | 9 | Ultra hafif uçak 8 milyon → tek motorlu, amfibi deniz uçağı, helikopter, turboprop, hafif jet, orta boy jet, uzun menzil jet → VIP geniş gövde uçak 1,1 milyar | Her sabah 2–10 ithal ilan; uçak sahnenin gökyüzünde uçar | %0,048 | %75 |
+| Yat | 10 | Jet ski 1,5 milyon → balıkçı teknesi, yelkenli, sürat teknesi, katamaran, gulet, flybridge, motoryat, süper yat → mega yat 875 milyon | Haftada bir yat partisi | %0,048 | %70 |
+| Yatırım | 5 | Kiralık daire 12 milyon → restoran, butik otel, AVM → futbol takımı 1,5 milyar | **Her gün gelir getirir**, gideri de vardır; oyundan çıkınca pasif gelire eklenir | %0,15 (takım %0,25) | %85 |
 
-| Mücevher | Altın kol saati (2,5 milyon) → İsviçre komplikasyonlu saat → pırlanta tektaş yüzük → zümrüt gerdanlık → nadir pembe elmas (160 milyon) | Değerini korur, sigortası ucuz | %0,01 | %85 |
-| Yatırım | Kiralık daire (12 milyon) → restoran → butik otel → alışveriş merkezi → futbol takımı (1,5 milyar) | **Her gün gelir getirir** ama gideri de vardır (gelirin yaklaşık dörtte biri; futbol takımında oyuncu maaşlarıyla daha fazla). Kendini yaklaşık 220 oyun gününde öder. Oyundan çıkınca pasif gelire de eklenir. | %0,15 (takım %0,25) | %85 |
+Her eşyanın kendi çizimi vardır; seviye şartları da ucuzdan pahalıya doğru artar. Liste `www/js/data.js` → `G.LUXURY`.
 
 **Yatırım gelirleri:** kiralık daire günde 72 bin, restoran 270 bin, butik otel 660 bin, AVM 2,4 milyon ₺ getirir. Futbol takımı (galerinin adını taşır, ör. "Yıldızspor") her gün maça çıkar; galibiyette gelir %40 fazla, yenilgide %40 az olur, sonuç gün sonu haberlerinde görünür. Yatırımların net günlük kazancının dörtte biri, oyundan çıkılan her saat için pasif gelire eklenir. Futbol takımı sahnenin arka planında stadyum olarak görünür.
 
