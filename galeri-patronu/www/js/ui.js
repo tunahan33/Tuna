@@ -39,7 +39,7 @@
     van:    { seams: [48, 68, 94], handles: [58, 82], mirror: [90, 18], belt: 20, rear: 6, front: 114, deck: 7 },
     pickup: { seams: [52, 65.5, 91], handles: [58, 80], mirror: [86, 18], belt: 20, rear: 6, front: 114, deck: 22 }
   };
-  const WHEEL = { ekonomi: "steel", ticari: "steel", aile: "alloy", suv: "offroad", elektrik: "aero", premium: "multi", luks: "multi", spor: "sport", klasik: "white" };
+  const WHEEL = { ultra: "gold", ekonomi: "steel", ticari: "steel", aile: "alloy", suv: "offroad", elektrik: "aero", premium: "multi", luks: "multi", spor: "sport", klasik: "white" };
   const BRAND = { Anka: "#c8102e", Ferro: "#1f4fa8", Rivo: "#d4a72c", Kaizen: "#5d6873", Hanbit: "#2e6e4a", Volta: "#2f6fd0", Nordik: "#1d2024", Stahl: "#9aa3ac", Mirage: "#7b2d8e" };
   let cid = 0;
 
@@ -61,6 +61,7 @@
       case "sport": o += `<circle r="${rr + 0.3}" fill="#8d959e"/><circle r="${rr}" fill="#1d2126"/><path d="M${(-rr * 0.75).toFixed(2)} ${(-rr * 0.45).toFixed(2)} A${(rr * 0.85).toFixed(2)} ${(rr * 0.85).toFixed(2)} 0 0 0 ${(-rr * 0.75).toFixed(2)} ${(rr * 0.45).toFixed(2)}" stroke="#d9343b" stroke-width="2.4" fill="none"/>${spokes(5, 1.2, rr * 0.95, "#5d6873", 1.7)}<circle r="1.2" fill="#d9343b"/>`; break;
       case "offroad": o += `<circle r="${r}" fill="none" stroke="#24282d" stroke-width="1.6" stroke-dasharray="1.6 1.4"/><circle r="${rr}" fill="#4a5058"/>${[0, 1, 2, 3, 4, 5].map(k => { const a = k * Math.PI / 3; return `<circle cx="${(Math.cos(a) * rr * 0.6).toFixed(2)}" cy="${(Math.sin(a) * rr * 0.6).toFixed(2)}" r=".9" fill="#2b3036"/>`; }).join("")}<circle r="1.4" fill="#7b8a94"/>`; break;
       case "white": o += `<circle r="${r * 0.8}" fill="#f2f2ee"/><circle r="${rr * 0.85}" fill="#d7dce2"/><circle r="${rr * 0.55}" fill="#eef1f4" stroke="#9aa3ac" stroke-width=".4"/><circle r="1.1" fill="#9aa3ac"/>`; break;
+      case "gold": o += `<circle r="${rr + 0.4}" fill="#d4a72c"/><circle r="${rr * 0.86}" fill="#1d2126"/>${spokes(7, 1, rr * 0.92, "#e8c25a", 1.2)}<circle r="1.3" fill="#d4a72c"/>`; break;
       case "aero": o += `<circle r="${rr}" fill="#dfe3e8"/><path d="M-${rr * 0.2} -${rr * 0.8} q${rr * 0.5} ${rr * 0.4} ${rr * 0.3} ${rr * 0.9} M${rr * 0.75} ${rr * 0.25} q-${rr * 0.6} 0 -${rr * 0.75} ${rr * 0.55} M-${rr * 0.65} ${rr * 0.45} q${rr * 0.1} -${rr * 0.55} -${rr * 0.15} -${rr * 0.85}" stroke="#5d6873" stroke-width=".9" fill="none"/><circle r="1.1" fill="#2f9fff"/>`; break;
     }
     return o + "</g>";
@@ -74,7 +75,7 @@
     const col = (G.COLORS.find(c => c.name === car.color) || G.COLORS[0]).hex;
     const dark = shade(col, 0.55), r = sh.r || 8;
     const id = "c" + (++cid);
-    const chrome = seg === "klasik" || seg === "luks";
+    const chrome = seg === "klasik" || seg === "luks" || seg === "ultra";
     const ev = car.fuel === "elektrik";
     const body = car.body == null ? 90 : car.body;
     const clean = car.clean == null ? 100 : car.clean;
@@ -246,7 +247,7 @@
   function carRow(car) {
     const mv = G.value(car, false);
     const gain = (car.price || mv) - car.buy - car.spent;
-    return `<article class="crow" role="button" tabindex="0" data-a="car" data-id="${car.id}">
+    return `<article class="crow ${G.M[car.m].seg === "ultra" ? "ultra" : ""}" role="button" tabindex="0" data-a="car" data-id="${car.id}">
       <div class="crow-img">${UI.carSVG(car)}</div>
       <div class="crow-main"><b>${esc(G.carName(car))}</b><span>${car.year} · ${G.fmtKm(G.realKm(car, false))}</span>${carStatus(car)}</div>
       <div class="crow-side">${car.price ? `<span class="sticker sm">${G.fmtS(car.price)}</span>` : `<span class="muted small">≈ ${G.fmtS(mv)}</span>`}<small class="${gain >= 0 ? "pos" : "neg"}">${gain >= 0 ? "kâr" : "zarar"} ${G.fmtS(Math.abs(gain))}</small></div>
@@ -286,7 +287,7 @@
       <div class="segctl" role="group">${[["ilan", "İlanlar"], ["ihale", "İhale"], ["trend", "Piyasa"]]
         .map(([k, l]) => `<button type="button" data-a="sub" data-k="piyasa" data-v="${k}" aria-pressed="${sub === k}">${l}</button>`).join("")}</div>`;
     if (sub === "ilan") {
-      const ls = s.listings.filter(l => !l.done).sort((a, b) => isNew(b) - isNew(a));
+      const ls = s.listings.filter(l => !l.done).sort((a, b) => (b.ultra ? 2 : 0) + isNew(b) - (a.ultra ? 2 : 0) - isNew(a));
       const nd = G.nextDrop();
       html += `<div class="card ilan-info"><div class="row"><div><b>Bugün ${ls.length} ilan</b><p class="small muted">${nd ? `Sıradaki yeni ilanlar saat ${G.clock(nd)}'de düşer.` : "Bugün yeni ilan düşmeyecek."} Her sabah bütün ilanlar yenilenir.</p></div>${adBtn("ilan", "+4 ilan")}</div></div>`;
       if (!ls.length) return html + `<div class="empty"><b>Şu an bakılacak ilan kalmadı</b>${nd ? `Saat ${G.clock(nd)}'de yeni ilanlar gelecek.` : "Yarın sabah yeni ilanlar gelecek."}</div>`;
@@ -313,9 +314,9 @@
   function listingRow(l) {
     const car = l.car;
     const deal = G.dealLabel(l.last, G.value(car, false));
-    return `<article class="crow" role="button" tabindex="0" data-a="listing" data-id="${l.id}">
+    return `<article class="crow ${l.ultra ? "ultra" : ""}" role="button" tabindex="0" data-a="listing" data-id="${l.id}">
       <div class="crow-img">${UI.carSVG(car)}</div>
-      <div class="crow-main"><b>${esc(G.carName(car))}</b><span>${car.year} · ${G.fmtKm(G.realKm(car, false))} · ${esc(G.SELLERS[l.seller].name)}</span><span class="chips"><span class="chip ${deal.c}">${deal.t}</span>${isNew(l) ? `<span class="chip acc">Yeni</span>` : ""}</span></div>
+      <div class="crow-main"><b>${esc(G.carName(car))}</b><span>${car.year} · ${G.fmtKm(G.realKm(car, false))} · ${esc(G.SELLERS[l.seller].name)}</span><span class="chips">${l.ultra ? `<span class="chip gold">Ultra lüks</span>` : ""}<span class="chip ${deal.c}">${deal.t}</span>${isNew(l) ? `<span class="chip acc">Yeni</span>` : ""}</span></div>
       <div class="crow-side"><span class="sticker sm">${G.fmtS(l.last)}</span><small class="muted">${G.SEGMENTS[G.M[car.m].seg].name}</small></div>
     </article>`;
   }
@@ -436,10 +437,16 @@
       <text x="0" y="12">+${G.fmtS(mx).replace(" ₺", "")}</text><text x="0" y="${H - 14}">−${G.fmtS(mx).replace(" ₺", "")}</text>${bs}</svg>`;
   }
 
+  function passiveCard() {
+    const pr = G.passiveRate();
+    return `<div class="card"><div class="row"><h3>Pasif gelir</h3><span class="pill">Saatte <b>${G.fmtS(pr.total)}</b></span></div>
+      <p class="muted small">Oyundan çıkınca galerin çalışmaya devam eder; döndüğünde en fazla ${G.OFFLINE_MAX_H} saatlik kazancı alırsın. Saatlik gelir son 7 günün ortalama satış kârına göre hesaplanır; satış danışmanları ve şöhret artırır.</p>
+      <div class="kv"><div><span>Temel</span><b>${G.fmtS(pr.base)}/sa</b></div><div><span>Danışman bonusu</span><b>+%${Math.round(pr.sales * 100)}</b></div><div><span>Şöhret bonusu</span><b>+%${Math.round(pr.fame * 100)}</b></div><div><span>Şimdiye kadar</span><b>${G.fmtS(S().stats.passive || 0)}</b></div></div></div>`;
+  }
   function patronDurum() {
     const s = S(), T = s.today;
     const qs = G.activeQuests(3);
-    return `<div class="card"><h3>Görevler</h3>${qs.length ? qs.map(q => `<div class="row"><div>${esc(q.text)}</div><div class="num small pos">+${G.fmtS(q.reward)}</div></div>`).join("") : `<p class="muted">Bütün görevleri bitirdin. Gerçek bir patronsun.</p>`}
+    return passiveCard() + `<div class="card"><h3>Görevler</h3>${qs.length ? qs.map(q => `<div class="row"><div>${esc(q.text)}</div><div class="num small pos">+${G.fmtS(q.reward)}</div></div>`).join("") : `<p class="muted">Bütün görevleri bitirdin. Gerçek bir patronsun.</p>`}
         <p class="muted small">${s.quests.length}/${G.QUESTS.length} görev tamamlandı</p></div>
       <div class="card"><h3>Bugün</h3><div class="kv">
         <div><span>Satış</span><b>${T.sales}</b></div><div><span>Satış kârı</span><b class="${T.profit >= 0 ? "pos" : "neg"}">${G.fmtS(T.profit)}</b></div>
@@ -711,6 +718,18 @@
     return html;
   };
 
+  SHEETS.offline = function () {
+    const o = UI.offline;
+    if (!o) return null;
+    const pr = G.passiveRate();
+    const h = o.away >= 60 * 24 ? `${Math.floor(o.away / 1440)} gün ${Math.floor((o.away % 1440) / 60)} saat` : o.away >= 60 ? `${Math.floor(o.away / 60)} saat ${Math.round(o.away % 60)} dakika` : `${Math.round(o.away)} dakika`;
+    return head("Hoş geldin patron!", `Sen ${h} yoktun. Galerin boş durmadı.`, false) + `
+      <div class="card welcome"><span class="muted small">Pasif gelir</span><div class="big-money">${G.fmt(o.amount)}</div>
+        <p class="small muted">Saatte ${G.fmtS(pr.total)} × ${o.hours.toFixed(1).replace(".", ",")} saat${o.capped ? ` (en fazla ${G.OFFLINE_MAX_H} saat birikir)` : ""}</p></div>
+      ${adBtn("offline", `Reklam izle, 2 katını al: ${G.fmtS(o.amount * 2)}`, "", "block")}
+      <button class="btn pri block" type="button" data-a="offline-claim">${G.fmtS(o.amount)} al</button>`;
+  };
+
   SHEETS.feed = function () {
     return head("Galeri defteri", "Son olaylar") + `<div class="card">${S().feed.map(f => `<div class="small"><span class="muted">${esc(f.t)}</span><br>${esc(f.text)}</div>`).join("") || '<p class="muted">Henüz kayıt yok.</p>'}</div>`;
   };
@@ -791,7 +810,7 @@
     UI.renderSheet(true);
   };
   UI.close = function (force) {
-    if (!force && UI.sheet && (UI.sheet.kind === "summary" || UI.sheet.kind === "intro")) return;
+    if (!force && UI.sheet && (UI.sheet.kind === "summary" || UI.sheet.kind === "intro" || UI.sheet.kind === "offline")) return;
     if (!force && UI.sheet && UI.sheet.kind === "auction" && S().auction.live) return;
     for (const c of S().custs) c.userBusy = false;
     UI.sheet = null;
@@ -799,14 +818,14 @@
     $("sheetWrap").hidden = true;
     UI.render();
   };
-  UI.blocking = () => (G.Ads && G.Ads.showing) || (!!UI.sheet && (UI.sheet.kind === "summary" || UI.sheet.kind === "intro" || UI.sheet.kind === "auction"));
+  UI.blocking = () => (G.Ads && G.Ads.showing) || (!!UI.sheet && (UI.sheet.kind === "summary" || UI.sheet.kind === "intro" || UI.sheet.kind === "auction" || UI.sheet.kind === "offline"));
 
   // Sık güncellenen küçük öğeler (ilerleme çubukları, sabır), gerekirse tam yeniden çizim
   UI.tick = function () {
     const s = S();
     if (!s) return;
     renderTop();
-    if (s.summary && (!UI.sheet || UI.sheet.kind !== "summary")) { UI.sheet = { kind: "summary" }; UI.renderSheet(true); }
+    if (s.summary && (!UI.sheet || (UI.sheet.kind !== "summary" && UI.sheet.kind !== "offline"))) { UI.sheet = { kind: "summary" }; UI.renderSheet(true); }
     const sig = viewSig();
     if (sig !== UI.sig && !UI.dragging) { UI.sig = sig; const y = window.scrollY; $("view").innerHTML = VIEWS[UI.tab](); window.scrollTo(0, y); }
     renderNav();
@@ -816,6 +835,17 @@
     for (const el of document.querySelectorAll("[data-energyt]")) { const u = s.staff.find(x => x.id === +el.dataset.energyt); if (u) el.textContent = Math.round(u.energy); }
     for (const el of document.querySelectorAll("[data-pat]")) { const c = s.custs.find(x => x.id === +el.dataset.pat); if (c) el.style.width = (c.patience / c.patMax * 100) + "%"; }
     UI.renderSheet(false);
+  };
+
+  // Oyuna dönünce pasif gelir ekranı
+  UI.checkOffline = function (ms) {
+    const s = S();
+    if (!s || !s.started || UI.offline || (UI.sheet && UI.sheet.kind === "intro")) return;
+    const o = G.offlineReward(ms);
+    if (!o || o.amount <= 0) return;
+    UI.offline = o;
+    UI.sheet = { kind: "offline" };
+    UI.renderSheet(true);
   };
 
   // ---- Reklam izleme ----
@@ -911,6 +941,8 @@
     },
     disc: el => { S().maxDisc = +el.dataset.v / 100; UI.render(); },
     fac: el => UI.open("fac", el.dataset.v),
+    "offline-claim": () => { G.claimOffline(UI.offline, 1); UI.offline = null; UI.sheet = S().summary ? { kind: "summary" } : null; G.save(); UI.render(); },
+    "ad-offline": () => { const o = UI.offline; if (!o) return; UI.watch("offline", () => { G.claimOffline(o, 2); UI.offline = null; UI.sheet = S().summary ? { kind: "summary" } : null; }); },
     luxcat: el => { UI.luxCat = el.dataset.v; UI.armed = null; UI.render(); },
     "lux-buy": el => { const r = G.buyLux(el.dataset.v); msg(r); if (r.ok) UI.toast(`Hayırlı olsun: ${G.LX[el.dataset.v].name}`, "good"); UI.render(); },
     "lux-sell": el => {

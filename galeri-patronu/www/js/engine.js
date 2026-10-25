@@ -358,7 +358,7 @@
     return p;
   };
   G.ageF = function (md, year) {
-    if (md.seg === "klasik") return 1;
+    if (md.seg === "klasik" || md.seg === "ultra") return 1;
     const age = G.YEAR - year;
     return age === 0 ? 1 : Math.max(0.16, 0.9 * Math.pow(0.9, age));
   };
@@ -367,7 +367,7 @@
 
   G.value = function (car, all) {
     const md = G.M[car.m];
-    const klasik = md.seg === "klasik";
+    const klasik = md.seg === "klasik" || md.seg === "ultra";
     const age = G.YEAR - car.year;
     let v = md.price * G.ageF(md, car.year);
     const km = G.realKm(car, all);
@@ -393,7 +393,7 @@
 
   // ---- İlanlar (piyasadan alım) ----
   G.pickModel = function (filter) {
-    const pool = G.MODELS.filter(m => G.segUnlocked(m.seg) && (!filter || filter(m)));
+    const pool = G.MODELS.filter(m => m.seg !== "ultra" && G.segUnlocked(m.seg) && (!filter || filter(m)));
     return R.wpick(pool, m => m.pop * (0.7 + 0.6 * G.trendOf(m.seg)) * (m.seg === "luks" || m.seg === "spor" ? 0.6 : 1));
   };
 
@@ -719,12 +719,13 @@
     return G.CTYPES.filter(t => t.prestige <= L.prestige + (S.rep >= 75 ? 1 : 0) + G.presEff().gate && Object.keys(t.segs).some(G.segUnlocked));
   }
 
-  G.spawnCustomer = function () {
-    const types = customerTypes();
+  G.spawnCustomer = function (forceType) {
+    const types = forceType ? [G.CT[forceType]] : customerTypes();
     let boost = {};
     for (const e of S.events) { const d = G.EVENTS.find(x => x.id === e.id); if (d && d.cust) Object.assign(boost, d.cust); }
     if (G.partyActive()) Object.assign(boost, { patron: 4, doktor: 2.5, hizli: 2.5 });
-    const t = R.wpick(types, x => x.w * (boost[x.id] || 1));
+    const ultraListed = G.ultraListed();
+    const t = R.wpick(types, x => (x.ultra ? (ultraListed ? 2.5 : 0) : x.w) * (boost[x.id] || 1));
     if (!t) return;
     const segs = Object.keys(t.segs).filter(G.segUnlocked);
     const seg = R.wpick(segs, s => t.segs[s] * G.trendOf(s));
@@ -769,6 +770,7 @@
       const picky = Math.max(0.2, 1 - t.picky * (0.04 * car.painted + 0.09 * car.replaced + (car.tramer > 0 ? 0.05 : 0)));
       const fit = 0.55 + 0.45 * Math.min(1, car.price / (c.budget * 0.6));
       const lux = (md.seg === "luks" || md.seg === "spor") && !car.show ? 0.6 : 1;
+      if (md.seg === "ultra" && c.type !== "milyarder") continue;
       const s = segW * priceS * (0.5 + cond) * looks * picky * fit * lux * R.rand(0.8, 1.2);
       if (s > bs) { bs = s; best = car; }
     }
@@ -861,6 +863,7 @@
     S.stats.profit += profit;
     if (profit > S.stats.best) S.stats.best = profit;
     if (G.M[car.m].seg === "luks") S.stats.luxSold++;
+    if (G.M[car.m].seg === "ultra") S.stats.ultraSold = (S.stats.ultraSold || 0) + 1;
     if (bySales) {
       const com = R.r100(price * 0.015);
       S.money -= com;
@@ -1063,9 +1066,58 @@
   };
   G.partyCost = () => { const y = G.bestOf("yat"); return y ? R.r1k(150000 + y.party * 150000) : 0; };
 
+  // ---- Ultra lüks ilanlar ----
+  G.ULTRA_CHANCE = 0.12; // her sabah ultra lüks ilan çıkma ihtimali (gün içinde her ilan saatinde %3 daha): ortalama 4 günde bir
+  G.ultraListed = () => S.cars.some(c => c.price > 0 && c.status === "lot" && G.M[c.m].seg === "ultra");
+  G.ultraListing = function (quiet) {
+    if (S.level < G.SEGMENTS.ultra.lvl) return null;
+    const md = R.pick(G.MODELS.filter(m => m.seg === "ultra"));
+    const src = G.SELLERS.miras;
+    const car = G.makeCar(md, src);
+    const old = G.YEAR - car.year > 30;
+    car.km = old ? R.randi(15, 90) * 1000 : R.randi(1, 12) * 1000 + R.randi(0, 999);
+    car.motor = R.randi(80, 99); car.body = R.randi(82, 99); car.inter = R.randi(80, 99);
+    car.painted = 0; car.replaced = 0; car.tramer = 0;
+    car.issues = car.issues.filter(is => is.id !== "km" && is.id !== "sel");
+    car.color = R.pick(md.id === "volta-speedster" || md.id === "anka-prototip" ? ["Kırmızı", "Bordo", "Gümüş", "Beyaz"] : ["Siyah", "Kırmızı", "Sarı", "Turuncu", "Beyaz", "Gri"]);
+    const ap = G.value(car, false);
+    const ask = R.r1k(ap * R.rand(src.ask[0], src.ask[1]));
+    const l = { id: G.nid(), car, seller: "miras", sellerName: R.pick(["Miras satışı", "Özel koleksiyon", "Müzayede evi", "Yurt dışı koleksiyoner"]), ask, min: R.r1k(ask * R.rand(src.min[0], src.min[1])), rounds: src.rounds, last: ask, day: S.day, born: S.min, msgs: [], done: false, ultra: true };
+    S.listings.unshift(l);
+    if (!quiet) G.feed(`Nadir fırsat! Ultra lüks ${G.carTitle(car)} ilana düştü: ${G.fmtS(ask)}.`, "level");
+    return l;
+  };
+
+  // ---- Pasif gelir ----
+  // Oyundan çıkınca galeri çalışmaya devam eder: dönüşte en fazla G.OFFLINE_MAX_H saatlik gelir verilir
+  G.OFFLINE_MAX_H = 8;
+  G.OFFLINE_MIN_MIN = 5;
+  G.passiveRate = function () {
+    const h = S.history.slice(-7);
+    const avg = h.length ? h.reduce((a, d) => a + Math.max(0, d.profit), 0) / h.length : 0;
+    const base = Math.max(2000 * S.level, avg * 0.12);
+    const sales = G.staffOf("satis").length * 0.15;
+    const fame = Math.min(0.5, G.prestige() * 0.001);
+    return { base: R.r100(base), sales, fame, total: R.r100(base * (1 + sales + fame)), avg: R.r1k(avg) };
+  };
+  G.offlineReward = function (ms) {
+    const mins = ms / 60000;
+    if (!(mins >= G.OFFLINE_MIN_MIN)) return null;
+    const hours = Math.min(G.OFFLINE_MAX_H, mins / 60);
+    return { away: mins, hours, amount: R.r100(G.passiveRate().total * hours), capped: mins / 60 > G.OFFLINE_MAX_H };
+  };
+  G.claimOffline = function (o, mult) {
+    if (!o || o.claimed) return;
+    o.claimed = true;
+    const v = o.amount * (mult || 1);
+    S.money += v;
+    S.stats.passive = (S.stats.passive || 0) + v;
+    G.feed(`Pasif gelir: sen yokken galeri ${G.fmt(v)} kazandırdı.`, "good");
+  };
+
   // ---- Reklam ödülleri ----
   // Ödüllü reklamlar yalnızca oyuncu isteyince açılır; her ödülün ve günün bir sınırı vardır.
-  G.AD_CAPS = { rush: 3, boost: 2, bonus: 1, inspect: 3, tea: 3, ilan: 2 };
+  G.AD_CAPS = { rush: 3, boost: 2, bonus: 1, inspect: 3, tea: 3, ilan: 2, offline: 2 };
   G.AD_DAILY = 10;
   function adDay() {
     if (!S.adv) S.adv = { day: 0, n: {}, total: 0, lastInter: 0, lastWatch: 0 };
@@ -1143,7 +1195,9 @@
   // ---- Zaman ----
   G.minute = function () {
     S.min++;
-    if (G.LISTING_DROPS.includes(S.min)) { const n = R.randi(2, 3); G.addListings(n, `Piyasaya ${n} yeni ilan düştü.`); }
+    if (G.LISTING_DROPS.includes(S.min)) { const n = R.randi(2, 3); G.addListings(n, `Piyasaya ${n} yeni ilan düştü.`); if (R.chance(0.03)) G.ultraListing(); }
+    // galeride etiketli ultra lüks araç varsa milyarder koleksiyoncular ara sıra uğrar
+    if (G.ultraListed() && !S.custs.some(c => c.type === "milyarder") && R.chance(1 / 240)) G.spawnCustomer("milyarder");
     // atölye
     ustaMinute();
     for (const j of S.jobs.slice()) { j.left -= G.jobRate(j); if (j.left <= 0) finishJob(j); }
@@ -1231,6 +1285,7 @@
     }
     G.refreshListings();
     const imp = G.importListings();
+    if (S.level >= G.SEGMENTS.ultra.lvl && R.chance(G.ULTRA_CHANCE)) { const u = G.ultraListing(true); if (u) summary.news.push({ title: "Nadir fırsat", text: `Piyasaya ultra lüks bir araç düştü: ${G.carTitle(u.car)}. Kârı yüksek ama pahalı.` }); }
     if (imp) summary.news.push({ title: "Yurt dışından ilanlar", text: `Uçağın sayesinde bugün piyasada ${imp} ithal ilan var.` });
     if (G.partyActive()) summary.news.push({ title: "Yat partisinin etkisi", text: "Bugün galeriye zengin müşteri akını bekleniyor." });
     G.newAuction();

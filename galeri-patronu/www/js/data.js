@@ -14,7 +14,8 @@
     premium:  { name: "Premium",    lvl: 5 },
     spor:     { name: "Spor",       lvl: 7 },
     klasik:   { name: "Klasik",     lvl: 8 },
-    luks:     { name: "Lüks",       lvl: 10 }
+    luks:     { name: "Lüks",       lvl: 10 },
+    ultra:    { name: "Ultra lüks", lvl: 6 }  // normal ilanlarda çıkmaz; nadir fırsat olarak gelir
   };
 
   G.BODIES = { hatch: "Hatchback", sedan: "Sedan", suv: "SUV", coupe: "Coupe", van: "Hafif ticari", pickup: "Pick-up", wagon: "Station wagon" };
@@ -83,7 +84,14 @@
     ["mirage-comet",   "Mirage", "Comet '68",   "klasik",   "coupe",  3.2e6,  [1966, 1972], ["benzin"],                    ["manuel", "otomatik"], 1],
     ["stahl-s8",       "Stahl",  "S8",          "luks",     "sedan",  9.8e6,  [2012, 2026], ["benzin", "hibrit"],          ["otomatik"],           2],
     ["nordik-xr90",    "Nordik", "XR90",        "luks",     "suv",    7.8e6,  [2015, 2026], ["dizel", "hibrit"],           ["otomatik"],           2],
-    ["mirage-escala",  "Mirage", "Escala",      "luks",     "suv",    8.5e6,  [2015, 2026], ["benzin"],                    ["otomatik"],           1]
+    ["mirage-escala",  "Mirage", "Escala",      "luks",     "suv",    8.5e6,  [2015, 2026], ["benzin"],                    ["otomatik"],           1],
+    // Ultra lüks: koleksiyon ve hiper otomobiller. Değer kaybetmez, nadiren ilana düşer.
+    ["ferro-leggenda", "Ferro",  "Leggenda",          "ultra", "coupe", 70e6, [2018, 2026], ["benzin"],   ["otomatik"], 1],
+    ["mirage-apex",    "Mirage", "Apex Hiper",        "ultra", "coupe", 55e6, [2019, 2026], ["benzin"],   ["otomatik"], 1],
+    ["nordik-aurora",  "Nordik", "Aurora EV Hiper",   "ultra", "coupe", 60e6, [2021, 2026], ["elektrik"], ["otomatik"], 1],
+    ["stahl-phantom",  "Stahl",  "Phantom V12",       "ultra", "sedan", 48e6, [2016, 2026], ["benzin"],   ["otomatik"], 1],
+    ["volta-speedster","Volta",  "Speedster '57",     "ultra", "coupe", 40e6, [1955, 1959], ["benzin"],   ["manuel"],   1],
+    ["anka-prototip",  "Anka",   "Kartal Prototip '64","ultra", "sedan", 35e6, [1964, 1964], ["benzin"],   ["manuel"],   1]
   ].map(a => ({ id: a[0], brand: a[1], name: a[2], seg: a[3], body: a[4], price: a[5], years: a[6], fuels: a[7], gears: a[8], pop: a[9] }));
   G.M = {};
   G.MODELS.forEach(m => { G.M[m.id] = m; });
@@ -109,6 +117,7 @@
     acil:       { name: "Acil satılık",        ask: [0.84, 0.93], min: [0.84, 0.91], issue: 0.38, w: 2, rounds: 3 },
     hasarli:    { name: "Ağır hasar kayıtlı",  ask: [0.62, 0.78], min: [0.85, 0.93], issue: 0.45, w: 1, rounds: 3, bodyHit: 35, pert: true, lvl: 2 },
     ihale:      { name: "İhale",               ask: [1, 1],       min: [1, 1],       issue: 0.3,  w: 0, rounds: 0 },
+    miras:      { name: "Koleksiyon satışı",   ask: [0.72, 0.84], min: [0.9, 0.95],  issue: 0.08, w: 0, rounds: 3, clean: true },
     ithal:      { name: "Yurt dışı (ithal)",   ask: [0.9, 1.0],   min: [0.92, 0.97], issue: 0.05, w: 0, rounds: 2, clean: true }
   };
 
@@ -125,7 +134,9 @@
     { id: "koleksiyon", name: "Koleksiyoncu",       budget: [700e3, 4e6],    segs: { klasik: 6 },                             haggle: 0.08, picky: 0.4, patience: 100, prestige: 1, w: 1,   trade: 0 },
     { id: "doktor",   name: "Doktor",               budget: [1.8e6, 4.5e6],  segs: { premium: 3, suv: 2, elektrik: 1 },       haggle: 0.05, picky: 0.9, patience: 60,  prestige: 2, w: 2,   trade: 0.3 },
     { id: "hizli",    name: "Hız tutkunu",          budget: [2e6, 8.5e6],    segs: { spor: 5 },                               haggle: 0.05, picky: 0.8, patience: 70,  prestige: 2, w: 1.2, trade: 0.2 },
-    { id: "patron",   name: "İş insanı",            budget: [3e6, 1.05e7],   segs: { luks: 3, premium: 2, suv: 1 },           haggle: 0.06, picky: 1,   patience: 50,  prestige: 3, w: 1.5, trade: 0.3 }
+    { id: "patron",   name: "İş insanı",            budget: [3e6, 1.05e7],   segs: { luks: 3, premium: 2, suv: 1 },           haggle: 0.06, picky: 1,   patience: 50,  prestige: 3, w: 1.5, trade: 0.3 },
+    // Yalnızca galeride ultra lüks araç varken gelir
+    { id: "milyarder", name: "Milyarder koleksiyoncu", budget: [3e7, 1.4e8], segs: { ultra: 10 },                             haggle: 0.06, picky: 0.6, patience: 150, prestige: 0, w: 0,   trade: 0, ultra: true }
   ];
   G.CT = {};
   G.CTYPES.forEach(t => { G.CT[t.id] = t; });
@@ -273,6 +284,7 @@
     { id: "kar500",    text: "Tek satıştan 500.000 ₺ kâr et",          reward: 400000,  check: S => S.stats.best >= 500000 },
     { id: "tesis5",    text: "Bir tesisi 5. seviyeye çıkar",           reward: 150000,  check: S => Object.values(S.fac || {}).some(n => n >= 5) },
     { id: "tesis10",   text: "Bir tesisi 10. seviyeye çıkar",          reward: 700000,  check: S => Object.values(S.fac || {}).some(n => n >= 10) },
+    { id: "ultra",     text: "Ultra lüks bir araç sat",                reward: 3000000, check: S => (S.stats.ultraSold || 0) >= 1 },
     { id: "lux1",      text: "İlk lüks alışverişini yap",              reward: 100000,  check: S => (S.lux || []).length >= 1 },
     { id: "luks",      text: "Bir lüks araç sat",                      reward: 600000,  check: S => S.stats.luxSold >= 1 },
     { id: "plaza",     text: "Oto plazaya taşın",                      reward: 1000000, check: S => S.loc >= 3 },

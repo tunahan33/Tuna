@@ -7,6 +7,7 @@
 
   G.save = function () {
     if (!G.S || !G.S.started) return;
+    G.S.lastSeen = Date.now();
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(G.S)); } catch (e) { /* kayıt alanı yoksa oyun yine çalışır */ }
   };
   function loadSaved() {
@@ -58,7 +59,11 @@
       UI.sheet = { kind: "intro" };
     }
     UI.render();
-    document.addEventListener("visibilitychange", () => { if (document.hidden) { G.save(); if (G.S) G.S.paused = true; } });
+    if (saved && saved.lastSeen) UI.checkOffline(Date.now() - saved.lastSeen);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) { G.save(); if (G.S) G.S.paused = true; }
+      else if (G.S && G.S.lastSeen) UI.checkOffline(Date.now() - G.S.lastSeen);
+    });
     window.addEventListener("pagehide", G.save);
     requestAnimationFrame(frame);
   }

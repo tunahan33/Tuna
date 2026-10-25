@@ -59,6 +59,24 @@ Her tesisin n. seviyesi için gereken oyuncu seviyesi = başlangıç + yuvarla((
 
 Basit bir bot oyuncuyla 240 günlük simülasyonda oyuncu 21. seviyeye, tesisler 17–18. seviyeye ulaştı. Tesisler hep seviye kilidinin 0–2 altında ilerledi; yani tempoyu para değil oyuncu seviyesi belirliyor.
 
+## Pasif gelir
+
+Oyundan çıkınca galeri çalışmaya devam eder. Oyuncu en az 5 dakika sonra döndüğünde "Hoş geldin patron!" ekranı çıkar ve yokluk süresine göre gelir verilir (en fazla 8 saat birikir). İsteyen reklam izleyip bu gelirin 2 katını alabilir (günde 2 kez).
+
+- Saatlik gelir = son 7 günün ortalama günlük satış kârının %12'si (en az oyuncu seviyesi × 2.000 ₺)
+- Her satış danışmanı +%15, şöhret +%50'ye kadar artırır
+- Patron → Durum ekranında saatlik pasif gelir ve şimdiye kadar toplanan tutar görünür
+- Ayarlar `www/js/engine.js` içinde: `G.OFFLINE_MAX_H` (8 saat), `G.OFFLINE_MIN_MIN` (5 dakika), `G.passiveRate`
+
+## Ultra lüks araçlar
+
+Oyuncu 6. seviyeye gelince ilanlara arada bir ultra lüks koleksiyon aracı düşer: her sabah %12 ihtimalle, gün içinde her ilan saatinde %3 ihtimalle (ortalama 4 günde bir). 6 model var: Ferro Leggenda, Mirage Apex Hiper, Nordik Aurora EV Hiper, Stahl Phantom V12, Volta Speedster '57 ve Anka Kartal Prototip '64. Değerleri 25–70 milyon ₺ arasındadır ve değer kaybetmezler.
+
+- "Koleksiyon satışı" ilanları değerin %72–84'üne çıkar; kâr çoğu zaman 5–15 milyon ₺ olur
+- Yalnızca **milyarder koleksiyoncu** müşteriler (bütçe 30–140 milyon ₺) alır; galeride etiketli ultra araç varken gelirler
+- İlanda altın çerçeve ve "Ultra lüks" etiketiyle en üstte durur, araçların altın jantları vardır
+- "Ultra lüks bir araç sat" görevi 3 milyon ₺ ödül verir
+
 ## Lüks alışveriş (Patron → Lüks)
 
 Patron kazandığı parayla kendine ev, araba, uçak ve yat alabilir. 18 eşyanın her birinin kendi çizimi, oyuncu seviyesi şartı, şöhret puanı, günlük bakım masrafı ve geri satış değeri vardır.
