@@ -108,7 +108,8 @@
     filo:       { name: "Filo çıkışı",         ask: [0.92, 1.02], min: [0.9, 0.95],  issue: 0.12, w: 2, rounds: 2, kmMult: 1.9 },
     acil:       { name: "Acil satılık",        ask: [0.84, 0.93], min: [0.84, 0.91], issue: 0.38, w: 2, rounds: 3 },
     hasarli:    { name: "Ağır hasar kayıtlı",  ask: [0.62, 0.78], min: [0.85, 0.93], issue: 0.45, w: 1, rounds: 3, bodyHit: 35, pert: true, lvl: 2 },
-    ihale:      { name: "İhale",               ask: [1, 1],       min: [1, 1],       issue: 0.3,  w: 0, rounds: 0 }
+    ihale:      { name: "İhale",               ask: [1, 1],       min: [1, 1],       issue: 0.3,  w: 0, rounds: 0 },
+    ithal:      { name: "Yurt dışı (ithal)",   ask: [0.9, 1.0],   min: [0.92, 0.97], issue: 0.05, w: 0, rounds: 2, clean: true }
   };
 
   // Galeriye gelen müşteri tipleri. segs: hangi segmentleri ne kadar istedikleri, haggle: pazarlık payı, picky: boya/değişene hassasiyet
@@ -181,6 +182,37 @@
     }
   };
 
+  // Lüks alışveriş: patronun kişisel harcamaları. Şöhret puanı verir, günlük bakım masrafı vardır, sonradan satılabilir.
+  // upkeep: fiyatın günlük yüzdesi, resale: satışta geri alınan oran
+  G.LUX_CATS = {
+    ev:    { name: "Ev",    upkeep: 0.0004, resale: 0.95, perk: "Evler en çok şöhreti verir ve değerini korur." },
+    araba: { name: "Araba", upkeep: 0.0008, resale: 0.7,  perk: "En iyi araban galerinin önüne park eder; müşteriler patronun arabasını görür." },
+    ucak:  { name: "Uçak",  upkeep: 0.0012, resale: 0.75, perk: "Yurt dışı bağlantısı: her sabah piyasaya ithal premium, spor ve lüks araç ilanları gelir." },
+    yat:   { name: "Yat",   upkeep: 0.0012, resale: 0.7,  perk: "Haftada bir yat partisi: ertesi gün galeriye zengin müşteri akını ve itibar." }
+  };
+  G.LUXURY = [
+    { id: "ev1", cat: "ev", name: "Mahalle dairesi",          desc: "2+1, asansörlü, köşede bakkal.",             price: 3.5e6, lvl: 3,  pres: 5 },
+    { id: "ev2", cat: "ev", name: "Site içinde 3+1",          desc: "Havuzlu, güvenlikli, otoparklı site.",       price: 9e6,   lvl: 6,  pres: 10 },
+    { id: "ev3", cat: "ev", name: "Boğaz manzaralı rezidans", desc: "Kat görevlisi, vale, köprü manzarası.",      price: 28e6,  lvl: 10, pres: 20 },
+    { id: "ev4", cat: "ev", name: "Müstakil villa",           desc: "Bahçeli, havuzlu, 6+2.",                     price: 65e6,  lvl: 14, pres: 35 },
+    { id: "ev5", cat: "ev", name: "Sahil yalısı",             desc: "Ahşap cephe, kendi iskelesi, deniz kapıda.", price: 180e6, lvl: 20, pres: 60 },
+    { id: "ar1", cat: "araba", name: "Stahl S5",              desc: "Siyah, tam donanım. İlk patron arabası.",    price: 4.5e6, lvl: 4,  pres: 4,  model: "stahl-s5",        color: "Siyah" },
+    { id: "ar2", cat: "araba", name: "Mirage Stallion GT",    desc: "Kırmızı, V8, manuel.",                       price: 5.2e6, lvl: 6,  pres: 6,  model: "mirage-stallion", color: "Kırmızı" },
+    { id: "ar3", cat: "araba", name: "Nordik XR90",           desc: "Beyaz, 7 koltuk, her yola çıkar.",           price: 8.2e6, lvl: 8,  pres: 9,  model: "nordik-xr90",     color: "Beyaz" },
+    { id: "ar4", cat: "araba", name: "Stahl S8 uzun şasi",    desc: "Lacivert, arkada masaj koltukları.",         price: 11e6,  lvl: 11, pres: 12, model: "stahl-s8",        color: "Lacivert" },
+    { id: "ar5", cat: "araba", name: "Ferro Inferno",         desc: "Sarı hiper otomobil. Dünyada 99 tane.",      price: 32e6,  lvl: 17, pres: 25, model: "ferro-veloce",    color: "Sarı" },
+    { id: "uc1", cat: "ucak", name: "Tek motorlu uçak",       desc: "4 kişilik pervaneli uçak.",                  price: 12e6,  lvl: 9,  pres: 15, imports: 1 },
+    { id: "uc2", cat: "ucak", name: "Helikopter",             desc: "Şehir içi trafiğe takılmazsın.",             price: 25e6,  lvl: 12, pres: 25, imports: 2 },
+    { id: "uc3", cat: "ucak", name: "Hafif jet",              desc: "8 kişilik, Avrupa'ya 3 saat.",               price: 60e6,  lvl: 15, pres: 45, imports: 3 },
+    { id: "uc4", cat: "ucak", name: "Uzun menzil jet",        desc: "Okyanus aşar, yatak odalı.",                 price: 220e6, lvl: 22, pres: 80, imports: 4 },
+    { id: "y1", cat: "yat", name: "Sürat teknesi",            desc: "Hafta sonu koy gezisi için.",                price: 6e6,   lvl: 7,  pres: 6,  party: 1 },
+    { id: "y2", cat: "yat", name: "Ahşap gulet",              desc: "Bodrum yapımı, 4 kamaralı.",                 price: 30e6,  lvl: 12, pres: 18, party: 2 },
+    { id: "y3", cat: "yat", name: "Motoryat",                 desc: "3 katlı, jakuzili.",                         price: 90e6,  lvl: 17, pres: 40, party: 3 },
+    { id: "y4", cat: "yat", name: "Mega yat",                 desc: "Helikopter pisti ve 12 kişilik mürettebat.", price: 350e6, lvl: 24, pres: 90, party: 4 }
+  ];
+  G.LX = {};
+  G.LUXURY.forEach(x => { G.LX[x.id] = x; });
+
   G.ADS = [
     { name: "Tanıtım yok",         cost: 0,     mult: 1 },
     { name: "Sosyal medya",        cost: 1200,  mult: 1.2 },
@@ -240,9 +272,11 @@
     { id: "kar500",    text: "Tek satıştan 500.000 ₺ kâr et",          reward: 400000,  check: S => S.stats.best >= 500000 },
     { id: "tesis5",    text: "Bir tesisi 5. seviyeye çıkar",           reward: 150000,  check: S => Object.values(S.fac || {}).some(n => n >= 5) },
     { id: "tesis10",   text: "Bir tesisi 10. seviyeye çıkar",          reward: 700000,  check: S => Object.values(S.fac || {}).some(n => n >= 10) },
+    { id: "lux1",      text: "İlk lüks alışverişini yap",              reward: 100000,  check: S => (S.lux || []).length >= 1 },
     { id: "luks",      text: "Bir lüks araç sat",                      reward: 600000,  check: S => S.stats.luxSold >= 1 },
     { id: "plaza",     text: "Oto plazaya taşın",                      reward: 1000000, check: S => S.loc >= 3 },
     { id: "yuz",       text: "100 araç sat",                           reward: 1500000, check: S => S.stats.sold >= 100 },
+    { id: "yat",       text: "Bir yat al ve parti ver",                reward: 1500000, check: S => (S.stats.parties || 0) >= 1 },
     { id: "net50",     text: "Net değerini 50 milyon ₺'ye çıkar",      reward: 3000000, check: S => G.netWorth() >= 50e6 },
     { id: "merkez",    text: "Otomotiv merkezini kur",                 reward: 5000000, check: S => S.loc >= 4 },
     { id: "tesis20",   text: "Bütün tesisleri 20. seviyeye çıkar",     reward: 10000000, check: S => Object.values(S.fac || {}).length === 4 && Object.values(S.fac).every(n => n >= 20) }

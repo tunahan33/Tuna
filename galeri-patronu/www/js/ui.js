@@ -408,9 +408,10 @@
   VIEWS.patron = function () {
     const s = S(), sub = UI.sub.patron;
     let html = `<div class="vh"><div><h2>Patron masası</h2><p>${esc(G.loc().name)} · Seviye ${s.level}</p></div></div>
-      <div class="segctl" role="group">${[["tesis", "Tesisler"], ["durum", "Durum"], ["dukkan", "Adres"], ["personel", "Personel"], ["finans", "Banka"]]
+      <div class="segctl" role="group">${[["tesis", "Tesisler"], ["lux", "Lüks"], ["durum", "Durum"], ["dukkan", "Adres"], ["personel", "Personel"], ["finans", "Banka"]]
         .map(([k, l]) => `<button type="button" data-a="sub" data-k="patron" data-v="${k}" aria-pressed="${sub === k}">${l}</button>`).join("")}</div>`;
     if (sub === "tesis") html += patronTesis();
+    if (sub === "lux") html += UI.luxView();
     if (sub === "durum") html += patronDurum();
     if (sub === "dukkan") html += patronDukkan();
     if (sub === "personel") html += patronPersonel();
@@ -736,7 +737,7 @@
       case "piyasa": return "p" + s.day + UI.sub.piyasa + s.listings.map(l => l.id + "." + l.done + "." + l.last).join() + "|" + Math.floor(s.min / 60) + G.adLeft("ilan") + "|" + s.auction.idx + s.auction.finished + "|" + Math.round(s.money / 10000) + "|" + G.carCount();
       case "musteri": return "m" + s.custs.map(c => `${c.id}.${c.state}.${c.offer}`).join() + "|" + s.lost.length + "|" + s.today.sales + G.boostActive() + G.adLeft("boost") + (s.min < G.CLOSE - 60);
       case "atolye": return "a" + s.jobs.map(j => j.id).join() + "|" + JSON.stringify(s.upg) + JSON.stringify(s.fac) + s.staff.length + G.adLeft("rush") + G.restFree() + G.ustas().map(u => u.resting + "" + G.buffActive(u) + Math.round(u.energy / 35)).join();
-      case "patron": return "b" + s.day + UI.sub.patron + Math.round(s.money / 1000) + s.staff.length + s.cands.length + JSON.stringify(s.upg) + JSON.stringify(s.fac) + s.loan + s.ads + s.loc + s.level + s.quests.length + Math.round(s.rep) + s.today.sales + UI.armed + s.maxDisc;
+      case "patron": return "b" + s.day + UI.sub.patron + Math.round(s.money / 1000) + s.staff.length + s.cands.length + JSON.stringify(s.upg) + JSON.stringify(s.fac) + (s.lux || []).join() + UI.luxCat + G.partyReady() + G.partyActive() + s.loan + s.ads + s.loc + s.level + s.quests.length + Math.round(s.rep) + s.today.sales + UI.armed + s.maxDisc;
     }
     return "";
   }
@@ -910,6 +911,15 @@
     },
     disc: el => { S().maxDisc = +el.dataset.v / 100; UI.render(); },
     fac: el => UI.open("fac", el.dataset.v),
+    luxcat: el => { UI.luxCat = el.dataset.v; UI.armed = null; UI.render(); },
+    "lux-buy": el => { const r = G.buyLux(el.dataset.v); msg(r); if (r.ok) UI.toast(`Hayırlı olsun: ${G.LX[el.dataset.v].name}`, "good"); UI.render(); },
+    "lux-sell": el => {
+      const id = el.dataset.v;
+      if (UI.armed !== "lux" + id) { UI.armed = "lux" + id; UI.render(); return; }
+      UI.armed = null; G.sellLux(id); UI.render();
+    },
+    lux: () => { UI.tab = "patron"; UI.sub.patron = "lux"; UI.sheet = null; window.scrollTo(0, 0); UI.render(); },
+    party: () => { const r = G.throwParty(); msg(r); if (r.ok) UI.toast("Parti verildi! Yarın galeriye zengin müşteriler gelecek.", "good"); UI.render(); },
     facup: el => { const r = G.buyFac(el.dataset.v); msg(r); if (r.ok) UI.toast(`${G.FACILITIES[el.dataset.v].name}: seviye ${G.facLevel(el.dataset.v)}`, "good"); UI.render(); },
     rest: el => { const u = S().staff.find(x => x.id === +el.dataset.id); if (u) { msg(G.sendRest(u)); UI.render(); } },
     recall: el => { const u = S().staff.find(x => x.id === +el.dataset.id); if (u) { G.recall(u); UI.render(); } },

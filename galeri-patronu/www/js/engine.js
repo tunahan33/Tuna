@@ -67,7 +67,8 @@
       today: G.blankDay(), history: [],
       stats: { sold: 0, bought: 0, revenue: 0, profit: 0, best: 0, inspected: 0, auctions: 0, luxSold: 0 },
       quests: [], nextId: 1, summary: null, started: false,
-      adv: { day: 0, n: {}, total: 0, lastInter: 0, lastWatch: 0 }, boost: null
+      adv: { day: 0, n: {}, total: 0, lastInter: 0, lastWatch: 0 }, boost: null,
+      lux: [], party: null, lastParty: -99
     };
     Object.keys(G.SEGMENTS).forEach(k => { st.trend[k] = 1; });
     return st;
@@ -82,6 +83,7 @@
     starter.price = R.r1k(G.value(starter, false) * 1.06);
     S.cars.push(starter);
     G.refreshListings();
+    G.importListings();
     G.newAuction();
     G.newCandidates();
     S.started = true;
@@ -231,6 +233,7 @@
     }
     delete st.upg.showroom;
     delete st.upg.wash;
+    if (!st.lux) { st.lux = []; st.party = null; st.lastParty = -99; }
     for (const x of st.staff) if (x.role === "usta" && x.energy == null) x.energy = 100;
     return st;
   };
@@ -250,6 +253,7 @@
   };
   G.trafficMult = function () {
     let t = 1;
+    if (G.partyActive()) t *= G.partyEff().traffic;
     for (const e of S.events) { const d = G.EVENTS.find(x => x.id === e.id); if (d && d.traffic) t *= d.traffic; }
     return t;
   };
@@ -383,7 +387,7 @@
   G.carTitle = car => `${car.year} ${G.carName(car)}`;
   G.hasUnknown = car => car.issues.some(is => !is.known && !is.fixed);
 
-  G.netWorth = () => S.money + S.cars.reduce((a, c) => a + G.value(c, false), 0) - S.loan;
+  G.netWorth = () => S.money + S.cars.reduce((a, c) => a + G.value(c, false), 0) - S.loan + G.luxValue();
 
   // ---- İlanlar (piyasadan alım) ----
   G.pickModel = function (filter) {
@@ -710,13 +714,14 @@
   // ---- Müşteriler ----
   function customerTypes() {
     const L = G.loc();
-    return G.CTYPES.filter(t => t.prestige <= L.prestige + (S.rep >= 75 ? 1 : 0) && Object.keys(t.segs).some(G.segUnlocked));
+    return G.CTYPES.filter(t => t.prestige <= L.prestige + (S.rep >= 75 ? 1 : 0) + G.presEff().gate && Object.keys(t.segs).some(G.segUnlocked));
   }
 
   G.spawnCustomer = function () {
     const types = customerTypes();
     let boost = {};
     for (const e of S.events) { const d = G.EVENTS.find(x => x.id === e.id); if (d && d.cust) Object.assign(boost, d.cust); }
+    if (G.partyActive()) Object.assign(boost, { patron: 4, doktor: 2.5, hizli: 2.5 });
     const t = R.wpick(types, x => x.w * (boost[x.id] || 1));
     if (!t) return;
     const segs = Object.keys(t.segs).filter(G.segUnlocked);
@@ -775,7 +780,7 @@
   function makeOffer(c, car) {
     const t = G.CT[c.type], md = G.M[car.m];
     const mv = G.value(car, false), tv = G.value(car, true);
-    c.max = R.r1k(Math.min(c.budget * 1.08, mv * R.rand(1.0, 1.08) * (car.show ? 1.03 : 1) * (1 + S.rep / 1000) * G.facEff("galeri").pay));
+    c.max = R.r1k(Math.min(c.budget * 1.08, mv * R.rand(1.0, 1.08) * (car.show ? 1.03 : 1) * (1 + S.rep / 1000) * G.facEff("galeri").pay * G.presEff().pay));
     // titiz müşteri kendi ekspertizini yaptırır
     if (R.chance(t.picky * 0.5) && tv < mv) { c.max = R.r1k(Math.min(c.max, tv * 1.02)); c.checked = true; }
     let offer;
@@ -980,6 +985,77 @@
       }
     }
   };
+  // ---- Lüks alışveriş ----
+  G.owns = id => (S.lux || []).includes(id);
+  G.luxOwned = () => (S.lux || []).map(id => G.LX[id]).filter(Boolean);
+  G.prestige = () => G.luxOwned().reduce((a, x) => a + x.pres, 0);
+  // Şöhretin etkileri: müşterinin ödemeye razı olduğu fiyat, zengin müşteri kapısı, günlük itibar
+  G.presEff = function (p) {
+    if (p == null) p = G.prestige();
+    return { pay: 1 + Math.min(0.06, p * 0.0002), gate: p >= 150 ? 2 : p >= 50 ? 1 : 0, rep: Math.min(0.5, p / 400) };
+  };
+  G.luxResale = x => R.r1k(x.price * G.LUX_CATS[x.cat].resale);
+  G.luxValue = () => G.luxOwned().reduce((a, x) => a + G.luxResale(x), 0);
+  G.luxUpkeep = () => Math.round(G.luxOwned().reduce((a, x) => a + x.price * G.LUX_CATS[x.cat].upkeep, 0));
+  G.bestOf = cat => G.luxOwned().filter(x => x.cat === cat).sort((a, b) => b.price - a.price)[0] || null;
+  G.buyLux = function (id) {
+    const x = G.LX[id];
+    if (!x || G.owns(id)) return { ok: false };
+    if (S.level < x.lvl) return { ok: false, msg: `Bunun için oyuncu seviyen ${x.lvl} olmalı.` };
+    if (S.money < x.price) return { ok: false, msg: "Kasada yeterli para yok." };
+    S.money -= x.price;
+    S.lux.push(id);
+    G.addRep(Math.min(5, x.pres / 10));
+    G.feed(`Patron lüks bir alışveriş yaptı: ${x.name} (${G.fmtS(x.price)}). Şöhret +${x.pres}.`, "level");
+    G.checkQuests();
+    return { ok: true };
+  };
+  G.sellLux = function (id) {
+    const x = G.LX[id];
+    if (!x || !G.owns(id)) return { ok: false };
+    const v = G.luxResale(x);
+    S.money += v;
+    S.lux = S.lux.filter(k => k !== id);
+    G.feed(`${x.name} satıldı: ${G.fmt(v)} kasaya girdi.`, "info");
+    return { ok: true, price: v };
+  };
+  // Uçak: her sabah ithal ilanlar
+  G.importCount = () => { const p = G.bestOf("ucak"); return p ? p.imports : 0; };
+  G.importListings = function () {
+    const n = G.importCount();
+    if (!n) return 0;
+    const segs = ["premium", "spor", "luks", "elektrik"].filter(G.segUnlocked);
+    if (!segs.length) return 0;
+    for (let i = 0; i < n * 2; i++) {
+      const src = G.SELLERS.ithal;
+      const car = G.makeCar(G.pickModel(m => segs.includes(m.seg)), src);
+      const ap = G.value(car, false);
+      const ask = R.r1k(ap * R.rand(src.ask[0], src.ask[1]));
+      S.listings.unshift({ id: G.nid(), car, seller: "ithal", sellerName: R.pick(["Münih", "Milano", "Lyon", "Göteborg", "Stuttgart", "Seul"]) + " bayisi", ask, min: R.r1k(ask * R.rand(src.min[0], src.min[1])), rounds: src.rounds, last: ask, day: S.day, born: S.min, msgs: [], done: false });
+    }
+    return n * 2;
+  };
+  // Yat: haftada bir parti
+  G.PARTY_COOLDOWN = 7;
+  G.partyEff = () => { const y = G.bestOf("yat"); const t = y ? y.party : 0; return { traffic: 1.3 + 0.15 * t, rep: 2 * t }; };
+  G.partyActive = () => !!(S.party && S.party.day === S.day);
+  G.partyReady = () => !!G.bestOf("yat") && S.day - (S.lastParty == null ? -99 : S.lastParty) >= G.PARTY_COOLDOWN;
+  G.throwParty = function () {
+    if (!G.partyReady()) return { ok: false, msg: G.bestOf("yat") ? `Bir sonraki parti ${S.lastParty + G.PARTY_COOLDOWN}. günde verilebilir.` : "Önce bir yat almalısın." };
+    const e = G.partyEff();
+    const cost = R.r1k(150000 + G.bestOf("yat").party * 150000);
+    if (S.money < cost) return { ok: false, msg: `Parti masrafı için kasada ${G.fmt(cost)} olmalı.` };
+    S.money -= cost;
+    S.lastParty = S.day;
+    S.party = { day: S.day + 1 };
+    S.stats.parties = (S.stats.parties || 0) + 1;
+    G.addRep(e.rep);
+    G.feed(`${G.bestOf("yat").name} üzerinde yat partisi verildi (${G.fmt(cost)}). İtibar +${e.rep}; yarın galeriye zengin müşteriler gelecek.`, "level");
+    G.checkQuests();
+    return { ok: true };
+  };
+  G.partyCost = () => { const y = G.bestOf("yat"); return y ? R.r1k(150000 + y.party * 150000) : 0; };
+
   // ---- Reklam ödülleri ----
   // Ödüllü reklamlar yalnızca oyuncu isteyince açılır; her ödülün ve günün bir sınırı vardır.
   G.AD_CAPS = { rush: 3, boost: 2, bonus: 1, inspect: 3, tea: 3, ilan: 2 };
@@ -1047,6 +1123,9 @@
     if (tired && G.restFree() > 0) out.push({ text: `${tired.name} yorgun (enerji ${Math.round(tired.energy)}); çardakta dinlenirse dinç döner`, a: "rest", id: tired.id, btn: "Çardağa gönder" });
     const fac = Object.keys(G.FACILITIES).map(k => ({ k, nx: G.facNext(k) })).filter(x => x.nx && x.nx.req <= S.level && S.money >= x.nx.cost * 2.5).sort((a, b) => a.nx.cost - b.nx.cost)[0];
     if (fac) out.push({ text: `${G.FACILITIES[fac.k].name} ${fac.nx.n}. seviyeye yükseltilebilir (${G.fmtS(fac.nx.cost)})`, a: "fac", v: fac.k, btn: "Bak" });
+    const lux = G.LUXURY.filter(x => !G.owns(x.id) && x.lvl <= S.level && S.money >= x.price * 3).sort((a, b) => a.price - b.price)[0];
+    if (lux && !G.luxOwned().length) out.push({ text: `Kasan dolu: kendine bir ${lux.name.toLocaleLowerCase("tr-TR")} alabilirsin (${G.fmtS(lux.price)})`, a: "tab", v: "patron", btn: "Lüks" });
+    if (G.partyReady()) out.push({ text: `Yatında parti verebilirsin; yarın zengin müşteriler gelir`, a: "party", btn: "Parti ver" });
     const next = G.LOCS[S.loc + 1];
     if (next && S.level >= next.lvl && S.money >= next.cost * 1.3) out.push({ text: `${next.name} adresine taşınabilirsin`, a: "tab", v: "patron", btn: "Bak" });
     return out.slice(0, 4);
@@ -1096,13 +1175,16 @@
     exp -= saved;
     S.money -= exp;
     S.today.expenses += exp;
+    // kişisel lüks eşyaların bakımı işletme netine sayılmaz ama kasadan düşer
+    const luxUp = G.luxUpkeep();
+    S.money -= luxUp;
     const T = S.today;
     const net = T.profit - T.expenses - T.spentWork;
     S.history.push({ day: S.day, revenue: T.revenue, profit: T.profit, expenses: T.expenses + T.spentWork, net, sales: T.sales });
     if (S.history.length > 30) S.history.shift();
     const summary = {
       day: S.day, today: Object.assign({}, T), net,
-      lines: [["Kira", L.rent], ["Maaşlar", salaries], ["Reklam", ads], ["Sigorta ve otopark", insurance], ["Kredi faizi", interest], ["Ek hesap faizi", overdraft], ["Muhasebe tasarrufu", -saved]].filter(x => x[1]),
+      lines: [["Kira", L.rent], ["Maaşlar", salaries], ["Reklam", ads], ["Sigorta ve otopark", insurance], ["Kredi faizi", interest], ["Ek hesap faizi", overdraft], ["Muhasebe tasarrufu", -saved], ["Lüks bakım masrafı (kişisel)", luxUp]].filter(x => x[1]),
       lost: S.lost.slice(0, 6), news: []
     };
 
@@ -1125,6 +1207,7 @@
     for (const k of Object.keys(S.trend)) S.trend[k] = R.clamp(S.trend[k] * R.rand(0.985, 1.016) + (1 - S.trend[k]) * 0.05, 0.85, 1.18);
     S.events = S.events.filter(e => e.until >= S.day);
     if (G.ADS[S.ads].rep) G.addRep(G.ADS[S.ads].rep);
+    G.addRep(G.presEff().rep);
     if (S.rep > 50) G.addRep(-0.15);
     // olay
     if (S.day > 2 && R.chance(0.33)) summary.news.push(triggerEvent());
@@ -1140,6 +1223,9 @@
       summary.news.push({ title: "Müşteri şikâyeti", text: t });
     }
     G.refreshListings();
+    const imp = G.importListings();
+    if (imp) summary.news.push({ title: "Yurt dışından ilanlar", text: `Uçağın sayesinde bugün piyasada ${imp} ithal ilan var.` });
+    if (G.partyActive()) summary.news.push({ title: "Yat partisinin etkisi", text: "Bugün galeriye zengin müşteri akını bekleniyor." });
     G.newAuction();
     if (S.day - S.candDay >= 5) G.newCandidates();
     G.checkQuests();

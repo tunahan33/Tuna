@@ -298,6 +298,28 @@ ul.facl li.up { color: var(--good); font-weight: 600; }
 .energy b { font-family: var(--font-num); color: var(--ink); text-align: right; }
 .energy .bar { margin: 0; }
 
+/* Lüks */
+.lux-head .fame { text-align: center; background: var(--sticker); color: var(--sticker-ink); border-radius: 10px; padding: 6px 12px; flex: none; }
+.lux-head .fame span { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.lux-head .fame b { font: 800 24px/1 var(--font-num); }
+.lux-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.lux-card { background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); display: grid; border: 2px solid transparent; }
+.lux-card.own { border-color: var(--good); }
+.lux-card.locked .lux-art { filter: grayscale(.7); opacity: .75; }
+.lux-art { position: relative; }
+.lux-art svg { display: block; width: 100%; height: auto; }
+.own-tag { position: absolute; top: 8px; left: 8px; }
+.lux-body { padding: 10px 12px 12px; display: grid; gap: 6px; }
+.lux-body p { margin: 0; }
+.segctl button small { font-weight: 600; opacity: .7; font-size: 11px; }
+.card.party { border: 1.5px dashed var(--sticker); }
+.card.party .btn, .lux-body .btn { flex: none; white-space: nowrap; }
+.scene .fly { animation: fly 26s linear infinite; }
+@keyframes fly { from { transform: translateX(-40px); } to { transform: translateX(440px); } }
+.rotor { transform-box: fill-box; transform-origin: center; animation: rotor .25s linear infinite; }
+@keyframes rotor { 50% { transform: scaleX(.15); } }
+svg .spin { transform-box: fill-box; transform-origin: center; animation: rotor .2s linear infinite; }
+
 /* Yapılacaklar */
 .todo { gap: 8px; }
 .todo-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; }
@@ -369,7 +391,7 @@ details.more[open] > summary::after { content: " ▴"; }
   .preset b { font-size: 14px; }
   .small-ctl button { padding: 6px 9px; }
 }
-@media (prefers-reduced-motion: reduce) { .scene .walk, .scene .drop, .scene .bubble, .scene .led, .scene .twinkle, .scene .glow, .scene .pulse, .scene .hue, .scene .wave, .scene .bob, .scene .spin, .scene .brush, .scene .bub, .scene .smoke, .scene .beam { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .scene .fly, .rotor, svg .spin, .scene .walk, .scene .drop, .scene .bubble, .scene .led, .scene .twinkle, .scene .glow, .scene .pulse, .scene .hue, .scene .wave, .scene .bob, .scene .spin, .scene .brush, .scene .bub, .scene .smoke, .scene .beam { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .sheet { animation: none; } .prog i { transition: none; } }
 </style>
 
@@ -406,5 +428,6 @@ details.more[open] > summary::after { content: " ▴"; }
 <script src="js/ads.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/scene.js"></script>
+<script src="js/lux.js"></script>
 <script src="js/main.js"></script>
 <!-- ARTIFACT-END -->

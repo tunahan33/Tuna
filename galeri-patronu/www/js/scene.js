@@ -305,6 +305,14 @@
       <rect y="${-pad}" width="${W}" height="${lotTop + pad}" fill="url(#sky)"/>
       <circle cx="${sunX.toFixed(1)}" cy="${sunY.toFixed(1)}" r="11" fill="${t > 0.8 ? "#ffb070" : "#ffe08a"}" opacity=".9"/>
       <g fill="#ffffff" opacity=".75"><ellipse cx="${(90 + t * 40).toFixed(0)}" cy="28" rx="22" ry="6"/><ellipse cx="${(290 - t * 30).toFixed(0)}" cy="18" rx="16" ry="5"/></g>`;
+    // patronun uçağı gökyüzünde
+    const pl = G.bestOf("ucak");
+    if (pl) {
+      const py = 14 - pad * 0.3;
+      svg += pl.id === "uc2"
+        ? `<g class="fly" data-a="lux"><g transform="translate(0 ${py})"><rect x="-14" y="0" width="28" height="1.2" fill="#3c4650" class="rotor"/><path d="M-8 3 q2 -1 9 -1 q6 0 7 5 q-1 4 -7 4 h-5 q-4 0 -4 -4 z" fill="#1f4fa8"/><rect x="-16" y="5" width="9" height="2" fill="#1f4fa8"/></g></g>`
+        : `<g class="fly" data-a="lux"><g transform="translate(0 ${py})"><path d="M-14 4 q1 -3 8 -3 h18 q5 0 7 3 q-2 3 -7 3 h-24 z" fill="#ffffff" stroke="#9aa3ac" stroke-width=".5"/><path d="M-12 2 l-3 -6 h3 l5 5 z" fill="${pl.id === "uc1" ? "#c8323a" : "#1f4fa8"}"/><path d="M-2 5 l6 6 h3 l-4 -6 z" fill="#c3cad1"/></g></g>`;
+    }
     if (tier >= 1) {
       svg += `<g fill="#b9c7d3" opacity="${tier >= 2 ? 0.9 : 0.5}">`;
       [[8, 40], [40, 62], [70, 30], [300, 54], [330, 70], [362, 44]].forEach(([bx, bh], i) => { svg += `<rect x="${bx}" y="${BASE - bh - 10}" width="${26 + (i % 2) * 6}" height="${bh + 10}"/>`; });
@@ -391,6 +399,12 @@
     svg += `<rect x="0" y="${roadY}" width="${W}" height="5" fill="#c8ced4"/><rect x="0" y="${roadY + 5}" width="${W}" height="23" fill="#4a535c"/>
       <path d="M0 ${roadY + 16.5} H${W}" stroke="#e8e2c4" stroke-width="1.2" stroke-dasharray="10 9"/>`;
     if (ol >= 8) svg += parkingDecorRoad(ol, roadY);
+    // patronun kendi arabası kapının önünde
+    const pc = G.bestOf("araba");
+    if (pc) {
+      const px = 150;
+      svg += `<g data-a="lux" class="hit">${carAt({ m: pc.model, color: pc.color, clean: 100, body: 100, motor: 100, painted: 0, fuel: G.M[pc.model].fuels[0] }, px, roadY + 4, CAR_S)}<rect x="${px + 14}" y="${roadY + 22}" width="18" height="5" rx="1" fill="#ffd23f"/><text x="${px + 23}" y="${roadY + 25.8}" text-anchor="middle" font-size="3.8" font-weight="800" fill="#151b21" ${FONT}>PATRON</text></g>`;
+    }
     const out = S.jobs.filter(j => !j.inhouse).length;
     if (out) svg += `<g data-a="tab" data-v="atolye" class="hit"><rect x="${W - 92}" y="${roadY + 8}" width="86" height="13" rx="6.5" fill="#ffffff"/><text x="${W - 49}" y="${roadY + 17}" text-anchor="middle" font-size="7.5" font-weight="700" fill="#17202b">Dış serviste: ${out} araç</text></g>`;
     if (G.boostActive()) svg += `<g><rect x="6" y="${roadY + 8}" width="104" height="13" rx="6.5" fill="#ffd23f"/><text x="58" y="${roadY + 17}" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1d1a10">Kampanya: 2× müşteri</text></g>`;
