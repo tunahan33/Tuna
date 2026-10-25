@@ -111,14 +111,14 @@
 
   // Araç ilanı veren satıcı tipleri. ask: piyasa değerine göre istenen fiyat, min: istenen fiyatın en fazla ne kadarına inerler
   G.SELLERS = {
-    sahibinden: { name: "Sahibinden",          ask: [0.97, 1.12], min: [0.86, 0.94], issue: 0.22, w: 5, rounds: 3 },
-    galeriden:  { name: "Galeriden",           ask: [1.04, 1.16], min: [0.93, 0.97], issue: 0.1,  w: 3, rounds: 2, clean: true },
-    filo:       { name: "Filo çıkışı",         ask: [0.92, 1.02], min: [0.9, 0.95],  issue: 0.12, w: 2, rounds: 2, kmMult: 1.9 },
-    acil:       { name: "Acil satılık",        ask: [0.84, 0.93], min: [0.84, 0.91], issue: 0.38, w: 2, rounds: 3 },
-    hasarli:    { name: "Ağır hasar kayıtlı",  ask: [0.62, 0.78], min: [0.85, 0.93], issue: 0.45, w: 1, rounds: 3, bodyHit: 35, pert: true, lvl: 2 },
-    ihale:      { name: "İhale",               ask: [1, 1],       min: [1, 1],       issue: 0.3,  w: 0, rounds: 0 },
-    miras:      { name: "Koleksiyon satışı",   ask: [0.72, 0.84], min: [0.9, 0.95],  issue: 0.08, w: 0, rounds: 3, clean: true },
-    ithal:      { name: "Yurt dışı (ithal)",   ask: [0.9, 1.0],   min: [0.92, 0.97], issue: 0.05, w: 0, rounds: 2, clean: true }
+    sahibinden: { name: "Sahibinden",          ask: [0.97, 1.12], min: [0.86, 0.94], issue: 0.12, w: 5, rounds: 3 },
+    galeriden:  { name: "Galeriden",           ask: [1.04, 1.16], min: [0.93, 0.97], issue: 0.05,  w: 3, rounds: 2, clean: true },
+    filo:       { name: "Filo çıkışı",         ask: [0.92, 1.02], min: [0.9, 0.95],  issue: 0.06, w: 2, rounds: 2, kmMult: 1.9 },
+    acil:       { name: "Acil satılık",        ask: [0.84, 0.93], min: [0.84, 0.91], issue: 0.2, w: 2, rounds: 3 },
+    hasarli:    { name: "Ağır hasar kayıtlı",  ask: [0.62, 0.78], min: [0.85, 0.93], issue: 0.3, w: 1, rounds: 3, bodyHit: 35, pert: true, lvl: 2 },
+    ihale:      { name: "İhale",               ask: [1, 1],       min: [1, 1],       issue: 0.18,  w: 0, rounds: 0 },
+    miras:      { name: "Koleksiyon satışı",   ask: [0.72, 0.84], min: [0.9, 0.95],  issue: 0.05, w: 0, rounds: 3, clean: true },
+    ithal:      { name: "Yurt dışı (ithal)",   ask: [0.9, 1.0],   min: [0.92, 0.97], issue: 0.03, w: 0, rounds: 2, clean: true }
   };
 
   // Galeriye gelen müşteri tipleri. segs: hangi segmentleri ne kadar istedikleri, haggle: pazarlık payı, picky: boya/değişene hassasiyet

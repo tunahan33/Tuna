@@ -765,6 +765,19 @@
       <button class="btn pri block" type="button" data-a="offline-claim">${G.fmtS(o.amount)} al</button>`;
   };
 
+  SHEETS.freecar = function () {
+    const car = UI.freeCar;
+    if (!car) return null;
+    const v = G.value(car, false), cs = G.condScore(car);
+    return head("Bedava araç fırsatı!", "Kısa bir reklam izle, bu araç hiç para ödemeden senin olsun.") + `
+      <div class="hero">${UI.carSVG(car)}<span class="sticker">Bedava</span></div>
+      <div class="tiles"><div><span>Araç</span><b>${esc(G.carTitle(car))}</b></div><div><span>Piyasa değeri</span><b class="pos">${G.fmtS(v)}</b></div><div><span>Durum</span><b>${cs} · ${G.condLabel(cs)}</b></div></div>
+      <p class="small">${spec(car)} · ${esc(car.color)}</p>
+      <div class="chips">${paintChips(car)}<span class="chip good">Ekspertiz temiz</span></div>
+      ${adBtn("freecar", "Reklam izle, bedava al", "", "block big")}
+      <button class="btn block" type="button" data-a="freecar-no">Hayır, teşekkürler</button>`;
+  };
+
   SHEETS.skip = function () {
     const s = S();
     const offers = s.custs.filter(c => c.state === "offer").length;
@@ -875,6 +888,7 @@
     const sig = viewSig();
     if (sig !== UI.sig && !UI.dragging) { UI.sig = sig; const y = window.scrollY; $("view").innerHTML = VIEWS[UI.tab](); window.scrollTo(0, y); }
     renderNav();
+    maybeFreeCar(s);
     for (const el of document.querySelectorAll("[data-job]")) { const j = s.jobs.find(x => x.id === +el.dataset.job); if (j) el.style.width = ((1 - j.left / j.total) * 100) + "%"; }
     for (const el of document.querySelectorAll("[data-jobt]")) { const j = s.jobs.find(x => x.id === +el.dataset.jobt); if (j) el.textContent = G.fmtDur(G.jobEta(j)); }
     for (const el of document.querySelectorAll("[data-energy]")) { const u = s.staff.find(x => x.id === +el.dataset.energy); if (u) { el.style.width = u.energy + "%"; el.className = energyCls(u.energy); } }
@@ -882,6 +896,27 @@
     for (const el of document.querySelectorAll("[data-pat]")) { const c = s.custs.find(x => x.id === +el.dataset.pat); if (c) el.style.width = (c.patience / c.patMax * 100) + "%"; }
     UI.renderSheet(false);
   };
+
+  // İlanlara bakarken ara sıra "reklam izle, bu araç bedava senin" teklifi; kasa azsa daha sık
+  function maybeFreeCar(s) {
+    const onListings = UI.tab === "piyasa" && UI.sub.piyasa === "ilan";
+    if (!onListings) { UI.listingsSince = 0; return; }
+    const now = Date.now();
+    if (!UI.listingsSince) UI.listingsSince = now;
+    if (UI.sheet || s.paused || s.summary || UI.dragging || !G.Ads || G.Ads.showing) return;
+    if (!G.adLeft("freecar") || G.spaceLeft() <= 0) return;
+    if (!s.freeShown || s.freeShown.day !== s.day) s.freeShown = { day: s.day, n: 0 };
+    if (s.freeShown.n >= 3) return;
+    if (now - Math.max(UI.listingsSince, UI.lastFree || 0) < 45000) return;
+    const low = s.money < 300000;
+    if (!R.chance(low ? 0.008 : 0.0033)) return;
+    const car = G.makeFreeCar();
+    if (!car) return;
+    UI.freeCar = car;
+    UI.lastFree = now;
+    s.freeShown.n++;
+    UI.open("freecar");
+  }
 
   // Oyuna dönünce pasif gelir ekranı
   UI.checkOffline = function (ms) {
@@ -989,6 +1024,8 @@
     fac: el => UI.open("fac", el.dataset.v),
     skip: () => { const s = S(); if (!s.started || s.summary || UI.blocking()) return; UI.open("skip"); },
     "skip-go": () => { UI.sheet = null; UI.skipping = true; try { G.skipDay(); } finally { UI.skipping = false; } G.save(); UI.render(); },
+    "ad-freecar": () => { const car = UI.freeCar; if (!car) return; if (G.spaceLeft() <= 0) { UI.toast("Galeride boş park yeri yok.", "bad"); return; } UI.watch("freecar", () => { if (G.claimFreeCar(car)) { UI.freeCar = null; UI.sheet = null; UI.toast(`${G.carTitle(car)} artık senin!`, "good"); } }); },
+    "freecar-no": () => { UI.freeCar = null; UI.close(); },
     "lf-tog": el => { UI.lf[el.dataset.v] = !UI.lf[el.dataset.v]; UI.render(); },
     "lf-reset": () => { UI.lf = { seg: "all", sort: "yeni", deal: false, afford: false }; UI.render(); },
     "offline-claim": () => { G.claimOffline(UI.offline, 1); UI.offline = null; UI.sheet = S().summary ? { kind: "summary" } : null; G.save(); UI.render(); },

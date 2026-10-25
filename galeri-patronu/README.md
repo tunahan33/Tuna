@@ -59,6 +59,14 @@ Her tesisin n. seviyesi için gereken oyuncu seviyesi = başlangıç + yuvarla((
 
 Basit bir bot oyuncuyla 240 günlük simülasyonda oyuncu 21. seviyeye, tesisler 17–18. seviyeye ulaştı. Tesisler hep seviye kilidinin 0–2 altında ilerledi; yani tempoyu para değil oyuncu seviyesi belirliyor.
 
+## Kolaylıklar
+
+- **İlan filtresi:** segment, sıralama (önerilen, en ucuz, en pahalı, en kârlı, en az km, en yeni model), "sadece fırsatlar" ve "kasama uygun".
+- **Günü bitir (⏭):** hız düğmelerinin yanında; onaydan sonra zamanı 19:00'a kadar hızla ilerletir. Atölye, müşteriler ve olaylar normal işler; danışman yoksa cevapsız teklifler kaybolabilir.
+- **Oyun hızı:** 1× hızda bir oyun günü yaklaşık 2,5 dakika sürer (`www/js/main.js` → `MIN_PER_SEC`).
+- **Bedava araç teklifi:** ilanlara bakarken ekranda 45 saniyeden sonra ara sıra "Reklam izle, bu araç bedava senin" penceresi çıkar (kasa 300 bin ₺'nin altındaysa daha sık; günde en fazla 3 kez gösterilir, 2 kez alınabilir). Araç oyuncunun seviyesine göre seçilir ve pahalı değildir: değeri en fazla 250 bin + seviye × 120 bin ₺ (1. seviyede 370 bin, 10. seviyede 1,45 milyon); lüks, spor ve klasik çıkmaz, ekspertizi temizdir.
+- **Gizli kusur oranı:** ilanların yaklaşık %12'sinde (fırsat ilanlarında %21) ekspertizde kusur çıkar.
+
 ## Pasif gelir
 
 Oyundan çıkınca galeri çalışmaya devam eder. Oyuncu en az 5 dakika sonra döndüğünde "Hoş geldin patron!" ekranı çıkar ve yokluk süresine göre gelir verilir (en fazla 8 saat birikir). İsteyen reklam izleyip bu gelirin 2 katını alabilir (günde 2 kez).
@@ -95,7 +103,7 @@ Patron kazandığı parayla kendine ev, araba, uçak ve yat alabilir. 18 eşyan�
 Oyun ücretsiz; gelir Google AdMob reklamlarından gelir. Oyuncuyu reklama boğmamak için kurallar kodda sabit:
 
 - **Banner reklam yok.** Oyun sırasında, pazarlıkta ya da ihalede kendiliğinden reklam açılmaz.
-- **Ödüllü reklam** yalnızca oyuncu "Reklam izle" düğmesine basınca açılır. Günde en fazla 10 tane izlenebilir:
+- **Ödüllü reklam** yalnızca oyuncu "Reklam izle" düğmesine basınca açılır. Günde en fazla 12 tane izlenebilir:
 
 | Ödül | Nerede | Günlük hak |
 |---|---|---|
@@ -104,6 +112,7 @@ Oyun ücretsiz; gelir Google AdMob reklamlarından gelir. Oyuncuyu reklama boğm
 | Müşteriye çay ikram et: sabrı dolar, +1 pazarlık hakkı | Müşteri sayfası | 3 |
 | Müşteri kampanyası: 2 saat iki kat müşteri | Müşteri sekmesi | 2 |
 | Piyasaya 4 yeni ilan getir | Araç al → İlanlar | 2 |
+| Bedava araç (seviyeye uygun, ekspertizi temiz) | İlanlara bakarken çıkan teklif penceresi | 2 |
 | Sponsor bonusu: günün kârına göre nakit | Gün sonu raporu | 1 |
 
 - **Ara reklam** (geçilebilir, tam ekran) yalnızca gün geçişinde çıkar: 4. günden sonra, en fazla 3 günde bir ve o gün oyuncu hiç ödüllü reklam izlemediyse. Yani reklam izleyen oyuncu ara reklam görmez.

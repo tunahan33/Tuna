@@ -308,7 +308,7 @@
 
     const issues = [];
     if (!opt.noIssues && R.chance(src.issue)) {
-      const n = R.chance(0.25) ? 2 : 1;
+      const n = R.chance(0.1) ? 2 : 1;
       const pool = Object.keys(G.ISSUES).filter(id => {
         const d = G.ISSUES[id];
         if (d.noEv && fuel === "elektrik") return false;
@@ -1072,6 +1072,33 @@
     while (!S.summary && guard-- > 0) G.minute();
   };
 
+  // ---- Reklamla bedava araç ----
+  // İlanlara bakarken ara sıra çıkar: oyuncunun seviyesine uygun, pahalı olmayan, ekspertizi temiz bir araç
+  G.freeCarCap = () => R.r1k(250000 + S.level * 120000);
+  G.makeFreeCar = function () {
+    const cap = G.freeCarCap();
+    let best = null;
+    for (let i = 0; i < 40; i++) {
+      const car = G.makeCar(G.pickModel(m => m.seg !== "luks" && m.seg !== "spor" && m.seg !== "klasik"), G.SELLERS.galeriden, { noIssues: true });
+      const v = G.value(car, false);
+      if (v <= cap && v >= cap * 0.35) { best = car; break; }
+      if (v <= cap && (!best || v > G.value(best, false))) best = car;
+    }
+    if (!best) return null;
+    best.issues = [];
+    best.inspected = true;
+    best.clean = 100;
+    return best;
+  };
+  G.claimFreeCar = function (car) {
+    if (!car || G.spaceLeft() <= 0) return false;
+    car.buy = 0; car.spent = 0; car.status = "lot"; car.price = 0;
+    S.cars.push(car);
+    S.stats.freeCars = (S.stats.freeCars || 0) + 1;
+    G.feed(`Reklam hediyesi: ${G.carTitle(car)} bedavaya galerine geldi (değeri ${G.fmtS(G.value(car, false))}).`, "good");
+    return true;
+  };
+
   // ---- Ultra lüks ilanlar ----
   G.ULTRA_CHANCE = 0.12; // her sabah ultra lüks ilan çıkma ihtimali (gün içinde her ilan saatinde %3 daha): ortalama 4 günde bir
   G.ultraListed = () => S.cars.some(c => c.price > 0 && c.status === "lot" && G.M[c.m].seg === "ultra");
@@ -1123,8 +1150,8 @@
 
   // ---- Reklam ödülleri ----
   // Ödüllü reklamlar yalnızca oyuncu isteyince açılır; her ödülün ve günün bir sınırı vardır.
-  G.AD_CAPS = { rush: 3, boost: 2, bonus: 1, inspect: 3, tea: 3, ilan: 2, offline: 2 };
-  G.AD_DAILY = 10;
+  G.AD_CAPS = { rush: 3, boost: 2, bonus: 1, inspect: 3, tea: 3, ilan: 2, offline: 2, freecar: 2 };
+  G.AD_DAILY = 12;
   function adDay() {
     if (!S.adv) S.adv = { day: 0, n: {}, total: 0, lastInter: 0, lastWatch: 0 };
     if (S.adv.day !== S.day) { S.adv.day = S.day; S.adv.n = {}; S.adv.total = 0; }
