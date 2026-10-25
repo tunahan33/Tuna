@@ -1,0 +1,223 @@
+/* Galeri Patronu — oyun verileri
+ * Bütün marka ve model adları hayalidir; mağazada yayınlarken marka hakkı sorunu çıkmaması için gerçek isim kullanılmaz. */
+(function (G) {
+  "use strict";
+
+  G.YEAR = 2026;
+
+  G.SEGMENTS = {
+    ekonomi:  { name: "Ekonomi",    lvl: 1 },
+    aile:     { name: "Aile",       lvl: 1 },
+    ticari:   { name: "Ticari",     lvl: 2 },
+    suv:      { name: "SUV",        lvl: 3 },
+    elektrik: { name: "Elektrikli", lvl: 4 },
+    premium:  { name: "Premium",    lvl: 5 },
+    spor:     { name: "Spor",       lvl: 7 },
+    klasik:   { name: "Klasik",     lvl: 8 },
+    luks:     { name: "Lüks",       lvl: 10 }
+  };
+
+  G.BODIES = { hatch: "Hatchback", sedan: "Sedan", suv: "SUV", coupe: "Coupe", van: "Hafif ticari", pickup: "Pick-up", wagon: "Station wagon" };
+  G.FUELS = {
+    benzin:   { name: "Benzin",     f: 1 },
+    dizel:    { name: "Dizel",      f: 1.02 },
+    hibrit:   { name: "Hibrit",     f: 1.07 },
+    lpg:      { name: "Benzin/LPG", f: 0.93 },
+    elektrik: { name: "Elektrik",   f: 1 }
+  };
+  G.GEARS = { manuel: { name: "Manuel", f: 0.96 }, otomatik: { name: "Otomatik", f: 1.05 } };
+
+  // w: piyasada görülme sıklığı, f: fiyata etkisi, sport: spor araçta ek etkisi
+  G.COLORS = [
+    { name: "Beyaz",      hex: "#f2f3f1", w: 9, f: 1.02 },
+    { name: "Siyah",      hex: "#1d2024", w: 6, f: 1.01 },
+    { name: "Gri",        hex: "#767d86", w: 7, f: 1.01 },
+    { name: "Gümüş",      hex: "#b8bdc3", w: 5, f: 1 },
+    { name: "Lacivert",   hex: "#1f2f5a", w: 3, f: 0.99 },
+    { name: "Mavi",       hex: "#2f6fd0", w: 2, f: 0.98 },
+    { name: "Kırmızı",    hex: "#c8282d", w: 3, f: 0.97, sport: 1.06 },
+    { name: "Bordo",      hex: "#6e1f2b", w: 2, f: 0.96 },
+    { name: "Yeşil",      hex: "#2e6e4a", w: 1, f: 0.93 },
+    { name: "Turuncu",    hex: "#e2742c", w: 1, f: 0.92, sport: 1.05 },
+    { name: "Sarı",       hex: "#e5bd2e", w: 1, f: 0.9,  sport: 1.05 },
+    { name: "Kahverengi", hex: "#5f4430", w: 1, f: 0.92 }
+  ];
+
+  // [id, marka, model, segment, kasa, yeni fiyat (klasikte kusursuz örnek), yıl aralığı, yakıtlar, vitesler, yaygınlık]
+  G.MODELS = [
+    ["anka-serce",     "Anka",   "Serçe",       "ekonomi",  "hatch",  950e3,  [2008, 2026], ["benzin", "lpg"],             ["manuel"],             3],
+    ["ferro-punta",    "Ferro",  "Punta",       "ekonomi",  "hatch",  1.1e6,  [2010, 2026], ["benzin", "dizel", "lpg"],    ["manuel", "otomatik"], 4],
+    ["rivo-kanto",     "Rivo",   "Kanto",       "ekonomi",  "hatch",  1.25e6, [2012, 2026], ["benzin", "dizel"],           ["manuel", "otomatik"], 4],
+    ["kaizen-mio",     "Kaizen", "Mio",         "ekonomi",  "hatch",  1.3e6,  [2010, 2026], ["benzin", "hibrit"],          ["manuel", "otomatik"], 3],
+    ["hanbit-ari",     "Hanbit", "Arı",         "ekonomi",  "sedan",  1.2e6,  [2011, 2026], ["benzin", "dizel"],           ["manuel", "otomatik"], 3],
+    ["volta-pira",     "Volta",  "Pira",        "ekonomi",  "hatch",  1.45e6, [2010, 2026], ["benzin", "dizel"],           ["manuel", "otomatik"], 4],
+    ["ferro-egeo",     "Ferro",  "Egeo",        "aile",     "sedan",  1.35e6, [2015, 2026], ["benzin", "dizel", "lpg"],    ["manuel", "otomatik"], 5],
+    ["rivo-megara",    "Rivo",   "Megara",      "aile",     "sedan",  1.7e6,  [2010, 2026], ["benzin", "dizel"],           ["manuel", "otomatik"], 5],
+    ["kaizen-sora",    "Kaizen", "Sora",        "aile",     "sedan",  1.9e6,  [2010, 2026], ["benzin", "hibrit"],          ["manuel", "otomatik"], 4],
+    ["hanbit-elan",    "Hanbit", "Elan",        "aile",     "sedan",  1.65e6, [2010, 2026], ["benzin", "dizel", "lpg"],    ["manuel", "otomatik"], 3],
+    ["volta-arcus",    "Volta",  "Arcus",       "aile",     "sedan",  2.3e6,  [2010, 2026], ["benzin", "dizel"],           ["otomatik"],           4],
+    ["nordik-s70",     "Nordik", "S70 Kombi",   "aile",     "wagon",  2.5e6,  [2010, 2026], ["dizel", "hibrit"],           ["otomatik"],           2],
+    ["ferro-dobo",     "Ferro",  "Dobo",        "ticari",   "van",    1.15e6, [2008, 2026], ["dizel", "benzin"],           ["manuel"],             5],
+    ["anka-yukcu",     "Anka",   "Yükçü",       "ticari",   "van",    1.0e6,  [2006, 2026], ["dizel"],                     ["manuel"],             3],
+    ["volta-kargo",    "Volta",  "Kargo",       "ticari",   "van",    1.9e6,  [2010, 2026], ["dizel"],                     ["manuel", "otomatik"], 3],
+    ["kaizen-atlas",   "Kaizen", "Atlas",       "ticari",   "pickup", 2.4e6,  [2010, 2026], ["dizel"],                     ["manuel", "otomatik"], 3],
+    ["rivo-dunar",     "Rivo",   "Dunar",       "suv",      "suv",    1.85e6, [2012, 2026], ["benzin", "dizel", "lpg"],    ["manuel", "otomatik"], 4],
+    ["hanbit-toros",   "Hanbit", "Toros",       "suv",      "suv",    2.2e6,  [2012, 2026], ["benzin", "dizel", "hibrit"], ["otomatik"],           4],
+    ["kaizen-taiga",   "Kaizen", "Taiga",       "suv",      "suv",    2.6e6,  [2012, 2026], ["benzin", "hibrit"],          ["otomatik"],           4],
+    ["volta-terra",    "Volta",  "Terra",       "suv",      "suv",    2.9e6,  [2012, 2026], ["benzin", "dizel"],           ["otomatik"],           3],
+    ["anka-ekartal",   "Anka",   "e-Kartal",    "elektrik", "suv",    2.1e6,  [2023, 2026], ["elektrik"],                  ["otomatik"],           4],
+    ["volta-epira",    "Volta",  "e.Pira",      "elektrik", "hatch",  1.9e6,  [2020, 2026], ["elektrik"],                  ["otomatik"],           2],
+    ["hanbit-ion",     "Hanbit", "Ion 5",       "elektrik", "suv",    2.8e6,  [2021, 2026], ["elektrik"],                  ["otomatik"],           3],
+    ["mirage-voltis",  "Mirage", "Voltis",      "elektrik", "sedan",  3.5e6,  [2018, 2026], ["elektrik"],                  ["otomatik"],           3],
+    ["stahl-s3",       "Stahl",  "S3",          "premium",  "sedan",  3.2e6,  [2010, 2026], ["benzin", "dizel"],           ["otomatik"],           4],
+    ["stahl-s5",       "Stahl",  "S5",          "premium",  "sedan",  4.5e6,  [2010, 2026], ["benzin", "dizel", "hibrit"], ["otomatik"],           3],
+    ["nordik-xr40",    "Nordik", "XR40",        "premium",  "suv",    3.6e6,  [2015, 2026], ["benzin", "hibrit"],          ["otomatik"],           3],
+    ["kaizen-luxa",    "Kaizen", "Luxa ES",     "premium",  "sedan",  3.9e6,  [2012, 2026], ["hibrit"],                    ["otomatik"],           2],
+    ["kaizen-ryu",     "Kaizen", "Ryu",         "spor",     "coupe",  3.4e6,  [2012, 2026], ["benzin"],                    ["manuel", "otomatik"], 3],
+    ["mirage-stallion","Mirage", "Stallion GT", "spor",     "coupe",  4.9e6,  [2010, 2026], ["benzin"],                    ["manuel", "otomatik"], 3],
+    ["ferro-veloce",   "Ferro",  "Veloce",      "spor",     "coupe",  7.2e6,  [2010, 2026], ["benzin"],                    ["otomatik"],           2],
+    ["stahl-rcoupe",   "Stahl",  "R Coupe",     "spor",     "coupe",  8.5e6,  [2012, 2026], ["benzin"],                    ["otomatik"],           1],
+    ["anka-kartal",    "Anka",   "Kartal SLX",  "klasik",   "sedan",  650e3,  [1980, 1994], ["benzin", "lpg"],             ["manuel"],             3],
+    ["volta-bocek",    "Volta",  "Böcek",       "klasik",   "hatch",  950e3,  [1965, 1985], ["benzin"],                    ["manuel"],             2],
+    ["ferro-spider",   "Ferro",  "Spider",      "klasik",   "coupe",  2.4e6,  [1970, 1990], ["benzin"],                    ["manuel"],             1],
+    ["mirage-comet",   "Mirage", "Comet '68",   "klasik",   "coupe",  3.2e6,  [1966, 1972], ["benzin"],                    ["manuel", "otomatik"], 1],
+    ["stahl-s8",       "Stahl",  "S8",          "luks",     "sedan",  9.8e6,  [2012, 2026], ["benzin", "hibrit"],          ["otomatik"],           2],
+    ["nordik-xr90",    "Nordik", "XR90",        "luks",     "suv",    7.8e6,  [2015, 2026], ["dizel", "hibrit"],           ["otomatik"],           2],
+    ["mirage-escala",  "Mirage", "Escala",      "luks",     "suv",    8.5e6,  [2015, 2026], ["benzin"],                    ["otomatik"],           1]
+  ].map(a => ({ id: a[0], brand: a[1], name: a[2], seg: a[3], body: a[4], price: a[5], years: a[6], fuels: a[7], gears: a[8], pop: a[9] }));
+  G.M = {};
+  G.MODELS.forEach(m => { G.M[m.id] = m; });
+
+  // Ekspertizde çıkabilecek gizli kusurlar. hit: ilgili parçanın gerçek durumundan düşen puan, fix: onarım maliyeti (araç değerine oranla)
+  G.ISSUES = {
+    sanziman: { name: "Şanzıman arızası",            part: "motor", hit: 30, fix: 0.07, hours: 14 },
+    conta:    { name: "Silindir kapak contası yakmış", part: "motor", hit: 22, fix: 0.04, hours: 10, noEv: true },
+    turbo:    { name: "Turbo arızası",               part: "motor", hit: 18, fix: 0.05, hours: 8,  noEv: true },
+    batarya:  { name: "Batarya sağlığı düşük",        part: "motor", hit: 26, fix: 0.12, hours: 6,  evOnly: true },
+    pas:      { name: "Şasi paslanması",             part: "body",  hit: 22, fix: 0.05, hours: 16 },
+    elektrik: { name: "Elektrik tesisatı arızası",   part: "inter", hit: 16, fix: 0.03, hours: 6 },
+    gizliboya:{ name: "Beyan edilmemiş boyalı parça", part: null,    hit: 0,  fix: null, painted: 2 },
+    km:       { name: "Kilometresi düşürülmüş",       part: null,    hit: 0,  fix: null },
+    sel:      { name: "Sel hasarı geçmişi",          part: "inter", hit: 20, fix: null, valueHit: 0.72 }
+  };
+
+  // Araç ilanı veren satıcı tipleri. ask: piyasa değerine göre istenen fiyat, min: istenen fiyatın en fazla ne kadarına inerler
+  G.SELLERS = {
+    sahibinden: { name: "Sahibinden",          ask: [0.97, 1.12], min: [0.86, 0.94], issue: 0.22, w: 5, rounds: 3 },
+    galeriden:  { name: "Galeriden",           ask: [1.04, 1.16], min: [0.93, 0.97], issue: 0.1,  w: 3, rounds: 2, clean: true },
+    filo:       { name: "Filo çıkışı",         ask: [0.92, 1.02], min: [0.9, 0.95],  issue: 0.12, w: 2, rounds: 2, kmMult: 1.9 },
+    acil:       { name: "Acil satılık",        ask: [0.84, 0.93], min: [0.84, 0.91], issue: 0.38, w: 2, rounds: 3 },
+    hasarli:    { name: "Ağır hasar kayıtlı",  ask: [0.62, 0.78], min: [0.85, 0.93], issue: 0.45, w: 1, rounds: 3, bodyHit: 35, pert: true, lvl: 2 },
+    ihale:      { name: "İhale",               ask: [1, 1],       min: [1, 1],       issue: 0.3,  w: 0, rounds: 0 }
+  };
+
+  // Galeriye gelen müşteri tipleri. segs: hangi segmentleri ne kadar istedikleri, haggle: pazarlık payı, picky: boya/değişene hassasiyet
+  G.CTYPES = [
+    { id: "ogrenci",  name: "Üniversite öğrencisi", budget: [250e3, 600e3],  segs: { ekonomi: 4, klasik: 0.4 },               haggle: 0.10, picky: 0.3, patience: 50,  prestige: 0, w: 3,   trade: 0 },
+    { id: "genc",     name: "Genç çalışan",         budget: [450e3, 1.2e6],  segs: { ekonomi: 3, aile: 1, elektrik: 0.7, spor: 0.4 }, haggle: 0.07, picky: 0.5, patience: 60, prestige: 0, w: 4, trade: 0.2 },
+    { id: "aile",     name: "Kalabalık aile",       budget: [650e3, 1.8e6],  segs: { aile: 3, suv: 2, ticari: 0.4 },          haggle: 0.08, picky: 0.7, patience: 80,  prestige: 0, w: 4,   trade: 0.35 },
+    { id: "esnaf",    name: "Esnaf",                budget: [450e3, 1.6e6],  segs: { ticari: 4, aile: 0.6 },                  haggle: 0.12, picky: 0.4, patience: 50,  prestige: 0, w: 3,   trade: 0.25 },
+    { id: "memur",    name: "Memur",                budget: [550e3, 1.3e6],  segs: { aile: 3, ekonomi: 2 },                   haggle: 0.06, picky: 0.85, patience: 90, prestige: 0, w: 3,   trade: 0.3 },
+    { id: "emekli",   name: "Emekli",               budget: [400e3, 1.1e6],  segs: { aile: 2, ekonomi: 2, klasik: 0.6 },      haggle: 0.09, picky: 0.9, patience: 120, prestige: 0, w: 2,   trade: 0.3 },
+    { id: "tekno",    name: "Teknoloji meraklısı",  budget: [1.1e6, 3e6],    segs: { elektrik: 4, premium: 1 },               haggle: 0.05, picky: 0.7, patience: 70,  prestige: 1, w: 2,   trade: 0.2 },
+    { id: "filo",     name: "Filo yöneticisi",      budget: [1e6, 2.6e6],    segs: { ticari: 3, aile: 2 },                    haggle: 0.10, picky: 0.5, patience: 60,  prestige: 1, w: 1,   trade: 0 },
+    { id: "koleksiyon", name: "Koleksiyoncu",       budget: [700e3, 4e6],    segs: { klasik: 6 },                             haggle: 0.08, picky: 0.4, patience: 100, prestige: 1, w: 1,   trade: 0 },
+    { id: "doktor",   name: "Doktor",               budget: [1.8e6, 4.5e6],  segs: { premium: 3, suv: 2, elektrik: 1 },       haggle: 0.05, picky: 0.9, patience: 60,  prestige: 2, w: 2,   trade: 0.3 },
+    { id: "hizli",    name: "Hız tutkunu",          budget: [2e6, 8.5e6],    segs: { spor: 5 },                               haggle: 0.05, picky: 0.8, patience: 70,  prestige: 2, w: 1.2, trade: 0.2 },
+    { id: "patron",   name: "İş insanı",            budget: [3e6, 1.05e7],   segs: { luks: 3, premium: 2, suv: 1 },           haggle: 0.06, picky: 1,   patience: 50,  prestige: 3, w: 1.5, trade: 0.3 }
+  ];
+  G.CT = {};
+  G.CTYPES.forEach(t => { G.CT[t.id] = t; });
+
+  G.FIRST = ["Ahmet", "Mehmet", "Ayşe", "Fatma", "Zeynep", "Elif", "Can", "Emre", "Burak", "Deniz", "Ece", "Selin", "Murat", "Hakan",
+    "Gizem", "Mert", "Kerem", "Derya", "Ozan", "Merve", "Hülya", "Yusuf", "Kemal", "Sevgi", "Ali", "Esra", "Serkan", "Tuğba", "Onur", "Nur"];
+  G.LAST = ["Yılmaz", "Kaya", "Demir", "Şahin", "Çelik", "Aydın", "Öztürk", "Arslan", "Doğan", "Koç", "Kurt", "Aksoy", "Polat", "Erdem", "Yıldız", "Güneş", "Tekin", "Bulut"];
+  G.RIVALS = ["Kartal Oto", "Yıldız Motors", "Hakan Usta", "Özgür Galeri", "Bayrak Otomotiv", "Ege Oto", "Marmara Motor", "Çınar Galeri"];
+
+  // Galeri konumları; her taşınma kapasiteyi, müşteri trafiğini ve prestijli müşteri gelme ihtimalini artırır
+  G.LOCS = [
+    { id: "sanayi",  name: "Sanayi Sitesi Arsası", desc: "Toprak zemin, konteyner ofis. Her şey burada başlar.",       cap: 4,  staff: 1,  rent: 1500,  traffic: 0.8,  prestige: 0, lvl: 1,  cost: 0 },
+    { id: "mahalle", name: "Mahalle Galerisi",     desc: "Ana caddenin arkasında küçük bir dükkân ve önünde açık alan.", cap: 8,  staff: 2,  rent: 4500,  traffic: 1.0,  prestige: 1, lvl: 3,  cost: 300e3 },
+    { id: "cadde",   name: "Cadde Showroom",       desc: "Cam cepheli showroom; vitrindeki araçlar yoldan görünür.",    cap: 14, staff: 4,  rent: 11000, traffic: 1.35, prestige: 2, lvl: 6,  cost: 1.5e6 },
+    { id: "plaza",   name: "Oto Plaza Mağazası",   desc: "Galericiler plazasında iki katlı mağaza.",                    cap: 22, staff: 6,  rent: 24000, traffic: 1.8,  prestige: 3, lvl: 10, cost: 5e6 },
+    { id: "merkez",  name: "Otomotiv Merkezi",     desc: "Kendi binan: showroom, servis ve teslimat alanı bir arada.",  cap: 36, staff: 10, rent: 50000, traffic: 2.4,  prestige: 4, lvl: 15, cost: 18e6 }
+  ];
+
+  G.UPGRADES = {
+    wash:     { name: "Yıkama ünitesi",     desc: "Detaylı temizlik içeride yapılır: daha ucuz ve 1 saatte biter.",                levels: [{ cost: 60e3, lvl: 1 }] },
+    bays:     { name: "Atölye bölmesi",     desc: "Mekanik ve iç onarımları kendi atölyende yaparsın: dış servisten %35 ucuz ve daha hızlı. Her bölme aynı anda bir iş.", levels: [{ cost: 150e3, lvl: 2 }, { cost: 400e3, lvl: 4 }, { cost: 900e3, lvl: 8 }, { cost: 2e6, lvl: 12 }] },
+    paint:    { name: "Boya kabini",        desc: "Kaporta-boya işi içeride yapılır; usta işçilikle tek parça boya yeterli olur.",  levels: [{ cost: 350e3, lvl: 4 }] },
+    pdr:      { name: "Boyasız göçük seti", desc: "Küçük göçükleri boyasız düzeltir; boyalı parça sayısı artmaz.",                 levels: [{ cost: 90e3, lvl: 2 }] },
+    expert:   { name: "Ekspertiz cihazı",   desc: "Ekspertiz 500 ₺'ye düşer; ihaledeki araçları da kontrol edebilirsin.",          levels: [{ cost: 120e3, lvl: 3 }] },
+    showroom: { name: "Kapalı vitrin",      desc: "Vitrindeki araçlar daha çok ilgi görür, dolu ve hırsızlıktan korunur. Lüks müşteriler vitrine bakar.", levels: [{ cost: 200e3, lvl: 3, slots: 2 }, { cost: 650e3, lvl: 6, slots: 4 }, { cost: 1.6e6, lvl: 10, slots: 7 }, { cost: 4e6, lvl: 14, slots: 12 }] },
+    cafe:     { name: "Müşteri köşesi",     desc: "Çay-kahve ve oturma alanı: müşteriler %35 daha sabırlı.",                       levels: [{ cost: 80e3, lvl: 2 }] },
+    security: { name: "Kamera ve alarm",    desc: "Gece hırsızlık ve vandalizm olaylarını önler.",                                  levels: [{ cost: 50e3, lvl: 1 }] }
+  };
+
+  G.ADS = [
+    { name: "Reklam yok",          cost: 0,     mult: 1 },
+    { name: "Sosyal medya",        cost: 1200,  mult: 1.2 },
+    { name: "İlan sitesi vitrini", cost: 3500,  mult: 1.5 },
+    { name: "Billboard ve radyo",  cost: 12000, mult: 2.0, rep: 0.25 }
+  ];
+
+  G.ROLES = {
+    satis:    { name: "Satış danışmanı", base: 1300, desc: "Sen meşgulken teklifleri karşılar, pazarlık eder. Satıştan %1,5 prim alır." },
+    usta:     { name: "Usta",            base: 1600, desc: "Atölye işlerini hızlandırır. Usta olmadan içerideki işler yavaş ilerler." },
+    yikama:   { name: "Yıkamacı",        base: 750,  desc: "Her sabah araçları siler, temiz tutar." },
+    muhasebe: { name: "Muhasebeci",      base: 1150, desc: "Günlük giderleri düşürür, vergi denetiminde ceza yemezsin." }
+  };
+
+  // Atölye işleri. cost: araç değerine göre maliyet (v = aracın kusursuz hâldeki piyasa değeri)
+  G.JOBS = {
+    clean:    { name: "Detaylı temizlik",       hours: 3,  cost: v => 3000,              where: "wash" },
+    service:  { name: "Periyodik bakım",        hours: 6,  cost: v => 6000 + 0.01 * v,   where: "bay" },
+    engine:   { name: "Motor revizyonu",        hours: 24, cost: v => 20000 + 0.05 * v,  where: "bay" },
+    paint:    { name: "Kaporta ve boya",        hours: 16, cost: v => 12000 + 0.03 * v,  where: "paint" },
+    pdr:      { name: "Boyasız göçük düzeltme", hours: 4,  cost: v => 6000,              where: "pdr" },
+    interior: { name: "Döşeme ve iç yenileme",  hours: 10, cost: v => 7000 + 0.018 * v,  where: "bay" },
+    restore:  { name: "Tam restorasyon",        hours: 60, cost: v => 60000 + 0.22 * v,  where: "bay" },
+    fix:      { name: "Arıza giderme",          hours: 8,  cost: v => 0,                 where: "bay" }
+  };
+
+  // Piyasa olayları. seg: segment fiyat çarpanı, traffic: müşteri trafiği çarpanı
+  G.EVENTS = [
+    { id: "yakit",  title: "Akaryakıta büyük zam",          text: "Elektrikli ve hibritlere ilgi arttı, büyük SUV'lar yavaşladı.",       days: 5, seg: { elektrik: 1.14, suv: 0.93 } },
+    { id: "bayram", title: "Bayram yaklaşıyor",              text: "Aileler memleket yolu için araç arıyor.",                              days: 4, seg: { aile: 1.08, suv: 1.05 }, traffic: 1.25, cust: { aile: 2.5 } },
+    { id: "kur",    title: "Döviz kurunda sert yükseliş",    text: "Sıfır araç fiyatları arttı, ikinci el de yukarı gitti.",               days: 6, all: 1.07 },
+    { id: "otv",    title: "ÖTV düzenlemesi",                text: "Sıfır lüks araç pahalandı, alıcılar ikinci ele yöneldi.",               days: 6, seg: { luks: 1.1, premium: 1.06 } },
+    { id: "faiz",   title: "Taşıt kredisi faizleri düştü",   text: "Galerilere gelen müşteri sayısı arttı.",                                days: 5, traffic: 1.35 },
+    { id: "durgun", title: "Piyasada durgunluk",             text: "Alıcılar bekle-gör modunda; fiyatlar biraz geriledi.",                 days: 4, all: 0.96, traffic: 0.75 },
+    { id: "yaz",    title: "Yaz sezonu açıldı",              text: "Spor ve klasik araçlar gözde.",                                        days: 6, seg: { spor: 1.12, klasik: 1.06 }, cust: { hizli: 2 } },
+    { id: "kis",    title: "Kar kapıda",                     text: "4x4 ve SUV talebi arttı, spor araçlara ilgi azaldı.",                   days: 6, seg: { suv: 1.1, spor: 0.93 } },
+    { id: "fuar",   title: "Klasik otomobil fuarı",          text: "Koleksiyoncular şehirde.",                                             days: 3, seg: { klasik: 1.15 }, cust: { koleksiyon: 4 } },
+    { id: "esnaf",  title: "Esnafa düşük faizli kredi",      text: "Ticari araç arayan çok.",                                              days: 5, seg: { ticari: 1.08 }, cust: { esnaf: 2.5, filo: 2 } },
+    { id: "dolu",   title: "Gece dolu yağdı",                text: "Açıkta duran araçların kaportası zarar gördü.",                        instant: "dolu" },
+    { id: "fenomen",title: "Bir fenomen galerini paylaştı",  text: "Takipçileri galerine akın etti.",                                       days: 2, traffic: 1.5, rep: 4 },
+    { id: "hirsiz", title: "Gece hırsızlık girişimi",        text: "",                                                                     instant: "hirsiz" },
+    { id: "denetim",title: "Vergi denetimi",                 text: "",                                                                     instant: "denetim" }
+  ];
+
+  G.QUESTS = [
+    { id: "ilksatis",  text: "İlk aracını sat",                        reward: 25000,   check: S => S.stats.sold >= 1 },
+    { id: "ekspertiz", text: "Bir aracı ekspertize sok",               reward: 10000,   check: S => S.stats.inspected >= 1 },
+    { id: "ihale",     text: "Açık artırmadan araç kazan",             reward: 30000,   check: S => S.stats.auctions >= 1 },
+    { id: "bes",       text: "5 araç sat",                             reward: 60000,   check: S => S.stats.sold >= 5 },
+    { id: "personel",  text: "İlk çalışanını işe al",                  reward: 40000,   check: S => S.staff.length >= 1 },
+    { id: "atolye",    text: "Atölye bölmesi kur",                     reward: 50000,   check: S => S.upg.bays >= 1 },
+    { id: "mahalle",   text: "Mahalle galerisine taşın",               reward: 100000,  check: S => S.loc >= 1 },
+    { id: "kar100",    text: "Tek satıştan 100.000 ₺ kâr et",          reward: 75000,   check: S => S.stats.best >= 100000 },
+    { id: "itibar60",  text: "İtibarını 60'a çıkar",                   reward: 120000,  check: S => S.rep >= 60 },
+    { id: "yirmibes",  text: "25 araç sat",                            reward: 250000,  check: S => S.stats.sold >= 25 },
+    { id: "cadde",     text: "Cadde showroom'a taşın",                 reward: 300000,  check: S => S.loc >= 2 },
+    { id: "kar500",    text: "Tek satıştan 500.000 ₺ kâr et",          reward: 400000,  check: S => S.stats.best >= 500000 },
+    { id: "luks",      text: "Bir lüks araç sat",                      reward: 600000,  check: S => S.stats.luxSold >= 1 },
+    { id: "plaza",     text: "Oto plazaya taşın",                      reward: 1000000, check: S => S.loc >= 3 },
+    { id: "yuz",       text: "100 araç sat",                           reward: 1500000, check: S => S.stats.sold >= 100 },
+    { id: "net50",     text: "Net değerini 50 milyon ₺'ye çıkar",      reward: 3000000, check: S => G.netWorth() >= 50e6 },
+    { id: "merkez",    text: "Otomotiv merkezini kur",                 reward: 5000000, check: S => S.loc >= 4 }
+  ];
+
+  G.PLATE_CITIES = ["34", "06", "35", "16", "07", "41", "01", "42", "33", "27", "55", "61"];
+  G.PLATE_LETTERS = "ABCDEFGHJKLMNPRSTUVYZ";
+})(window.G = window.G || {});
