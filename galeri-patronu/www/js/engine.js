@@ -1128,7 +1128,7 @@
     if (G.partyReady()) out.push({ text: `Yatında parti verebilirsin; yarın zengin müşteriler gelir`, a: "party", btn: "Parti ver" });
     const next = G.LOCS[S.loc + 1];
     if (next && S.level >= next.lvl && S.money >= next.cost * 1.3) out.push({ text: `${next.name} adresine taşınabilirsin`, a: "tab", v: "patron", btn: "Bak" });
-    return out.slice(0, 4);
+    return out.slice(0, 2); // en önemli iki adım (sıra: teklifler, fiyat, ekspertiz, hazırlık...)
   };
 
   G.activeQuests = n => G.QUESTS.filter(q => !S.quests.includes(q.id)).slice(0, n || 3);
