@@ -234,6 +234,8 @@
     delete st.upg.showroom;
     delete st.upg.wash;
     if (!st.lux) { st.lux = []; st.party = null; st.lastParty = -99; }
+    // lüks fiyatları 2,5 katına çıkmadan önce alınan eşyalar eski fiyatlarıyla kayda geçer
+    if (!st.luxPaid) { st.luxPaid = {}; for (const id of st.lux) if (G.LX[id]) st.luxPaid[id] = Math.round(G.LX[id].price / 2.5); }
     for (const x of st.staff) if (x.role === "usta" && x.energy == null) x.energy = 100;
     return st;
   };
@@ -994,7 +996,9 @@
     if (p == null) p = G.prestige();
     return { pay: 1 + Math.min(0.06, p * 0.0002), gate: p >= 150 ? 2 : p >= 50 ? 1 : 0, rep: Math.min(0.5, p / 400) };
   };
-  G.luxResale = x => R.r1k(x.price * G.LUX_CATS[x.cat].resale);
+  // geri satış ödenen fiyat üzerinden hesaplanır (fiyatlar sonradan değişse de)
+  G.luxPaid = x => (S.luxPaid && S.luxPaid[x.id]) || x.price;
+  G.luxResale = x => R.r1k(G.luxPaid(x) * G.LUX_CATS[x.cat].resale);
   G.luxValue = () => G.luxOwned().reduce((a, x) => a + G.luxResale(x), 0);
   G.luxUpkeep = () => Math.round(G.luxOwned().reduce((a, x) => a + x.price * G.LUX_CATS[x.cat].upkeep, 0));
   G.bestOf = cat => G.luxOwned().filter(x => x.cat === cat).sort((a, b) => b.price - a.price)[0] || null;
@@ -1005,6 +1009,8 @@
     if (S.money < x.price) return { ok: false, msg: "Kasada yeterli para yok." };
     S.money -= x.price;
     S.lux.push(id);
+    if (!S.luxPaid) S.luxPaid = {};
+    S.luxPaid[id] = x.price;
     G.addRep(Math.min(5, x.pres / 10));
     G.feed(`Patron lüks bir alışveriş yaptı: ${x.name} (${G.fmtS(x.price)}). Şöhret +${x.pres}.`, "level");
     G.checkQuests();
@@ -1016,6 +1022,7 @@
     const v = G.luxResale(x);
     S.money += v;
     S.lux = S.lux.filter(k => k !== id);
+    if (S.luxPaid) delete S.luxPaid[id];
     G.feed(`${x.name} satıldı: ${G.fmt(v)} kasaya girdi.`, "info");
     return { ok: true, price: v };
   };

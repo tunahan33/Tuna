@@ -65,12 +65,12 @@ Patron kazandığı parayla kendine ev, araba, uçak ve yat alabilir. 18 eşyan�
 
 | Kategori | Eşyalar | Özel fayda | Günlük bakım | Geri satış |
 |---|---|---|---|---|
-| Ev | Mahalle dairesi (3,5 milyon) → site içinde 3+1 → Boğaz manzaralı rezidans → müstakil villa → sahil yalısı (180 milyon) | En çok şöhreti verir | %0,04 | %95 |
-| Araba | Stahl S5 (4,5 milyon) → Mirage Stallion GT → Nordik XR90 → Stahl S8 uzun şasi → Ferro Inferno (32 milyon) | En iyi araba galerinin önüne "PATRON" plakasıyla park eder | %0,08 | %70 |
-| Uçak | Tek motorlu uçak (12 milyon) → helikopter → hafif jet → uzun menzil jet (220 milyon) | Her sabah 2–8 ithal premium, spor, lüks ve elektrikli araç ilanı; uçak sahnenin gökyüzünde uçar | %0,12 | %75 |
-| Yat | Sürat teknesi (6 milyon) → ahşap gulet → motoryat → mega yat (350 milyon) | Haftada bir yat partisi: itibar artar, ertesi gün 1,45–1,9 kat müşteri ve zengin müşteri akını | %0,12 | %70 |
+| Ev | Mahalle dairesi (9 milyon) → site içinde 3+1 → Boğaz manzaralı rezidans → müstakil villa → sahil yalısı (450 milyon) | En çok şöhreti verir | %0,016 | %95 |
+| Araba | Stahl S5 (11 milyon) → Mirage Stallion GT → Nordik XR90 → Stahl S8 uzun şasi → Ferro Inferno (80 milyon) | En iyi araba galerinin önüne "PATRON" plakasıyla park eder | %0,032 | %70 |
+| Uçak | Tek motorlu uçak (30 milyon) → helikopter → hafif jet → uzun menzil jet (550 milyon) | Her sabah 2–8 ithal premium, spor, lüks ve elektrikli araç ilanı; uçak sahnenin gökyüzünde uçar | %0,048 | %75 |
+| Yat | Sürat teknesi (15 milyon) → ahşap gulet → motoryat → mega yat (875 milyon) | Haftada bir yat partisi: itibar artar, ertesi gün 1,45–1,9 kat müşteri ve zengin müşteri akını | %0,048 | %70 |
 
-**Şöhret** (sahip olunan eşyaların puanlarının toplamı) şunları verir: müşterinin ödemeye razı olduğu fiyat +%6'ya kadar, günde +0,5'e kadar itibar, 50 şöhrette bir ve 150 şöhrette iki kademe daha zengin müşteri tipi. Bakım masrafları kişisel gider olarak gün sonu raporunda ayrı satırda görünür ve işletmenin günlük netine sayılmaz. Lüks eşyaların geri satış değeri net değere eklenir.
+**Şöhret** (sahip olunan eşyaların puanlarının toplamı) şunları verir: müşterinin ödemeye razı olduğu fiyat +%6'ya kadar, günde +0,5'e kadar itibar, 50 şöhrette bir ve 150 şöhrette iki kademe daha zengin müşteri tipi. Bakım masrafları kişisel gider olarak gün sonu raporunda ayrı satırda görünür ve işletmenin günlük netine sayılmaz. Lüks eşyaların geri satış değeri net değere eklenir. Bütün eşyaların toplam fiyatı yaklaşık 2,85 milyar ₺; geri satış ödenen fiyat üzerinden hesaplanır.
 
 ## Reklam modeli
 
