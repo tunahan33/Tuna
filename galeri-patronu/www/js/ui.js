@@ -29,18 +29,101 @@
     const ch = s => R.clamp(Math.round(((n >> s) & 255) * f), 0, 255);
     return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
   }
+  // Kasa tipine göre kapı çizgileri, kollar, ayna ve tampon noktaları
+  const META = {
+    sedan:  { seams: [36, 63.5, 92], handles: [54, 80], mirror: [87, 21], belt: 23, rear: 6, front: 114, deck: 24 },
+    hatch:  { seams: [45.5, 82], handles: [36, 66], mirror: [77, 21], belt: 23, rear: 13, front: 110, deck: 14 },
+    wagon:  { seams: [37.5, 59.5, 86], handles: [50, 74], mirror: [81, 21], belt: 23, rear: 6, front: 114, deck: 14 },
+    suv:    { seams: [39.5, 61.5, 90], handles: [52, 78], mirror: [85, 18], belt: 20, rear: 6, front: 114, deck: 9 },
+    coupe:  { seams: [43, 90], handles: [72], mirror: [84, 23], belt: 25, rear: 8, front: 114, deck: 26 },
+    van:    { seams: [48, 68, 94], handles: [58, 82], mirror: [90, 18], belt: 20, rear: 6, front: 114, deck: 7 },
+    pickup: { seams: [52, 65.5, 91], handles: [58, 80], mirror: [86, 18], belt: 20, rear: 6, front: 114, deck: 22 }
+  };
+  const WHEEL = { ekonomi: "steel", ticari: "steel", aile: "alloy", suv: "offroad", elektrik: "aero", premium: "multi", luks: "multi", spor: "sport", klasik: "white" };
+  const BRAND = { Anka: "#c8102e", Ferro: "#1f4fa8", Rivo: "#d4a72c", Kaizen: "#5d6873", Hanbit: "#2e6e4a", Volta: "#2f6fd0", Nordik: "#1d2024", Stahl: "#9aa3ac", Mirage: "#7b2d8e" };
+  let cid = 0;
+
+  function spokes(n, r0, r1, color, w) {
+    let o = "";
+    for (let k = 0; k < n; k++) {
+      const a = (k / n) * Math.PI * 2 - Math.PI / 2, c = Math.cos(a), sn = Math.sin(a);
+      o += `<line x1="${(c * r0).toFixed(2)}" y1="${(sn * r0).toFixed(2)}" x2="${(c * r1).toFixed(2)}" y2="${(sn * r1).toFixed(2)}" stroke="${color}" stroke-width="${w}" stroke-linecap="round"/>`;
+    }
+    return o;
+  }
+  function wheelSVG(cx, r, style) {
+    const rr = r * 0.62;
+    let o = `<g transform="translate(${cx} 38)"><circle r="${r + 1.3}" fill="#0e1013"/><circle r="${r}" fill="#17191d"/><circle r="${r - 1.1}" fill="none" stroke="#2c3137" stroke-width=".8"/>`;
+    switch (style) {
+      case "steel": o += `<circle r="${rr}" fill="#8d959e"/><circle r="${rr * 0.82}" fill="#b9c0c8"/><circle r="${rr * 0.55}" fill="none" stroke="#8d959e" stroke-width=".6"/><circle r="${rr * 0.25}" fill="#6b737c"/>`; break;
+      case "alloy": o += `<circle r="${rr}" fill="#c9cfd6"/><circle r="${rr * 0.86}" fill="#363c44"/>${spokes(5, 1.2, rr * 0.9, "#d7dce2", 1.9)}<circle r="1.3" fill="#9aa3ac"/>`; break;
+      case "multi": o += `<circle r="${rr + 0.4}" fill="#e3e7eb"/><circle r="${rr * 0.88}" fill="#2b3036"/>${spokes(10, 1, rr * 0.92, "#eef1f4", 0.8)}<circle r="1.3" fill="#c9cfd6"/>`; break;
+      case "sport": o += `<circle r="${rr + 0.3}" fill="#8d959e"/><circle r="${rr}" fill="#1d2126"/><path d="M${(-rr * 0.75).toFixed(2)} ${(-rr * 0.45).toFixed(2)} A${(rr * 0.85).toFixed(2)} ${(rr * 0.85).toFixed(2)} 0 0 0 ${(-rr * 0.75).toFixed(2)} ${(rr * 0.45).toFixed(2)}" stroke="#d9343b" stroke-width="2.4" fill="none"/>${spokes(5, 1.2, rr * 0.95, "#5d6873", 1.7)}<circle r="1.2" fill="#d9343b"/>`; break;
+      case "offroad": o += `<circle r="${r}" fill="none" stroke="#24282d" stroke-width="1.6" stroke-dasharray="1.6 1.4"/><circle r="${rr}" fill="#4a5058"/>${[0, 1, 2, 3, 4, 5].map(k => { const a = k * Math.PI / 3; return `<circle cx="${(Math.cos(a) * rr * 0.6).toFixed(2)}" cy="${(Math.sin(a) * rr * 0.6).toFixed(2)}" r=".9" fill="#2b3036"/>`; }).join("")}<circle r="1.4" fill="#7b8a94"/>`; break;
+      case "white": o += `<circle r="${r * 0.8}" fill="#f2f2ee"/><circle r="${rr * 0.85}" fill="#d7dce2"/><circle r="${rr * 0.55}" fill="#eef1f4" stroke="#9aa3ac" stroke-width=".4"/><circle r="1.1" fill="#9aa3ac"/>`; break;
+      case "aero": o += `<circle r="${rr}" fill="#dfe3e8"/><path d="M-${rr * 0.2} -${rr * 0.8} q${rr * 0.5} ${rr * 0.4} ${rr * 0.3} ${rr * 0.9} M${rr * 0.75} ${rr * 0.25} q-${rr * 0.6} 0 -${rr * 0.75} ${rr * 0.55} M-${rr * 0.65} ${rr * 0.45} q${rr * 0.1} -${rr * 0.55} -${rr * 0.15} -${rr * 0.85}" stroke="#5d6873" stroke-width=".9" fill="none"/><circle r="1.1" fill="#2f9fff"/>`; break;
+    }
+    return o + "</g>";
+  }
+
   UI.carShape = function (car) {
     const md = G.M[car.m];
     const sh = SHAPES[md.body] || SHAPES.sedan;
+    const mt = META[md.body] || META.sedan;
+    const seg = md.seg;
     const col = (G.COLORS.find(c => c.name === car.color) || G.COLORS[0]).hex;
-    const r = sh.r || 8;
-    const dirty = car.clean < 45 ? `<path d="${sh.d}" fill="#6b5a3c" opacity="${((45 - car.clean) / 45 * 0.35).toFixed(2)}"/>` : "";
-    const wheel = x => `<circle cx="${x}" cy="38" r="${r}" fill="#1b1f24"/><circle cx="${x}" cy="38" r="${(r * 0.45).toFixed(1)}" fill="#a3acb6"/>`;
-    return `<ellipse cx="60" cy="46" rx="54" ry="2.2" fill="#000" opacity=".18"/>
-      <path d="${sh.d}" fill="${col}" stroke="${shade(col, 0.6)}" stroke-width="1"/>${dirty}
-      ${sh.win.map(w => `<path d="${w}" fill="#2a3644" opacity=".88"/>`).join("")}
-      <rect x="${(sh.head || 108) - 1}" y="27" width="6" height="3" rx="1.5" fill="#ffe7a3"/>
-      <rect x="${sh.tail}" y="27" width="3.5" height="3" rx="1" fill="#d23a35"/>${wheel(30)}${wheel(90)}`;
+    const dark = shade(col, 0.55), r = sh.r || 8;
+    const id = "c" + (++cid);
+    const chrome = seg === "klasik" || seg === "luks";
+    const ev = car.fuel === "elektrik";
+    const body = car.body == null ? 90 : car.body;
+    const clean = car.clean == null ? 100 : car.clean;
+    const contrast = ["Beyaz", "Gümüş", "Sarı"].includes(car.color) ? "#1d2024" : "#ffffff";
+    const head = sh.head || 108, rear = mt.rear, front = mt.front;
+    let o = `<defs><clipPath id="${id}b"><path d="${sh.d}"/></clipPath><clipPath id="${id}w">${sh.win.map(w => `<path d="${w}"/>`).join("")}</clipPath></defs>`;
+    o += `<ellipse cx="60" cy="46.2" rx="55" ry="2.4" fill="#000" opacity=".22"/>`;
+    if (md.body === "suv") o += `<path d="M14 7 H74" stroke="#2c3540" stroke-width="1.5" stroke-linecap="round"/><path d="M20 7 v1.6 M66 7 v1.6" stroke="#2c3540" stroke-width="1.2"/>`;
+    o += `<path d="${sh.d}" fill="${col}" stroke="${dark}" stroke-width=".8"/>`;
+    // gövde gölgesi, ışığı ve çizgileri
+    o += `<g clip-path="url(#${id}b)">
+      <rect x="0" y="31" width="120" height="12" fill="#000" opacity=".2"/>
+      <rect x="0" y="0" width="120" height="${mt.belt - 1.5}" fill="#fff" opacity=".13"/>
+      <path d="M0 ${mt.belt + 4.4} H120" stroke="#fff" stroke-width=".9" opacity=".45"/>
+      <path d="M0 ${mt.belt + 6.1} H120" stroke="#000" stroke-width=".6" opacity=".14"/>
+      <path d="M0 34.6 H120" stroke="#000" stroke-width=".7" opacity=".22"/>
+      ${mt.seams.map(x => `<path d="M${x} ${mt.belt} V35" stroke="${dark}" stroke-width=".5" opacity=".8"/>`).join("")}`;
+    if (car.painted > 0) o += `<rect x="${front - 24}" y="${mt.belt}" width="24" height="16" fill="${shade(col, car.painted > 2 ? 1.14 : 1.07)}" opacity=".55"/>`;
+    if (seg === "spor") o += `<rect x="0" y="${mt.belt + 7.4}" width="120" height="1.4" fill="${contrast}" opacity=".85"/>`;
+    if (chrome) o += `<path d="M0 31.2 H120" stroke="#eef1f4" stroke-width=".9"/>`;
+    if (ev) o += `<path d="M0 34.2 H120" stroke="#2f9fff" stroke-width=".8"/>`;
+    o += `<rect x="${rear - 1}" y="30.6" width="12" height="4.6" fill="${chrome ? "#dfe3e8" : "#2a2f35"}" opacity="${chrome ? 1 : 0.5}"/><rect x="${front - 11}" y="30.6" width="12" height="4.6" fill="${chrome ? "#dfe3e8" : "#2a2f35"}" opacity="${chrome ? 1 : 0.5}"/>`;
+    if (clean < 45) o += `<rect x="0" y="0" width="120" height="48" fill="#6b5a3c" opacity="${((45 - clean) / 45 * 0.35).toFixed(2)}"/>`;
+    if (clean < 30) o += `<path d="M14 36 q4 -4 10 -2 q-4 1 -6 3 z M74 36 q4 -4 10 -2 q-4 1 -6 3 z M36 35 q4 -3 9 -1 q-3 1 -5 2 z" fill="#5a4a30" opacity=".55"/>`;
+    if (body < 55) o += `<path d="M58 31 l9 -2.2 M61 32.6 l6 -1.4 M46 29 l5 1.2" stroke="#ffffff" stroke-width=".55" opacity=".65"/><ellipse cx="70" cy="30.5" rx="4" ry="1.8" fill="#000" opacity=".2"/>`;
+    if (body < 35) o += `<path d="M24 28 l6 -1 M98 30 l-5 2" stroke="#ffffff" stroke-width=".55" opacity=".65"/><ellipse cx="102" cy="31" rx="3" ry="1.5" fill="#000" opacity=".22"/>${[30, 44, 88].map((x, i) => `<circle cx="${x}" cy="${33 + (i % 2)}" r="${1 + (i % 2) * 0.5}" fill="#8a4b22" opacity=".75"/>`).join("")}`;
+    o += `</g>`;
+    // camlar ve yansıma
+    o += sh.win.map(w => `<path d="${w}" fill="#24303c"/>`).join("");
+    o += `<g clip-path="url(#${id}w)"><path d="M30 6 L40 6 L28 30 L18 30 Z M56 6 L61 6 L49 30 L44 30 Z M78 6 L86 6 L74 30 L66 30 Z" fill="#fff" opacity=".2"/></g>`;
+    if (chrome || seg === "premium") o += sh.win.map(w => `<path d="${w}" fill="none" stroke="#e3e7eb" stroke-width=".55"/>`).join("");
+    // kollar, ayna, ışıklar, tampon ayrıntıları
+    o += mt.handles.map(hx => `<rect x="${hx - 2}" y="${mt.belt + 5.2}" width="4" height="1.1" rx=".5" fill="${shade(col, 0.45)}"/>`).join("");
+    o += `<path d="M${mt.mirror[0]} ${mt.mirror[1]} h3.2 l1.2 2.4 h-4.2 z" fill="${col}" stroke="${dark}" stroke-width=".5"/>`;
+    o += `<path d="M${head - 6} 26.4 L${head + 4.5} 27.4 L${head + 4} 29.8 L${head - 6.4} 29.8 Z" fill="#fff3c4" stroke="#c9b58a" stroke-width=".4"/>`;
+    if (seg === "premium" || seg === "luks" || ev) o += `<rect x="${head - 7}" y="30.4" width="9" height=".9" rx=".4" fill="#dff6ff"/>`;
+    o += `<rect x="${md.body === "hatch" ? 13 : sh.tail}" y="26.2" width="4" height="3.4" rx=".8" fill="#c62d2a"/><rect x="${(md.body === "hatch" ? 13 : sh.tail) + 0.8}" y="26.8" width="1.6" height="1.2" fill="#ff8a7a"/>`;
+    o += ev ? `<rect x="${front - 5}" y="31" width="4" height="1" fill="${dark}"/>` : `<rect x="${front - 5}" y="30.8" width="4.6" height="2.6" rx=".6" fill="#1b1f24" opacity=".75"/>`;
+    o += `<circle cx="${front - 7.5}" cy="29" r="1" fill="${BRAND[md.brand] || "#9aa3ac"}" stroke="#eef1f4" stroke-width=".3"/>`;
+    if (md.body === "suv") o += `<circle cx="${front - 3}" cy="33.4" r=".9" fill="#fff3c4"/>`;
+    if (!ev) o += `<rect x="${rear - 1.6}" y="35.2" width="4.6" height="1.6" rx=".8" fill="#6b737c"/>`;
+    if (ev) o += `<rect x="${rear + 12}" y="${mt.belt + 3}" width="3" height="2" rx=".5" fill="${dark}"/><text x="${mt.seams[0] + 4}" y="${mt.belt + 10.5}" font-size="3.2" font-weight="800" fill="#2f9fff" font-family="Saira, sans-serif">e</text>`;
+    if (seg === "spor" && (md.body === "coupe" || md.body === "sedan")) o += `<path d="M${rear + 1} ${mt.deck - 2} h12 v-1.6 h-12 z" fill="${dark}"/><path d="M${rear + 4} ${mt.deck - 0.4} v1.6 M${rear + 10} ${mt.deck - 0.4} v1.6" stroke="${dark}" stroke-width=".8"/>`;
+    if (md.body === "van") o += `<path d="M48 21.2 H68" stroke="#000" stroke-width=".6" opacity=".35"/>`;
+    if (md.body === "pickup") o += `<path d="M6 22.4 H50" stroke="${dark}" stroke-width="1.2"/><path d="M9 23 V34" stroke="${dark}" stroke-width=".5"/>`;
+    if ((car.motor != null ? car.motor : 90) < 35 && !ev) o += `<circle cx="${rear - 3}" cy="34" r="1.8" fill="#9aa3ac" opacity=".55"/><circle cx="${rear - 6}" cy="32" r="2.4" fill="#9aa3ac" opacity=".35"/>`;
+    o += wheelSVG(30, r, WHEEL[seg] || "alloy") + wheelSVG(90, r, WHEEL[seg] || "alloy");
+    if (clean >= 95) o += `<g class="spark"><path d="M50 9 l.7 2 l2 .7 l-2 .7 l-.7 2 l-.7 -2 l-2 -.7 l2 -.7 z M100 24 l.6 1.6 l1.6 .6 l-1.6 .6 l-.6 1.6 l-.6 -1.6 l-1.6 -.6 l1.6 -.6 z" fill="#ffffff"/></g>`;
+    return o;
   };
   UI.carSVG = car => `<svg viewBox="0 0 120 48" role="img" aria-label="${esc(car.color)} ${esc(G.carName(car))}">${UI.carShape(car)}</svg>`;
 

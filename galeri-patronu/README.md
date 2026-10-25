@@ -31,6 +31,20 @@ Bir oyun günü (09:00–19:00) normal hızda yaklaşık 1 dakika sürer; 2× ve
 | **Usta çardağı** | Ustalar çalıştıkça yorulur ve yavaşlar. Çardağa gönderilen usta enerjisini toplar; en az 30 dakika dinlenen usta çardaktan çıkınca bir süre çok daha hızlı çalışır (×1,33'ten ×2'ye, 1,5 saatten 4,5 saate). Seviyeyle çardağın kapasitesi ve dinlenme hızı artar; 10. seviyede yorulan usta kendisi molaya gider. |
 | **Ön otopark** | Her 2 seviyede +1 park yeri, 4. seviyede aydınlatma (hırsızlık riski yarıya iner), 6. seviyede tente (araçların bir kısmı doludan korunur), 10. seviyede asfalt ve çizgili park yerleri. |
 
+### Her seviye görünür
+
+Her tesis seviyesi galeri sahnesine yeni bir parça ekler (20 seviye = 20 parça, birikerek):
+
+- **Galeri binası:** çatı lambaları, "AÇIK" tabelası, saksılar, spot ışıklar, bayrak direği, kırmızı halı, neon çerçeve, giriş tentesi, çatı bayrakları, ağaç, LED ekran, çatı reklam panosu, ışıklı kaide, balonlar, altın cephe, ikinci ağaç, ışık hüzmeleri, kadife ip, taç ve parıltılar.
+- **Yıkama:** hortum, kova, su deposu, cila şişeleri, dönen fırça, köpük, döner lamba, kurutma fanı, köpük tüneli, ikinci fırça, LED şerit, süpürge direği, köpük kabarcıkları, lastik parlatıcı, güneş paneli, bayrak, sürekli su, renk değiştiren ışık, altın "DETAY" tabelası.
+- **Çardak:** masa, tabureler, kareli örtü, semaver ve çay bardakları, saksılar, tavla, radyo, kilim, ışık zinciri, kedi, testi, hasır perde, kuş kafesi, üzüm salkımları, vantilatör, mangal, fener, çiçekler, hamak; asma her seviyede biraz daha sarar.
+- **Otopark:** P tabelası, park numaraları, tekerlek takozları, aydınlatma, çiçek şeridi, tente, güvenlik kulübesi, bariyer, ağaçlar, asfalt, hız tümseği, ikinci sıra tente, elektrikli şarj istasyonu, yön okları, lamba bayrakları, kamera, LED zemin şeridi, bütün sıralara tente, altın babalar, VIP park yeri.
+- **Ekipmanlar:** atölye bölmeleri, boya kabini, göçük seti arabası, ekspertiz tabelası, müşteri köşesi şemsiyesi ve kamera da sahnede görünür.
+
+### Araç çizimleri
+
+Araçlar kasa tipine göre çizilir. Gövdede ışık, gölge, kapı çizgileri, kollar, ayna, cam yansıması ve marka rozeti vardır. Jantlar sınıfa göre değişir: ekonomi ve ticaride çelik jant, ailede alüminyum, SUV'da arazi, elektrikliyi aerodinamik, premium ve lükste çok kollu, sporda siyah jant ile kırmızı kaliper, klasikte beyaz yanaklı lastik. Spor araçta spoiler ve şerit, SUV'da tavan rayı, lüks ve klasikte krom, elektrikliyi mavi şerit bulunur. Aracın durumu görünür: kaportası kötü araç çizik ve göçüklü (çok kötüyse paslı), boyalı parçası farklı tonda, motoru kötü araç dumanlı, kirli araç çamurlu, yeni yıkanmış araç parıltılıdır.
+
 ### Denge ayarı
 
 Her tesisin n. seviyesi için gereken oyuncu seviyesi = başlangıç + yuvarla((n − 1) × 1,15); fiyat = taban × 1,3^(n − 1). Böylece tesisler oyuncunun seviyesiyle birlikte büyür ve 20. seviye oyuncunun 23–25. seviyesine denk gelir. Değerler `www/js/data.js` içindeki `G.FAC_STEP`, `G.FAC_GROWTH` ve her tesisin `start` ile `base` alanlarından değiştirilir.
