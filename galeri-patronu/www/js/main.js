@@ -47,6 +47,7 @@
 
   function start(hotData) {
     UI.bind();
+    if (G.Ads) G.Ads.init();
     const saved = (hotData && hotData.state) || loadSaved();
     if (saved) {
       G.S = saved;

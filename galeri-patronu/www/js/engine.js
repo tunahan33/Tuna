@@ -65,7 +65,8 @@
       loan: 0, feed: [], complaints: [],
       today: G.blankDay(), history: [],
       stats: { sold: 0, bought: 0, revenue: 0, profit: 0, best: 0, inspected: 0, auctions: 0, luxSold: 0 },
-      quests: [], nextId: 1, summary: null, started: false
+      quests: [], nextId: 1, summary: null, started: false,
+      adv: { day: 0, n: {}, total: 0, lastInter: 0, lastWatch: 0 }, boost: null
     };
     Object.keys(G.SEGMENTS).forEach(k => { st.trend[k] = 1; });
     return st;
@@ -298,8 +299,8 @@
 
   G.expertCost = () => (S.upg.expert ? 500 : 3500);
 
-  G.inspect = function (car) {
-    const cost = G.expertCost();
+  G.inspect = function (car, free) {
+    const cost = free ? 0 : G.expertCost();
     if (car.inspected) return { ok: false, msg: "Bu araç zaten ekspertizden geçti." };
     if (S.money < cost) return { ok: false, msg: "Kasada ekspertiz ücreti kadar para yok." };
     S.money -= cost;
@@ -518,13 +519,19 @@
     S.jobs = S.jobs.filter(x => x !== j);
     if (!car) return;
     car.status = "lot";
-    switch (j.type) {
+    applyJob(car, j.type, j.inhouse, j.issue, false);
+    G.feed(`Atölye: ${G.carTitle(car)} için ${j.name.toLocaleLowerCase("tr-TR")} bitti.`, "shop");
+  }
+  G.finishJob = finishJob;
+
+  function applyJob(car, type, inhouse, issue, expected) {
+    switch (type) {
       case "clean": car.clean = 100; car.inter = Math.min(100, car.inter + 3); break;
       case "service": car.motor = Math.min(95, car.motor + 22); break;
       case "engine": car.motor = Math.max(car.motor, 96); break;
       case "paint":
         car.body = Math.max(car.body, 95);
-        car.painted += j.inhouse ? 1 : R.randi(1, 3);
+        car.painted += inhouse ? 1 : expected ? 2 : R.randi(1, 3);
         break;
       case "pdr": car.body = Math.min(100, car.body + 15); break;
       case "interior": car.inter = Math.max(car.inter, 95); break;
@@ -533,10 +540,31 @@
         car.painted += 3; car.clean = 100;
         car.issues.forEach(is => { if (is.known && G.ISSUES[is.id].fix) is.fixed = true; });
         break;
-      case "fix": { const is = car.issues.find(x => x.id === j.issue); if (is) is.fixed = true; break; }
+      case "fix": { const is = car.issues.find(x => x.id === issue); if (is) is.fixed = true; break; }
     }
-    G.feed(`Atölye: ${G.carTitle(car)} için ${j.name.toLocaleLowerCase("tr-TR")} bitti.`, "shop");
   }
+
+  // Bir işin aracın piyasa değerini ne kadar artıracağı (temizlik değere değil müşteri ilgisine etki eder)
+  G.jobGain = function (car, o) {
+    const copy = JSON.parse(JSON.stringify(car));
+    applyJob(copy, o.type, o.inhouse, o.issue, true);
+    return G.value(copy, false) - G.value(car, false);
+  };
+  // Araç için en mantıklı sıradaki iş: önce bilinen arızalar, sonra değeri maliyetinden çok artıran iş, sonra temizlik
+  G.recommendJob = function (car) {
+    if (car.status !== "lot") return null;
+    const opts = G.jobOptions(car).filter(o => !o.why || o.why === "Kasada yeterli para yok");
+    let best = null, bestNet = 0;
+    for (const o of opts) {
+      if (o.type === "clean") continue;
+      const net = G.jobGain(car, o) - o.cost;
+      const score = o.type === "fix" ? net + 1e9 : net;
+      if (net > o.cost * 0.15 && score > bestNet) { bestNet = score; best = o; }
+    }
+    if (best) return best;
+    if (car.clean < 70) return opts.find(o => o.type === "clean") || null;
+    return null;
+  };
 
   // ---- Fiyat, vitrin, toptan satış ----
   G.setPrice = function (car, price) { car.price = Math.max(0, R.r1k(price)); };
@@ -828,6 +856,73 @@
       }
     }
   };
+  // ---- Reklam ödülleri ----
+  // Ödüllü reklamlar yalnızca oyuncu isteyince açılır; her ödülün ve günün bir sınırı vardır.
+  G.AD_CAPS = { rush: 3, boost: 2, bonus: 1, inspect: 3, tea: 3 };
+  G.AD_DAILY = 10;
+  function adDay() {
+    if (!S.adv) S.adv = { day: 0, n: {}, total: 0, lastInter: 0, lastWatch: 0 };
+    if (S.adv.day !== S.day) { S.adv.day = S.day; S.adv.n = {}; S.adv.total = 0; }
+    return S.adv;
+  }
+  G.adLeft = function (kind) {
+    const a = adDay();
+    return Math.max(0, Math.min(G.AD_CAPS[kind] - (a.n[kind] || 0), G.AD_DAILY - a.total));
+  };
+  G.adUsed = function (kind) {
+    const a = adDay();
+    a.n[kind] = (a.n[kind] || 0) + 1;
+    a.total++;
+    a.lastWatch = S.day;
+  };
+  G.boostActive = () => !!(S.boost && S.boost.day === S.day && S.min < S.boost.until);
+  G.reward = {
+    rush(job) { if (!S.jobs.includes(job)) return false; finishJob(job); return true; },
+    boost() { S.boost = { day: S.day, until: Math.min(G.CLOSE, S.min + 120) }; G.feed("Sosyal medya kampanyası başladı: 2 saat boyunca iki kat müşteri.", "good"); return true; },
+    bonus(sm) { if (!sm || sm.bonusTaken) return false; sm.bonusTaken = true; S.money += sm.bonus; G.feed(`Sponsor bonusu: ${G.fmt(sm.bonus)} kasaya girdi.`, "good"); return true; },
+    inspect(car) { return G.inspect(car, true); },
+    tea(c) { if (!S.custs.includes(c)) return false; c.patience = c.patMax; c.rounds++; c.msgs.push({ who: "them", text: "Çay için teşekkürler, acelem yok. Konuşalım." }); return true; }
+  };
+  // Ara reklam: yalnızca gün geçişinde, 4. günden sonra, en az 3 günde bir ve o gün ödüllü reklam izlenmediyse
+  G.interstitialDue = function (endedDay) {
+    const a = adDay();
+    return endedDay >= 4 && endedDay - (a.lastInter || 0) >= 3 && a.lastWatch < endedDay;
+  };
+  G.interstitialShown = function (endedDay) { adDay().lastInter = endedDay; };
+
+  // ---- Sade ekran yardımcıları ----
+  G.condScore = car => Math.round(G.cond(car, false));
+  G.condLabel = v => (v >= 85 ? "Çok iyi" : v >= 70 ? "İyi" : v >= 55 ? "Orta" : v >= 40 ? "Bakım ister" : "Kötü");
+  G.PRICE_PRESETS = [
+    { k: "hizli", name: "Hızlı satış", f: 0.97, note: "Müşteri çabuk gelir" },
+    { k: "dengeli", name: "Dengeli", f: 1.05, note: "Önerilen" },
+    { k: "karli", name: "Kârlı", f: 1.12, note: "Bekleyebilir" }
+  ];
+  G.dealLabel = function (ask, value) {
+    const r = ask / value;
+    return r <= 0.93 ? { t: "Fırsat", c: "good" } : r <= 1.04 ? { t: "Normal fiyat", c: "" } : { t: "Pahalı", c: "bad" };
+  };
+  // "Şimdi ne yapmalı?" listesi: oyuncuya sıradaki adımları gösterir
+  G.todos = function () {
+    const out = [];
+    const offers = S.custs.filter(c => c.state === "offer");
+    for (const c of offers.slice(0, 2)) {
+      const car = G.custCar(c);
+      if (car) out.push({ text: `${c.name}, ${G.carName(car)} için ${G.fmtS(c.offer)} teklif ediyor`, a: "cust", id: c.id, btn: "Cevap ver", hot: true });
+    }
+    const noPrice = S.cars.filter(c => c.status === "lot" && !c.price);
+    if (noPrice.length) out.push({ text: noPrice.length === 1 ? `${G.carName(noPrice[0])} aracının fiyat etiketi yok; müşteri bakmaz` : `${noPrice.length} aracın fiyat etiketi yok; müşteri bakmaz`, a: "car", id: noPrice[0].id, btn: "Fiyat koy" });
+    const unins = S.cars.find(c => c.status === "lot" && !c.inspected);
+    if (unins) out.push({ text: `${G.carName(unins)} ekspertizden geçmedi; gizli kusuru olabilir`, a: "car", id: unins.id, btn: "Ekspertiz" });
+    const prep = S.cars.find(c => c.status === "lot" && G.recommendJob(c));
+    if (prep) { const o = G.recommendJob(prep); out.push({ text: `${G.carName(prep)}: ${o.name.toLocaleLowerCase("tr-TR")} değerini artırır`, a: "car", id: prep.id, btn: "Hazırla" }); }
+    if (G.spaceLeft() > 0 && S.listings.some(l => !l.done) && S.money > 150000) out.push({ text: `${G.spaceLeft()} boş park yerin var; piyasada ${S.listings.filter(l => !l.done).length} ilan seni bekliyor`, a: "tab", v: "piyasa", btn: "İlanlara bak" });
+    if (S.auction && !S.auction.finished && S.auction.idx === 0 && !S.auction.live && G.spaceLeft() > 0) out.push({ text: `Günün ihalesinde ${S.auction.lots.length} araç var`, a: "auction", btn: "İhaleye gir" });
+    const next = G.LOCS[S.loc + 1];
+    if (next && S.level >= next.lvl && S.money >= next.cost * 1.3) out.push({ text: `${next.name} adresine taşınabilirsin`, a: "tab", v: "patron", btn: "Bak" });
+    return out.slice(0, 4);
+  };
+
   G.activeQuests = n => G.QUESTS.filter(q => !S.quests.includes(q.id)).slice(0, n || 3);
 
   // ---- Zaman ----
@@ -839,7 +934,7 @@
     const L = G.loc();
     const listed = S.cars.filter(c => c.status === "lot" && c.price > 0).length;
     const stock = listed ? Math.min(1.5, 0.6 + listed * 0.12) : 0.25;
-    const perHour = 1.15 * L.traffic * G.ADS[S.ads].mult * (0.45 + S.rep / 90) * G.trafficMult() * stock;
+    const perHour = 1.15 * L.traffic * G.ADS[S.ads].mult * (0.45 + S.rep / 90) * G.trafficMult() * stock * (G.boostActive() ? 2 : 1);
     if (S.custs.length < 3 + L.prestige * 2 && R.chance(perHour / 60)) G.spawnCustomer();
     // müşteriler
     for (const c of S.custs.slice()) {
@@ -915,6 +1010,7 @@
     G.newAuction();
     if (S.day - S.candDay >= 5) G.newCandidates();
     G.checkQuests();
+    summary.bonus = R.r1k(R.clamp(Math.max(0, T.profit) * 0.3, 25000 + S.level * 5000, 150000 + S.level * 60000));
     S.summary = summary;
     S.paused = true;
   };

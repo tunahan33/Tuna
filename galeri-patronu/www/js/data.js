@@ -155,7 +155,7 @@
   };
 
   G.ADS = [
-    { name: "Reklam yok",          cost: 0,     mult: 1 },
+    { name: "Tanıtım yok",         cost: 0,     mult: 1 },
     { name: "Sosyal medya",        cost: 1200,  mult: 1.2 },
     { name: "İlan sitesi vitrini", cost: 3500,  mult: 1.5 },
     { name: "Billboard ve radyo",  cost: 12000, mult: 2.0, rep: 0.25 }

@@ -68,7 +68,7 @@ h1, h2, h3 { text-wrap: balance; }
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 10px 8px;
 }
-.top-in { max-width: 980px; margin: 0 auto; display: grid; gap: 8px; }
+.top-in { max-width: 980px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .top-row { display: flex; align-items: center; gap: 10px; }
 .gname { font: 800 20px/1 var(--font-display); text-transform: uppercase; letter-spacing: .02em; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .clock { text-align: right; line-height: 1.1; }
@@ -77,9 +77,10 @@ h1, h2, h3 { text-wrap: balance; }
 .speed { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 .speed button { border: 0; background: transparent; padding: 6px 9px; font: 600 13px/1 var(--font-num); color: var(--muted); min-width: 34px; }
 .speed button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
-.kpis { display: grid; grid-template-columns: 1.4fr 1fr 1fr 0.8fr; gap: 10px; }
+.kpis { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 12px; }
 .kpi { min-width: 0; }
 .kpi-l { font: 600 10.5px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+#kMoney { font-size: 21px; }
 .kpi-v { font: 700 17px/1.25 var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kpi-v.neg { color: var(--bad); }
 .meter { height: 4px; background: var(--surface-2); border-radius: 2px; overflow: hidden; margin-top: 3px; }
@@ -95,7 +96,7 @@ h1, h2, h3 { text-wrap: balance; }
   max-width: 980px; margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 14px calc(88px + env(safe-area-inset-bottom, 0px));
-  display: grid; gap: 14px;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px;
 }
 .vh { display: flex; align-items: end; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .vh h2 { font: 800 24px/1 var(--font-display); text-transform: uppercase; margin: 0; letter-spacing: .01em; }
@@ -249,12 +250,91 @@ h1, h2, h3 { text-wrap: balance; }
 .intro-art svg { width: 33%; height: auto; flex: none; }
 ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
 
+/* Galeri sahnesi */
+.scene-card { width: 100%; max-width: 720px; justify-self: center; border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); background: #9aa3ac; }
+.scene { display: block; width: 100%; height: auto; }
+.scene .hit { cursor: pointer; }
+.scene .hit:hover { filter: brightness(1.08); }
+.scene .walk { animation: walk 6s ease-in-out infinite alternate; }
+.scene .drop { animation: drop 0.9s linear infinite; }
+.scene .bubble { animation: bob 1.6s ease-in-out infinite; }
+@keyframes walk { from { translate: -14px 0; } to { translate: 14px 0; } }
+@keyframes drop { from { translate: 0 -3px; opacity: 1; } to { translate: 0 8px; opacity: 0; } }
+@keyframes bob { 50% { translate: 0 -2px; } }
+.scene-cap { display: flex; justify-content: space-between; gap: 10px; padding: 8px 12px; background: var(--surface); font-size: 13px; color: var(--muted); }
+.scene-cap b { color: var(--ink); font-family: var(--font-num); }
+
+/* Yapılacaklar */
+.todo { gap: 8px; }
+.todo-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.todo-row:first-of-type { border-top: 0; padding-top: 0; }
+.todo-row span { min-width: 0; }
+.todo-row .btn { flex: none; }
+.todo-row.hot span { font-weight: 600; }
+
+/* Kompakt araç satırları */
+.rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 8px; }
+.crow { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 10px; align-items: center; background: var(--surface); border-radius: 12px; padding: 8px 12px 8px 8px; box-shadow: var(--shadow); cursor: pointer; border: 1px solid transparent; }
+.crow:hover { border-color: var(--line); }
+.crow-img { background: linear-gradient(var(--surface-2) 0 72%, var(--ground) 72% 100%); border-radius: 8px; padding: 6px 4px 0; }
+.crow-img svg { display: block; width: 100%; height: auto; }
+.crow-main { display: grid; gap: 3px; min-width: 0; justify-items: start; }
+.crow-main b { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.crow-main > span:not(.chip) { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.crow-side { display: grid; justify-items: end; gap: 4px; text-align: right; }
+.crow-side small { font-size: 12px; font-weight: 600; white-space: nowrap; }
+.sticker.sm { position: static; font-size: 13px; padding: 5px 7px 4px; transform: rotate(2deg); white-space: nowrap; }
+
+/* Araç sayfası */
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tiles div { background: var(--surface); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+.tiles span { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.tiles b { font: 700 15px/1.3 var(--font-num); font-variant-numeric: tabular-nums; display: block; overflow-wrap: anywhere; }
+.step { display: grid; gap: 8px; }
+.step > h3 { margin: 4px 0 0; display: flex; align-items: center; gap: 8px; font: 700 17px/1 var(--font-display); text-transform: uppercase; letter-spacing: .03em; }
+.step .n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: var(--surface); font: 700 12px/1 var(--font-num); }
+.presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.preset { display: grid; gap: 2px; text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 9px 10px; min-width: 0; }
+.preset span { font-size: 12px; font-weight: 600; color: var(--muted); }
+.preset b { font: 700 16px/1.2 var(--font-num); font-variant-numeric: tabular-nums; }
+.preset small { font-size: 11.5px; font-weight: 600; }
+.preset em { font-style: normal; font-size: 11px; color: var(--muted); }
+.preset.on { border-color: var(--accent); background: var(--accent-soft); }
+.rec { grid-template-columns: minmax(0, 1fr); }
+.rec p { margin-top: 2px; }
+details.more { background: var(--surface); border-radius: 10px; padding: 0 12px; }
+details.more > summary { cursor: pointer; padding: 11px 0; font-weight: 600; font-size: 14px; color: var(--accent); list-style: none; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::after { content: " ▾"; }
+details.more[open] { padding-bottom: 12px; display: grid; gap: 10px; }
+details.more[open] > summary::after { content: " ▴"; }
+.link { border: 0; background: none; color: var(--bad); font-size: 13px; padding: 2px 0; justify-self: start; text-decoration: underline; }
+.big-btns .btn { padding: 12px 14px; font-size: 15px; }
+.pat-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.num.big { font-weight: 700; font-size: 18px; }
+.offer .btns .btn { flex: 1 1 auto; }
+
+/* Reklam düğmeleri ve katmanı */
+.btn.ad { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.btn.ad svg { width: 14px; height: 14px; }
+.btn.ad small { font-size: 11px; opacity: .75; font-weight: 600; }
+.card.boost, .card.bonus { border: 1.5px dashed var(--accent); }
+.ad-layer { position: fixed; inset: 0; z-index: 40; background: rgba(5, 8, 12, .86); display: grid; place-items: center; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.ad-box { width: 100%; max-width: 420px; background: var(--surface); border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+.ad-tag { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.ad-art { aspect-ratio: 16 / 9; max-width: 100%; border-radius: 10px; background: repeating-linear-gradient(135deg, var(--surface-2) 0 14px, var(--bg) 14px 28px); display: grid; place-content: center; text-align: center; gap: 6px; padding: 16px; }
+.ad-art span { color: var(--muted); font-size: 13px; }
+
 @media (max-width: 520px) {
-  .kpis { grid-template-columns: 1.3fr 1fr 1fr; }
-  .kpis .kpi:nth-child(4) { display: none; }
   .gname { font-size: 18px; }
-  .grid { grid-template-columns: 1fr; }
+  .grid, .rows { grid-template-columns: 1fr; }
+  .crow { grid-template-columns: 78px minmax(0, 1fr) auto; }
+  .presets { gap: 6px; }
+  .preset { padding: 8px; }
+  .preset b { font-size: 14px; }
+  .small-ctl button { padding: 6px 9px; }
 }
+@media (prefers-reduced-motion: reduce) { .scene .walk, .scene .drop, .scene .bubble { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .sheet { animation: none; } .prog i { transition: none; } }
 </style>
 
@@ -269,8 +349,7 @@ ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
     <div class="kpis">
       <div class="kpi"><div class="kpi-l">Kasa</div><div class="kpi-v" id="kMoney">0 ₺</div></div>
       <div class="kpi"><div class="kpi-l">İtibar</div><div class="kpi-v" id="kRep">0</div><div class="meter"><i id="kRepBar"></i></div></div>
-      <div class="kpi"><div class="kpi-l" id="kLvlL">Seviye 1</div><div class="kpi-v" id="kXp">0</div><div class="meter"><i id="kXpBar"></i></div></div>
-      <div class="kpi"><div class="kpi-l">Park</div><div class="kpi-v" id="kPark">0/0</div></div>
+      <div class="kpi"><div class="kpi-l" id="kLvlL">Seviye 1</div><div class="kpi-v" id="kXp">%0</div><div class="meter"><i id="kXpBar"></i></div></div>
     </div>
     <button class="ticker" type="button" data-a="feed" id="ticker"><span id="tickerT">Hoş geldin.</span><b>Kayıt</b></button>
   </div>
@@ -285,9 +364,12 @@ ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
   <section class="sheet" id="sheet" role="dialog" aria-modal="true"></section>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="ad-layer" id="adLayer" hidden></div>
 
 <script src="js/data.js"></script>
 <script src="js/engine.js"></script>
+<script src="js/ads.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/scene.js"></script>
 <script src="js/main.js"></script>
 <!-- ARTIFACT-END -->

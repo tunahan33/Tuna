@@ -17,8 +17,43 @@ Oyun saf HTML, CSS ve JavaScript ile yazıldı (kütüphane yok). Aynı kod tara
 | **Büyüme** | 5 konum (sanayi arsası → mahalle galerisi → cadde showroom → oto plaza → otomotiv merkezi), 8 geliştirme (yıkama, atölye bölmeleri, boya kabini, göçük seti, ekspertiz cihazı, kapalı vitrin, müşteri köşesi, kamera-alarm), 4 personel rolü, 4 reklam paketi, banka kredisi. |
 | **Piyasa** | Segment fiyatları her gün oynar; akaryakıt zammı, bayram, kur artışı, ÖTV, faiz indirimi, kar, klasik otomobil fuarı gibi olaylar talebi değiştirir. Dolu, hırsızlık ve vergi denetimi gibi riskler var. |
 | **İlerleme** | Seviye ve XP, segment kilitleri, 17 görev ve ödülleri, günlük kâr-zarar raporu ve 14 günlük grafik, otomatik kayıt. |
+| **Galeri görünümü** | Galeri ekranının üstünde galerinin önden çizimi: bina konuma göre değişir (konteyner ofis, mahalle dükkânı, cam showroom, plaza, otomotiv merkezi). Alınan atölye, yıkama, vitrin, kamera ve müşteri köşesi sahnede belirir. Etiketli araçlar parkta, pazarlık eden müşteriler aracın yanında durur; gökyüzü gün içinde akşama döner. Sahnedeki araca, müşteriye ya da binaya dokununca ilgili ekran açılır. |
+| **Sade kullanım** | "Şimdi ne yapmalı?" kartı sıradaki adımı söyler. Fiyat üç hazır seçenekle (hızlı satış, dengeli, kârlı) tek dokunuşta asılır; araç sayfası en kârlı atölye işini önerir; müşteriye "kabul et / biraz daha iste / etikette diren" düğmeleriyle cevap verilir. Ayrıntılar ve kaydırıcılar katlanır bölümlerde durur. |
 
 Bir oyun günü (09:00–19:00) normal hızda yaklaşık 1 dakika sürer; 2× ve 4× hız ile duraklatma var.
+
+## Reklam modeli
+
+Oyun ücretsiz; gelir Google AdMob reklamlarından gelir. Oyuncuyu reklama boğmamak için kurallar kodda sabit:
+
+- **Banner reklam yok.** Oyun sırasında, pazarlıkta ya da ihalede kendiliğinden reklam açılmaz.
+- **Ödüllü reklam** yalnızca oyuncu "Reklam izle" düğmesine basınca açılır. Günde en fazla 10 tane izlenebilir:
+
+| Ödül | Nerede | Günlük hak |
+|---|---|---|
+| Atölye işini hemen bitir | Atölye ve araç sayfası | 3 |
+| Ücretsiz ekspertiz | Araç ve ilan sayfası | 3 |
+| Müşteriye çay ikram et: sabrı dolar, +1 pazarlık hakkı | Müşteri sayfası | 3 |
+| Müşteri kampanyası: 2 saat iki kat müşteri | Müşteri sekmesi | 2 |
+| Sponsor bonusu: günün kârına göre nakit | Gün sonu raporu | 1 |
+
+- **Ara reklam** (geçilebilir, tam ekran) yalnızca gün geçişinde çıkar: 4. günden sonra, en fazla 3 günde bir ve o gün oyuncu hiç ödüllü reklam izlemediyse. Yani reklam izleyen oyuncu ara reklam görmez.
+- Sınırlar `www/js/engine.js` içindeki `G.AD_CAPS`, `G.AD_DAILY` ve `G.interstitialDue` ile ayarlanır.
+
+Tarayıcıda gerçek reklam gösterilmez; akışı denemek için 5 saniyelik örnek reklam ekranı açılır. Uygulama içinde `www/js/ads.js` otomatik olarak AdMob'u kullanır.
+
+### AdMob kurulumu (yayından önce)
+
+1. [admob.google.com](https://admob.google.com) üzerinden hesap aç, Android ve iOS için birer uygulama ekle.
+2. Her platform için bir **ödüllü** ve bir **geçiş (interstitial)** reklam birimi oluştur. Kimlikleri `www/js/ads.js` içindeki `AD_UNITS` alanına yaz ve `TESTING` değerini `false` yap. Geliştirme sırasında test kimlikleriyle kal; kendi reklamına tıklamak hesabın kapatılmasına yol açabilir.
+3. AdMob **uygulama kimliğini** (`ca-app-pub-…~…`) ekle:
+   - Android: `android/app/src/main/AndroidManifest.xml` içinde `<application>` altına `<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="UYGULAMA_KİMLİĞİ"/>`
+   - iOS: `ios/App/App/Info.plist` içine `GADApplicationIdentifier`, `SKAdNetworkItems` listesi ve `NSUserTrackingUsageDescription` (ör. "Reklamları sana uygun göstermek için kullanılır.")
+4. AdMob panelinde **Gizlilik ve mesajlar** bölümünden GDPR/KVKK onay mesajını ve iOS izin açıklamasını oluştur; oyun açılışta bu formu kendisi gösterir.
+5. Sitende `app-ads.txt` dosyasını yayınla ve mağaza sayfasındaki geliştirici web sitesi olarak bu siteyi göster.
+6. Mağaza formları: Google Play'de "Uygulama reklam içeriyor" seçeneğini işaretle ve Veri güvenliği formunda reklam kimliğinin toplandığını belirt; App Store'da gizlilik etiketlerinde "Tanımlayıcılar → Cihaz kimliği (reklam)" seç. Gizlilik politikanda AdMob'u adıyla an.
+
+İleride ücretli "Reklamları kaldır" paketi eklenebilir; o zaman `G.interstitialDue` her zaman false döndürmeli, ödüllü reklamlar ise isteğe bağlı kalmalı.
 
 ## Dosyalar
 
@@ -28,7 +63,9 @@ galeri-patronu/
     index.html         Sayfa yapısı ve bütün stiller
     js/data.js         Modeller, segmentler, müşteri tipleri, konumlar, olaylar, görevler
     js/engine.js       Oyun motoru: değerleme, pazarlık, müşteriler, atölye, ihale, gün sonu
+    js/ads.js          Reklam katmanı (AdMob ve tarayıcıdaki örnek reklam)
     js/ui.js           Ekranlar, araç çizimleri, pencereler
+    js/scene.js        Galeri sahnesi (bina, park alanı, müşteriler)
     js/main.js         Oyun döngüsü ve kayıt
   capacitor.config.json
   package.json
@@ -70,7 +107,7 @@ npm run open:ios       # Xcode açılır
 - [ ] **Gizlilik politikası**: iki mağaza da bir gizlilik politikası adresi ister. Oyun şu an hiçbir kişisel veri toplamıyor; bunu belirten kısa bir sayfa yeterli.
 - [ ] **Yaş derecelendirmesi** formlarını doldur (şiddet, kumar vb. yok).
 - [ ] **Mağaza görselleri**: telefon ve tablet ekran görüntüleri, kısa ve uzun açıklama.
-- [ ] Gelir modeli kararı: ücretli, reklamlı (ör. AdMob ödüllü reklam) ya da uygulama içi satın alma. Reklam ve satın alma eklenecekse ilgili Capacitor eklentileri ve mağaza ayarları gerekir.
+- [ ] Yukarıdaki AdMob kurulum adımları.
 
 ### Marka adları
 
