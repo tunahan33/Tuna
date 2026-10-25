@@ -41,7 +41,13 @@ Her tesis seviyesi galeri sahnesine yeni bir parça ekler (20 seviye = 20 parça
 - **Otopark:** P tabelası, park numaraları, tekerlek takozları, aydınlatma, çiçek şeridi, tente, güvenlik kulübesi, bariyer, ağaçlar, asfalt, hız tümseği, ikinci sıra tente, elektrikli şarj istasyonu, yön okları, lamba bayrakları, kamera, LED zemin şeridi, bütün sıralara tente, altın babalar, VIP park yeri.
 - **Ekipmanlar:** atölye bölmeleri, boya kabini, göçük seti arabası, ekspertiz tabelası, müşteri köşesi şemsiyesi ve kamera da sahnede görünür.
 
-### Araç çizimleri
+### Araç fotoğrafları
+
+45 modelin hepsinin fotoğrafı var: `www/img/araclar/{model}-{renk}.webp` (1200×480, şeffaf arka plan, araç tabanı y=460, sağa bakar). Her modelin tek fotoğrafı olduğu için o model oyunda hep fotoğraftaki renkte çıkar; hangi modelin hangi renkte olduğu `js/photos.js` içindeki `G.PHOTO_COLOR` tablosunda. Eski kayıtlardaki araçların rengi açılışta fotoğrafa göre düzeltilir. Fotoğraf da durumu gösterir: kirli araç solgun ve çamurlu, kaportası kötü araç çizikli, motoru kötü araç dumanlı, yeni yıkanmış araç parıltılı.
+
+Yeni renk eklemek için aynı modelin başka renkteki görselini aynı ölçüde hazırlayıp klasöre koymak ve `photos.js`'i güncellemek yeterli. Fotoğrafı olmayan bir model eklenirse aşağıdaki SVG çizimle gösterilir.
+
+### Araç çizimleri (yedek)
 
 Araçlar kasa tipine göre çizilir. Gövdede ışık, gölge, kapı çizgileri, kollar, ayna, cam yansıması ve marka rozeti vardır. Jantlar sınıfa göre değişir: ekonomi ve ticaride çelik jant, ailede alüminyum, SUV'da arazi, elektrikliyi aerodinamik, premium ve lükste çok kollu, sporda siyah jant ile kırmızı kaliper, klasikte beyaz yanaklı lastik. Spor araçta spoiler ve şerit, SUV'da tavan rayı, lüks ve klasikte krom, elektrikliyi mavi şerit bulunur. Aracın durumu görünür: kaportası kötü araç çizik ve göçüklü (çok kötüyse paslı), boyalı parçası farklı tonda, motoru kötü araç dumanlı, kirli araç çamurlu, yeni yıkanmış araç parıltılıdır.
 
@@ -146,6 +152,8 @@ galeri-patronu/
   www/                 Uygulamanın kendisi (Capacitor bu klasörü paketler)
     index.html         Sayfa yapısı ve bütün stiller
     js/data.js         Modeller, segmentler, müşteri tipleri, konumlar, olaylar, görevler
+    js/photos.js       Araç fotoğrafı ↔ renk tablosu
+    img/araclar/       45 araç fotoğrafı (WebP)
     js/engine.js       Oyun motoru: değerleme, pazarlık, müşteriler, atölye, ihale, gün sonu
     js/ads.js          Reklam katmanı (AdMob ve tarayıcıdaki örnek reklam)
     js/ui.js           Ekranlar, araç çizimleri, pencereler
@@ -161,7 +169,7 @@ Oyun dengesini değiştirmek için çoğu zaman yalnızca `js/data.js` dosyasın
 
 `www/index.html` dosyasını tarayıcıda açman yeterli.
 
-**Tek dosya:** `dist/galeri-patronu.html` bütün oyunu tek bir HTML dosyasında içerir; çift tıklayınca açılır, başka dosyaya ihtiyaç duymaz. `www/` içinde değişiklik yaptıktan sonra `python3 build-single.py` ile yeniden üretilir. Site sunucuya yüklendiğinde `/galeri-patronu/www/` adresinden de açılır.
+**Tek dosya:** `dist/galeri-patronu.html` bütün oyunu tek bir HTML dosyasında içerir; çift tıklayınca açılır, başka dosyaya ihtiyaç duymaz (araç fotoğrafları da içine gömülüdür, yaklaşık 3,8 MB). `www/` içinde değişiklik yaptıktan sonra `python3 build-single.py` ile yeniden üretilir. Site sunucuya yüklendiğinde `/galeri-patronu/www/` adresinden de açılır.
 
 ## App Store ve Google Play'e çıkış
 

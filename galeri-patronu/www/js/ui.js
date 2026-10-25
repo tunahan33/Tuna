@@ -67,7 +67,40 @@
     return o + "</g>";
   }
 
+  // Fotoğraf kaynağı: tek dosya derlemesinde gömülü veri (bir kez blob URL'ye çevrilir), yoksa img/araclar
+  const photoURL = {};
+  UI.photoSrc = function (key) {
+    if (photoURL[key]) return photoURL[key];
+    const data = G.CAR_PHOTO_DATA && G.CAR_PHOTO_DATA[key];
+    let url = `img/araclar/${key}.webp`;
+    if (data) {
+      try {
+        const bin = atob(data), buf = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+        url = URL.createObjectURL(new Blob([buf], { type: "image/webp" }));
+      } catch (e) { url = "data:image/webp;base64," + data; }
+    }
+    return (photoURL[key] = url);
+  };
+
+  // Fotoğraflı araç: 1200×480 görsel 120×48 kutuya birebir oturur (taban y≈46)
+  function photoShape(car, key) {
+    const body = car.body == null ? 90 : car.body;
+    const clean = car.clean == null ? 100 : car.clean;
+    const dirt = R.clamp((60 - clean) / 60, 0, 1);
+    const filt = dirt > 0 ? ` style="filter:sepia(${(dirt * 0.55).toFixed(2)}) saturate(${(1 - dirt * 0.35).toFixed(2)}) brightness(${(1 - dirt * 0.18).toFixed(2)})"` : "";
+    let o = `<ellipse cx="60" cy="46.2" rx="52" ry="2.2" fill="#000" opacity=".22"/>`;
+    o += `<image href="${UI.photoSrc(key)}" x="0" y="0" width="120" height="48" preserveAspectRatio="xMidYMid meet"${filt}/>`;
+    if (dirt > 0.4) o += `<g fill="#6b5a3f" opacity="${(dirt * 0.45).toFixed(2)}"><ellipse cx="22" cy="40" rx="6" ry="2"/><ellipse cx="96" cy="40" rx="6" ry="2"/><ellipse cx="60" cy="38" rx="9" ry="1.6"/></g>`;
+    if (body < 55) o += `<path d="M44 30 l7 1.5 l-3 2 l8 1 M70 27 l6 3 l-4 .5 l5 2" stroke="#2b2f35" stroke-width=".7" fill="none" opacity="${body < 30 ? 0.85 : 0.55}"/>`;
+    if ((car.motor != null ? car.motor : 90) < 35 && car.fuel !== "elektrik") o += `<circle cx="6" cy="38" r="1.8" fill="#9aa3ac" opacity=".55"/><circle cx="3" cy="35.5" r="2.4" fill="#9aa3ac" opacity=".35"/>`;
+    if (clean >= 95) o += `<g class="spark"><path d="M50 9 l.7 2 l2 .7 l-2 .7 l-.7 2 l-.7 -2 l-2 -.7 l2 -.7 z M100 24 l.6 1.6 l1.6 .6 l-1.6 .6 l-.6 1.6 l-.6 -1.6 l-1.6 -.6 l1.6 -.6 z" fill="#ffffff"/></g>`;
+    return o;
+  }
+
   UI.carShape = function (car) {
+    const pk = G.photoKey && G.PHOTO_COLOR[car.m] === car.color ? G.photoKey(car.m) : null;
+    if (pk) return photoShape(car, pk);
     const md = G.M[car.m];
     const sh = SHAPES[md.body] || SHAPES.sedan;
     const mt = META[md.body] || META.sedan;
@@ -794,7 +827,7 @@
   };
 
   SHEETS.intro = function () {
-    const demo = ["ferro-egeo", "kaizen-taiga", "mirage-stallion"].map((m, i) => UI.carSVG({ m, color: ["Beyaz", "Lacivert", "Kırmızı"][i], clean: 100 })).join("");
+    const demo = ["ferro-egeo", "kaizen-taiga", "mirage-stallion"].map((m, i) => UI.carSVG({ m, color: G.photoColor(m, ["Beyaz", "Lacivert", "Kırmızı"][i]), clean: 100 })).join("");
     return head("Galeri Patronu", "Sanayideki arsadan otomotiv merkezine.", false) + `
       <div class="intro-art">${demo}</div>
       <div class="field"><label for="nameIn"><b>Galerinin adı</b></label><input type="text" id="nameIn" maxlength="28" value="${esc(UI.draft.name || "Patron Otomotiv")}" autocomplete="off"></div>

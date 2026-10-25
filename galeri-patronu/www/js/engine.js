@@ -237,6 +237,15 @@
     // lüks fiyatları 2,5 katına çıkmadan önce alınan eşyalar eski fiyatlarıyla kayda geçer
     if (!st.luxPaid) { st.luxPaid = {}; for (const id of st.lux) if (G.LX[id]) st.luxPaid[id] = Math.round(G.LX[id].price / 2.5); }
     for (const x of st.staff) if (x.role === "usta" && x.energy == null) x.energy = 100;
+    // fotoğrafı olan modellerin rengi fotoğraftaki renge çekilir (kayıttaki tüm araçlar)
+    const seen = new Set();
+    const walk = o => {
+      if (!o || typeof o !== "object" || seen.has(o)) return;
+      seen.add(o);
+      if (typeof o.m === "string" && typeof o.color === "string" && G.PHOTO_COLOR && G.PHOTO_COLOR[o.m]) o.color = G.PHOTO_COLOR[o.m];
+      for (const k in o) walk(o[k]);
+    };
+    walk(st);
     return st;
   };
 
@@ -302,7 +311,8 @@
       tramer = R.r1k(R.rand(6e3, 35e3) * (painted + replaced * 2.5) * (src.pert ? 3 : 1) * (model.price / 1.5e6));
     }
 
-    const color = opt.color || R.wpick(G.COLORS, c => c.w * (model.seg === "spor" && c.sport ? 3 : 1));
+    const pc = G.PHOTO_COLOR && G.PHOTO_COLOR[model.id];
+    const color = (pc && G.COLORS.find(c => c.name === pc)) || opt.color || R.wpick(G.COLORS, c => c.w * (model.seg === "spor" && c.sport ? 3 : 1));
     const fuel = R.pick(model.fuels);
     const gear = model.gears.length > 1 ? (R.chance(age < 6 ? 0.7 : 0.35) ? "otomatik" : "manuel") : model.gears[0];
 
@@ -1142,7 +1152,7 @@
     car.motor = R.randi(80, 99); car.body = R.randi(82, 99); car.inter = R.randi(80, 99);
     car.painted = 0; car.replaced = 0; car.tramer = 0;
     car.issues = car.issues.filter(is => is.id !== "km" && is.id !== "sel");
-    car.color = R.pick(md.id === "volta-speedster" || md.id === "anka-prototip" ? ["Kırmızı", "Bordo", "Gümüş", "Beyaz"] : ["Siyah", "Kırmızı", "Sarı", "Turuncu", "Beyaz", "Gri"]);
+    if (!G.PHOTO_COLOR || !G.PHOTO_COLOR[md.id]) car.color = R.pick(md.id === "volta-speedster" || md.id === "anka-prototip" ? ["Kırmızı", "Bordo", "Gümüş", "Beyaz"] : ["Siyah", "Kırmızı", "Sarı", "Turuncu", "Beyaz", "Gri"]);
     const ap = G.value(car, false);
     const ask = R.r1k(ap * R.rand(src.ask[0], src.ask[1]));
     const l = { id: G.nid(), car, seller: "miras", sellerName: R.pick(["Miras satışı", "Özel koleksiyon", "Müzayede evi", "Yurt dışı koleksiyoner"]), ask, min: R.r1k(ask * R.rand(src.min[0], src.min[1])), rounds: src.rounds, last: ask, day: S.day, born: S.min, msgs: [], done: false, ultra: true };
