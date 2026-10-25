@@ -159,7 +159,9 @@ Oyun dengesini değiştirmek için çoğu zaman yalnızca `js/data.js` dosyasın
 
 ## Bilgisayarda çalıştırma
 
-`www/index.html` dosyasını tarayıcıda açman yeterli. Site sunucuya yüklendiğinde `/galeri-patronu/www/` adresinden de açılır.
+`www/index.html` dosyasını tarayıcıda açman yeterli.
+
+**Tek dosya:** `dist/galeri-patronu.html` bütün oyunu tek bir HTML dosyasında içerir; çift tıklayınca açılır, başka dosyaya ihtiyaç duymaz. `www/` içinde değişiklik yaptıktan sonra `python3 build-single.py` ile yeniden üretilir. Site sunucuya yüklendiğinde `/galeri-patronu/www/` adresinden de açılır.
 
 ## App Store ve Google Play'e çıkış
 
