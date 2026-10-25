@@ -11,7 +11,7 @@ Oyun saf HTML, CSS ve JavaScript ile yazıldı (kütüphane yok). Aynı kod tara
 | **Araçlar** | 9 segment (ekonomi, aile, ticari, SUV, elektrikli, premium, spor, klasik, lüks), 39 hayali model, 7 kasa tipi. Her aracın yılı, kilometresi, yakıtı, vitesi, rengi, motor/kaporta/iç durumu, boyalı ve değişen parça sayısı, tramer kaydı ve temizliği var. |
 | **Değerleme** | Piyasa değeri yaşa, kilometreye, duruma, boya/değişene, tramere, renge, yakıta, vitese ve segment trendine göre hesaplanır. Klasik araçlar yaşla değer kaybetmez, restorasyonla çok kazanır. |
 | **Gizli kusurlar** | Şanzıman, conta, turbo, batarya, pas, elektrik arızası, beyan edilmemiş boya, düşürülmüş kilometre, sel hasarı. Ekspertiz yaptırmadan alınan araçta çıkabilir; kusuru bilinmeden satılan araç müşteri şikâyeti, tazminat ve itibar kaybı getirir. |
-| **Araç alımı** | Günlük ilanlar (sahibinden, galeriden, filo çıkışı, acil satılık, ağır hasarlı) ve satıcıyla mesajlaşarak pazarlık. Her gün canlı açık artırma: rakip galericilerle saniye saniye teklif yarışı. |
+| **Araç alımı** | Her sabah tamamen yenilenen ilanlar (oyuncu seviyesi ve adresle 10'dan 24'e çıkar; gün içinde 11:00, 13:00, 15:00 ve 17:00'de 2–3 yeni ilan daha düşer) (sahibinden, galeriden, filo çıkışı, acil satılık, ağır hasarlı) ve satıcıyla mesajlaşarak pazarlık. Her gün canlı açık artırma: rakip galericilerle saniye saniye teklif yarışı. |
 | **Atölye** | Detaylı temizlik, periyodik bakım, motor revizyonu, kaporta-boya, boyasız göçük düzeltme, döşeme yenileme, arıza giderme, klasiklerde tam restorasyon. Kendi atölyen yoksa işler pahalı ve yavaş dış servise gider. Boya kaportayı düzeltir ama boyalı parça sayısını artırır. |
 | **Müşteriler** | 12 müşteri tipi (öğrenci, esnaf, aile, doktor, koleksiyoncu, iş insanı...). Her birinin bütçesi, istediği segment, pazarlık payı ve boya/değişen hassasiyeti farklı. Kimi kendi ekspertizini yaptırır, kimi takasa araç verir. Teklifi kabul et, karşı teklif ver ya da reddet. |
 | **Büyüme** | 5 konum (sanayi arsası → mahalle galerisi → cadde showroom → oto plaza → otomotiv merkezi), 8 geliştirme (yıkama, atölye bölmeleri, boya kabini, göçük seti, ekspertiz cihazı, kapalı vitrin, müşteri köşesi, kamera-alarm), 4 personel rolü, 4 reklam paketi, banka kredisi. |
@@ -58,6 +58,7 @@ Oyun ücretsiz; gelir Google AdMob reklamlarından gelir. Oyuncuyu reklama boğm
 | Ücretsiz ekspertiz | Araç ve ilan sayfası | 3 |
 | Müşteriye çay ikram et: sabrı dolar, +1 pazarlık hakkı | Müşteri sayfası | 3 |
 | Müşteri kampanyası: 2 saat iki kat müşteri | Müşteri sekmesi | 2 |
+| Piyasaya 4 yeni ilan getir | Araç al → İlanlar | 2 |
 | Sponsor bonusu: günün kârına göre nakit | Gün sonu raporu | 1 |
 
 - **Ara reklam** (geçilebilir, tam ekran) yalnızca gün geçişinde çıkar: 4. günden sonra, en fazla 3 günde bir ve o gün oyuncu hiç ödüllü reklam izlemediyse. Yani reklam izleyen oyuncu ara reklam görmez.

@@ -203,8 +203,10 @@
       <div class="segctl" role="group">${[["ilan", "İlanlar"], ["ihale", "İhale"], ["trend", "Piyasa"]]
         .map(([k, l]) => `<button type="button" data-a="sub" data-k="piyasa" data-v="${k}" aria-pressed="${sub === k}">${l}</button>`).join("")}</div>`;
     if (sub === "ilan") {
-      const ls = s.listings.filter(l => !l.done);
-      if (!ls.length) return html + `<div class="empty"><b>Bugünkü ilanların hepsine baktın</b>Yarın sabah yeni ilanlar düşer.</div>`;
+      const ls = s.listings.filter(l => !l.done).sort((a, b) => isNew(b) - isNew(a));
+      const nd = G.nextDrop();
+      html += `<div class="card ilan-info"><div class="row"><div><b>Bugün ${ls.length} ilan</b><p class="small muted">${nd ? `Sıradaki yeni ilanlar saat ${G.clock(nd)}'de düşer.` : "Bugün yeni ilan düşmeyecek."} Her sabah bütün ilanlar yenilenir.</p></div>${adBtn("ilan", "+4 ilan")}</div></div>`;
+      if (!ls.length) return html + `<div class="empty"><b>Şu an bakılacak ilan kalmadı</b>${nd ? `Saat ${G.clock(nd)}'de yeni ilanlar gelecek.` : "Yarın sabah yeni ilanlar gelecek."}</div>`;
       html += `<div class="rows">${ls.map(listingRow).join("")}</div>`;
     } else if (sub === "ihale") {
       const a = s.auction;
@@ -224,12 +226,13 @@
     return html;
   };
 
+  const isNew = l => (l.day === S().day && l.born > G.OPEN && S().min - l.born < 120 ? 1 : 0);
   function listingRow(l) {
     const car = l.car;
     const deal = G.dealLabel(l.last, G.value(car, false));
     return `<article class="crow" role="button" tabindex="0" data-a="listing" data-id="${l.id}">
       <div class="crow-img">${UI.carSVG(car)}</div>
-      <div class="crow-main"><b>${esc(G.carName(car))}</b><span>${car.year} · ${G.fmtKm(G.realKm(car, false))} · ${esc(G.SELLERS[l.seller].name)}</span><span class="chip ${deal.c}">${deal.t}</span></div>
+      <div class="crow-main"><b>${esc(G.carName(car))}</b><span>${car.year} · ${G.fmtKm(G.realKm(car, false))} · ${esc(G.SELLERS[l.seller].name)}</span><span class="chips"><span class="chip ${deal.c}">${deal.t}</span>${isNew(l) ? `<span class="chip acc">Yeni</span>` : ""}</span></div>
       <div class="crow-side"><span class="sticker sm">${G.fmtS(l.last)}</span><small class="muted">${G.SEGMENTS[G.M[car.m].seg].name}</small></div>
     </article>`;
   }
@@ -647,7 +650,7 @@
     const s = S();
     switch (UI.tab) {
       case "galeri": return "g" + s.day + Math.floor(s.min / 20) + s.cars.map(c => `${c.id}.${c.status}.${c.price}.${c.show}.${Math.round(c.clean / 20)}.${c.inspected}.${c.motor}.${c.body}.${c.inter}.${c.painted}.${c.issues.filter(i => i.fixed).length}`).join() + "|" + s.custs.map(c => c.id + c.state + c.carId).join() + "|" + s.jobs.map(j => j.id + "." + Math.ceil(j.left / 30)).join() + "|" + JSON.stringify(s.upg) + JSON.stringify(s.fac) + s.loc + G.boostActive() + Math.round(s.money / 50000) + G.ustas().map(u => u.resting + "" + Math.round(u.energy / 35)).join();
-      case "piyasa": return "p" + s.day + UI.sub.piyasa + s.listings.map(l => l.id + "." + l.done + "." + l.last).join() + "|" + s.auction.idx + s.auction.finished + "|" + Math.round(s.money / 10000) + "|" + G.carCount();
+      case "piyasa": return "p" + s.day + UI.sub.piyasa + s.listings.map(l => l.id + "." + l.done + "." + l.last).join() + "|" + Math.floor(s.min / 60) + G.adLeft("ilan") + "|" + s.auction.idx + s.auction.finished + "|" + Math.round(s.money / 10000) + "|" + G.carCount();
       case "musteri": return "m" + s.custs.map(c => `${c.id}.${c.state}.${c.offer}`).join() + "|" + s.lost.length + "|" + s.today.sales + G.boostActive() + G.adLeft("boost") + (s.min < G.CLOSE - 60);
       case "atolye": return "a" + s.jobs.map(j => j.id).join() + "|" + JSON.stringify(s.upg) + JSON.stringify(s.fac) + s.staff.length + G.adLeft("rush") + G.restFree() + G.ustas().map(u => u.resting + "" + G.buffActive(u) + Math.round(u.energy / 35)).join();
       case "patron": return "b" + s.day + UI.sub.patron + Math.round(s.money / 1000) + s.staff.length + s.cands.length + JSON.stringify(s.upg) + JSON.stringify(s.fac) + s.loan + s.ads + s.loc + s.level + s.quests.length + Math.round(s.rep) + s.today.sales + UI.armed + s.maxDisc;
@@ -839,6 +842,7 @@
     "ad-rush": el => { const j = S().jobs.find(x => x.id === +el.dataset.id); if (j) UI.watch("rush", () => G.reward.rush(j)); },
     "ad-boost": () => UI.watch("boost", () => G.reward.boost()),
     "ad-bonus": () => UI.watch("bonus", () => G.reward.bonus(S().summary)),
+    "ad-ilan": () => UI.watch("ilan", () => G.reward.ilan()),
     "ad-tea": el => { const c = custById(el.dataset.id); if (c) UI.watch("tea", () => G.reward.tea(c)); },
     "ad-inspect": el => {
       const car = el.dataset.l ? (S().listings.find(x => x.id === +el.dataset.l) || {}).car : carById(el.dataset.id);

@@ -401,15 +401,27 @@
     return {
       id: G.nid(), car, seller: sk, sellerName: R.pick(G.FIRST) + " " + R.pick(G.LAST)[0] + ".",
       ask, min: R.r1k(ask * R.rand(src.min[0], src.min[1])), rounds: src.rounds,
-      last: ask, expires: S.day + R.randi(1, 3), msgs: [], done: false
+      last: ask, day: S.day, born: S.min, msgs: [], done: false
     };
   };
 
+  // İlanlar her sabah tamamen yenilenir; gün içinde belli saatlerde yeni ilanlar düşer
+  G.LISTING_DROPS = [11 * 60, 13 * 60, 15 * 60, 17 * 60];
+  G.listingTarget = () => Math.min(24, 10 + Math.floor(S.level / 2) + 2 * S.loc);
   G.refreshListings = function () {
-    S.listings = S.listings.filter(l => l.expires >= S.day && !l.done);
-    const target = Math.min(14, 6 + Math.floor(S.level / 2) + S.loc);
-    while (S.listings.length < target) S.listings.push(G.makeListing());
+    S.listings = [];
+    const n = G.listingTarget();
+    for (let i = 0; i < n; i++) S.listings.push(G.makeListing());
   };
+  G.addListings = function (n, note) {
+    // biten ilanları at, liste çok uzamasın
+    S.listings = S.listings.filter(l => !l.done);
+    for (let i = 0; i < n; i++) S.listings.push(G.makeListing());
+    const cap = G.listingTarget() + 10;
+    if (S.listings.length > cap) S.listings.splice(0, S.listings.length - cap);
+    if (note) G.feed(note, "info");
+  };
+  G.nextDrop = () => G.LISTING_DROPS.find(m => m > S.min) || null;
 
   G.expertCost = () => (S.upg.expert ? 500 : 3500);
 
@@ -970,7 +982,7 @@
   };
   // ---- Reklam ödülleri ----
   // Ödüllü reklamlar yalnızca oyuncu isteyince açılır; her ödülün ve günün bir sınırı vardır.
-  G.AD_CAPS = { rush: 3, boost: 2, bonus: 1, inspect: 3, tea: 3 };
+  G.AD_CAPS = { rush: 3, boost: 2, bonus: 1, inspect: 3, tea: 3, ilan: 2 };
   G.AD_DAILY = 10;
   function adDay() {
     if (!S.adv) S.adv = { day: 0, n: {}, total: 0, lastInter: 0, lastWatch: 0 };
@@ -993,6 +1005,7 @@
     boost() { S.boost = { day: S.day, until: Math.min(G.CLOSE, S.min + 120) }; G.feed("Sosyal medya kampanyası başladı: 2 saat boyunca iki kat müşteri.", "good"); return true; },
     bonus(sm) { if (!sm || sm.bonusTaken) return false; sm.bonusTaken = true; S.money += sm.bonus; G.feed(`Sponsor bonusu: ${G.fmt(sm.bonus)} kasaya girdi.`, "good"); return true; },
     inspect(car) { return G.inspect(car, true); },
+    ilan() { G.addListings(4, "Reklam ödülü: piyasaya 4 yeni ilan geldi."); return true; },
     tea(c) { if (!S.custs.includes(c)) return false; c.patience = c.patMax; c.rounds++; c.msgs.push({ who: "them", text: "Çay için teşekkürler, acelem yok. Konuşalım." }); return true; }
   };
   // Ara reklam: yalnızca gün geçişinde, 4. günden sonra, en az 3 günde bir ve o gün ödüllü reklam izlenmediyse
@@ -1044,6 +1057,7 @@
   // ---- Zaman ----
   G.minute = function () {
     S.min++;
+    if (G.LISTING_DROPS.includes(S.min)) { const n = R.randi(2, 3); G.addListings(n, `Piyasaya ${n} yeni ilan düştü.`); }
     // atölye
     ustaMinute();
     for (const j of S.jobs.slice()) { j.left -= G.jobRate(j); if (j.left <= 0) finishJob(j); }
