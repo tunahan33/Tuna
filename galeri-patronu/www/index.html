@@ -460,6 +460,32 @@ body::before { background: var(--hero-1); }
 @keyframes shutter-up { 0% { transform: translateY(0); } 8% { transform: translateY(1.5%); } 100% { transform: translateY(-104%); } }
 @keyframes shutter-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
 @media (prefers-reduced-motion: reduce) { .shutter-door { animation: shutter-fade .4s ease .2s forwards; } .shutter-sign { animation: none; } @keyframes shutter-fade { to { opacity: 0; } } }
+
+/* Rehber turu: vurgulanan öğenin etrafı açık, ekranın geri kalanı karartılır */
+.tour { position: fixed; inset: 0; z-index: 70; }
+.tour.dim { background: rgba(5, 12, 22, .62); }
+.tour-hole { position: fixed; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(5, 12, 22, .62); outline: 3px solid var(--sticker); outline-offset: 0; transition: all .25s ease; pointer-events: none; }
+.tour-card { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); max-width: 400px; margin: 0 auto; background: var(--surface); color: var(--ink); border-radius: 16px; padding: 16px; box-shadow: 0 12px 36px rgba(0, 0, 0, .35); display: grid; gap: 8px; border-top: 5px solid var(--accent); animation: tour-in .22s ease; }
+.tour-card h3 { margin: 0; font: 800 22px/1.05 var(--font-display); text-transform: uppercase; letter-spacing: .01em; }
+.tour-card p { margin: 0; font-size: 15px; line-height: 1.45; }
+.tour-top { display: flex; justify-content: space-between; align-items: center; }
+.tour-n { font: 700 12px/1 var(--font-num); color: var(--muted); letter-spacing: .06em; }
+.tour-skip, .tip-off { border: 0; background: transparent; color: var(--muted); font-weight: 600; font-size: 13px; padding: 6px 0 6px 10px; text-decoration: underline; text-underline-offset: 3px; }
+.tour-dots { display: flex; gap: 5px; }
+.tour-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+.tour-dots i.past { background: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.tour-dots i.on { background: var(--accent); width: 18px; border-radius: 4px; }
+.tour-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 2px; }
+.tour-btns .btn { min-width: 96px; padding: 11px 16px; font-size: 15px; }
+@keyframes tour-in { from { opacity: 0; transform: translateY(6px); } }
+
+/* Ekran ipucu: bir pencere ilk açılınca üstte çıkar, oyunu durdurmaz */
+.tip { position: fixed; z-index: 65; top: calc(env(safe-area-inset-top, 0px) + 10px); left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); max-width: 460px; margin: 0 auto; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; background: var(--surface); color: var(--ink); border-radius: 14px; padding: 12px 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .3); border-left: 5px solid var(--sticker); animation: tour-in .22s ease; }
+.tip-ic { width: 26px; height: 26px; border-radius: 50%; background: var(--sticker); color: var(--sticker-ink); display: grid; place-items: center; font: 800 16px/1 Georgia, serif; font-style: italic; }
+.tip-body { display: grid; gap: 4px; }
+.tip-body p { margin: 0; font-size: 14px; }
+.tip-btns { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+@media (prefers-reduced-motion: reduce) { .tour-card, .tip { animation: none; } .tour-hole { transition: none; } }
 </style>
 
 <header class="top">
@@ -498,5 +524,6 @@ body::before { background: var(--hero-1); }
 <script src="js/ui.js"></script>
 <script src="js/scene.js"></script>
 <script src="js/lux.js"></script>
+<script src="js/tour.js"></script>
 <script src="js/main.js"></script>
 <!-- ARTIFACT-END -->

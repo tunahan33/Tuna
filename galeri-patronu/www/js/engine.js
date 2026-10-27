@@ -60,6 +60,7 @@
       fac: { galeri: 0, yikama: 0, cardak: 0, otopark: 0 },
       ads: 0, maxDisc: 0.05,
       staff: [], cands: [], candDay: 0,
+      tut: { done: false, off: false, seen: {} },
       cars: [], listings: [], auction: null,
       custs: [], lost: [], jobs: [],
       trend: {}, events: [], news: [],
@@ -237,6 +238,8 @@
     // lüks fiyatları 2,5 katına çıkmadan önce alınan eşyalar eski fiyatlarıyla kayda geçer
     if (!st.luxPaid) { st.luxPaid = {}; for (const id of st.lux) if (G.LX[id]) st.luxPaid[id] = Math.round(G.LX[id].price / 2.5); }
     for (const x of st.staff) if (x.role === "usta" && x.energy == null) x.energy = 100;
+    // rehberden önceki kayıtlar: tur gösterilmez, ekran ipuçları bir kez çıkar
+    if (!st.tut) st.tut = { done: true, off: false, seen: {} };
     // fotoğrafı olan modellerin rengi fotoğraftaki renge çekilir (kayıttaki tüm araçlar)
     const seen = new Set();
     const walk = o => {

@@ -19,6 +19,7 @@ Oyun saf HTML, CSS ve JavaScript ile yazıldı (kütüphane yok). Aynı kod tara
 | **Piyasa** | Segment fiyatları her gün oynar; akaryakıt zammı, bayram, kur artışı, ÖTV, faiz indirimi, kar, klasik otomobil fuarı gibi olaylar talebi değiştirir. Dolu, hırsızlık ve vergi denetimi gibi riskler var. |
 | **İlerleme** | Seviye ve XP, segment kilitleri, 17 görev ve ödülleri, günlük kâr-zarar raporu ve 14 günlük grafik, otomatik kayıt. |
 | **Galeri görünümü** | Galeri ekranının üstünde galerinin önden çizimi: bina konuma göre değişir (konteyner ofis, mahalle dükkânı, cam showroom, plaza, otomotiv merkezi). Alınan atölye, yıkama, vitrin, kamera ve müşteri köşesi sahnede belirir. Etiketli araçlar parkta, pazarlık eden müşteriler aracın yanında durur; gökyüzü gün içinde akşama döner. Sahnedeki araca, müşteriye ya da binaya dokununca ilgili ekran açılır. |
+| **Rehber** | İlk kez oynayana galeri açılınca 11 adımlık tanıtım turu çıkar: her adım ilgili sekmeyi açar ve anlattığı yeri (kasa, hız düğmeleri, sahne, "Şimdi ne yapmalı?", ilanlar, atölye, müşteriler, patron masası) vurgular; tur sürerken oyun durur. Tur bitince ilan, araç, müşteri teklifi, ihale, gün sonu ve tesis pencereleri ilk açıldıklarında birer kısa ipucu gösterir. **"Eğitimi atla"** tek dokunuşla hem turu hem bütün ipuçlarını kapatır; ipucundaki "İpuçlarını kapat" da aynısını yapar. Patron → Durum → "Turu baştan izle" ile tur ve ipuçları yeniden açılır. Kod: `js/tour.js`. |
 | **Sade kullanım** | "Şimdi ne yapmalı?" kartı sıradaki adımı söyler. Fiyat üç hazır seçenekle (hızlı satış, dengeli, kârlı) tek dokunuşta asılır; araç sayfası en kârlı atölye işini önerir; müşteriye "kabul et / biraz daha iste / etikette diren" düğmeleriyle cevap verilir. Ayrıntılar ve kaydırıcılar katlanır bölümlerde durur. |
 
 **Görünüm:** canlı renkli tema (yeşil-turkuaz geçişli üst panel, sarı kasa, parlak düğmeler), açık ve koyu modda. Galeri her açılışta (oyunun başında ve her sabah) metal kepengin yukarı sarıldığı kısa bir animasyonla açılır; "hareketi azalt" ayarı açık cihazlarda kepenk kayarak değil solarak kalkar.
@@ -162,6 +163,7 @@ galeri-patronu/
     js/ads.js          Reklam katmanı (AdMob ve tarayıcıdaki örnek reklam)
     js/ui.js           Ekranlar, araç çizimleri, pencereler
     js/scene.js        Galeri sahnesi (bina, park alanı, müşteriler)
+    js/tour.js         İlk oyun rehberi: tanıtım turu ve ipuçları
     js/main.js         Oyun döngüsü ve kayıt
   capacitor.config.json
   package.json

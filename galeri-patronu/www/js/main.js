@@ -60,6 +60,8 @@
     }
     UI.render();
     if (saved && saved.lastSeen) UI.checkOffline(Date.now() - saved.lastSeen);
+    // tur yarıda kaldıysa kaldığı yerden değil baştan sürer
+    if (saved && G.S.started && G.S.tut && !G.S.tut.done && !G.S.tut.off && !UI.sheet) UI.tourStart();
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) { G.save(); if (G.S) G.S.paused = true; }
       else if (G.S && G.S.lastSeen) UI.checkOffline(Date.now() - G.S.lastSeen);

@@ -530,7 +530,7 @@
   function patronDurum() {
     const s = S(), T = s.today;
     const qs = G.activeQuests(3);
-    return passiveCard() + `<div class="card"><h3>Görevler</h3>${qs.length ? qs.map(q => `<div class="row"><div>${esc(q.text)}</div><div class="num small pos">+${G.fmtS(q.reward)}</div></div>`).join("") : `<p class="muted">Bütün görevleri bitirdin. Gerçek bir patronsun.</p>`}
+    return passiveCard() + `<div class="card"><div class="row"><div><b>Oyun rehberi</b><p class="muted small">Oyunun nasıl oynandığını anlatan tanıtım turu ve ipuçları.</p></div><button class="btn sm" type="button" data-a="tour">Turu baştan izle</button></div></div><div class="card"><h3>Görevler</h3>${qs.length ? qs.map(q => `<div class="row"><div>${esc(q.text)}</div><div class="num small pos">+${G.fmtS(q.reward)}</div></div>`).join("") : `<p class="muted">Bütün görevleri bitirdin. Gerçek bir patronsun.</p>`}
         <p class="muted small">${s.quests.length}/${G.QUESTS.length} görev tamamlandı</p></div>
       <div class="card"><h3>Bugün</h3><div class="kv">
         <div><span>Satış</span><b>${T.sales}</b></div><div><span>Satış kârı</span><b class="${T.profit >= 0 ? "pos" : "neg"}">${G.fmtS(T.profit)}</b></div>
@@ -908,6 +908,7 @@
     [...sh.querySelectorAll("details")].forEach((x, i) => { if (open[i]) x.open = true; });
     sh.scrollTop = top;
     wrap.hidden = false;
+    if (UI.maybeTip) UI.maybeTip(UI.sheet.kind);
   };
 
   UI.open = function (kind, id) {
@@ -1002,6 +1003,7 @@
   function afterSale() { if (UI.sheet && UI.sheet.kind === "cust") UI.sheet = null; UI.render(); }
 
   const ACT = {
+    tour: () => UI.tourRestart(),
     staff: () => { UI.tab = "patron"; UI.sub.patron = "personel"; UI.sheet = null; window.scrollTo(0, 0); UI.render(); },
     tab: el => { UI.tab = el.dataset.v; if (UI.sheet && !UI.blocking()) UI.sheet = null; window.scrollTo(0, 0); UI.armed = null; UI.render(); },
     sub: el => { UI.sub[el.dataset.k] = el.dataset.v; UI.render(); },
@@ -1137,6 +1139,7 @@
       G.save();
       UI.render();
       UI.shutter(G.S.name, "Hayırlı olsun, kapılar açıldı");
+      if (!G.S.tut.done && !G.S.tut.off) setTimeout(() => UI.tourStart(), 2200);
     }
   };
 
