@@ -69,10 +69,10 @@
 
   // Fotoğraf kaynağı: tek dosya derlemesinde gömülü veri (bir kez blob URL'ye çevrilir), yoksa img/araclar
   const photoURL = {};
-  UI.photoSrc = function (key) {
+  UI.photoSrc = function (key, dir) {
     if (photoURL[key]) return photoURL[key];
     const data = G.CAR_PHOTO_DATA && G.CAR_PHOTO_DATA[key];
-    let url = `img/araclar/${key}.webp`;
+    let url = `img/${dir || "araclar"}/${key}.webp`;
     if (data) {
       try {
         const bin = atob(data), buf = new Uint8Array(bin.length);
@@ -97,6 +97,18 @@
     if (clean >= 95) o += `<g class="spark"><path d="M50 9 l.7 2 l2 .7 l-2 .7 l-.7 2 l-.7 -2 l-2 -.7 l2 -.7 z M100 24 l.6 1.6 l1.6 .6 l-1.6 .6 l-.6 1.6 l-.6 -1.6 l-1.6 -.6 l1.6 -.6 z" fill="#ffffff"/></g>`;
     return o;
   }
+
+  // Kişi avatarı: portre fotoğrafı varsa o, yoksa adın baş harfleri renkli dairede
+  const AVA_COLORS = ["#00a676", "#14b8d4", "#7b5cff", "#ff3d7f", "#e07b00", "#1f4fa8", "#0fa958", "#b8312f"];
+  UI.avatar = function (p, who, kind, size) {
+    const key = G.portraitKey(who, kind, p.g);
+    const sz = size ? `--ava:${size}px;` : "";
+    if (G.PEOPLE_PHOTOS.includes(key)) return `<span class="ava" style="${sz}"><img src="${UI.photoSrc(key, "kisiler")}" alt=""></span>`;
+    const parts = String(p.name).split(" ");
+    let h = 0;
+    for (const ch of String(p.name)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return `<span class="ava" aria-hidden="true" style="${sz}background:${AVA_COLORS[h % AVA_COLORS.length]}">${esc((parts[0][0] || "") + (parts[1] ? parts[1][0] : ""))}</span>`;
+  };
 
   UI.carShape = function (car) {
     const pk = G.photoKey && G.PHOTO_COLOR[car.m] === car.color ? G.photoKey(car.m) : null;
@@ -417,7 +429,7 @@
       html += `<div class="empty"><b>Şu an galeride müşteri yok</b>${s.min >= G.CLOSE ? "Galeri kapalı." : "Fiyat etiketli, temiz araçlar ve iyi itibar müşteri getirir."}</div>`;
     }
     if (browsing.length) {
-      html += `<div class="card"><h3>Araçlara bakıyor</h3>${browsing.map(c => `<div class="row small"><div><b>${esc(c.name)}</b> · ${esc(G.CT[c.type].name)}</div><div class="muted">${G.SEGMENTS[c.seg].name} arıyor</div></div>`).join("")}</div>`;
+      html += `<div class="card"><h3>Araçlara bakıyor</h3>${browsing.map(c => `<div class="row small"><div class="who">${UI.avatar(c, "musteri", c.type, 30)}<div><b>${esc(c.name)}</b> · ${esc(G.CT[c.type].name)}</div></div><div class="muted">${G.SEGMENTS[c.seg].name} arıyor</div></div>`).join("")}</div>`;
     }
     if (s.lost.length) {
       html += `<div class="card"><h3>Bugün kaçanlar</h3><p class="muted small">Ne aradıklarına bakıp stoğunu ona göre kur.</p>${s.lost.map(l => `<div class="row small"><div><b>${esc(l.type)}</b></div><div class="muted" style="text-align:right">${esc(l.text)}</div></div>`).join("")}</div>`;
@@ -432,7 +444,7 @@
     if (!car) return "";
     const profit = c.offer - car.buy - car.spent;
     const raise = raiseAmount(c, car);
-    return `<div class="card offer"><div class="row"><div><b>${esc(c.name)}</b> <span class="muted small">${esc(G.CT[c.type].name)}</span>${c.love ? ` <span class="chip gold">Araca vuruldu</span>` : ""}<p class="small muted">${esc(G.carTitle(car))} · etiket ${G.fmtS(car.price)}</p></div>
+    return `<div class="card offer"><div class="row"><div class="who">${UI.avatar(c, "musteri", c.type)}<div><b>${esc(c.name)}</b> <span class="muted small">${esc(G.CT[c.type].name)}</span>${c.love ? ` <span class="chip gold">Araca vuruldu</span>` : ""}<p class="small muted">${esc(G.carTitle(car))} · etiket ${G.fmtS(car.price)}</p></div></div>
       <div style="text-align:right"><div class="num big">${G.fmtS(c.offer)}</div><div class="small ${profit >= 0 ? "pos" : "neg"}">${profit >= 0 ? "kâr" : "zarar"} ${G.fmtS(Math.abs(profit))}</div></div></div>
       ${c.trade ? `<p class="small">Takasa <b>${esc(G.carTitle(c.trade))}</b> veriyor (${G.fmtS(c.tradeVal)})</p>` : ""}
       <div class="prog pat" title="Müşterinin sabrı"><i data-pat="${c.id}" style="width:${c.patience / c.patMax * 100}%"></i></div>
@@ -578,14 +590,14 @@
   function patronPersonel() {
     const s = S(), L = G.loc();
     let html = `<div class="card"><div class="row"><h3>Kadro</h3><span class="pill">Kadro <b>${s.staff.length}/${L.staff}</b></span></div>`;
-    html += s.staff.length ? s.staff.map(st => `<div class="opt"><div><b>${esc(st.name)}</b> · ${esc(G.ROLES[st.role].name)} <span class="chip">${"★".repeat(st.skill)}${"☆".repeat(5 - st.skill)}</span><small>Günlük ${G.fmt(st.salary)}</small></div>
+    html += s.staff.length ? s.staff.map(st => `<div class="opt"><div class="who">${UI.avatar(st, "personel", st.role)}<div><b>${esc(st.name)}</b> · ${esc(G.ROLES[st.role].name)} <span class="chip">${"★".repeat(st.skill)}${"☆".repeat(5 - st.skill)}</span><small>Günlük ${G.fmt(st.salary)}</small></div></div>
       <button class="btn sm danger" type="button" data-a="fire" data-id="${st.id}">${UI.armed === "fire" + st.id ? "Emin misin?" : "Çıkar"}</button></div>`).join("")
       : `<p class="muted small">Henüz çalışanın yok. Her şeyi sen yapıyorsun.</p>`;
     html += `</div>`;
     if (G.staffOf("satis").length) {
       html += `<div class="card"><h3>Danışmanın indirim yetkisi</h3><p class="muted small">15 dakika içinde cevap vermediğin teklifleri danışmanın bu indirime kadar kendisi bağlar.</p><div class="quick">${[0, 3, 5, 8, 12].map(v => `<button class="btn ${Math.round(s.maxDisc * 100) === v ? "pri" : ""}" type="button" data-a="disc" data-v="${v}">%${v}</button>`).join("")}</div></div>`;
     }
-    html += `<div class="card"><h3>İş başvuruları</h3><p class="muted small">Başvurular 5 günde bir yenilenir.</p>${s.cands.length ? s.cands.map(c => `<div class="opt"><div><b>${esc(c.name)}</b> · ${esc(G.ROLES[c.role].name)} <span class="chip">${"★".repeat(c.skill)}${"☆".repeat(5 - c.skill)}</span><small>${esc(G.ROLES[c.role].desc)} Günlük ${G.fmt(c.salary)}.</small></div>
+    html += `<div class="card"><h3>İş başvuruları</h3><p class="muted small">Başvurular 5 günde bir yenilenir.</p>${s.cands.length ? s.cands.map(c => `<div class="opt"><div class="who">${UI.avatar(c, "personel", c.role)}<div><b>${esc(c.name)}</b> · ${esc(G.ROLES[c.role].name)} <span class="chip">${"★".repeat(c.skill)}${"☆".repeat(5 - c.skill)}</span><small>${esc(G.ROLES[c.role].desc)} Günlük ${G.fmt(c.salary)}.</small></div></div>
       <button class="btn sm pri" type="button" data-a="hire" data-id="${c.id}" ${s.staff.length >= L.staff ? "disabled" : ""}>İşe al</button></div>`).join("") : `<p class="muted small">Şu an başvuru yok.</p>`}</div>`;
     return html;
   }

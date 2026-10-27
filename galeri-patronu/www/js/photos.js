@@ -54,6 +54,10 @@
     "volta-speedster": "Lacivert",
     "volta-terra": "Kırmızı",
   };
+  // Müşteri ve personel portreleri: img/kisiler/{anahtar}.webp (256×256). Anahtar: musteri-{tip}-{k|e}, personel-{rol}-{k|e}.
+  // Fotoğrafı gelen portrenin anahtarı bu listeye eklenir; olmayanlar için baş harfli renkli avatar çizilir.
+  G.PEOPLE_PHOTOS = [];
+  G.portraitKey = (who, kind, g) => `${who}-${kind}-${g || "e"}`;
   G.photoKey = m => G.PHOTO_COLOR[m] ? `${m}-${G.COLOR_SLUG[G.PHOTO_COLOR[m]]}` : null;
   // fotoğrafı olan modelin rengini fotoğrafa sabitler
   G.photoColor = (m, fallback) => G.PHOTO_COLOR[m] || fallback;

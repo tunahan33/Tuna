@@ -487,6 +487,12 @@ body::before { background: var(--hero-1); }
 .tip-body p { margin: 0; font-size: 14px; }
 .tip-btns { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
 @media (prefers-reduced-motion: reduce) { .tour-card, .tip { animation: none; } .tour-hole { transition: none; } }
+
+/* Kişi avatarı (portre ya da baş harfler) */
+.who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.who > div { min-width: 0; }
+.ava { --ava: 40px; flex: none; width: var(--ava); height: var(--ava); border-radius: 50%; overflow: hidden; display: grid; place-items: center; color: #fff; font: 700 calc(var(--ava) * .38)/1 var(--font-num); letter-spacing: .02em; box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px color-mix(in srgb, var(--accent) 45%, transparent); }
+.ava img { width: 100%; height: 100%; object-fit: cover; display: block; }
 </style>
 
 <header class="top">

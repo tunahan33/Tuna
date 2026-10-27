@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """www/ klasöründeki oyunu tek bir HTML dosyasında birleştirir: dist/galeri-patronu.html
-Araç fotoğrafları (www/img/araclar/*.webp) base64 olarak gömülür (G.CAR_PHOTO_DATA).
+Fotoğraflar (www/img/araclar, kisiler, luks altındaki *.webp) base64 olarak gömülür (G.CAR_PHOTO_DATA).
 Kullanım: python3 build-single.py [--artifact ÇIKTI.html]
   --artifact: yalnızca ARTIFACT-START/END arasını (head/body iskeleti olmadan) ayrıca yazar."""
 import base64
@@ -19,12 +19,15 @@ def inline(m):
 
 
 def photo_data():
-    d = os.path.join(www, "img", "araclar")
     items = []
-    for f in sorted(os.listdir(d)):
-        if f.endswith(".webp"):
-            b64 = base64.b64encode(open(os.path.join(d, f), "rb").read()).decode("ascii")
-            items.append(f'"{f[:-5]}":"{b64}"')
+    for sub in ("araclar", "kisiler", "luks"):
+        d = os.path.join(www, "img", sub)
+        if not os.path.isdir(d):
+            continue
+        for f in sorted(os.listdir(d)):
+            if f.endswith(".webp"):
+                b64 = base64.b64encode(open(os.path.join(d, f), "rb").read()).decode("ascii")
+                items.append(f'"{f[:-5]}":"{b64}"')
     return "<script>\nwindow.G.CAR_PHOTO_DATA = {" + ",\n".join(items) + "};\n</script>"
 
 

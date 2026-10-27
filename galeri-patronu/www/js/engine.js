@@ -238,6 +238,7 @@
     // lüks fiyatları 2,5 katına çıkmadan önce alınan eşyalar eski fiyatlarıyla kayda geçer
     if (!st.luxPaid) { st.luxPaid = {}; for (const id of st.lux) if (G.LX[id]) st.luxPaid[id] = Math.round(G.LX[id].price / 2.5); }
     for (const x of st.staff) if (x.role === "usta" && x.energy == null) x.energy = 100;
+    for (const x of [...st.staff, ...(st.cands || []), ...(st.custs || [])]) if (!x.g) x.g = G.genderOf(x.name);
     // rehberden önceki kayıtlar: tur gösterilmez, ekran ipuçları bir kez çıkar
     if (!st.tut) st.tut = { done: true, off: false, seen: {} };
     // fotoğrafı olan modellerin rengi fotoğraftaki renge çekilir (kayıttaki tüm araçlar)
@@ -743,7 +744,7 @@
     const segs = Object.keys(t.segs).filter(G.segUnlocked);
     const seg = R.wpick(segs, s => t.segs[s] * G.trendOf(s));
     const c = {
-      id: G.nid(), name: R.pick(G.FIRST) + " " + R.pick(G.LAST), type: t.id, budget: R.r1k(R.rand(t.budget[0], t.budget[1])),
+      id: G.nid(), ...G.person(), type: t.id, budget: R.r1k(R.rand(t.budget[0], t.budget[1])),
       seg, state: "browse", t: R.randi(12, 35), patience: 0, patMax: 0, rounds: 0, carId: null, offer: 0, max: 0, msgs: [], trade: null, tradeVal: 0
     };
     if (R.chance(t.trade)) {
@@ -949,6 +950,10 @@
     G.leave(c, `${G.carName(car)} için danışmanın indirim sınırında anlaşamadı`);
   }
 
+  // ---- Kişiler ----
+  G.person = () => { const g = R.chance(0.5) ? "k" : "e"; return { g, name: R.pick(g === "k" ? G.FIRST_K : G.FIRST_E) + " " + R.pick(G.LAST) }; };
+  G.genderOf = name => (G.FIRST_K.includes(String(name).split(" ")[0]) ? "k" : "e");
+
   // ---- Personel ----
   G.newCandidates = function () {
     S.cands = [];
@@ -956,7 +961,7 @@
     for (let i = 0; i < 5; i++) {
       const role = i < roles.length ? roles[i] : R.pick(roles);
       const skill = R.wpick([1, 2, 3, 4, 5], s => [5, 5, 3, 1.5, 0.6][s - 1] * (s >= 4 && S.level < 5 ? 0.4 : 1));
-      S.cands.push({ id: G.nid(), role, skill, name: R.pick(G.FIRST) + " " + R.pick(G.LAST), salary: R.r100(G.ROLES[role].base * (0.7 + 0.3 * skill) * R.rand(0.92, 1.1)) });
+      S.cands.push({ id: G.nid(), role, skill, ...G.person(), salary: R.r100(G.ROLES[role].base * (0.7 + 0.3 * skill) * R.rand(0.92, 1.1)) });
     }
     S.candDay = S.day;
   };

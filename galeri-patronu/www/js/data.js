@@ -147,8 +147,10 @@
   G.CT = {};
   G.CTYPES.forEach(t => { G.CT[t.id] = t; });
 
-  G.FIRST = ["Ahmet", "Mehmet", "Ayşe", "Fatma", "Zeynep", "Elif", "Can", "Emre", "Burak", "Deniz", "Ece", "Selin", "Murat", "Hakan",
-    "Gizem", "Mert", "Kerem", "Derya", "Ozan", "Merve", "Hülya", "Yusuf", "Kemal", "Sevgi", "Ali", "Esra", "Serkan", "Tuğba", "Onur", "Nur"];
+  // Kadın ve erkek adları ayrı: müşteri ve personel portresi cinsiyete göre seçilir
+  G.FIRST_E = ["Ahmet", "Mehmet", "Can", "Emre", "Burak", "Murat", "Hakan", "Mert", "Kerem", "Ozan", "Yusuf", "Kemal", "Ali", "Serkan", "Onur"];
+  G.FIRST_K = ["Ayşe", "Fatma", "Zeynep", "Elif", "Ece", "Selin", "Gizem", "Derya", "Merve", "Hülya", "Sevgi", "Esra", "Tuğba", "Nur", "Deniz"];
+  G.FIRST = G.FIRST_E.concat(G.FIRST_K);
   G.LAST = ["Yılmaz", "Kaya", "Demir", "Şahin", "Çelik", "Aydın", "Öztürk", "Arslan", "Doğan", "Koç", "Kurt", "Aksoy", "Polat", "Erdem", "Yıldız", "Güneş", "Tekin", "Bulut"];
   G.RIVALS = ["Kartal Oto", "Yıldız Motors", "Hakan Usta", "Özgür Galeri", "Bayrak Otomotiv", "Ege Oto", "Marmara Motor", "Çınar Galeri"];
 

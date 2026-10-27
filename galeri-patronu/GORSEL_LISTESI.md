@@ -1,6 +1,6 @@
 # Galeri Patronu — görsel listesi
 
-Toplam 198 görsel. Dosya adlarını aynen kullan; görseller `galeri-patronu/www/` altındaki klasörlere konur. Bulunmayan görsellerin yerinde oyunun şu anki çizimi kalır.
+Toplam 215 görsel. Dosya adlarını aynen kullan; görseller `galeri-patronu/www/` altındaki klasörlere konur. Bulunmayan görsellerin yerinde oyunun şu anki çizimi kalır.
 
 Kurallar: tek tarz (hepsi fotoğraf ya da hepsi çizim), gerçek marka/logo/plaka/tanınabilir kişi yok, ticari kullanıma uygun lisans, sahnede kullanılacaklar şeffaf PNG.
 
@@ -218,33 +218,50 @@ Tek bir nesne, önden ya da hafif açılı. Sahnede küçük görüneceği için
 | Müşteri köşesi | Çay-kahve ve oturma alanı: müşteriler %35 daha sabırlı. | `img/ekipman/cafe.png` |
 | Kamera ve alarm | Gece hırsızlık ve vandalizm olaylarını önler. | `img/ekipman/security.png` |
 
-## Kişiler (19)
+## Kişiler (36)
 
-**Öncelik:** Sonra · **Boyut:** 256 × 256 px · **Biçim:** PNG, kare · **Klasör:** `img/kisiler/`
+**Öncelik:** Sıradaki · **Boyut:** 256 × 256 px · **Biçim:** PNG, kare · **Klasör:** `img/kisiler/`
 
-Omuzdan yukarı portre, yüz ortada. Gerçek kişi fotoğrafı yerine çizim ya da yapay zekâyla üretilmiş görsel kullan; gerçek bir kişinin yüzü izin olmadan kullanılamaz. Hepsi aynı tarzda olsun.
+Omuzdan yukarı gerçek fotoğraf gibi portre, yüz ortada. Her müşteri tipi ve personel rolü için bir kadın, bir erkek. Gerçek ya da ünlü bir kişiye benzememeli. Promptlar: `GEMINI_KISI_PROMPTLARI.md`. Gelmeyen portrelerin yerinde baş harfli renkli avatar görünür.
 
 | Ad | Açıklama | Dosya |
 |---|---|---|
-| Üniversite öğrencisi | Müşteri portresi | `img/kisiler/musteri-ogrenci.png` |
-| Genç çalışan | Müşteri portresi | `img/kisiler/musteri-genc.png` |
-| Kalabalık aile | Müşteri portresi | `img/kisiler/musteri-aile.png` |
-| Esnaf | Müşteri portresi | `img/kisiler/musteri-esnaf.png` |
-| Memur | Müşteri portresi | `img/kisiler/musteri-memur.png` |
-| Emekli | Müşteri portresi | `img/kisiler/musteri-emekli.png` |
-| Teknoloji meraklısı | Müşteri portresi | `img/kisiler/musteri-tekno.png` |
-| Filo yöneticisi | Müşteri portresi | `img/kisiler/musteri-filo.png` |
-| Koleksiyoncu | Müşteri portresi | `img/kisiler/musteri-koleksiyon.png` |
-| Doktor | Müşteri portresi | `img/kisiler/musteri-doktor.png` |
-| Hız tutkunu | Müşteri portresi | `img/kisiler/musteri-hizli.png` |
-| İş insanı | Müşteri portresi | `img/kisiler/musteri-patron.png` |
-| Milyarder koleksiyoncu | Müşteri portresi | `img/kisiler/musteri-milyarder.png` |
-| Satış danışmanı | Çalışan portresi | `img/kisiler/personel-satis.png` |
-| Usta | Çalışan portresi | `img/kisiler/personel-usta.png` |
-| Yıkamacı | Çalışan portresi | `img/kisiler/personel-yikama.png` |
-| Muhasebeci | Çalışan portresi | `img/kisiler/personel-muhasebe.png` |
-| Ekspertiz ustası | Çalışan portresi | `img/kisiler/personel-eksper.png` |
-| Patron (oyuncu) | Oyuncunun kendisi; hoş geldin ekranında ve gün sonunda görünür | `img/kisiler/patron.png` |
+| Üniversite öğrencisi (kadın) | Müşteri portresi | `img/kisiler/musteri-ogrenci-k.png` |
+| Üniversite öğrencisi (erkek) | Müşteri portresi | `img/kisiler/musteri-ogrenci-e.png` |
+| Genç çalışan (kadın) | Müşteri portresi | `img/kisiler/musteri-genc-k.png` |
+| Genç çalışan (erkek) | Müşteri portresi | `img/kisiler/musteri-genc-e.png` |
+| Kalabalık aile (kadın) | Müşteri portresi | `img/kisiler/musteri-aile-k.png` |
+| Kalabalık aile (erkek) | Müşteri portresi | `img/kisiler/musteri-aile-e.png` |
+| Esnaf (kadın) | Müşteri portresi | `img/kisiler/musteri-esnaf-k.png` |
+| Esnaf (erkek) | Müşteri portresi | `img/kisiler/musteri-esnaf-e.png` |
+| Memur (kadın) | Müşteri portresi | `img/kisiler/musteri-memur-k.png` |
+| Memur (erkek) | Müşteri portresi | `img/kisiler/musteri-memur-e.png` |
+| Emekli (kadın) | Müşteri portresi | `img/kisiler/musteri-emekli-k.png` |
+| Emekli (erkek) | Müşteri portresi | `img/kisiler/musteri-emekli-e.png` |
+| Teknoloji meraklısı (kadın) | Müşteri portresi | `img/kisiler/musteri-tekno-k.png` |
+| Teknoloji meraklısı (erkek) | Müşteri portresi | `img/kisiler/musteri-tekno-e.png` |
+| Filo yöneticisi (kadın) | Müşteri portresi | `img/kisiler/musteri-filo-k.png` |
+| Filo yöneticisi (erkek) | Müşteri portresi | `img/kisiler/musteri-filo-e.png` |
+| Koleksiyoncu (kadın) | Müşteri portresi | `img/kisiler/musteri-koleksiyon-k.png` |
+| Koleksiyoncu (erkek) | Müşteri portresi | `img/kisiler/musteri-koleksiyon-e.png` |
+| Doktor (kadın) | Müşteri portresi | `img/kisiler/musteri-doktor-k.png` |
+| Doktor (erkek) | Müşteri portresi | `img/kisiler/musteri-doktor-e.png` |
+| Hız tutkunu (kadın) | Müşteri portresi | `img/kisiler/musteri-hizli-k.png` |
+| Hız tutkunu (erkek) | Müşteri portresi | `img/kisiler/musteri-hizli-e.png` |
+| İş insanı (kadın) | Müşteri portresi | `img/kisiler/musteri-patron-k.png` |
+| İş insanı (erkek) | Müşteri portresi | `img/kisiler/musteri-patron-e.png` |
+| Milyarder koleksiyoncu (kadın) | Müşteri portresi | `img/kisiler/musteri-milyarder-k.png` |
+| Milyarder koleksiyoncu (erkek) | Müşteri portresi | `img/kisiler/musteri-milyarder-e.png` |
+| Satış danışmanı (kadın) | Çalışan portresi | `img/kisiler/personel-satis-k.png` |
+| Satış danışmanı (erkek) | Çalışan portresi | `img/kisiler/personel-satis-e.png` |
+| Usta (kadın) | Çalışan portresi | `img/kisiler/personel-usta-k.png` |
+| Usta (erkek) | Çalışan portresi | `img/kisiler/personel-usta-e.png` |
+| Yıkamacı (kadın) | Çalışan portresi | `img/kisiler/personel-yikama-k.png` |
+| Yıkamacı (erkek) | Çalışan portresi | `img/kisiler/personel-yikama-e.png` |
+| Muhasebeci (kadın) | Çalışan portresi | `img/kisiler/personel-muhasebe-k.png` |
+| Muhasebeci (erkek) | Çalışan portresi | `img/kisiler/personel-muhasebe-e.png` |
+| Ekspertiz ustası (kadın) | Çalışan portresi | `img/kisiler/personel-eksper-k.png` |
+| Ekspertiz ustası (erkek) | Çalışan portresi | `img/kisiler/personel-eksper-e.png` |
 
 ## Sahne ve arka planlar (7)
 
