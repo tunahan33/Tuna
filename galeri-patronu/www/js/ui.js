@@ -836,8 +836,11 @@
     return head("Hoş geldin patron!", `Sen ${h} yoktun. Galerin boş durmadı.`, false) + `
       <div class="card welcome"><span class="muted small">Pasif gelir</span><div class="big-money">${G.fmt(o.amount)}</div>
         <p class="small muted">Saatte ${G.fmtS(pr.total)} × ${o.hours.toFixed(1).replace(".", ",")} saat${o.capped ? ` (en fazla ${G.OFFLINE_MAX_H} saat birikir)` : ""}</p></div>
+      ${o.car ? `<div class="card gift"><span class="chip gold">Hoş geldin hediyesi</span><div class="hero">${UI.carSVG(o.car)}<span class="sticker">Bedava</span></div>
+        <div class="row"><div><b>${esc(G.carTitle(o.car))}</b><p class="small muted">${spec(o.car)} · ekspertizi temiz</p></div><div class="num pos" style="white-space:nowrap">${G.fmtS(G.value(o.car, false))}</div></div>
+        <p class="small muted">${G.spaceLeft() > 0 ? "Parayı alınca araç galerine gelir." : "Park yerin dolu: araç değerinin %60'ı kadar nakit olarak kasaya girer."}</p></div>` : ""}
       ${adBtn("offline", `Reklam izle, 2 katını al: ${G.fmtS(o.amount * 2)}`, "", "block")}
-      <button class="btn pri block" type="button" data-a="offline-claim">${G.fmtS(o.amount)} al</button>`;
+      <button class="btn pri block" type="button" data-a="offline-claim">${G.fmtS(o.amount)}${o.car ? " ve aracı" : ""} al</button>`;
   };
 
   SHEETS.freecar = function () {

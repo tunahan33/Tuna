@@ -80,12 +80,13 @@ Basit bir bot oyuncuyla 240 günlük simülasyonda oyuncu 21. seviyeye, tesisler
 
 ## Pasif gelir
 
-Oyundan çıkınca galeri çalışmaya devam eder. Oyuncu en az 5 dakika sonra döndüğünde "Hoş geldin patron!" ekranı çıkar ve yokluk süresine göre gelir verilir (en fazla 8 saat birikir). İsteyen reklam izleyip bu gelirin 2 katını alabilir (günde 2 kez).
+Oyundan çıkınca galeri çalışmaya devam eder. Oyuncu en az 5 dakika sonra döndüğünde "Hoş geldin patron!" ekranı çıkar ve yokluk süresine göre gelir verilir (en fazla 12 saat birikir). İsteyen reklam izleyip bu gelirin 2 katını alabilir (günde 2 kez).
 
-- Saatlik gelir = son 7 günün ortalama günlük satış kârının %12'si (en az oyuncu seviyesi × 2.000 ₺)
+- Saatlik gelir = son 7 günün ortalama günlük satış kârının %30'u (en az oyuncu seviyesi × 5.000 ₺)
 - Her satış danışmanı +%15, şöhret +%50'ye kadar artırır
 - Patron → Durum ekranında saatlik pasif gelir ve şimdiye kadar toplanan tutar görünür
-- Ayarlar `www/js/engine.js` içinde: `G.OFFLINE_MAX_H` (8 saat), `G.OFFLINE_MIN_MIN` (5 dakika), `G.passiveRate`
+- **Hoş geldin hediyesi:** en az 2 saat uzak kalınca %40 ihtimalle seviyeye uygun, pahalı olmayan, ekspertizi temiz bir araç bedava gelir (reklam gerekmez; en fazla 20 saatte bir). Park yeri doluysa araç değerinin %60'ı nakit olarak kasaya girer.
+- Ayarlar `www/js/engine.js` içinde: `G.OFFLINE_MAX_H` (12 saat), `G.OFFLINE_MIN_MIN` (5 dakika), `G.passiveRate`, `G.RETURN_CAR`
 
 ## Ultra lüks araçlar
 

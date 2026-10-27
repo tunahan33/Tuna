@@ -661,6 +661,9 @@ body::before { background: var(--hero-1); }
 .who > div { min-width: 0; }
 .ava { --ava: 40px; flex: none; width: var(--ava); height: var(--ava); border-radius: 50%; overflow: hidden; display: grid; place-items: center; color: #fff; font: 700 calc(var(--ava) * .38)/1 var(--font-num); letter-spacing: .02em; box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px color-mix(in srgb, var(--accent) 45%, transparent); }
 .ava img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.card.gift { border: 1.5px dashed var(--sticker); background: color-mix(in srgb, var(--sticker) 9%, var(--surface)); gap: 8px; }
+.card.gift .chip.gold { justify-self: start; }
 </style>
 
 <header class="top">
@@ -2357,8 +2360,8 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   // ---- Reklamla bedava araç ----
   // İlanlara bakarken ara sıra çıkar: oyuncunun seviyesine uygun, pahalı olmayan, ekspertizi temiz bir araç
   G.freeCarCap = () => R.r1k(250000 + S.level * 120000);
-  G.makeFreeCar = function () {
-    const cap = G.freeCarCap();
+  G.makeFreeCar = function (capMult) {
+    const cap = G.freeCarCap() * (capMult || 1);
     let best = null;
     for (let i = 0; i < 40; i++) {
       const car = G.makeCar(G.pickModel(m => m.seg !== "luks" && m.seg !== "spor" && m.seg !== "klasik"), G.SELLERS.galeriden, { noIssues: true });
@@ -2372,12 +2375,12 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     best.clean = 100;
     return best;
   };
-  G.claimFreeCar = function (car) {
+  G.claimFreeCar = function (car, why) {
     if (!car || G.spaceLeft() <= 0) return false;
     car.buy = 0; car.spent = 0; car.status = "lot"; car.price = 0;
     S.cars.push(car);
     S.stats.freeCars = (S.stats.freeCars || 0) + 1;
-    G.feed(`Reklam hediyesi: ${G.carTitle(car)} bedavaya galerine geldi (değeri ${G.fmtS(G.value(car, false))}).`, "good");
+    G.feed(`${why === "gift" ? "Hoş geldin hediyesi" : "Reklam hediyesi"}: ${G.carTitle(car)} bedavaya galerine geldi (değeri ${G.fmtS(G.value(car, false))}).`, "good");
     return true;
   };
 
@@ -2405,12 +2408,14 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
 
   // ---- Pasif gelir ----
   // Oyundan çıkınca galeri çalışmaya devam eder: dönüşte en fazla G.OFFLINE_MAX_H saatlik gelir verilir
-  G.OFFLINE_MAX_H = 8;
+  G.OFFLINE_MAX_H = 12;
+  // Geri dönüş hediyesi: en az 2 saat uzak kalınca ara sıra seviyeye uygun, pahalı olmayan bir araç (günde en fazla bir kez)
+  G.RETURN_CAR = { minH: 2, chance: 0.4, every: 20 * 3600e3, cap: 0.8 };
   G.OFFLINE_MIN_MIN = 5;
   G.passiveRate = function () {
     const h = S.history.slice(-7);
     const avg = h.length ? h.reduce((a, d) => a + Math.max(0, d.profit), 0) / h.length : 0;
-    const base = Math.max(2000 * S.level, avg * 0.12);
+    const base = Math.max(5000 * S.level, avg * 0.3);
     const sales = G.staffOf("satis").length * 0.15;
     const fame = Math.min(0.5, G.prestige() * 0.001);
     const invest = R.r100(Math.max(0, G.investNet()) * 0.25);
@@ -2420,7 +2425,13 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     const mins = ms / 60000;
     if (!(mins >= G.OFFLINE_MIN_MIN)) return null;
     const hours = Math.min(G.OFFLINE_MAX_H, mins / 60);
-    return { away: mins, hours, amount: R.r100(G.passiveRate().total * hours), capped: mins / 60 > G.OFFLINE_MAX_H };
+    const o = { away: mins, hours, amount: R.r100(G.passiveRate().total * hours), capped: mins / 60 > G.OFFLINE_MAX_H, car: null };
+    const rc = G.RETURN_CAR, now = Date.now();
+    if (mins >= rc.minH * 60 && now - (S.lastGiftCar || 0) >= rc.every && R.chance(rc.chance)) {
+      o.car = G.makeFreeCar(rc.cap);
+      if (o.car) S.lastGiftCar = now;
+    }
+    return o;
   };
   G.claimOffline = function (o, mult) {
     if (!o || o.claimed) return;
@@ -2429,6 +2440,11 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     S.money += v;
     S.stats.passive = (S.stats.passive || 0) + v;
     G.feed(`Pasif gelir: sen yokken galeri ${G.fmt(v)} kazandırdı.`, "good");
+    if (o.car) {
+      // park yeri yoksa hediye araç piyasa değerinin %60'ı kadar nakde çevrilir
+      if (G.spaceLeft() > 0) G.claimFreeCar(o.car, "gift");
+      else { const cash = R.r1k(G.value(o.car, false) * 0.6); S.money += cash; G.feed(`Park yeri dolu olduğu için hediye ${G.carTitle(o.car)} nakde çevrildi: ${G.fmt(cash)}.`, "good"); }
+    }
   };
 
   // ---- Reklam ödülleri ----
@@ -3622,8 +3638,11 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     return head("Hoş geldin patron!", `Sen ${h} yoktun. Galerin boş durmadı.`, false) + `
       <div class="card welcome"><span class="muted small">Pasif gelir</span><div class="big-money">${G.fmt(o.amount)}</div>
         <p class="small muted">Saatte ${G.fmtS(pr.total)} × ${o.hours.toFixed(1).replace(".", ",")} saat${o.capped ? ` (en fazla ${G.OFFLINE_MAX_H} saat birikir)` : ""}</p></div>
+      ${o.car ? `<div class="card gift"><span class="chip gold">Hoş geldin hediyesi</span><div class="hero">${UI.carSVG(o.car)}<span class="sticker">Bedava</span></div>
+        <div class="row"><div><b>${esc(G.carTitle(o.car))}</b><p class="small muted">${spec(o.car)} · ekspertizi temiz</p></div><div class="num pos" style="white-space:nowrap">${G.fmtS(G.value(o.car, false))}</div></div>
+        <p class="small muted">${G.spaceLeft() > 0 ? "Parayı alınca araç galerine gelir." : "Park yerin dolu: araç değerinin %60'ı kadar nakit olarak kasaya girer."}</p></div>` : ""}
       ${adBtn("offline", `Reklam izle, 2 katını al: ${G.fmtS(o.amount * 2)}`, "", "block")}
-      <button class="btn pri block" type="button" data-a="offline-claim">${G.fmtS(o.amount)} al</button>`;
+      <button class="btn pri block" type="button" data-a="offline-claim">${G.fmtS(o.amount)}${o.car ? " ve aracı" : ""} al</button>`;
   };
 
   SHEETS.freecar = function () {

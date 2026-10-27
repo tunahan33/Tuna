@@ -1155,8 +1155,8 @@
   // ---- Reklamla bedava araç ----
   // İlanlara bakarken ara sıra çıkar: oyuncunun seviyesine uygun, pahalı olmayan, ekspertizi temiz bir araç
   G.freeCarCap = () => R.r1k(250000 + S.level * 120000);
-  G.makeFreeCar = function () {
-    const cap = G.freeCarCap();
+  G.makeFreeCar = function (capMult) {
+    const cap = G.freeCarCap() * (capMult || 1);
     let best = null;
     for (let i = 0; i < 40; i++) {
       const car = G.makeCar(G.pickModel(m => m.seg !== "luks" && m.seg !== "spor" && m.seg !== "klasik"), G.SELLERS.galeriden, { noIssues: true });
@@ -1170,12 +1170,12 @@
     best.clean = 100;
     return best;
   };
-  G.claimFreeCar = function (car) {
+  G.claimFreeCar = function (car, why) {
     if (!car || G.spaceLeft() <= 0) return false;
     car.buy = 0; car.spent = 0; car.status = "lot"; car.price = 0;
     S.cars.push(car);
     S.stats.freeCars = (S.stats.freeCars || 0) + 1;
-    G.feed(`Reklam hediyesi: ${G.carTitle(car)} bedavaya galerine geldi (değeri ${G.fmtS(G.value(car, false))}).`, "good");
+    G.feed(`${why === "gift" ? "Hoş geldin hediyesi" : "Reklam hediyesi"}: ${G.carTitle(car)} bedavaya galerine geldi (değeri ${G.fmtS(G.value(car, false))}).`, "good");
     return true;
   };
 
@@ -1203,12 +1203,14 @@
 
   // ---- Pasif gelir ----
   // Oyundan çıkınca galeri çalışmaya devam eder: dönüşte en fazla G.OFFLINE_MAX_H saatlik gelir verilir
-  G.OFFLINE_MAX_H = 8;
+  G.OFFLINE_MAX_H = 12;
+  // Geri dönüş hediyesi: en az 2 saat uzak kalınca ara sıra seviyeye uygun, pahalı olmayan bir araç (günde en fazla bir kez)
+  G.RETURN_CAR = { minH: 2, chance: 0.4, every: 20 * 3600e3, cap: 0.8 };
   G.OFFLINE_MIN_MIN = 5;
   G.passiveRate = function () {
     const h = S.history.slice(-7);
     const avg = h.length ? h.reduce((a, d) => a + Math.max(0, d.profit), 0) / h.length : 0;
-    const base = Math.max(2000 * S.level, avg * 0.12);
+    const base = Math.max(5000 * S.level, avg * 0.3);
     const sales = G.staffOf("satis").length * 0.15;
     const fame = Math.min(0.5, G.prestige() * 0.001);
     const invest = R.r100(Math.max(0, G.investNet()) * 0.25);
@@ -1218,7 +1220,13 @@
     const mins = ms / 60000;
     if (!(mins >= G.OFFLINE_MIN_MIN)) return null;
     const hours = Math.min(G.OFFLINE_MAX_H, mins / 60);
-    return { away: mins, hours, amount: R.r100(G.passiveRate().total * hours), capped: mins / 60 > G.OFFLINE_MAX_H };
+    const o = { away: mins, hours, amount: R.r100(G.passiveRate().total * hours), capped: mins / 60 > G.OFFLINE_MAX_H, car: null };
+    const rc = G.RETURN_CAR, now = Date.now();
+    if (mins >= rc.minH * 60 && now - (S.lastGiftCar || 0) >= rc.every && R.chance(rc.chance)) {
+      o.car = G.makeFreeCar(rc.cap);
+      if (o.car) S.lastGiftCar = now;
+    }
+    return o;
   };
   G.claimOffline = function (o, mult) {
     if (!o || o.claimed) return;
@@ -1227,6 +1235,11 @@
     S.money += v;
     S.stats.passive = (S.stats.passive || 0) + v;
     G.feed(`Pasif gelir: sen yokken galeri ${G.fmt(v)} kazandırdı.`, "good");
+    if (o.car) {
+      // park yeri yoksa hediye araç piyasa değerinin %60'ı kadar nakde çevrilir
+      if (G.spaceLeft() > 0) G.claimFreeCar(o.car, "gift");
+      else { const cash = R.r1k(G.value(o.car, false) * 0.6); S.money += cash; G.feed(`Park yeri dolu olduğu için hediye ${G.carTitle(o.car)} nakde çevrildi: ${G.fmt(cash)}.`, "good"); }
+    }
   };
 
   // ---- Reklam ödülleri ----

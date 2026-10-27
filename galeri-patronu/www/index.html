@@ -493,6 +493,9 @@ body::before { background: var(--hero-1); }
 .who > div { min-width: 0; }
 .ava { --ava: 40px; flex: none; width: var(--ava); height: var(--ava); border-radius: 50%; overflow: hidden; display: grid; place-items: center; color: #fff; font: 700 calc(var(--ava) * .38)/1 var(--font-num); letter-spacing: .02em; box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px color-mix(in srgb, var(--accent) 45%, transparent); }
 .ava img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.card.gift { border: 1.5px dashed var(--sticker); background: color-mix(in srgb, var(--sticker) 9%, var(--surface)); gap: 8px; }
+.card.gift .chip.gold { justify-self: start; }
 </style>
 
 <header class="top">
