@@ -237,65 +237,137 @@ _600 milyon ₺ · Dünyanın en büyük berrak elmaslarından._
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: an enormous colorless pear-shaped diamond as big as a walnut on a small platinum stand, with dramatic rainbow light dispersion. Shot: high-end jewelry catalog photograph taken with a 100mm macro lens, the object centered and filling about 60% of the frame, on a plain dark charcoal velvet background, soft studio spotlight from above, real metal reflections and natural gemstone sparkle. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
+## Takım elbiseler (10)
+
+### 34. Hazır takım elbise — `s01.png`
+_25 bin ₺ · Mağazadan, lacivert, tek düğme._
+
+```
+A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: an affordable off-the-rack navy blue single-button business suit with a white shirt and a plain red tie. Shot: luxury menswear boutique catalog photograph taken with an 85mm lens, the suit displayed on a headless tailor's mannequin (no head, no face), centered and filling about 60% of the frame, in an elegant boutique with warm wood shelves softly blurred behind, soft warm light, real fabric texture and stitching visible. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
+```
+
+### 35. Ofis takımı — `s02.png`
+_60 bin ₺ · Gri yün, iki parça, her gün giyilir._
+
+```
+A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a medium grey wool two-piece office suit with a light blue shirt and a navy blue tie. Shot: luxury menswear boutique catalog photograph taken with an 85mm lens, the suit displayed on a headless tailor's mannequin (no head, no face), centered and filling about 60% of the frame, in an elegant boutique with warm wood shelves softly blurred behind, soft warm light, real fabric texture and stitching visible. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
+```
+
+### 36. Yelekli üç parça takım — `s03.png`
+_150 bin ₺ · Yelek, cep mendili ve kravat iğnesi._
+
+```
+A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a brown tweed three-piece suit with a matching waistcoat, a mustard yellow tie, a gold tie pin and a folded gold pocket square. Shot: luxury menswear boutique catalog photograph taken with an 85mm lens, the suit displayed on a headless tailor's mannequin (no head, no face), centered and filling about 60% of the frame, in an elegant boutique with warm wood shelves softly blurred behind, soft warm light, real fabric texture and stitching visible. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
+```
+
+### 37. Smokin — `s04.png`
+_300 bin ₺ · Saten yaka ve papyon; gala geceleri için._
+
+```
+A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a classic black tuxedo with shiny black satin peak lapels, a crisp white pleated dress shirt, a black silk bow tie and a white pocket square. Shot: luxury menswear boutique catalog photograph taken with an 85mm lens, the suit displayed on a headless tailor's mannequin (no head, no face), centered and filling about 60% of the frame, in an elegant boutique with warm wood shelves softly blurred behind, soft warm light, real fabric texture and stitching visible. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
+```
+
+### 38. İtalyan yünü takım — `s05.png`
+_650 bin ₺ · İnce yün, el dikişi astar._
+
+```
+A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a slim-fit midnight blue Italian fine wool suit with a soft natural shoulder, a purple silk tie and a white pocket square. Shot: luxury menswear boutique catalog photograph taken with an 85mm lens, the suit displayed on a headless tailor's mannequin (no head, no face), centered and filling about 60% of the frame, in an elegant boutique with warm wood shelves softly blurred behind, soft warm light, real fabric texture and stitching visible. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
+```
+
+### 39. Ismarlama terzi takımı — `s06.png`
+_1,2 milyon ₺ · Ölçüye göre dikilir, üç prova._
+
+```
+A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a bespoke charcoal grey double-breasted tailored suit with a matching waistcoat, a dark burgundy tie and a red pocket square, perfect handmade fit. Shot: luxury menswear boutique catalog photograph taken with an 85mm lens, the suit displayed on a headless tailor's mannequin (no head, no face), centered and filling about 60% of the frame, in an elegant boutique with warm wood shelves softly blurred behind, soft warm light, real fabric texture and stitching visible. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
+```
+
+### 40. Kaşmir palto ve takım — `s07.png`
+_2,5 milyon ₺ · Kaşmir palto, deri eldiven, ipek atkı._
+
+```
+A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a camel brown cashmere overcoat worn open over a camel suit, with a red silk scarf around the neck and brown leather gloves resting on the mannequin's shoulder. Shot: luxury menswear boutique catalog photograph taken with an 85mm lens, the suit displayed on a headless tailor's mannequin (no head, no face), centered and filling about 60% of the frame, in an elegant boutique with warm wood shelves softly blurred behind, soft warm light, real fabric texture and stitching visible. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
+```
+
+### 41. Londra terzisi ısmarlama — `s08.png`
+_5 milyon ₺ · Ünlü terzi sokağından, 80 saat el işçiliği._
+
+```
+A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a bespoke navy pinstripe three-piece suit from a traditional London tailor, with a matching waistcoat, a gold tie and an ivory pocket square. Shot: luxury menswear boutique catalog photograph taken with an 85mm lens, the suit displayed on a headless tailor's mannequin (no head, no face), centered and filling about 60% of the frame, in an elegant boutique with warm wood shelves softly blurred behind, soft warm light, real fabric texture and stitching visible. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
+```
+
+### 42. Vikunya yünü takım — `s09.png`
+_12 milyon ₺ · Dünyanın en nadir yünü, altın düğmeler._
+
+```
+A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: an extremely rare golden beige vicuna wool suit with real gold buttons, a dark brown silk tie and an ivory pocket square, the fabric visibly soft and luxurious. Shot: luxury menswear boutique catalog photograph taken with an 85mm lens, the suit displayed on a headless tailor's mannequin (no head, no face), centered and filling about 60% of the frame, in an elegant boutique with warm wood shelves softly blurred behind, soft warm light, real fabric texture and stitching visible. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
+```
+
+### 43. Pırlanta düğmeli gala takımı — `s10.png`
+_30 milyon ₺ · Altın iplik işlemeli, pırlanta düğmeler; tek parça üretim._
+
+```
+A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a one-of-a-kind midnight navy gala tuxedo with gold embroidered lapels, sparkling diamond buttons, a black silk bow tie and a gold pocket square. Shot: luxury menswear boutique catalog photograph taken with an 85mm lens, the suit displayed on a headless tailor's mannequin (no head, no face), centered and filling about 60% of the frame, in an elegant boutique with warm wood shelves softly blurred behind, soft warm light, real fabric texture and stitching visible. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
+```
+
 ## Uçaklar (9)
 
-### 34. Ultra hafif uçak — `u01.png`
+### 44. Ultra hafif uçak — `u01.png`
 _8 milyon ₺ · İki kişilik, çayırdan kalkar._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a tiny two-seat ultralight aircraft with an open tube frame, a high fabric wing and a rear pusher propeller, flying low over green meadows. Shot: real air-to-air aviation photograph taken from a chase plane with a telephoto lens, the whole aircraft from a three-quarter side view, centered, in a clear blue sky with a few soft clouds. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 35. Tek motorlu uçak — `uc1.png`
+### 45. Tek motorlu uçak — `uc1.png`
 _30 milyon ₺ · 4 kişilik pervaneli uçak._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a four-seat single-engine propeller plane with a high wing, painted white with a blue stripe. Shot: real air-to-air aviation photograph taken from a chase plane with a telephoto lens, the whole aircraft from a three-quarter side view, centered, in a clear blue sky with a few soft clouds. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 36. Amfibi deniz uçağı — `u03.png`
+### 46. Amfibi deniz uçağı — `u03.png`
 _45 milyon ₺ · Denize iner, koylara uçar._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: an amphibious seaplane on two large floats, high wing, one propeller engine, just touching down on a turquoise bay (water instead of sky below it). Shot: real air-to-air aviation photograph taken from a chase plane with a telephoto lens, the whole aircraft from a three-quarter side view, centered, in a clear blue sky with a few soft clouds. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 37. Helikopter — `uc2.png`
+### 47. Helikopter — `uc2.png`
 _62 milyon ₺ · Şehir içi trafiğe takılmazsın._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a sleek modern five-seat private helicopter in glossy dark blue, flying above a coastal city. Shot: real air-to-air aviation photograph taken from a chase plane with a telephoto lens, the whole aircraft from a three-quarter side view, centered, in a clear blue sky with a few soft clouds. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 38. Çift motorlu turboprop — `u05.png`
+### 48. Çift motorlu turboprop — `u05.png`
 _95 milyon ₺ · 10 kişilik, kısa pistlere iner._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a ten-seat twin-engine turboprop plane with two propeller engines on its wings, painted white with a red stripe. Shot: real air-to-air aviation photograph taken from a chase plane with a telephoto lens, the whole aircraft from a three-quarter side view, centered, in a clear blue sky with a few soft clouds. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 39. Hafif jet — `uc3.png`
+### 49. Hafif jet — `uc3.png`
 _150 milyon ₺ · 8 kişilik, Avrupa'ya 3 saat._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a small light business jet with two engines mounted at the rear and a T-shaped tail, white with a gold stripe. Shot: real air-to-air aviation photograph taken from a chase plane with a telephoto lens, the whole aircraft from a three-quarter side view, centered, in a clear blue sky with a few soft clouds. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 40. Orta boy iş jeti — `u07.png`
+### 50. Orta boy iş jeti — `u07.png`
 _300 milyon ₺ · Ayakta durulan kabin, 12 kişi._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a mid-size business jet with a tall stand-up cabin, swept wings with upturned winglets and two rear engines, white with a navy stripe. Shot: real air-to-air aviation photograph taken from a chase plane with a telephoto lens, the whole aircraft from a three-quarter side view, centered, in a clear blue sky with a few soft clouds. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 41. Uzun menzil jet — `uc4.png`
+### 51. Uzun menzil jet — `uc4.png`
 _550 milyon ₺ · Okyanus aşar, yatak odalı._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a large ultra-long-range business jet with very long swept wings and many oval windows, white with a silver stripe, high above the clouds over an ocean. Shot: real air-to-air aviation photograph taken from a chase plane with a telephoto lens, the whole aircraft from a three-quarter side view, centered, in a clear blue sky with a few soft clouds. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 42. VIP geniş gövde uçak — `u09.png`
+### 52. VIP geniş gövde uçak — `u09.png`
 _1,1 milyar ₺ · Uçan saray: toplantı salonu ve yatak odaları._
 
 ```
@@ -304,70 +376,70 @@ A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything
 
 ## Tekneler ve yatlar (10)
 
-### 43. Jet ski — `t01.png`
+### 53. Jet ski — `t01.png`
 _1,5 milyon ₺ · Koyda dalga yarışı._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a sporty jet ski (personal watercraft) in yellow and black, splashing through small waves in a bay. Shot: real drone photograph of the whole vessel from a three-quarter side view, centered, on calm turquoise Aegean sea on a sunny day, with a rocky green coastline far behind. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 44. Balıkçı teknesi — `t02.png`
+### 54. Balıkçı teknesi — `t02.png`
 _4 milyon ₺ · Sabah erkenden lüfer avı._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a small traditional wooden fishing boat painted white and blue with a tiny cabin and fishing rods, moored in a calm harbor at sunrise. Shot: real drone photograph of the whole vessel from a three-quarter side view, centered, on calm turquoise Aegean sea on a sunny day, with a rocky green coastline far behind. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 45. Yelkenli — `t03.png`
+### 55. Yelkenli — `t03.png`
 _9 milyon ₺ · 10 metrelik, iki kamaralı._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a ten-meter white sailboat with one tall mast and white sails, heeling slightly in the wind. Shot: real drone photograph of the whole vessel from a three-quarter side view, centered, on calm turquoise Aegean sea on a sunny day, with a rocky green coastline far behind. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 46. Sürat teknesi — `y1.png`
+### 56. Sürat teknesi — `y1.png`
 _15 milyon ₺ · Hafta sonu koy gezisi için._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a sleek white and red speedboat with a pointed bow, racing fast and leaving a long white wake. Shot: real drone photograph of the whole vessel from a three-quarter side view, centered, on calm turquoise Aegean sea on a sunny day, with a rocky green coastline far behind. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 47. Katamaran — `t05.png`
+### 57. Katamaran — `t05.png`
 _35 milyon ₺ · Geniş güverte, sakin seyir._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a large white sailing catamaran with two hulls and a wide deck with a net trampoline at the front. Shot: real drone photograph of the whole vessel from a three-quarter side view, centered, on calm turquoise Aegean sea on a sunny day, with a rocky green coastline far behind. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 48. Ahşap gulet — `y2.png`
+### 58. Ahşap gulet — `y2.png`
 _75 milyon ₺ · Bodrum yapımı, 4 kamaralı._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a traditional Turkish wooden gulet with a varnished wooden hull, two masts with furled sails and a shaded aft deck, anchored in a quiet cove. Shot: real drone photograph of the whole vessel from a three-quarter side view, centered, on calm turquoise Aegean sea on a sunny day, with a rocky green coastline far behind. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 49. Flybridge yat — `t07.png`
+### 59. Flybridge yat — `t07.png`
 _130 milyon ₺ · Üst kat dümen, güneşlenme terası._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a white flybridge motor yacht with an open upper deck that has a steering helm and sunbathing pads. Shot: real drone photograph of the whole vessel from a three-quarter side view, centered, on calm turquoise Aegean sea on a sunny day, with a rocky green coastline far behind. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 50. Motoryat — `y3.png`
+### 60. Motoryat — `y3.png`
 _225 milyon ₺ · 3 katlı, jakuzili._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a three-deck white motor yacht with dark tinted windows and a jacuzzi on the top deck. Shot: real drone photograph of the whole vessel from a three-quarter side view, centered, on calm turquoise Aegean sea on a sunny day, with a rocky green coastline far behind. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 51. Süper yat — `t09.png`
+### 61. Süper yat — `t09.png`
 _480 milyon ₺ · 5 kamara, denizaltı garajı._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a sleek 70-meter superyacht with a dark navy hull, a white five-deck superstructure and a swimming platform at the stern. Shot: real drone photograph of the whole vessel from a three-quarter side view, centered, on calm turquoise Aegean sea on a sunny day, with a rocky green coastline far behind. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 52. Mega yat — `y4.png`
+### 62. Mega yat — `y4.png`
 _875 milyon ₺ · Helikopter pisti ve 12 kişilik mürettebat._
 
 ```
@@ -376,35 +448,35 @@ A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything
 
 ## Yatırımlar (5)
 
-### 53. Kiralık daire — `i1.png`
+### 63. Kiralık daire — `i1.png`
 _12 milyon ₺ · Kiracısı hazır, düzenli kira geliri._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a new modern mid-rise apartment block with a white and warm wood facade and balconies with plants, on a quiet tree-lined street. Shot: real drone or architectural photograph of the business from a pleasant elevated angle, centered, on a sunny day. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 54. Restoran — `i2.png`
+### 64. Restoran — `i2.png`
 _45 milyon ₺ · Boğaz kenarında balık restoranı._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a seaside fish restaurant on a waterfront with tables under string lights right next to the water and a long suspension bridge in the distance, at dusk. Shot: real drone or architectural photograph of the business from a pleasant elevated angle, centered, on a sunny day. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 55. Butik otel — `i3.png`
+### 65. Butik otel — `i3.png`
 _110 milyon ₺ · 24 odalı, Kapadokya'da taş otel._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a 24-room boutique stone hotel carved into fairy-chimney rock formations in a Cappadocia-like valley, with colorful hot air balloons in the sky at sunrise. Shot: real drone or architectural photograph of the business from a pleasant elevated angle, centered, on a sunny day. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 56. Alışveriş merkezi — `i4.png`
+### 66. Alışveriş merkezi — `i4.png`
 _400 milyon ₺ · 180 mağazalı AVM, sinema ve yemek katı._
 
 ```
 A real photograph, not a render. NEW and DIFFERENT photo, do not repeat anything from earlier in this chat. Subject: a large modern shopping mall with a curved glass facade, a cinema wing, a big plaza with fountains and a parking area. Shot: real drone or architectural photograph of the business from a pleasant elevated angle, centered, on a sunny day. Style: ultra-realistic professional photograph, indistinguishable from a real photo, true-to-life materials and textures, natural light, realistic reflections and shadows, high dynamic range, sharp focus, fine detail. NOT a 3D render, NOT CGI, NOT an illustration, NOT a cartoon, no stylized or painterly look, no oversaturated colors. Rules: original fictional design; no text, letters, numbers, logos, brand names, flags or watermarks anywhere; no people in the foreground. Keep the whole main subject inside the frame with some margin on every side, because the top and bottom will be cropped slightly. Wide 16:9 landscape image.
 ```
 
-### 57. Futbol takımı — `i5.png`
+### 67. Futbol takımı — `i5.png`
 _1,5 milyar ₺ · Süper Lig kulübü: maç, bilet, yayın ve forma gelirleri. Oyuncu maaşları da senden._
 
 ```

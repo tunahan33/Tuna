@@ -794,7 +794,7 @@
   function makeOffer(c, car) {
     const t = G.CT[c.type], md = G.M[car.m];
     const mv = G.value(car, false), tv = G.value(car, true);
-    c.max = R.r1k(Math.min(c.budget * 1.08, mv * R.rand(1.0, 1.08) * (car.show ? 1.03 : 1) * (1 + S.rep / 1000) * G.facEff("galeri").pay * G.presEff().pay));
+    c.max = R.r1k(Math.min(c.budget * 1.08, mv * R.rand(1.0, 1.08) * (car.show ? 1.03 : 1) * (1 + S.rep / 1000) * G.facEff("galeri").pay * G.presEff().pay * (1 + G.suitCharm())));
     // titiz müşteri kendi ekspertizini yaptırır
     if (R.chance(t.picky * 0.5) && tv < mv) { c.max = R.r1k(Math.min(c.max, tv * 1.02)); c.checked = true; }
     let offer;
@@ -919,7 +919,7 @@
   G.newCandidates = function () {
     S.cands = [];
     const roles = Object.keys(G.ROLES);
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       const role = i < roles.length ? roles[i] : R.pick(roles);
       const skill = R.wpick([1, 2, 3, 4, 5], s => [5, 5, 3, 1.5, 0.6][s - 1] * (s >= 4 && S.level < 5 ? 0.4 : 1));
       S.cands.push({ id: G.nid(), role, skill, name: R.pick(G.FIRST) + " " + R.pick(G.LAST), salary: R.r100(G.ROLES[role].base * (0.7 + 0.3 * skill) * R.rand(0.92, 1.1)) });
@@ -1070,6 +1070,7 @@
     return { ok: true, price: v };
   };
   // Uçak: her sabah ithal ilanlar
+  G.suitCharm = () => { const t = G.bestOf("takim"); return t ? t.charm : 0; };
   G.importCount = () => { const p = G.bestOf("ucak"); return p ? p.imports : 0; };
   G.importListings = function () {
     const n = G.importCount();
@@ -1232,6 +1233,21 @@
     { k: "dengeli", name: "Dengeli", f: 1.05, note: "Önerilen" },
     { k: "karli", name: "Kârlı", f: 1.12, note: "Bekleyebilir" }
   ];
+  // ---- Değer tahmini ----
+  // Aracın gerçek piyasa değeri oyuncuya doğrudan gösterilmez; ekspertiz ustası tahmin eder.
+  // Hata payı en iyi ustanın yıldızına göre: 1★ ±%24 … 5★ ±%3. Aynı araç ve aynı yıldız için tahmin sabittir.
+  G.EST_SPREAD = [0, 0.24, 0.16, 0.1, 0.06, 0.03];
+  G.appraiser = () => G.staffOf("eksper").reduce((a, s) => Math.max(a, s.skill), 0);
+  function noise(key) {
+    let h = 2166136261;
+    for (const ch of String(key)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+    return ((h >>> 0) % 2001) / 1000 - 1;
+  }
+  G.estimate = function (car) {
+    const sk = G.appraiser();
+    if (!sk) return null;
+    return R.r1k(G.value(car, false) * (1 + noise(car.id + ":" + sk) * G.EST_SPREAD[sk]));
+  };
   G.dealLabel = function (ask, value) {
     const r = ask / value;
     return r <= 0.93 ? { t: "Fırsat", c: "good" } : r <= 1.04 ? { t: "Normal fiyat", c: "" } : { t: "Pahalı", c: "bad" };
@@ -1251,6 +1267,7 @@
     const prep = S.cars.find(c => c.status === "lot" && G.recommendJob(c));
     if (prep) { const o = G.recommendJob(prep); out.push({ text: `${G.carName(prep)}: ${o.name.toLocaleLowerCase("tr-TR")} değerini artırır`, a: "car", id: prep.id, btn: "Hazırla" }); }
     if (G.spaceLeft() > 0 && S.listings.some(l => !l.done) && S.money > 150000) out.push({ text: `${G.spaceLeft()} boş park yerin var; piyasada ${S.listings.filter(l => !l.done).length} ilan seni bekliyor`, a: "tab", v: "piyasa", btn: "İlanlara bak" });
+    if (!G.appraiser() && S.day >= 2 && S.staff.length < G.loc().staff && S.cands.some(c => c.role === "eksper")) out.push({ text: "Araçların değerini bilmiyorsun; ekspertiz ustası fırsatları ve pahalıları söyler", a: "staff", btn: "Personel" });
     if (S.auction && !S.auction.finished && S.auction.idx === 0 && !S.auction.live && G.spaceLeft() > 0) out.push({ text: `Günün ihalesinde ${S.auction.lots.length} araç var`, a: "auction", btn: "İhaleye gir" });
     const tired = G.ustas().find(u => !u.resting && u.energy < 35);
     if (tired && G.restFree() > 0) out.push({ text: `${tired.name} yorgun (enerji ${Math.round(tired.energy)}); çardakta dinlenirse dinç döner`, a: "rest", id: tired.id, btn: "Çardağa gönder" });

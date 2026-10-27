@@ -200,6 +200,7 @@
     ev:    { name: "Ev",    upkeep: 0.00016, resale: 0.95, perk: "Evler en çok şöhreti verir ve değerini korur." },
     araba: { name: "Araba", upkeep: 0.00032, resale: 0.7,  perk: "En iyi araban galerinin önüne park eder; müşteriler patronun arabasını görür." },
     mucevher: { name: "Mücevher", upkeep: 0.0001, resale: 0.85, perk: "Mücevherler değerini korur, sigortası ucuzdur; şöhret kazandırır." },
+    takim: { name: "Takım elbise", upkeep: 0.0004, resale: 0.4, perk: "Şık patrona müşteri güvenir: en iyi takım elbisen müşterinin ödemeye razı olduğu fiyatı artırır." },
     ucak:  { name: "Uçak",  upkeep: 0.00048, resale: 0.75, perk: "Yurt dışı bağlantısı: her sabah piyasaya ithal premium, spor ve lüks araç ilanları gelir." },
     yat:   { name: "Yat",   upkeep: 0.00048, resale: 0.7,  perk: "Haftada bir yat partisi: ertesi gün galeriye zengin müşteri akını ve itibar." },
     yatirim:  { name: "Yatırım",  upkeep: 0.0015, resale: 0.85, perk: "Yatırımlar her gün gelir getirir ama bakım ve işletme gideri de vardır. Oyundan çıkınca da kazandırır." }
@@ -264,6 +265,16 @@
     { id: "m5", cat: "mucevher", name: "Nadir pembe elmas", desc: "Müzayededen, dünyada benzeri yok.", price: 160e6, lvl: 20, pres: 40 },
     { id: "j19", cat: "mucevher", name: "Kraliyet tacı", desc: "Müzayededen, 1.200 değerli taş.", price: 300e6, lvl: 23, pres: 55, art: { t: "tac", metal: "#d4a72c", stone: "#c8102e" } },
     { id: "j20", cat: "mucevher", name: "Doğu Yıldızı elması", desc: "Dünyanın en büyük berrak elmaslarından.", price: 600e6, lvl: 26, pres: 80, art: { t: "buyukelmas", metal: "#e3e7eb", stone: "#e8f6ff" } },
+    { id: "s01", cat: "takim", name: "Hazır takım elbise", desc: "Mağazadan, lacivert, tek düğme.", price: 25000, lvl: 1, pres: 1, charm: 0.005, art: { t: "takim", fabric:"#1f2f5a",lapel:"#18254a",tie:"#c8282d" } },
+    { id: "s02", cat: "takim", name: "Ofis takımı", desc: "Gri yün, iki parça, her gün giyilir.", price: 60000, lvl: 2, pres: 1, charm: 0.01, art: { t: "takim", fabric:"#6b737c",lapel:"#575e66",tie:"#1f4fa8" } },
+    { id: "s03", cat: "takim", name: "Yelekli üç parça takım", desc: "Yelek, cep mendili ve kravat iğnesi.", price: 150000, lvl: 3, pres: 2, charm: 0.015, art: { t: "takim", fabric:"#5a4636",lapel:"#4a3a2c",tie:"#d4a72c",vest:"#6e5642",sq:"#d4a72c" } },
+    { id: "s04", cat: "takim", name: "Smokin", desc: "Saten yaka ve papyon; gala geceleri için.", price: 300000, lvl: 5, pres: 3, charm: 0.02, art: { t: "takim", fabric:"#16181c",lapel:"#3a3f47",tie:"#0b0c0e",bow:1,sq:"#ffffff" } },
+    { id: "s05", cat: "takim", name: "İtalyan yünü takım", desc: "İnce yün, el dikişi astar.", price: 650000, lvl: 7, pres: 4, charm: 0.025, art: { t: "takim", fabric:"#2c3e66",lapel:"#24345a",tie:"#7b2d8e",sq:"#f2f3f1" } },
+    { id: "s06", cat: "takim", name: "Ismarlama terzi takımı", desc: "Ölçüye göre dikilir, üç prova.", price: 1.2e6, lvl: 9, pres: 5, charm: 0.03, art: { t: "takim", fabric:"#3a3f47",lapel:"#2e3238",tie:"#6e1f2b",vest:"#3a3f47",sq:"#c8282d" } },
+    { id: "s07", cat: "takim", name: "Kaşmir palto ve takım", desc: "Kaşmir palto, deri eldiven, ipek atkı.", price: 2.5e6, lvl: 12, pres: 7, charm: 0.035, art: { t: "takim", fabric:"#8a6a4a",lapel:"#735738",tie:"#1f2f5a",coat:1,scarf:"#b8312f" } },
+    { id: "s08", cat: "takim", name: "Londra terzisi ısmarlama", desc: "Ünlü terzi sokağından, 80 saat el işçiliği.", price: 5e6, lvl: 15, pres: 9, charm: 0.04, art: { t: "takim", fabric:"#1d2d4f",lapel:"#152341",tie:"#d4a72c",vest:"#1d2d4f",sq:"#f7f3e8",stripe:1 } },
+    { id: "s09", cat: "takim", name: "Vikunya yünü takım", desc: "Dünyanın en nadir yünü, altın düğmeler.", price: 12e6, lvl: 19, pres: 12, charm: 0.045, art: { t: "takim", fabric:"#b08d64",lapel:"#9a7a54",tie:"#3a2a1c",btn:"#d4a72c",sq:"#f7f3e8" } },
+    { id: "s10", cat: "takim", name: "Pırlanta düğmeli gala takımı", desc: "Altın iplik işlemeli, pırlanta düğmeler; tek parça üretim.", price: 30e6, lvl: 24, pres: 16, charm: 0.05, art: { t: "takim", fabric:"#0f1a33",lapel:"#d4a72c",tie:"#0b0c0e",bow:1,btn:"#e8f6ff",gems:1,sq:"#d4a72c" } },
     { id: "u01", cat: "ucak", name: "Ultra hafif uçak", desc: "İki kişilik, çayırdan kalkar.", price: 8e6, lvl: 6, pres: 8, imports: 1, art: { t: "ultrahafif" } },
     { id: "uc1", cat: "ucak", name: "Tek motorlu uçak", desc: "4 kişilik pervaneli uçak.", price: 30e6, lvl: 9, pres: 15, imports: 1 },
     { id: "u03", cat: "ucak", name: "Amfibi deniz uçağı", desc: "Denize iner, koylara uçar.", price: 45e6, lvl: 11, pres: 18, imports: 1, art: { t: "amfibi" } },
@@ -304,7 +315,8 @@
     satis:    { name: "Satış danışmanı", base: 1300, desc: "Sen meşgulken teklifleri karşılar, pazarlık eder. Satıştan %1,5 prim alır." },
     usta:     { name: "Usta",            base: 1600, desc: "Atölye işlerini hızlandırır. Çalıştıkça yorulur; çardakta dinlenir." },
     yikama:   { name: "Yıkamacı",        base: 750,  desc: "Her sabah araçları siler, temiz tutar." },
-    muhasebe: { name: "Muhasebeci",      base: 1150, desc: "Günlük giderleri düşürür, vergi denetiminde ceza yemezsin." }
+    muhasebe: { name: "Muhasebeci",      base: 1150, desc: "Günlük giderleri düşürür, vergi denetiminde ceza yemezsin." },
+    eksper:   { name: "Ekspertiz ustası", base: 1400, desc: "İlandaki ve ihaledeki aracın piyasa değerini tahmin eder; fırsat mı pahalı mı söyler. Yıldızı arttıkça tahmini isabetli olur." }
   };
 
   // Atölye işleri. cost: araç değerine göre maliyet (v = aracın kusursuz hâldeki piyasa değeri)

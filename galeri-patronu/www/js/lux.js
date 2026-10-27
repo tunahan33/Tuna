@@ -71,6 +71,26 @@
     yumurta: a => VELVET + `<ellipse cx="60" cy="32" rx="15" ry="20" fill="${a.stone}"/><path d="M45 28 H75 M46 38 H74" stroke="${a.metal}" stroke-width="2"/>` + [-8, 0, 8].map(dx => `<circle cx="${60 + dx}" cy="33" r="1.6" fill="#ffffff"/>`).join("") + `<rect x="52" y="52" width="16" height="6" rx="1" fill="${a.metal}"/>` + sparkle(80, 16, 3),
     tac: a => VELVET + `<path d="M34 46 L36 20 L48 34 L60 12 L72 34 L84 20 L86 46 Z" fill="${a.metal}"/><rect x="34" y="44" width="52" height="7" rx="1" fill="${a.metal}"/>` + [[36, 20], [60, 12], [84, 20]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.6" fill="#f7f3e8"/>`).join("") + GEM(60, 36, 5, a.stone) + [44, 76].map(x => GEM(x, 40, 3, "#2f6fd0")).join("") + sparkle(92, 14, 3) + sparkle(28, 22, 2.5),
     buyukelmas: a => VELVET + `<rect x="36" y="44" width="48" height="10" rx="3" fill="#1f2f5a"/>` + GEM(60, 28, 18, a.stone) + sparkle(84, 14, 4) + sparkle(34, 18, 3) + sparkle(80, 40, 2.5),
+    // takım elbiseler: butikte askıda
+    takim: a => {
+      const L = a.coat ? 62 : 56, btn = a.btn || "#1d2024";
+      let o = `<rect width="120" height="64" fill="#efe4d4"/><rect x="0" y="0" width="120" height="6" fill="#d8c7ae"/><ellipse cx="60" cy="30" rx="40" ry="30" fill="#fff8ec" opacity=".6"/><rect y="58" width="120" height="6" fill="#c9b494"/>`;
+      o += `<path d="M60 3 q3 0 3 2.6 q0 2 -3 3" stroke="#8d6e4a" fill="none" stroke-width="1.1"/><path d="M39 16 L60 8.5 L81 16" stroke="#8d6e4a" stroke-width="1.8" fill="none"/>`;
+      o += `<path d="M34 24 L28 ${L - 3} L35 ${L - 2} L39 30 Z M86 24 L92 ${L - 3} L85 ${L - 2} L81 30 Z" fill="${a.lapel}"/>`;
+      o += `<path d="M40 16 L60 12 L80 16 L86 24 L84 ${L} L36 ${L} L34 24 Z" fill="${a.fabric}"/>`;
+      if (a.stripe) o += [44, 50, 70, 76].map(x => `<path d="M${x} 18 V${L}" stroke="#ffffff" stroke-width=".3" opacity=".35"/>`).join("");
+      if (a.vest) o += `<path d="M53 16 L60 34 L67 16 L67 44 L53 44 Z" fill="${a.vest}" stroke="#000" stroke-opacity=".25" stroke-width=".4"/><circle cx="60" cy="38" r=".8" fill="${btn}"/><circle cx="60" cy="41.5" r=".8" fill="${btn}"/>`;
+      o += `<path d="M53 13.5 L60 ${a.vest ? 30 : 36} L67 13.5 L60 11.5 Z" fill="#f7f8fa"/>`;
+      o += a.bow ? `<path d="M55 15 l5 2 l5 -2 v5 l-5 -2 l-5 2 z" fill="${a.tie}"/><circle cx="60" cy="17.4" r="1.1" fill="${a.tie}"/>`
+        : `<path d="M58.7 14.6 h2.6 l.9 2.8 l-1.5 ${a.vest ? 11 : 16} l-1.2 1.4 l-1.2 -1.4 l-1.5 -${a.vest ? 11 : 16} z" fill="${a.tie}"/>`;
+      o += `<path d="M53 13.5 L47 20 L52 24 L49 27 L60 ${a.vest ? 32 : 40} Z M67 13.5 L73 20 L68 24 L71 27 L60 ${a.vest ? 32 : 40} Z" fill="${a.lapel}"/>`;
+      o += `<circle cx="60" cy="${a.vest ? 47 : 44}" r="1.3" fill="${btn}"/><circle cx="60" cy="${a.vest ? 52 : 50}" r="1.3" fill="${btn}"/>`;
+      o += `<path d="M70 32 h8" stroke="#000" stroke-opacity=".3" stroke-width=".6"/><path d="M42 46 h9 M69 46 h9" stroke="#000" stroke-opacity=".3" stroke-width=".6"/>`;
+      if (a.sq) o += `<path d="M71 32 l1.5 -3 l1.5 2 l1.5 -2.6 l1.5 2.4 l1 1.2 z" fill="${a.sq}"/>`;
+      if (a.scarf) o += `<path d="M51 12 Q60 20 69 12 L70 16 Q60 24 50 16 Z" fill="${a.scarf}"/><path d="M63 17 L66 34 L62 34 L60 18 Z" fill="${a.scarf}"/>`;
+      if (a.gems) o += sparkle(60, 44, 2.2) + sparkle(60, 50, 2.2) + sparkle(80, 20, 2.6) + sparkle(40, 22, 2);
+      return o;
+    },
     // uçaklar
     ultrahafif: () => SKY + `<g transform="translate(26 18)"><rect x="0" y="4" width="70" height="2.4" fill="#ffd23f"/><path d="M28 6 Q32 6 34 12 L46 12 Q50 12 50 16 L30 16 Q24 16 24 12 Z" fill="#ffffff" stroke="#9aa3ac" stroke-width=".5"/><path d="M50 14 L66 14 L68 10 L64 10" stroke="#5d6873" fill="none"/><rect class="spin" x="22" y="6" width="1.6" height="14" fill="#3c4650" opacity=".6"/><circle cx="34" cy="20" r="2" fill="#1b1f24"/><circle cx="46" cy="20" r="2" fill="#1b1f24"/></g>`,
     amfibi: () => SKY + SEA(46) + `<g transform="translate(16 16)"><path d="M8 14 Q10 8 22 8 L66 8 Q76 8 80 12 L82 16 L8 16 Z" fill="#ffffff" stroke="#9aa3ac"/><path d="M8 10 L4 0 L12 0 L18 8 Z" fill="#2f7fc1"/><rect x="30" y="4" width="34" height="3" fill="#2f7fc1"/><rect x="60" y="10" width="10" height="3" fill="#2a3644"/><path d="M24 16 v8 M64 16 v8" stroke="#5d6873" stroke-width="1.2"/><path d="M14 24 h24 q4 0 4 3 h-28 z M52 24 h24 q4 0 4 3 h-28 z" fill="#e85d4a"/></g>`,
@@ -116,7 +136,7 @@
     html += `<div class="lux-grid">${G.LUXURY.filter(x => x.cat === UI.luxCat).map(x => {
       const own = G.owns(x.id);
       const net = x.income ? x.income - G.itemUpkeep(x) : 0;
-      const perk = x.imports ? `Her sabah ${x.imports * 2} ithal ilan` : x.party ? `Parti gücü ${x.party}` : x.football ? `Maç gününe göre ±%40` : "";
+      const perk = x.charm ? `Müşteri fiyatı +%${(x.charm * 100).toLocaleString("tr-TR")}` : x.imports ? `Her sabah ${x.imports * 2} ithal ilan` : x.party ? `Parti gücü ${x.party}` : x.football ? `Maç gününe göre ±%40` : "";
       let btn;
       if (own) btn = `<button class="btn sm danger" type="button" data-a="lux-sell" data-v="${x.id}">${UI.armed === "lux" + x.id ? `${G.fmtS(G.luxResale(x))}'ye sat?` : "Sat"}</button>`;
       else if (S.level < x.lvl) btn = `<span class="chip">Seviye ${x.lvl}</span>`;

@@ -159,6 +159,19 @@
     if (clean >= 95) o += `<g class="spark"><path d="M50 9 l.7 2 l2 .7 l-2 .7 l-.7 2 l-.7 -2 l-2 -.7 l2 -.7 z M100 24 l.6 1.6 l1.6 .6 l-1.6 .6 l-.6 1.6 l-.6 -1.6 l-1.6 -.6 l1.6 -.6 z" fill="#ffffff"/></g>`;
     return o;
   };
+  // Galeri açılışında kepengin yukarı sarılma animasyonu (oyunu durdurmaz, dokunmayı engellemez)
+  UI.shutter = function (title, sub) {
+    const old = document.querySelector(".shutter");
+    if (old) old.remove();
+    const el = document.createElement("div");
+    el.className = "shutter";
+    el.setAttribute("aria-hidden", "true");
+    el.innerHTML = `<div class="shutter-door"><div class="shutter-sign">${esc(title || "")}<small>${esc(sub || "")}</small></div></div>`;
+    document.body.appendChild(el);
+    const done = () => el.remove();
+    el.firstChild.addEventListener("animationend", e => { if (e.animationName !== "shutter-shake") done(); });
+    setTimeout(done, 2600);
+  };
   UI.carSVG = car => `<svg viewBox="0 0 120 48" role="img" aria-label="${esc(car.color)} ${esc(G.carName(car))}">${UI.carShape(car)}</svg>`;
 
   // ---- Küçük parçalar ----
@@ -238,6 +251,7 @@
     const km = $("kMoney");
     km.textContent = G.fmt(s.money);
     km.classList.toggle("neg", s.money < 0);
+    km.dataset.len = km.textContent.length > 13 ? "xl" : km.textContent.length > 11 ? "l" : "";
     $("kRep").textContent = Math.round(s.rep) + "/100";
     $("kRepBar").style.width = s.rep + "%";
     $("kLvlL").textContent = `Seviye ${s.level}`;
@@ -353,38 +367,40 @@
   UI.lf = UI.lf || { seg: "all", sort: "yeni", deal: false, afford: false };
   const LF_SORT = [["yeni", "Önerilen"], ["ucuz", "En ucuz"], ["pahali", "En pahalı"], ["kar", "En kârlı"], ["km", "En az km"], ["yil", "En yeni model"]];
   function filterListings(all) {
-    const f = UI.lf, s = S();
+    const f = UI.lf, s = S(), est = G.appraiser() > 0;
     let ls = all.filter(l => {
       if (f.seg !== "all" && G.M[l.car.m].seg !== f.seg) return false;
-      if (f.deal && G.dealLabel(l.last, G.value(l.car, false)).c !== "good") return false;
+      if (f.deal && est && (G.estimate(l.car) == null || G.dealLabel(l.last, G.estimate(l.car)).c !== "good")) return false;
       if (f.afford && l.last > s.money) return false;
       return true;
     });
-    const gain = l => G.value(l.car, false) - l.last;
+    const gain = l => (est ? G.estimate(l.car) : l.last) - l.last;
     const sorts = {
       yeni: (a, b) => (b.ultra ? 2 : 0) + isNew(b) - (a.ultra ? 2 : 0) - isNew(a),
       ucuz: (a, b) => a.last - b.last, pahali: (a, b) => b.last - a.last,
       kar: (a, b) => gain(b) - gain(a), km: (a, b) => G.realKm(a.car, false) - G.realKm(b.car, false), yil: (a, b) => b.car.year - a.car.year
     };
-    return ls.sort(sorts[f.sort] || sorts.yeni);
+    return ls.sort(sorts[f.sort === "kar" && !est ? "yeni" : f.sort] || sorts.yeni);
   }
   function listingFilters(all, shown) {
     const f = UI.lf;
     const segs = Object.keys(G.SEGMENTS).filter(k => all.some(l => G.M[l.car.m].seg === k));
+    const est = G.appraiser() > 0;
+    const sortOpts = LF_SORT.filter(([k]) => est || k !== "kar");
     const on = f.seg !== "all" || f.deal || f.afford || f.sort !== "yeni";
     return `<div class="filters">
       <label class="fsel"><span>Segment</span><select id="lfSeg" data-ch="seg"><option value="all">Tümü (${all.length})</option>${segs.map(k => `<option value="${k}" ${f.seg === k ? "selected" : ""}>${G.SEGMENTS[k].name} (${all.filter(l => G.M[l.car.m].seg === k).length})</option>`).join("")}</select></label>
-      <label class="fsel"><span>Sırala</span><select id="lfSort" data-ch="sort">${LF_SORT.map(([k, l]) => `<option value="${k}" ${f.sort === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
-      <div class="ftog"><button type="button" class="btn sm ${f.deal ? "pri" : ""}" data-a="lf-tog" data-v="deal" aria-pressed="${f.deal}">Sadece fırsatlar</button><button type="button" class="btn sm ${f.afford ? "pri" : ""}" data-a="lf-tog" data-v="afford" aria-pressed="${f.afford}">Kasama uygun</button>${on ? `<button type="button" class="btn sm" data-a="lf-reset">Sıfırla</button>` : ""}<span class="muted small">${shown}/${all.length} ilan</span></div></div>`;
+      <label class="fsel"><span>Sırala</span><select id="lfSort" data-ch="sort">${sortOpts.map(([k, l]) => `<option value="${k}" ${f.sort === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <div class="ftog">${est ? `<button type="button" class="btn sm ${f.deal ? "pri" : ""}" data-a="lf-tog" data-v="deal" aria-pressed="${f.deal}">Sadece fırsatlar</button>` : ""}<button type="button" class="btn sm ${f.afford ? "pri" : ""}" data-a="lf-tog" data-v="afford" aria-pressed="${f.afford}">Kasama uygun</button>${on ? `<button type="button" class="btn sm" data-a="lf-reset">Sıfırla</button>` : ""}<span class="muted small">${shown}/${all.length} ilan</span></div></div>`;
   }
 
   const isNew = l => (l.day === S().day && l.born > G.OPEN && S().min - l.born < 120 ? 1 : 0);
   function listingRow(l) {
     const car = l.car;
-    const deal = G.dealLabel(l.last, G.value(car, false));
+    const ev = G.estimate(car), deal = ev ? G.dealLabel(l.last, ev) : null;
     return `<article class="crow ${l.ultra ? "ultra" : ""}" role="button" tabindex="0" data-a="listing" data-id="${l.id}">
       <div class="crow-img">${UI.carSVG(car)}</div>
-      <div class="crow-main"><b>${esc(G.carName(car))}</b><span>${car.year} · ${G.fmtKm(G.realKm(car, false))} · ${esc(G.SELLERS[l.seller].name)}</span><span class="chips">${l.ultra ? `<span class="chip gold">Ultra lüks</span>` : ""}<span class="chip ${deal.c}">${deal.t}</span>${isNew(l) ? `<span class="chip acc">Yeni</span>` : ""}</span></div>
+      <div class="crow-main"><b>${esc(G.carName(car))}</b><span>${car.year} · ${G.fmtKm(G.realKm(car, false))} · ${esc(G.SELLERS[l.seller].name)}</span><span class="chips">${l.ultra ? `<span class="chip gold">Ultra lüks</span>` : ""}${deal ? `<span class="chip ${deal.c}">${deal.t}</span>` : ""}${isNew(l) ? `<span class="chip acc">Yeni</span>` : ""}</span></div>
       <div class="crow-side"><span class="sticker sm">${G.fmtS(l.last)}</span><small class="muted">${G.SEGMENTS[G.M[car.m].seg].name}</small></div>
     </article>`;
   }
@@ -655,9 +671,9 @@
   SHEETS.listing = function (id) {
     const s = S(), l = s.listings.find(x => x.id === id);
     if (!l) return null;
-    const car = l.car, ap = G.value(car, false);
-    const deal = G.dealLabel(l.last, ap);
-    const suggest = R.r1k(Math.min(l.last, ap * 0.9));
+    const car = l.car, ap = G.estimate(car), sk = G.appraiser();
+    const deal = ap ? G.dealLabel(l.last, ap) : null;
+    const suggest = R.r1k(Math.min(l.last, (ap || l.last) * 0.9));
     const d = UI.draft;
     if (d.lid !== id) { d.lid = id; d.offer = suggest; }
     const lo = R.r1k(l.last * 0.6), hi = l.last;
@@ -665,7 +681,8 @@
     const cs = G.condScore(car);
     let html = head(G.carName(car), `${esc(G.SELLERS[l.seller].name)} · ${esc(l.sellerName)}`);
     html += `<div class="hero">${UI.carSVG(car)}<span class="sticker">${G.fmtS(l.last)}</span></div>
-      <div class="tiles"><div><span>İstenen</span><b>${G.fmtS(l.last)}</b></div><div><span>Tahmini değer</span><b>${G.fmtS(ap)}</b></div><div><span>Değerlendirme</span><b class="${deal.c === "good" ? "pos" : deal.c === "bad" ? "neg" : ""}">${deal.t}</b></div></div>
+      <div class="tiles"><div><span>İstenen</span><b>${G.fmtS(l.last)}</b></div><div><span>Tahmini değer</span><b>${ap ? "≈ " + G.fmtS(ap) : "?"}</b></div><div><span>Değerlendirme</span><b class="${deal && deal.c === "good" ? "pos" : deal && deal.c === "bad" ? "neg" : "muted"}">${deal ? deal.t : "Bilinmiyor"}</b></div></div>
+      ${sk ? `<p class="small muted">Ekspertiz ustanın tahmini <span class="stars">${"★".repeat(sk)}${"☆".repeat(5 - sk)}</span> · hata payı ±%${Math.round(G.EST_SPREAD[sk] * 100)}</p>` : `<p class="small muted">Aracın değerini bilmiyorsun. <b>Ekspertiz ustası</b> işe alırsan (Patron → Personel) fırsat mı pahalı mı söyler.</p>`}
       <p class="small">${spec(car)} · ${esc(car.color)}</p>
       <div class="chips">${paintChips(car)}${car.inspected ? issueChips(car) : ""}<span class="chip ${cs >= 70 ? "good" : cs >= 50 ? "warn" : "bad"}">Durum ${cs}${car.inspected ? "" : " (satıcı beyanı)"}</span></div>`;
     if (!car.inspected && !l.done) {
@@ -684,8 +701,10 @@
     return html;
   };
   function offerInfo(o, l, ap) {
+    const below = `İstenenin %${Math.round((1 - o / l.last) * 100)} altı`;
+    if (!ap) return below;
     const pm = pct(o, ap);
-    return `İstenenin %${Math.round((1 - o / l.last) * 100)} altı · değerin ${pm >= 0 ? "%" + pm + " üstü" : "%" + -pm + " altı"}`;
+    return `${below} · tahminin ${pm >= 0 ? "%" + pm + " üstü" : "%" + -pm + " altı"}`;
   }
 
   SHEETS.cust = function (id) {
@@ -731,7 +750,7 @@
     }
     const lot = a.lots[a.idx], car = lot.car, L = a.live;
     html += `<div class="hero">${UI.carSVG(car)}<span class="sticker">Lot ${a.idx + 1}/${a.lots.length}</span></div>
-      <div class="row"><div><b>${esc(G.carTitle(car))}</b><p class="small muted">${esc(G.aucSrc(lot.src))} · ${spec(car)}</p></div><div class="num small">≈ ${G.fmtS(G.value(car, false))}</div></div>
+      <div class="row"><div><b>${esc(G.carTitle(car))}</b><p class="small muted">${esc(G.aucSrc(lot.src))} · ${spec(car)}</p></div><div class="num small">${G.estimate(car) ? "≈ " + G.fmtS(G.estimate(car)) : "Değer ?"}</div></div>
       <div class="chips">${paintChips(car)}${car.inspected ? issueChips(car) : `<span class="chip warn">Kontrol edilmedi</span>`}${condChip(car)}</div>`;
     if (!L) {
       html += `${s.upg.expert && !car.inspected ? `<button class="btn warn block" type="button" data-a="a-inspect">Hızlı kontrol · ${G.fmt(G.expertCost())}</button>` : ""}
@@ -832,7 +851,7 @@
       <div class="intro-art">${demo}</div>
       <div class="field"><label for="nameIn"><b>Galerinin adı</b></label><input type="text" id="nameIn" maxlength="28" value="${esc(UI.draft.name || "Patron Otomotiv")}" autocomplete="off"></div>
       <div class="card"><h3>Nasıl oynanır</h3><ol class="steps small">
-        <li><b>Araç al</b>: ilanlarda "Fırsat" yazan araçlara bak, pazarlık et ya da ihaleye gir.</li>
+        <li><b>Araç al</b>: ilanlara bak, pazarlık et ya da ihaleye gir. Aracın değerini bilmek için ekspertiz ustası işe al.</li>
         <li><b>Hazırla</b>: araca dokun, önerilen atölye işini başlat.</li>
         <li><b>Fiyat koy</b>: tek dokunuşla etiketi as. Müşteri gelince teklifini kabul et ya da biraz daha iste.</li>
         <li><b>Büyü</b>: kârla vitrin, atölye, personel ve yeni adresler al.</li></ol>
@@ -983,6 +1002,7 @@
   function afterSale() { if (UI.sheet && UI.sheet.kind === "cust") UI.sheet = null; UI.render(); }
 
   const ACT = {
+    staff: () => { UI.tab = "patron"; UI.sub.patron = "personel"; UI.sheet = null; window.scrollTo(0, 0); UI.render(); },
     tab: el => { UI.tab = el.dataset.v; if (UI.sheet && !UI.blocking()) UI.sheet = null; window.scrollTo(0, 0); UI.armed = null; UI.render(); },
     sub: el => { UI.sub[el.dataset.k] = el.dataset.v; UI.render(); },
     sort: el => { UI.sort = el.dataset.v; UI.render(); },
@@ -1106,6 +1126,7 @@
       UI.sheet = null;
       UI.render();
       if (G.Ads && G.interstitialDue(ended)) { G.interstitialShown(ended); await G.Ads.interstitial(); }
+      UI.shutter(s.name, `Gün ${s.day} · Günaydın patron`);
       s.paused = false;
     },
     begin: () => {
@@ -1115,6 +1136,7 @@
       UI.sheet = null;
       G.save();
       UI.render();
+      UI.shutter(G.S.name, "Hayırlı olsun, kapılar açıldı");
     }
   };
 
@@ -1161,7 +1183,7 @@
       const v = +el.value;
       const s = S();
       if (k === "price") { const car = s.cars.find(c => c.id === UI.sheet.id); UI.draft.price = v; $("prOut").textContent = G.fmt(v); if (car) $("prInfo").innerHTML = priceInfo(v, G.value(car, false), car.buy + car.spent); }
-      if (k === "offer") { const l = s.listings.find(x => x.id === UI.sheet.id); UI.draft.offer = v; $("ofOut").textContent = G.fmt(v); if (l) $("ofInfo").textContent = offerInfo(v, l, G.value(l.car, false)); }
+      if (k === "offer") { const l = s.listings.find(x => x.id === UI.sheet.id); UI.draft.offer = v; $("ofOut").textContent = G.fmt(v); if (l) $("ofInfo").textContent = offerInfo(v, l, G.estimate(l.car)); }
       if (k === "counter") { const c = s.custs.find(x => x.id === UI.sheet.id); UI.draft.counter = v; $("coOut").textContent = G.fmt(v); const car = c && G.custCar(c); if (car) $("coInfo").innerHTML = counterInfo(v, car.buy + car.spent); }
     });
     const down = e => { if (e.target.matches && e.target.matches('input[type="range"]')) UI.dragging = true; };

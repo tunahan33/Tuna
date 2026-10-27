@@ -11,14 +11,17 @@ Oyun saf HTML, CSS ve JavaScript ile yazıldı (kütüphane yok). Aynı kod tara
 | **Araçlar** | 9 segment (ekonomi, aile, ticari, SUV, elektrikli, premium, spor, klasik, lüks), 39 hayali model, 7 kasa tipi. Her aracın yılı, kilometresi, yakıtı, vitesi, rengi, motor/kaporta/iç durumu, boyalı ve değişen parça sayısı, tramer kaydı ve temizliği var. |
 | **Değerleme** | Piyasa değeri yaşa, kilometreye, duruma, boya/değişene, tramere, renge, yakıta, vitese ve segment trendine göre hesaplanır. Klasik araçlar yaşla değer kaybetmez, restorasyonla çok kazanır. |
 | **Gizli kusurlar** | Şanzıman, conta, turbo, batarya, pas, elektrik arızası, beyan edilmemiş boya, düşürülmüş kilometre, sel hasarı. Ekspertiz yaptırmadan alınan araçta çıkabilir; kusuru bilinmeden satılan araç müşteri şikâyeti, tazminat ve itibar kaybı getirir. |
+| **Değer tahmini** | Aracın gerçek piyasa değeri ilk etapta görünmez: ilanda "Fırsat / Normal fiyat / Pahalı" etiketi, tahmini değer, "Sadece fırsatlar" filtresi ve "En kârlı" sıralaması yoktur. Bunlar **ekspertiz ustası** işe alınınca açılır. Ustanın tahmini yıldızına göre şaşar: 1★ ±%24, 2★ ±%16, 3★ ±%10, 4★ ±%6, 5★ ±%3. Hata her araç için sabittir (aynı ilana tekrar bakınca değişmez); daha iyi bir usta alınca tahmin düzelir. İhaledeki araçlar için de aynı tahmin kullanılır. |
 | **Araç alımı** | Her sabah tamamen yenilenen ilanlar (oyuncu seviyesi ve adresle 10'dan 24'e çıkar; gün içinde 11:00, 13:00, 15:00 ve 17:00'de 2–3 yeni ilan daha düşer) (sahibinden, galeriden, filo çıkışı, acil satılık, ağır hasarlı) ve satıcıyla mesajlaşarak pazarlık. Her gün canlı açık artırma: rakip galericilerle saniye saniye teklif yarışı. |
 | **Atölye** | Detaylı temizlik, periyodik bakım, motor revizyonu, kaporta-boya, boyasız göçük düzeltme, döşeme yenileme, arıza giderme, klasiklerde tam restorasyon. Kendi atölyen yoksa işler pahalı ve yavaş dış servise gider. Boya kaportayı düzeltir ama boyalı parça sayısını artırır. |
 | **Müşteriler** | 12 müşteri tipi (öğrenci, esnaf, aile, doktor, koleksiyoncu, iş insanı...). Her birinin bütçesi, istediği segment, pazarlık payı ve boya/değişen hassasiyeti farklı. Kimi kendi ekspertizini yaptırır, kimi takasa araç verir. Teklifi kabul et, karşı teklif ver ya da reddet. |
-| **Büyüme** | 5 konum (sanayi arsası → mahalle galerisi → cadde showroom → oto plaza → otomotiv merkezi), 8 geliştirme (yıkama, atölye bölmeleri, boya kabini, göçük seti, ekspertiz cihazı, kapalı vitrin, müşteri köşesi, kamera-alarm), 4 personel rolü, 4 reklam paketi, banka kredisi. |
+| **Büyüme** | 5 konum (sanayi arsası → mahalle galerisi → cadde showroom → oto plaza → otomotiv merkezi), 8 geliştirme (yıkama, atölye bölmeleri, boya kabini, göçük seti, ekspertiz cihazı, kapalı vitrin, müşteri köşesi, kamera-alarm), 5 personel rolü (satış danışmanı, usta, yıkamacı, muhasebeci, ekspertiz ustası), 4 reklam paketi, banka kredisi. |
 | **Piyasa** | Segment fiyatları her gün oynar; akaryakıt zammı, bayram, kur artışı, ÖTV, faiz indirimi, kar, klasik otomobil fuarı gibi olaylar talebi değiştirir. Dolu, hırsızlık ve vergi denetimi gibi riskler var. |
 | **İlerleme** | Seviye ve XP, segment kilitleri, 17 görev ve ödülleri, günlük kâr-zarar raporu ve 14 günlük grafik, otomatik kayıt. |
 | **Galeri görünümü** | Galeri ekranının üstünde galerinin önden çizimi: bina konuma göre değişir (konteyner ofis, mahalle dükkânı, cam showroom, plaza, otomotiv merkezi). Alınan atölye, yıkama, vitrin, kamera ve müşteri köşesi sahnede belirir. Etiketli araçlar parkta, pazarlık eden müşteriler aracın yanında durur; gökyüzü gün içinde akşama döner. Sahnedeki araca, müşteriye ya da binaya dokununca ilgili ekran açılır. |
 | **Sade kullanım** | "Şimdi ne yapmalı?" kartı sıradaki adımı söyler. Fiyat üç hazır seçenekle (hızlı satış, dengeli, kârlı) tek dokunuşta asılır; araç sayfası en kârlı atölye işini önerir; müşteriye "kabul et / biraz daha iste / etikette diren" düğmeleriyle cevap verilir. Ayrıntılar ve kaydırıcılar katlanır bölümlerde durur. |
+
+**Görünüm:** canlı renkli tema (yeşil-turkuaz geçişli üst panel, sarı kasa, parlak düğmeler), açık ve koyu modda. Galeri her açılışta (oyunun başında ve her sabah) metal kepengin yukarı sarıldığı kısa bir animasyonla açılır; "hareketi azalt" ayarı açık cihazlarda kepenk kayarak değil solarak kalkar.
 
 Bir oyun günü (09:00–19:00) normal hızda yaklaşık 1 dakika sürer; 2× ve 4× hız ile duraklatma var.
 
@@ -93,13 +96,14 @@ Oyuncu 6. seviyeye gelince ilanlara arada bir ultra lüks koleksiyon aracı dü�
 
 ## Lüks alışveriş (Patron → Lüks)
 
-Patron kazandığı parayla kendine ev, araba, uçak, yat ve mücevher alabilir, gelir getiren yatırımlar yapabilir. 83 eşyanın her birinin kendi çizimi, oyuncu seviyesi şartı, şöhret puanı, günlük bakım masrafı ve geri satış değeri vardır.
+Patron kazandığı parayla kendine ev, araba, mücevher, takım elbise, uçak ve yat alabilir, gelir getiren yatırımlar yapabilir. 93 eşyanın her birinin kendi çizimi, oyuncu seviyesi şartı, şöhret puanı, günlük bakım masrafı ve geri satış değeri vardır.
 
 | Kategori | Sayı | Fiyat aralığı (ucuzdan pahalıya) | Özel fayda | Günlük bakım | Geri satış |
 |---|---|---|---|---|---|
 | Ev | 13 | Stüdyo daire 4 milyon → mahalle dairesi, bahçeli ev, site, dağ evi, çiftlik evi, rezidans, penthouse, villa, tarihi köşk, yalı, özel ada → Avrupa'da şato 1,4 milyar | En çok şöhreti verir | %0,016 | %95 |
 | Araba | 26 | Anka Serçe 2,5 milyon → aile, SUV, elektrikli, premium, spor ve hiper otomobiller → Ferro Leggenda 250 milyon | En iyi araba galerinin önüne "PATRON" plakasıyla park eder | %0,032 | %70 |
 | Mücevher | 20 | Gümüş künye 150 bin → bilezik, saatler, küpeler, inci, yakut, pırlanta, antika sorguç, gerdanlık, mücevherli yumurta, pembe elmas, kraliyet tacı → Doğu Yıldızı elması 600 milyon | Değerini korur, sigortası ucuz | %0,01 | %85 |
+| Takım elbise | 10 | Hazır takım 25 bin → ofis takımı, yelekli üç parça, smokin, İtalyan yünü, ısmarlama terzi işi, kaşmir palto, Londra terzisi, vikunya yünü → pırlanta düğmeli gala takımı 30 milyon | En iyi takım müşterinin ödemeye razı olduğu fiyatı %0,5'ten %5'e kadar artırır | %0,04 | %40 |
 | Uçak | 9 | Ultra hafif uçak 8 milyon → tek motorlu, amfibi deniz uçağı, helikopter, turboprop, hafif jet, orta boy jet, uzun menzil jet → VIP geniş gövde uçak 1,1 milyar | Her sabah 2–10 ithal ilan; uçak sahnenin gökyüzünde uçar | %0,048 | %75 |
 | Yat | 10 | Jet ski 1,5 milyon → balıkçı teknesi, yelkenli, sürat teknesi, katamaran, gulet, flybridge, motoryat, süper yat → mega yat 875 milyon | Haftada bir yat partisi | %0,048 | %70 |
 | Yatırım | 5 | Kiralık daire 12 milyon → restoran, butik otel, AVM → futbol takımı 1,5 milyar | **Her gün gelir getirir**, gideri de vardır; oyundan çıkınca pasif gelire eklenir | %0,15 (takım %0,25) | %85 |
@@ -108,7 +112,7 @@ Her eşyanın kendi çizimi vardır; seviye şartları da ucuzdan pahalıya doğ
 
 **Yatırım gelirleri:** kiralık daire günde 72 bin, restoran 270 bin, butik otel 660 bin, AVM 2,4 milyon ₺ getirir. Futbol takımı (galerinin adını taşır, ör. "Yıldızspor") her gün maça çıkar; galibiyette gelir %40 fazla, yenilgide %40 az olur, sonuç gün sonu haberlerinde görünür. Yatırımların net günlük kazancının dörtte biri, oyundan çıkılan her saat için pasif gelire eklenir. Futbol takımı sahnenin arka planında stadyum olarak görünür.
 
-**Şöhret** (sahip olunan eşyaların puanlarının toplamı) şunları verir: müşterinin ödemeye razı olduğu fiyat +%6'ya kadar, günde +0,5'e kadar itibar, 50 şöhrette bir ve 150 şöhrette iki kademe daha zengin müşteri tipi. Bakım masrafları kişisel gider olarak gün sonu raporunda ayrı satırda görünür ve işletmenin günlük netine sayılmaz. Lüks eşyaların geri satış değeri net değere eklenir. Bütün eşyaların toplam fiyatı yaklaşık 2,85 milyar ₺; geri satış ödenen fiyat üzerinden hesaplanır.
+**Şöhret** (sahip olunan eşyaların puanlarının toplamı) şunları verir: müşterinin ödemeye razı olduğu fiyat +%6'ya kadar, günde +0,5'e kadar itibar, 50 şöhrette bir ve 150 şöhrette iki kademe daha zengin müşteri tipi. Bakım masrafları kişisel gider olarak gün sonu raporunda ayrı satırda görünür ve işletmenin günlük netine sayılmaz. Lüks eşyaların geri satış değeri net değere eklenir. Bütün eşyaların toplam fiyatı yaklaşık 2,9 milyar ₺; geri satış ödenen fiyat üzerinden hesaplanır.
 
 ## Reklam modeli
 

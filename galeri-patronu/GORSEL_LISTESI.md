@@ -1,6 +1,6 @@
 # Galeri Patronu — görsel listesi
 
-Toplam 187 görsel. Dosya adlarını aynen kullan; görseller `galeri-patronu/www/` altındaki klasörlere konur. Bulunmayan görsellerin yerinde oyunun şu anki çizimi kalır.
+Toplam 198 görsel. Dosya adlarını aynen kullan; görseller `galeri-patronu/www/` altındaki klasörlere konur. Bulunmayan görsellerin yerinde oyunun şu anki çizimi kalır.
 
 Kurallar: tek tarz (hepsi fotoğraf ya da hepsi çizim), gerçek marka/logo/plaka/tanınabilir kişi yok, ticari kullanıma uygun lisans, sahnede kullanılacaklar şeffaf PNG.
 
@@ -58,7 +58,7 @@ Aracın yandan görünüşü, ön tarafı sağda. Plaka, logo ve marka yazısı 
 | Volta Speedster '57 | Ultra lüks · Coupe | `img/araclar/volta-speedster.png` |
 | Anka Kartal Prototip '64 | Ultra lüks · Sedan | `img/araclar/anka-prototip.png` |
 
-## Lüks eşyalar (83)
+## Lüks eşyalar (93)
 
 **Öncelik:** Önce · **Boyut:** 960 × 512 px (15:8) · **Biçim:** JPG · **Klasör:** `img/luks/`
 
@@ -125,6 +125,16 @@ Eşyanın kendisi, ortalanmış ve kart içinde rahat okunur. Mücevherlerde koy
 | Nadir pembe elmas | Mücevher · 160 milyon ₺ — Müzayededen, dünyada benzeri yok. | `img/luks/m5.jpg` |
 | Kraliyet tacı | Mücevher · 300 milyon ₺ — Müzayededen, 1.200 değerli taş. | `img/luks/j19.jpg` |
 | Doğu Yıldızı elması | Mücevher · 600 milyon ₺ — Dünyanın en büyük berrak elmaslarından. | `img/luks/j20.jpg` |
+| Hazır takım elbise | Takım elbise · 25 bin ₺ — Mağazadan, lacivert, tek düğme. | `img/luks/s01.jpg` |
+| Ofis takımı | Takım elbise · 60 bin ₺ — Gri yün, iki parça, her gün giyilir. | `img/luks/s02.jpg` |
+| Yelekli üç parça takım | Takım elbise · 150 bin ₺ — Yelek, cep mendili ve kravat iğnesi. | `img/luks/s03.jpg` |
+| Smokin | Takım elbise · 300 bin ₺ — Saten yaka ve papyon; gala geceleri için. | `img/luks/s04.jpg` |
+| İtalyan yünü takım | Takım elbise · 650 bin ₺ — İnce yün, el dikişi astar. | `img/luks/s05.jpg` |
+| Ismarlama terzi takımı | Takım elbise · 1,2 milyon ₺ — Ölçüye göre dikilir, üç prova. | `img/luks/s06.jpg` |
+| Kaşmir palto ve takım | Takım elbise · 2,5 milyon ₺ — Kaşmir palto, deri eldiven, ipek atkı. | `img/luks/s07.jpg` |
+| Londra terzisi ısmarlama | Takım elbise · 5 milyon ₺ — Ünlü terzi sokağından, 80 saat el işçiliği. | `img/luks/s08.jpg` |
+| Vikunya yünü takım | Takım elbise · 12 milyon ₺ — Dünyanın en nadir yünü, altın düğmeler. | `img/luks/s09.jpg` |
+| Pırlanta düğmeli gala takımı | Takım elbise · 30 milyon ₺ — Altın iplik işlemeli, pırlanta düğmeler; tek parça üretim. | `img/luks/s10.jpg` |
 | Ultra hafif uçak | Uçak · 8 milyon ₺ — İki kişilik, çayırdan kalkar. | `img/luks/u01.jpg` |
 | Tek motorlu uçak | Uçak · 30 milyon ₺ — 4 kişilik pervaneli uçak. | `img/luks/uc1.jpg` |
 | Amfibi deniz uçağı | Uçak · 45 milyon ₺ — Denize iner, koylara uçar. | `img/luks/u03.jpg` |
@@ -208,7 +218,7 @@ Tek bir nesne, önden ya da hafif açılı. Sahnede küçük görüneceği için
 | Müşteri köşesi | Çay-kahve ve oturma alanı: müşteriler %35 daha sabırlı. | `img/ekipman/cafe.png` |
 | Kamera ve alarm | Gece hırsızlık ve vandalizm olaylarını önler. | `img/ekipman/security.png` |
 
-## Kişiler (18)
+## Kişiler (19)
 
 **Öncelik:** Sonra · **Boyut:** 256 × 256 px · **Biçim:** PNG, kare · **Klasör:** `img/kisiler/`
 
@@ -233,6 +243,7 @@ Omuzdan yukarı portre, yüz ortada. Gerçek kişi fotoğrafı yerine çizim ya 
 | Usta | Çalışan portresi | `img/kisiler/personel-usta.png` |
 | Yıkamacı | Çalışan portresi | `img/kisiler/personel-yikama.png` |
 | Muhasebeci | Çalışan portresi | `img/kisiler/personel-muhasebe.png` |
+| Ekspertiz ustası | Çalışan portresi | `img/kisiler/personel-eksper.png` |
 | Patron (oyuncu) | Oyuncunun kendisi; hoş geldin ekranında ve gün sonunda görünür | `img/kisiler/patron.png` |
 
 ## Sahne ve arka planlar (7)
