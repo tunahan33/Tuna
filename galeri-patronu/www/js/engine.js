@@ -765,9 +765,33 @@
     if (note) G.feed(note, "info");
   };
 
+  // Piyasanın üstünde etiketli araca "gönlü düşen" müşteri: düşük ihtimalle etikete yakın fiyata alır.
+  // İhtimal etiket piyasanın %8 üstündeyken müşteri başına ~%3, %60 üstüne doğru %0,5'e iner; daha pahalısına kimse vurulmaz.
+  G.SMITTEN = { from: 1.08, to: 1.6, hi: 0.03, lo: 0.005 };
+  G.smittenChance = function (ratio, car) {
+    const k = G.SMITTEN;
+    if (ratio < k.from || ratio > k.to) return 0;
+    const p = k.hi - (k.hi - k.lo) * (ratio - k.from) / (k.to - k.from);
+    return p * (car.show ? 1.5 : 1) * (car.clean >= 80 ? 1.15 : 0.8);
+  };
+  function smitten(c, taken) {
+    const t = G.CT[c.type];
+    const pool = S.cars.filter(car => {
+      if (car.status !== "lot" || !car.price || taken.has(car.id) || car.price > c.budget * 1.08) return false;
+      const md = G.M[car.m];
+      if (md.seg === "ultra" && c.type !== "milyarder") return false;
+      return (md.seg === c.seg || t.segs[md.seg]) && car.price / G.value(car, false) >= G.SMITTEN.from;
+    });
+    if (!pool.length) return null;
+    const car = R.pick(pool);
+    return R.chance(G.smittenChance(car.price / G.value(car, false), car)) ? car : null;
+  }
+
   function decide(c) {
     const t = G.CT[c.type];
     const taken = new Set(S.custs.filter(o => o !== c && o.state === "offer").map(o => o.carId));
+    const love = smitten(c, taken);
+    if (love) { makeOffer(c, love, true); return; }
     let best = null, bs = 0;
     for (const car of S.cars) {
       if (car.status !== "lot" || !car.price || taken.has(car.id)) continue;
@@ -794,14 +818,19 @@
     makeOffer(c, best);
   }
 
-  function makeOffer(c, car) {
+  function makeOffer(c, car, love) {
     const t = G.CT[c.type], md = G.M[car.m];
     const mv = G.value(car, false), tv = G.value(car, true);
     c.max = R.r1k(Math.min(c.budget * 1.08, mv * R.rand(1.0, 1.08) * (car.show ? 1.03 : 1) * (1 + S.rep / 1000) * G.facEff("galeri").pay * G.presEff().pay * (1 + G.suitCharm())));
     // titiz müşteri kendi ekspertizini yaptırır
-    if (R.chance(t.picky * 0.5) && tv < mv) { c.max = R.r1k(Math.min(c.max, tv * 1.02)); c.checked = true; }
+    if (!love && R.chance(t.picky * 0.5) && tv < mv) { c.max = R.r1k(Math.min(c.max, tv * 1.02)); c.checked = true; }
     let offer;
-    if (car.price <= c.max * (1 - t.haggle * 0.3) && R.chance(0.3)) offer = car.price;
+    if (love) {
+      // vurulan müşteri etiketi ya da etikete çok yakınını öder, ekspertiz sonucuna da pek bakmaz
+      c.max = R.r1k(car.price * R.rand(0.98, 1.02));
+      c.love = true;
+      offer = R.chance(0.45) ? car.price : R.r1k(car.price * R.rand(0.94, 0.98));
+    } else if (car.price <= c.max * (1 - t.haggle * 0.3) && R.chance(0.3)) offer = car.price;
     else offer = R.r1k(Math.min(car.price, c.max) * (1 - t.haggle * R.rand(0.7, 1.4)));
     c.state = "offer";
     c.carId = car.id;
@@ -812,7 +841,9 @@
       c.tradeVal = R.r1k(G.value(c.trade, false) * 0.85);
       if (c.tradeVal >= c.offer * 0.8) { c.trade = null; c.tradeVal = 0; }
     }
-    const first = c.offer >= car.price
+    const first = love
+      ? R.pick([`${md.brand} ${md.name} görür görmez vuruldum! Fiyatı biraz yüksek ama ${G.fmt(c.offer)} veririm.`, `Yıllardır tam böyle bir ${md.name} arıyordum. Pazarlığa gerek yok, ${G.fmt(c.offer)} hazır.`, `Bu araç bana göre, fiyatına takılmayacağım: ${G.fmt(c.offer)}.`])
+      : c.offer >= car.price
       ? `${md.brand} ${md.name} tam aradığım araç. Etiket fiyatına alıyorum.`
       : R.pick([`${md.brand} ${md.name} ilgimi çekti. ${G.fmt(c.offer)} veririm.`, `Aracı beğendim ama fiyat biraz yüksek. ${G.fmt(c.offer)} olur mu?`, `Nakit ${G.fmt(c.offer)} hazır, hemen alırım.`]);
     c.msgs = [{ who: "them", text: first }];

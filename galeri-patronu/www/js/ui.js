@@ -432,7 +432,7 @@
     if (!car) return "";
     const profit = c.offer - car.buy - car.spent;
     const raise = raiseAmount(c, car);
-    return `<div class="card offer"><div class="row"><div><b>${esc(c.name)}</b> <span class="muted small">${esc(G.CT[c.type].name)}</span><p class="small muted">${esc(G.carTitle(car))} · etiket ${G.fmtS(car.price)}</p></div>
+    return `<div class="card offer"><div class="row"><div><b>${esc(c.name)}</b> <span class="muted small">${esc(G.CT[c.type].name)}</span>${c.love ? ` <span class="chip gold">Araca vuruldu</span>` : ""}<p class="small muted">${esc(G.carTitle(car))} · etiket ${G.fmtS(car.price)}</p></div>
       <div style="text-align:right"><div class="num big">${G.fmtS(c.offer)}</div><div class="small ${profit >= 0 ? "pos" : "neg"}">${profit >= 0 ? "kâr" : "zarar"} ${G.fmtS(Math.abs(profit))}</div></div></div>
       ${c.trade ? `<p class="small">Takasa <b>${esc(G.carTitle(c.trade))}</b> veriyor (${G.fmtS(c.tradeVal)})</p>` : ""}
       <div class="prog pat" title="Müşterinin sabrı"><i data-pat="${c.id}" style="width:${c.patience / c.patMax * 100}%"></i></div>
