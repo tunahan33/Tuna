@@ -4,7 +4,7 @@ Toplam 187 görsel. Dosya adlarını aynen kullan; görseller `galeri-patronu/ww
 
 Kurallar: tek tarz (hepsi fotoğraf ya da hepsi çizim), gerçek marka/logo/plaka/tanınabilir kişi yok, ticari kullanıma uygun lisans, sahnede kullanılacaklar şeffaf PNG.
 
-## Araç modelleri (45)
+## Araç modelleri (45) — hazır
 
 **Öncelik:** Önce · **Boyut:** 1200 × 480 px · **Biçim:** PNG, şeffaf arka plan · **Klasör:** `img/araclar/`
 
@@ -255,7 +255,7 @@ Galeri ekranındaki sahnenin parçaları. Şu anki çizimler iş görüyor; değ
 
 **Öncelik:** Önce · **Boyut:** satırda yazıyor · **Biçim:** satırda yazıyor · **Klasör:** `img/uygulama/`
 
-Mağazaya çıkmak için gerekli. Mağaza ekran görüntülerini aramana gerek yok; oyundan ben alırım.
+**Hazır** (`assets/` ve `store/` klasörleri). Mağaza ekran görüntülerini aramana gerek yok; oyundan ben alırım.
 
 | Ad | Açıklama | Dosya |
 |---|---|---|

@@ -195,7 +195,7 @@ npm run open:ios       # Xcode açılır
 
 ### 3. Yayından önce yapılacaklar
 
-- [ ] **Uygulama ikonu ve açılış ekranı**: 1024×1024 ikon ve 2732×2732 açılış görseli hazırlayıp `npx @capacitor/assets generate` ile bütün boyutları üret.
+- [x] **Uygulama ikonu ve açılış ekranı**: hazır. `assets/icon-only.png` (1024×1024, sarı fiyat etiketi + araba), `assets/splash.png` ve `assets/splash-dark.png` (2732×2732). Diğer ikon seçenekleri `assets/secenekler/` içinde; birini seçersen `icon-only.png` adıyla değiştir. Bütün boyutları üretmek için: `npm i -D @capacitor/assets && npx @capacitor/assets generate --iconBackgroundColor '#0d6b5a' --splashBackgroundColor '#0f1419'`. Google Play öne çıkan görseli `store/google-play-one-cikan.png` (1024×500), App Store ikonu `store/app-store-ikon-1024.png`. Görseller `tools/marka/` içindeki betiklerle yeniden üretilebilir.
 - [ ] **Yazı tiplerini pakete ekle**: şu an Google Fonts'tan yükleniyor; internet yokken yedek yazı tipine düşer. `.woff2` dosyalarını `www/fonts/` altına koyup `@font-face` ile bağla.
 - [ ] **Kayıt**: oyun `localStorage` kullanıyor. Uygulamada daha güvenli olması için `@capacitor/preferences` eklentisine geçir (iOS, alan daraldığında web depolamasını silebilir).
 - [ ] **Gizlilik politikası**: iki mağaza da bir gizlilik politikası adresi ister. Oyun şu an hiçbir kişisel veri toplamıyor; bunu belirten kısa bir sayfa yeterli.
