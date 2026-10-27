@@ -9,8 +9,7 @@
 <!-- ARTIFACT-START -->
 <title>Galeri Patronu</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700;800&family=Saira:wght@500;600;700&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
 /* Düzen: üstte sabit patron paneli (kasa, saat, hız), ortada sekme içeriği, altta uygulama sekme çubuğu.
    Araç kartlarında ön camdaki sarı fiyat etiketi tek vurgulu öğe. */
@@ -54,7 +53,8 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html, body { height: 100%; }
+html { height: 100%; }
+body { min-height: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--ink);
   font: 15px/1.45 var(--font-body);
@@ -180,6 +180,7 @@ h1, h2, h3 { text-wrap: balance; }
 .btn.danger { color: var(--bad); }
 .btn.sm { padding: 6px 10px; font-size: 13px; border-radius: 7px; }
 .btn.block { width: 100%; }
+a.btn { text-decoration: none; color: inherit; }
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 .btns { display: flex; gap: 8px; flex-wrap: wrap; }
 .btns .btn { flex: 1; }

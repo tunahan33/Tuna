@@ -4,11 +4,18 @@
   const UI = G.UI;
   const SAVE_KEY = "galeri-patronu-v1";
   const MIN_PER_SEC = 4; // 1× hızda bir oyun günü (09:00–19:00) yaklaşık 2,5 dakika sürer
+  // Uygulamada kayıt ayrıca cihazın kalıcı deposuna (@capacitor/preferences) yazılır:
+  // iOS yer daraldığında web depolamasını silebilir; açılışta localStorage boşsa kayıt oradan geri gelir.
+  const Cap = window.Capacitor;
+  const Prefs = Cap && Cap.Plugins && Cap.Plugins.Preferences;
+  const nativePrefs = !!Prefs && Cap.getPlatform && Cap.getPlatform() !== "web";
 
   G.save = function () {
     if (!G.S || !G.S.started) return;
     G.S.lastSeen = Date.now();
-    try { localStorage.setItem(SAVE_KEY, JSON.stringify(G.S)); } catch (e) { /* kayıt alanı yoksa oyun yine çalışır */ }
+    const data = JSON.stringify(G.S);
+    try { localStorage.setItem(SAVE_KEY, data); } catch (e) { /* kayıt alanı yoksa oyun yine çalışır */ }
+    if (nativePrefs) Prefs.set({ key: SAVE_KEY, value: data }).catch(() => {});
   };
   function loadSaved() {
     try {
@@ -19,6 +26,7 @@
   }
   G.wipe = function () {
     try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* yok say */ }
+    if (nativePrefs) Prefs.remove({ key: SAVE_KEY }).catch(() => {});
     G.S = G.newState();
     UI.tab = "galeri";
     UI.sheet = { kind: "intro" };
@@ -72,5 +80,16 @@
 
   const hot = window.claude && window.claude.hot;
   if (hot && hot.snapshot) hot.snapshot(() => ({ state: G.S }));
-  if (hot && hot.ready) hot.ready(start); else start((hot && hot.data) || {});
+  // uygulamada önce kalıcı depodaki kayıt localStorage'a geri yüklenir
+  async function boot(hotData) {
+    if (nativePrefs) {
+      try {
+        let has = false;
+        try { has = !!localStorage.getItem(SAVE_KEY); } catch (e) { /* yok say */ }
+        if (!has) { const r = await Prefs.get({ key: SAVE_KEY }); if (r && r.value) localStorage.setItem(SAVE_KEY, r.value); }
+      } catch (e) { /* kalıcı depo yoksa web kaydıyla devam */ }
+    }
+    start(hotData);
+  }
+  if (hot && hot.ready) hot.ready(boot); else boot((hot && hot.data) || {});
 })(window.G = window.G || {});

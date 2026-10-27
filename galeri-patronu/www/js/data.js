@@ -5,6 +5,12 @@
 
   G.YEAR = 2026;
 
+  // Uygulama bilgileri. Sürümü package.json ve mağazadaki sürümle birlikte artır.
+  G.VERSION = "0.1.0";
+  // Geri bildirim e-postası ve gizlilik politikasının açık adresi; boş bırakılanın düğmesi görünmez.
+  G.FEEDBACK_EMAIL = "";
+  G.PRIVACY_URL = "";
+
   G.SEGMENTS = {
     ekonomi:  { name: "Ekonomi",    lvl: 1 },
     aile:     { name: "Aile",       lvl: 1 },

@@ -202,12 +202,25 @@ npm run open:ios       # Xcode açılır
 ### 3. Yayından önce yapılacaklar
 
 - [x] **Uygulama ikonu ve açılış ekranı**: hazır. `assets/icon-only.png` (1024×1024, sarı fiyat etiketi + araba), `assets/splash.png` ve `assets/splash-dark.png` (2732×2732). Diğer ikon seçenekleri `assets/secenekler/` içinde; birini seçersen `icon-only.png` adıyla değiştir. Bütün boyutları üretmek için: `npm i -D @capacitor/assets && npx @capacitor/assets generate --iconBackgroundColor '#0d6b5a' --splashBackgroundColor '#0f1419'`. Google Play öne çıkan görseli `store/google-play-one-cikan.png` (1024×500), App Store ikonu `store/app-store-ikon-1024.png`. Görseller `tools/marka/` içindeki betiklerle yeniden üretilebilir.
-- [ ] **Yazı tiplerini pakete ekle**: şu an Google Fonts'tan yükleniyor; internet yokken yedek yazı tipine düşer. `.woff2` dosyalarını `www/fonts/` altına koyup `@font-face` ile bağla.
-- [ ] **Kayıt**: oyun `localStorage` kullanıyor. Uygulamada daha güvenli olması için `@capacitor/preferences` eklentisine geçir (iOS, alan daraldığında web depolamasını silebilir).
-- [ ] **Gizlilik politikası**: iki mağaza da bir gizlilik politikası adresi ister. Oyun şu an hiçbir kişisel veri toplamıyor; bunu belirten kısa bir sayfa yeterli.
-- [ ] **Yaş derecelendirmesi** formlarını doldur (şiddet, kumar vb. yok).
-- [ ] **Mağaza görselleri**: telefon ve tablet ekran görüntüleri, kısa ve uzun açıklama.
+- [x] **Yazı tipleri pakette**: Saira Condensed, Saira ve Figtree `www/fonts/` içinde (Türkçe karakterli, OFL lisanslı); oyun internetsiz de doğru görünür. Tek dosya sürümüne gömülür.
+- [x] **Kayıt**: uygulamada kayıt `localStorage`'a ek olarak `@capacitor/preferences` ile cihazın kalıcı deposuna da yazılır; iOS web depolamasını silerse açılışta oradan geri gelir. `npm install` sonrası `npm run sync` yeterli.
+- [x] **Gizlilik politikası** hazır: `gizlilik.html` (Türkçe + İngilizce). Oyun kendisi kişisel veri toplamaz ama **AdMob reklam kimliği, IP ve cihaz bilgisi toplar**; politika bunu anlatır. Sarı işaretli `[GELİŞTİRİCİ ADI]` ve `[E-POSTA]` yerlerini doldur, sitende yayınla (ör. `https://SITEN/galeri-patronu/gizlilik.html`) ve adresi `www/js/data.js` → `G.PRIVACY_URL` alanına yaz; oyunda Patron → Durum'da bağlantı belirir.
+- [ ] **Yaş derecelendirmesi ve veri formları**: cevaplar `store/MAGAZA_METINLERI.md` içinde (Google Play Veri güvenliği, App Store Uygulama gizliliği, IARC).
+- [x] **Mağaza görselleri ve metinleri**: başlıklı ekran görüntüleri `store/ekran-goruntuleri/iphone-6.7/` (1290×2796) ve `android/` (1080×1920); uygulama adı, kısa/uzun açıklama, alt başlık, anahtar kelimeler `store/MAGAZA_METINLERI.md`. iPad'i de destekleyeceksen iPad ekran görüntüsü gerekir; desteklemeyeceksen Xcode'da hedefi yalnızca iPhone yap.
+- [ ] **Geri bildirim e-postası**: `www/js/data.js` → `G.FEEDBACK_EMAIL`; doldurunca Patron → Durum'da "Geri bildirim gönder" düğmesi çıkar (sürüm ve cihaz bilgisi e-postaya eklenir). Sürüm numarası `G.VERSION` ve `package.json` içinde; her mağaza güncellemesinde ikisini birlikte artır.
+- [ ] **app-ads.txt**: `store/app-ads.txt` içindeki `pub-…` numarasını AdMob yayıncı kimliğinle değiştir, sitenin kök dizinine (`https://SITEN/app-ads.txt`) koy.
 - [ ] Yukarıdaki AdMob kurulum adımları.
+
+### 4. Adım adım yayın (soft launch)
+
+| Aşama | Ne | Süre | Geçme şartı |
+|---|---|---|---|
+| 0. Arkadaş testi | `dist/galeri-patronu.html` dosyasını itch.io'ya HTML5 oyun olarak (gizli/şifreli sayfa) yükle, 5–10 kişiye gönder | 1 hafta | Takılan, sıkılan yer kalmadı |
+| 1. Kapalı test | Google Play: dahili test → **kapalı test (en az 12 kişi, 14 gün, yeni kişisel hesaplarda zorunlu)**. iPhone: TestFlight | 2–3 hafta | Çökme yok, test kullanıcıları oynamaya devam ediyor |
+| 2. Tek ülke | Sadece Türkiye'de yayın; Google Play'de kademeli dağıtım %10 → %50 → %100. Gerçek AdMob kimlikleri bu aşamada açılır (`TESTING = false`) | 2–4 hafta | Ertesi gün dönen oyuncu %35+, 7. gün %12+, çökme %1'in altı |
+| 3. Herkese | İngilizce çeviriyle diğer ülkeler | — | — |
+
+Her aşamada geri bildirimle denge ayarı yapılır, sürüm numarası artırılıp yeni paket yüklenir.
 
 ### Marka adları
 

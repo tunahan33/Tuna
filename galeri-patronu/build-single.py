@@ -29,6 +29,18 @@ def photo_data():
 
 
 html = re.sub(r'<script src="(js/[a-z]+\.js)"></script>', inline, html)
+
+
+def fonts_inline(m):
+    d = os.path.join(www, "fonts")
+    css = open(os.path.join(d, "fonts.css"), encoding="utf-8").read()
+    css = re.sub(r"url\(([a-z0-9-]+\.woff2)\)", lambda u: "url(data:font/woff2;base64," + base64.b64encode(open(os.path.join(d, u.group(1)), "rb").read()).decode("ascii") + ")", css)
+    return "<style>\n" + css + "</style>"
+
+
+# yazı tipleri dosyaya gömülür (internet gerekmez)
+html = re.sub(r'<link rel="stylesheet" href="fonts/fonts\.css">', fonts_inline, html)
+assert "fonts/fonts.css" not in html
 # fotoğraf verisi photos.js'ten hemen sonra (ui.js'ten önce) yüklenir
 html = html.replace("<!-- PHOTO-DATA -->", photo_data(), 1)
 assert 'src="js/' not in html

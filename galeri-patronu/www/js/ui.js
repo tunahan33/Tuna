@@ -527,10 +527,21 @@
       <p class="muted small">Oyundan çıkınca galerin çalışmaya devam eder; döndüğünde en fazla ${G.OFFLINE_MAX_H} saatlik kazancı alırsın. Saatlik gelir son 7 günün ortalama satış kârına göre hesaplanır; satış danışmanları ve şöhret artırır, Lüks → Yatırım'daki işletmeler ayrıca ekler.</p>
       <div class="kv"><div><span>Temel</span><b>${G.fmtS(pr.base)}/sa</b></div><div><span>Danışman bonusu</span><b>+%${Math.round(pr.sales * 100)}</b></div><div><span>Şöhret bonusu</span><b>+%${Math.round(pr.fame * 100)}</b></div><div><span>Yatırımlar</span><b>+${G.fmtS(pr.invest)}/sa</b></div><div><span>Şimdiye kadar</span><b>${G.fmtS(S().stats.passive || 0)}</b></div></div></div>`;
   }
+  // Sürüm, geri bildirim ve gizlilik bağlantısı
+  function appCard() {
+    const subj = encodeURIComponent(`Galeri Patronu ${G.VERSION} geri bildirim`);
+    const body = encodeURIComponent(`\n\n---\nSürüm: ${G.VERSION}\nGün: ${S().day} · Seviye: ${S().level}\nCihaz: ${navigator.userAgent}`);
+    const links = [
+      G.FEEDBACK_EMAIL ? `<a class="btn sm" href="mailto:${esc(G.FEEDBACK_EMAIL)}?subject=${subj}&body=${body}">Geri bildirim gönder</a>` : "",
+      G.PRIVACY_URL ? `<a class="btn sm" href="${esc(G.PRIVACY_URL)}" target="_blank" rel="noopener">Gizlilik politikası</a>` : ""
+    ].join("");
+    return `<div class="card"><div class="row"><div><b>Galeri Patronu</b><p class="muted small">Sürüm ${esc(G.VERSION)}</p></div>${links ? `<div class="btns" style="flex:none">${links}</div>` : ""}</div></div>`;
+  }
+
   function patronDurum() {
     const s = S(), T = s.today;
     const qs = G.activeQuests(3);
-    return passiveCard() + `<div class="card"><div class="row"><div><b>Oyun rehberi</b><p class="muted small">Oyunun nasıl oynandığını anlatan tanıtım turu ve ipuçları.</p></div><button class="btn sm" type="button" data-a="tour">Turu baştan izle</button></div></div><div class="card"><h3>Görevler</h3>${qs.length ? qs.map(q => `<div class="row"><div>${esc(q.text)}</div><div class="num small pos">+${G.fmtS(q.reward)}</div></div>`).join("") : `<p class="muted">Bütün görevleri bitirdin. Gerçek bir patronsun.</p>`}
+    return passiveCard() + `<div class="card"><div class="row"><div><b>Oyun rehberi</b><p class="muted small">Oyunun nasıl oynandığını anlatan tanıtım turu ve ipuçları.</p></div><button class="btn sm" type="button" data-a="tour">Turu baştan izle</button></div></div>${appCard()}<div class="card"><h3>Görevler</h3>${qs.length ? qs.map(q => `<div class="row"><div>${esc(q.text)}</div><div class="num small pos">+${G.fmtS(q.reward)}</div></div>`).join("") : `<p class="muted">Bütün görevleri bitirdin. Gerçek bir patronsun.</p>`}
         <p class="muted small">${s.quests.length}/${G.QUESTS.length} görev tamamlandı</p></div>
       <div class="card"><h3>Bugün</h3><div class="kv">
         <div><span>Satış</span><b>${T.sales}</b></div><div><span>Satış kârı</span><b class="${T.profit >= 0 ? "pos" : "neg"}">${G.fmtS(T.profit)}</b></div>
