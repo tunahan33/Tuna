@@ -61,6 +61,7 @@
       ads: 0, maxDisc: 0.05,
       staff: [], cands: [], candDay: 0,
       tut: { done: false, off: false, seen: {} },
+      opts: { offerPause: true }, offerPause: false,
       cars: [], listings: [], auction: null,
       custs: [], lost: [], jobs: [],
       trend: {}, events: [], news: [],
@@ -241,6 +242,7 @@
     for (const x of [...st.staff, ...(st.cands || []), ...(st.custs || [])]) if (!x.g) x.g = G.genderOf(x.name);
     // rehberden önceki kayıtlar: tur gösterilmez, ekran ipuçları bir kez çıkar
     if (!st.tut) st.tut = { done: true, off: false, seen: {} };
+    if (!st.opts) st.opts = { offerPause: true };
     // fotoğrafı olan modellerin rengi fotoğraftaki renge çekilir (kayıttaki tüm araçlar)
     const seen = new Set();
     const walk = o => {
@@ -819,6 +821,11 @@
     makeOffer(c, best);
   }
 
+  // Teklif veren müşteri ne kadar bekler (tipin sabrı × bu çarpan, dakika) ve kaç kez pazarlığa girer
+  G.PATIENCE_MULT = 1.5;
+  // Danışman, oyuncu beklemeden teklifi hemen devralır
+  G.salesHandle = c => { if (c.state === "offer" && G.staffOf("satis").length) salesAuto(c); };
+
   function makeOffer(c, car, love) {
     const t = G.CT[c.type], md = G.M[car.m];
     const mv = G.value(car, false), tv = G.value(car, true);
@@ -836,8 +843,8 @@
     c.state = "offer";
     c.carId = car.id;
     c.offer = Math.min(offer, car.price);
-    c.patMax = c.patience = Math.round(t.patience * (S.upg.cafe ? 1.35 : 1));
-    c.rounds = R.randi(2, 3);
+    c.patMax = c.patience = Math.round(t.patience * G.PATIENCE_MULT * (S.upg.cafe ? 1.35 : 1));
+    c.rounds = R.randi(3, 4);
     if (c.trade) {
       c.tradeVal = R.r1k(G.value(c.trade, false) * 0.85);
       if (c.tradeVal >= c.offer * 0.8) { c.trade = null; c.tradeVal = 0; }
@@ -883,7 +890,7 @@
     }
     const nv = R.r1k(c.offer + (Math.min(amount, c.max) - c.offer) * R.rand(0.35, 0.65));
     c.offer = Math.max(c.offer, Math.min(nv, car.price));
-    c.patience = Math.max(c.patience, 20);
+    c.patience = Math.max(c.patience, 30);
     c.msgs.push({ who: "them", text: R.pick([`En fazla ${G.fmt(c.offer)} verebilirim.`, `Biraz daha inin. ${G.fmt(c.offer)} diyorum.`, `${G.fmt(c.offer)}, son sözüm.`]) });
     return { res: "counter", price: c.offer };
   };
