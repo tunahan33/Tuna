@@ -108,7 +108,9 @@
 
   UI.luxArt = function (x) {
     let inner;
-    if (x.cat === "araba") {
+    if (G.LUX_PHOTOS && G.LUX_PHOTOS.includes(x.id)) {
+      inner = `<image href="${UI.photoSrc(x.id, "luks")}" x="0" y="0" width="120" height="64" preserveAspectRatio="xMidYMid slice"/>`;
+    } else if (x.cat === "araba") {
       inner = `<rect width="120" height="64" fill="#e9ecef"/><rect y="46" width="120" height="18" fill="#c3cad1"/><ellipse cx="60" cy="52" rx="50" ry="5" fill="#ffffff" opacity=".6"/>` +
         `<g transform="translate(6 10) scale(0.9)">${UI.carShape({ m: x.model, color: x.color, clean: 100, body: 100, motor: 100, painted: 0, fuel: G.M[x.model].fuels[0] })}</g>`;
     } else if (ART[x.id]) inner = ART[x.id]();

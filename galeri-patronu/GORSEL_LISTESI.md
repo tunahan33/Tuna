@@ -58,7 +58,7 @@ Aracın yandan görünüşü, ön tarafı sağda. Plaka, logo ve marka yazısı 
 | Volta Speedster '57 | Ultra lüks · Coupe | `img/araclar/volta-speedster.png` |
 | Anka Kartal Prototip '64 | Ultra lüks · Sedan | `img/araclar/anka-prototip.png` |
 
-## Lüks eşyalar (93)
+## Lüks eşyalar (93) — evler (13) hazır
 
 **Öncelik:** Önce · **Boyut:** 960 × 512 px (15:8) · **Biçim:** JPG · **Klasör:** `img/luks/`
 

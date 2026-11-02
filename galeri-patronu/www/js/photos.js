@@ -62,6 +62,8 @@
   // Aşama seviyeye göre: 1 (0–4), 2 (5–9), 3 (10–14), 4 (15–20). Fotoğrafı gelen anahtar listeye eklenir;
   // o adresin galeri fotoğrafı yoksa sahne çizimle gösterilir.
   G.SCENE_PHOTOS = [];
+  // Lüks eşya fotoğrafları: img/luks/{eşya id}.webp (768×410, 15:8). Listede olmayan eşya çizimle gösterilir.
+  G.LUX_PHOTOS = ["e01", "ev1", "e03", "ev2", "e05", "e06", "ev3", "e08", "ev4", "e10", "ev5", "e12", "e13"];
   G.stageOf = n => (n >= 15 ? 4 : n >= 10 ? 3 : n >= 5 ? 2 : 1);
   G.photoKey = m => G.PHOTO_COLOR[m] ? `${m}-${G.COLOR_SLUG[G.PHOTO_COLOR[m]]}` : null;
   // fotoğrafı olan modelin rengini fotoğrafa sabitler
