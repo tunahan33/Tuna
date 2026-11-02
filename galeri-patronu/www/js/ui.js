@@ -336,7 +336,7 @@
       bekleyen: (a, b) => b.days - a.days
     };
     cars.sort(sorters[UI.sort] || sorters.yeni);
-    let html = `<div class="scene-card">${UI.scene()}<div class="scene-cap"><span>${esc(G.loc().name)}</span><span>Park <b>${G.carCount()}/${G.capacity()}</b>${G.showSlots() ? ` · Vitrin <b>${G.showUsed()}/${G.showSlots()}</b>` : ""}</span></div></div>`;
+    let html = `<div class="scene-card">${UI.scene()}<div class="scene-cap"><span>${esc(G.loc().name)}</span><span>Park <b>${G.carCount()}/${G.capacity()}</b>${G.showSlots() ? ` · Vitrin <b>${G.showUsed()}/${G.showSlots()}</b>` : ""}</span></div></div>` + UI.sceneCards();
     html += todoCard();
     if (!cars.length) {
       return html + `<div class="empty"><b>Galeride araç yok</b>"Araç al" sekmesinden ilanlara bak ya da günün ihalesine katıl.<div style="margin-top:12px"><button class="btn pri" type="button" data-a="tab" data-v="piyasa">Araç al</button></div></div>`;

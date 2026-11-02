@@ -58,6 +58,11 @@
   // Fotoğrafı gelen portrenin anahtarı bu listeye eklenir; olmayanlar için baş harfli renkli avatar çizilir.
   G.PEOPLE_PHOTOS = [];
   G.portraitKey = (who, kind, g) => `${who}-${kind}-${g || "e"}`;
+  // Gerçekçi galeri sahnesi: img/sahne/galeri-{adres}-{1..4}.webp (16:9) ve {atolye|yikama|cardak|otopark}-{1..4}.webp (4:3).
+  // Aşama seviyeye göre: 1 (0–4), 2 (5–9), 3 (10–14), 4 (15–20). Fotoğrafı gelen anahtar listeye eklenir;
+  // o adresin galeri fotoğrafı yoksa sahne çizimle gösterilir.
+  G.SCENE_PHOTOS = [];
+  G.stageOf = n => (n >= 15 ? 4 : n >= 10 ? 3 : n >= 5 ? 2 : 1);
   G.photoKey = m => G.PHOTO_COLOR[m] ? `${m}-${G.COLOR_SLUG[G.PHOTO_COLOR[m]]}` : null;
   // fotoğrafı olan modelin rengini fotoğrafa sabitler
   G.photoColor = (m, fallback) => G.PHOTO_COLOR[m] || fallback;

@@ -496,6 +496,18 @@ body::before { background: var(--hero-1); }
 
 .card.gift { border: 1.5px dashed var(--sticker); background: color-mix(in srgb, var(--sticker) 9%, var(--surface)); gap: 8px; }
 .card.gift .chip.gold { justify-self: start; }
+
+/* Fotoğraflı sahne ve tesis kartları */
+.scene.photo { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #c9d6df; }
+.fac-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 640px) { .fac-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.fac-card { position: relative; border: 0; padding: 0; border-radius: 12px; overflow: hidden; aspect-ratio: 4 / 3; background: linear-gradient(135deg, var(--hero-2), var(--hero-3)); box-shadow: var(--shadow); text-align: left; color: #fff; }
+.fac-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.fac-card.off { background: var(--surface-2); color: var(--muted); box-shadow: none; border: 1.5px dashed var(--line); }
+.fc-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 10px 8px; display: grid; gap: 1px; }
+.fac-card.has-img .fc-cap, .fac-card:not(.off) .fc-cap { background: linear-gradient(transparent, rgba(5, 12, 20, .72)); }
+.fc-cap b { font: 700 15px/1.1 var(--font-display); text-transform: uppercase; letter-spacing: .02em; }
+.fc-cap small { font-size: 12px; opacity: .9; }
 </style>
 
 <header class="top">

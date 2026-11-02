@@ -664,6 +664,18 @@ body::before { background: var(--hero-1); }
 
 .card.gift { border: 1.5px dashed var(--sticker); background: color-mix(in srgb, var(--sticker) 9%, var(--surface)); gap: 8px; }
 .card.gift .chip.gold { justify-self: start; }
+
+/* Fotoğraflı sahne ve tesis kartları */
+.scene.photo { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #c9d6df; }
+.fac-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 640px) { .fac-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.fac-card { position: relative; border: 0; padding: 0; border-radius: 12px; overflow: hidden; aspect-ratio: 4 / 3; background: linear-gradient(135deg, var(--hero-2), var(--hero-3)); box-shadow: var(--shadow); text-align: left; color: #fff; }
+.fac-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.fac-card.off { background: var(--surface-2); color: var(--muted); box-shadow: none; border: 1.5px dashed var(--line); }
+.fc-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 10px 8px; display: grid; gap: 1px; }
+.fac-card.has-img .fc-cap, .fac-card:not(.off) .fc-cap { background: linear-gradient(transparent, rgba(5, 12, 20, .72)); }
+.fc-cap b { font: 700 15px/1.1 var(--font-display); text-transform: uppercase; letter-spacing: .02em; }
+.fc-cap small { font-size: 12px; opacity: .9; }
 </style>
 
 <header class="top">
@@ -1148,6 +1160,11 @@ body::before { background: var(--hero-1); }
   // Fotoğrafı gelen portrenin anahtarı bu listeye eklenir; olmayanlar için baş harfli renkli avatar çizilir.
   G.PEOPLE_PHOTOS = [];
   G.portraitKey = (who, kind, g) => `${who}-${kind}-${g || "e"}`;
+  // Gerçekçi galeri sahnesi: img/sahne/galeri-{adres}-{1..4}.webp (16:9) ve {atolye|yikama|cardak|otopark}-{1..4}.webp (4:3).
+  // Aşama seviyeye göre: 1 (0–4), 2 (5–9), 3 (10–14), 4 (15–20). Fotoğrafı gelen anahtar listeye eklenir;
+  // o adresin galeri fotoğrafı yoksa sahne çizimle gösterilir.
+  G.SCENE_PHOTOS = [];
+  G.stageOf = n => (n >= 15 ? 4 : n >= 10 ? 3 : n >= 5 ? 2 : 1);
   G.photoKey = m => G.PHOTO_COLOR[m] ? `${m}-${G.COLOR_SLUG[G.PHOTO_COLOR[m]]}` : null;
   // fotoğrafı olan modelin rengini fotoğrafa sabitler
   G.photoColor = (m, fallback) => G.PHOTO_COLOR[m] || fallback;
@@ -3145,7 +3162,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       bekleyen: (a, b) => b.days - a.days
     };
     cars.sort(sorters[UI.sort] || sorters.yeni);
-    let html = `<div class="scene-card">${UI.scene()}<div class="scene-cap"><span>${esc(G.loc().name)}</span><span>Park <b>${G.carCount()}/${G.capacity()}</b>${G.showSlots() ? ` · Vitrin <b>${G.showUsed()}/${G.showSlots()}</b>` : ""}</span></div></div>`;
+    let html = `<div class="scene-card">${UI.scene()}<div class="scene-cap"><span>${esc(G.loc().name)}</span><span>Park <b>${G.carCount()}/${G.capacity()}</b>${G.showSlots() ? ` · Vitrin <b>${G.showUsed()}/${G.showSlots()}</b>` : ""}</span></div></div>` + UI.sceneCards();
     html += todoCard();
     if (!cars.length) {
       return html + `<div class="empty"><b>Galeride araç yok</b>"Araç al" sekmesinden ilanlara bak ya da günün ihalesine katıl.<div style="margin-top:12px"><button class="btn pri" type="button" data-a="tab" data-v="piyasa">Araç al</button></div></div>`;
@@ -4052,6 +4069,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
 /* Galeri Patronu — galeri sahnesi
  * Galerinin önden görünüşü: bina (konuma göre değişir), atölye, çardak, yıkama, vitrin, flamalı park alanı,
  * etiketli araçlar ve müşteriler. Her tesis seviyesi sahneye yeni bir parça ekler (20 seviye = 20 parça).
+ * Adresin galeri fotoğrafı geldiyse (G.SCENE_PHOTOS) çizim yerine fotoğraflı sahne ve tesis kartları gösterilir.
  * Araca, müşteriye, binaya ya da bir tesise dokununca ilgili ekran açılır. */
 (function (G) {
   "use strict";
@@ -4327,7 +4345,72 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     return o + `</g>`;
   }
 
+  // ---- Fotoğraflı sahne ----
+  // Galeri binası fotoğrafı (adres × aşama) üstüne araçlar dizilir; tesisler altta fotoğraflı kartlarda.
+  const PW = 400, PH = 225;
+  function facStages() {
+    const S = G.S;
+    const bays = S.upg.bays || 0;
+    const at = bays ? Math.min(4, Math.min(3, bays) + (S.upg.paint ? 1 : 0)) : 0;
+    return [
+      { k: "atolye", name: "Atölye", lv: bays ? `${bays} bölme${S.upg.paint ? " · boya" : ""}` : "", stage: at, act: `data-a="tab" data-v="atolye"` },
+      { k: "yikama", name: "Yıkama", lv: G.facLevel("yikama"), stage: G.facLevel("yikama") ? G.stageOf(G.facLevel("yikama")) : 0, act: `data-a="fac" data-v="yikama"` },
+      { k: "cardak", name: "Usta çardağı", lv: G.facLevel("cardak"), stage: G.facLevel("cardak") ? G.stageOf(G.facLevel("cardak")) : 0, act: `data-a="fac" data-v="cardak"` },
+      { k: "otopark", name: "Otopark", lv: G.facLevel("otopark"), stage: G.stageOf(G.facLevel("otopark")), act: `data-a="fac" data-v="otopark"` }
+    ];
+  }
+  UI.photoSceneKey = () => `galeri-${G.loc().id}-${G.stageOf(G.facLevel("galeri"))}`;
+  UI.photoScene = () => G.SCENE_PHOTOS.includes(UI.photoSceneKey());
+
+  function photoScene() {
+    const S = G.S;
+    const t = (S.min - G.OPEN) / (G.CLOSE - G.OPEN);
+    const cars = S.cars.filter(c => c.status === "lot").sort((a, b) => (b.show ? 1 : 0) - (a.show ? 1 : 0) || (b.price ? 1 : 0) - (a.price ? 1 : 0));
+    const offerBy = {};
+    S.custs.forEach(c => { if (c.state === "offer") offerBy[c.carId] = c; });
+    const PER = 7, back = cars.slice(PER, PER * 2), front = cars.slice(0, PER);
+    let svg = `<svg class="scene photo" viewBox="0 0 ${PW} ${PH}" role="img" aria-label="${esc(S.name)}: ${esc(G.loc().name)}, parkta ${cars.length} araç">
+      <g data-a="fac" data-v="galeri" class="hit"><image href="${UI.photoSrc(UI.photoSceneKey(), "sahne")}" x="0" y="0" width="${PW}" height="${PH}" preserveAspectRatio="xMidYMid slice"/></g>`;
+    // akşam olurken ışık sıcaklaşır, kapanışa doğru kararır
+    if (t > 0.6) svg += `<rect width="${PW}" height="${PH}" fill="#ff8a3d" opacity="${Math.min(0.18, (t - 0.6) * 0.45).toFixed(3)}" style="mix-blend-mode:multiply" pointer-events="none"/>`;
+    if (t > 0.85) svg += `<rect width="${PW}" height="${PH}" fill="#1b2a55" opacity="${Math.min(0.3, (t - 0.85) * 2).toFixed(3)}" style="mix-blend-mode:multiply" pointer-events="none"/>`;
+    const row = (list, base, sc) => list.map((car, i) => {
+      const w = 120 * sc, gap = (PW - 16 - PER * w) / (PER - 1);
+      const x = 8 + i * (w + gap), y = base - 46 * sc;
+      const tag = car.price
+        ? `<rect x="${x + w * 0.55}" y="${y - 4}" width="21" height="9" rx="1.5" fill="#ffd23f" transform="rotate(4 ${x + w * 0.55 + 10} ${y})"/><text x="${x + w * 0.55 + 10.5}" y="${y + 2.8}" text-anchor="middle" font-size="6.2" font-weight="700" fill="#1d1a10" ${FONT}>${tiny(car.price)}</text>`
+        : `<rect x="${x + w * 0.6}" y="${y - 4}" width="13" height="9" rx="1.5" fill="#ffffff" stroke="#e04a3f" stroke-width=".8"/><text x="${x + w * 0.6 + 6.5}" y="${y + 2.8}" text-anchor="middle" font-size="7" font-weight="800" fill="#e04a3f">?</text>`;
+      const c = offerBy[car.id];
+      const bub = c ? `<g data-a="cust" data-id="${c.id}" class="hit bubble"><rect x="${x + 4}" y="${y - 6}" width="12" height="9" rx="3" fill="#ffffff" stroke="#1d8549"/><text x="${x + 10}" y="${y + 1}" text-anchor="middle" font-size="6.5" font-weight="800" fill="#1d8549">₺</text></g>` : "";
+      return `<g data-a="car" data-id="${car.id}" class="hit">${carAt(car, x, y, sc)}${tag}</g>${bub}`;
+    }).join("");
+    svg += row(back, PH - 34, 0.38) + row(front, PH - 2, 0.46);
+    const more = cars.length - front.length - back.length;
+    const chips = [];
+    const browsing = S.custs.filter(c => c.state === "browse").length;
+    if (browsing) chips.push(`<g data-a="tab" data-v="musteri" class="hit"><rect x="0" y="0" width="86" height="13" rx="6.5" fill="#ffffff" opacity=".92"/><text x="43" y="9" text-anchor="middle" font-size="7.5" font-weight="700" fill="#17202b">${browsing} müşteri bakıyor</text></g>`);
+    if (more > 0) chips.push(`<g data-a="tab" data-v="galeri"><rect x="0" y="0" width="64" height="13" rx="6.5" fill="#17202b" opacity=".85"/><text x="32" y="9" text-anchor="middle" font-size="7.5" font-weight="700" fill="#ffffff">+${more} araç daha</text></g>`);
+    if (G.boostActive()) chips.push(`<g><rect x="0" y="0" width="98" height="13" rx="6.5" fill="#ffd23f"/><text x="49" y="9" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1d1a10">Kampanya: 2× müşteri</text></g>`);
+    const out = S.cars.filter(c => c.status === "shop").length;
+    if (out) chips.push(`<g data-a="tab" data-v="atolye" class="hit"><rect x="0" y="0" width="84" height="13" rx="6.5" fill="#ffffff" opacity=".92"/><text x="42" y="9" text-anchor="middle" font-size="7.5" font-weight="700" fill="#17202b">Dış serviste: ${out} araç</text></g>`);
+    let cx = 6;
+    for (const ch of chips) { const w = +ch.match(/width="(\d+)"/)[1]; svg += `<g transform="translate(${cx} 6)">${ch}</g>`; cx += w + 5; }
+    return svg + `</svg>`;
+  }
+
+  // Tesis kartları: her tesisin bulunduğu aşamanın fotoğrafı (yoksa sade bir kart)
+  UI.sceneCards = function () {
+    if (!UI.photoScene()) return "";
+    return `<div class="fac-cards">${facStages().map(f => {
+      const key = `${f.k}-${f.stage}`;
+      const img = f.stage && G.SCENE_PHOTOS.includes(key) ? `<img src="${UI.photoSrc(key, "sahne")}" alt="">` : "";
+      const lv = f.stage ? (typeof f.lv === "number" ? `Seviye ${f.lv}` : f.lv) : "Kurulmadı";
+      return `<button type="button" class="fac-card ${f.stage ? "" : "off"} ${img ? "has-img" : ""}" ${f.act}>${img}<span class="fc-cap"><b>${esc(f.name)}</b><small>${esc(lv)}</small></span></button>`;
+    }).join("")}</div>`;
+  };
+
   UI.scene = function () {
+    if (UI.photoScene()) return photoScene();
     const S = G.S, L = G.loc(), tier = S.loc;
     const show = S.cars.filter(c => c.show);
     const lot = S.cars.filter(c => !c.show && c.status === "lot");

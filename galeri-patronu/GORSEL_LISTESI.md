@@ -1,6 +1,6 @@
 # Galeri Patronu — görsel listesi
 
-Toplam 215 görsel. Dosya adlarını aynen kullan; görseller `galeri-patronu/www/` altındaki klasörlere konur. Bulunmayan görsellerin yerinde oyunun şu anki çizimi kalır.
+Toplam 213 görsel. Dosya adlarını aynen kullan; görseller `galeri-patronu/www/` altındaki klasörlere konur. Bulunmayan görsellerin yerinde oyunun şu anki çizimi kalır.
 
 Kurallar: tek tarz (hepsi fotoğraf ya da hepsi çizim), gerçek marka/logo/plaka/tanınabilir kişi yok, ticari kullanıma uygun lisans, sahnede kullanılacaklar şeffaf PNG.
 
@@ -160,63 +160,50 @@ Eşyanın kendisi, ortalanmış ve kart içinde rahat okunur. Mücevherlerde koy
 | Alışveriş merkezi | Yatırım · 400 milyon ₺ — 180 mağazalı AVM, sinema ve yemek katı. | `img/luks/i4.jpg` |
 | Futbol takımı | Yatırım · 1,5 milyar ₺ — Süper Lig kulübü: maç, bilet, yayın ve forma gelirleri. Oyuncu maaşları da senden. | `img/luks/i5.jpg` |
 
-## Galeri binaları (adresler) (5)
+## Galeri sahnesi (36)
 
-**Öncelik:** Önce · **Boyut:** 1200 × 700 px · **Biçim:** PNG, şeffaf arka plan · **Klasör:** `img/galeri/`
+**Öncelik:** Sıradaki · **Klasör:** `img/sahne/` · **Promptlar:** `GEMINI_GALERI_PROMPTLARI.md`
 
-Binanın önden görünüşü, zemin çizgisi altta. Gökyüzü, park alanı ve araçlar oyun tarafından çizilir; sadece bina gerekir. Tabela boş kalsın, galerinin adını oyun yazar.
-
-| Ad | Açıklama | Dosya |
-|---|---|---|
-| Sanayi Sitesi Arsası | Toprak zemin, konteyner ofis. Her şey burada başlar. | `img/galeri/sanayi.png` |
-| Mahalle Galerisi | Ana caddenin arkasında küçük bir dükkân ve önünde açık alan. | `img/galeri/mahalle.png` |
-| Cadde Showroom | Cam cepheli showroom; vitrindeki araçlar yoldan görünür. | `img/galeri/cadde.png` |
-| Oto Plaza Mağazası | Galericiler plazasında iki katlı mağaza. | `img/galeri/plaza.png` |
-| Otomotiv Merkezi | Kendi binan: showroom, servis ve teslimat alanı bir arada. | `img/galeri/merkez.png` |
-
-## Tesisler (5 aşama) (20)
-
-**Öncelik:** Sonra · **Boyut:** 600 × 400 px · **Biçim:** PNG, şeffaf arka plan · **Klasör:** `img/tesis/`
-
-Her tesis 20 seviyedir; 5 aşamanın görseli yeterli (1, 5, 10, 15, 20). Aşamalar arasında gelişme görünsün: basitten gösterişliye. Ara seviyelerdeki küçük süsleri oyun çizmeye devam eder.
+Galeri ekranındaki çizim sahnenin yerine gerçek fotoğraflar gelir. Galeri binası adres ve galeri seviyesine göre 4 aşamada değişir (1: seviye 0–4, 2: 5–9, 3: 10–14, 4: 15–20). Binanın önündeki boş alana oyun araçları dizer. Atölye (bölme sayısı ve boya kabini), yıkama, usta çardağı ve otopark sahnenin altında kendi aşamalarının fotoğrafıyla kart olarak görünür. Bir adresin galeri fotoğrafı gelmeden o adreste çizim sahne kalır.
 
 | Ad | Açıklama | Dosya |
 |---|---|---|
-| Galeri binası · 1. seviye | Bir önceki aşamadan biraz daha gelişmiş hâli | `img/tesis/galeri-1.png` |
-| Galeri binası · 5. seviye | Bir önceki aşamadan biraz daha gelişmiş hâli | `img/tesis/galeri-5.png` |
-| Galeri binası · 10. seviye | Bir önceki aşamadan biraz daha gelişmiş hâli | `img/tesis/galeri-10.png` |
-| Galeri binası · 15. seviye | Bir önceki aşamadan biraz daha gelişmiş hâli | `img/tesis/galeri-15.png` |
-| Galeri binası · 20. seviye | Efsane showroom | `img/tesis/galeri-20.png` |
-| Yıkama ünitesi · 1. seviye | İçeride yıkama | `img/tesis/yikama-1.png` |
-| Yıkama ünitesi · 5. seviye | Cila: temiz araç müşteriyi daha çok çeker | `img/tesis/yikama-5.png` |
-| Yıkama ünitesi · 10. seviye | Köpük tüneli | `img/tesis/yikama-10.png` |
-| Yıkama ünitesi · 15. seviye | Bir önceki aşamadan biraz daha gelişmiş hâli | `img/tesis/yikama-15.png` |
-| Yıkama ünitesi · 20. seviye | Detaylı bakım merkezi | `img/tesis/yikama-20.png` |
-| Usta çardağı · 1. seviye | 1 kişilik çardak | `img/tesis/cardak-1.png` |
-| Usta çardağı · 5. seviye | 2 kişilik | `img/tesis/cardak-5.png` |
-| Usta çardağı · 10. seviye | Otomatik mola: yorulan usta kendisi dinlenmeye gider | `img/tesis/cardak-10.png` |
-| Usta çardağı · 15. seviye | 4 kişilik | `img/tesis/cardak-15.png` |
-| Usta çardağı · 20. seviye | 5 kişilik, semaver ve hamak | `img/tesis/cardak-20.png` |
-| Ön otopark · 1. seviye | Bir önceki aşamadan biraz daha gelişmiş hâli | `img/tesis/otopark-1.png` |
-| Ön otopark · 5. seviye | Bir önceki aşamadan biraz daha gelişmiş hâli | `img/tesis/otopark-5.png` |
-| Ön otopark · 10. seviye | Asfalt ve çizgili park yerleri | `img/tesis/otopark-10.png` |
-| Ön otopark · 15. seviye | Bir önceki aşamadan biraz daha gelişmiş hâli | `img/tesis/otopark-15.png` |
-| Ön otopark · 20. seviye | +10 park yeri | `img/tesis/otopark-20.png` |
-
-## Ekipmanlar (6)
-
-**Öncelik:** Sonra · **Boyut:** 400 × 400 px · **Biçim:** PNG, şeffaf arka plan · **Klasör:** `img/ekipman/`
-
-Tek bir nesne, önden ya da hafif açılı. Sahnede küçük görüneceği için sade ve net hatlı olsun.
-
-| Ad | Açıklama | Dosya |
-|---|---|---|
-| Atölye bölmesi | Mekanik ve iç onarımları kendi atölyende yaparsın: dış servisten %35 ucuz ve daha hızlı. Her bölme aynı anda bir iş. | `img/ekipman/bays.png` |
-| Boya kabini | Kaporta-boya işi içeride yapılır; usta işçilikle tek parça boya yeterli olur. | `img/ekipman/paint.png` |
-| Boyasız göçük seti | Küçük göçükleri boyasız düzeltir; boyalı parça sayısı artmaz. | `img/ekipman/pdr.png` |
-| Ekspertiz cihazı | Ekspertiz 500 ₺'ye düşer; ihaledeki araçları da kontrol edebilirsin. | `img/ekipman/expert.png` |
-| Müşteri köşesi | Çay-kahve ve oturma alanı: müşteriler %35 daha sabırlı. | `img/ekipman/cafe.png` |
-| Kamera ve alarm | Gece hırsızlık ve vandalizm olaylarını önler. | `img/ekipman/security.png` |
+| Sanayi Sitesi Arsası · 1. aşama | Galeri binası, 16:9 | `img/sahne/galeri-sanayi-1.png` |
+| Sanayi Sitesi Arsası · 2. aşama | Galeri binası, 16:9 | `img/sahne/galeri-sanayi-2.png` |
+| Sanayi Sitesi Arsası · 3. aşama | Galeri binası, 16:9 | `img/sahne/galeri-sanayi-3.png` |
+| Sanayi Sitesi Arsası · 4. aşama | Galeri binası, 16:9 | `img/sahne/galeri-sanayi-4.png` |
+| Mahalle Galerisi · 1. aşama | Galeri binası, 16:9 | `img/sahne/galeri-mahalle-1.png` |
+| Mahalle Galerisi · 2. aşama | Galeri binası, 16:9 | `img/sahne/galeri-mahalle-2.png` |
+| Mahalle Galerisi · 3. aşama | Galeri binası, 16:9 | `img/sahne/galeri-mahalle-3.png` |
+| Mahalle Galerisi · 4. aşama | Galeri binası, 16:9 | `img/sahne/galeri-mahalle-4.png` |
+| Cadde Showroom · 1. aşama | Galeri binası, 16:9 | `img/sahne/galeri-cadde-1.png` |
+| Cadde Showroom · 2. aşama | Galeri binası, 16:9 | `img/sahne/galeri-cadde-2.png` |
+| Cadde Showroom · 3. aşama | Galeri binası, 16:9 | `img/sahne/galeri-cadde-3.png` |
+| Cadde Showroom · 4. aşama | Galeri binası, 16:9 | `img/sahne/galeri-cadde-4.png` |
+| Oto Plaza Mağazası · 1. aşama | Galeri binası, 16:9 | `img/sahne/galeri-plaza-1.png` |
+| Oto Plaza Mağazası · 2. aşama | Galeri binası, 16:9 | `img/sahne/galeri-plaza-2.png` |
+| Oto Plaza Mağazası · 3. aşama | Galeri binası, 16:9 | `img/sahne/galeri-plaza-3.png` |
+| Oto Plaza Mağazası · 4. aşama | Galeri binası, 16:9 | `img/sahne/galeri-plaza-4.png` |
+| Otomotiv Merkezi · 1. aşama | Galeri binası, 16:9 | `img/sahne/galeri-merkez-1.png` |
+| Otomotiv Merkezi · 2. aşama | Galeri binası, 16:9 | `img/sahne/galeri-merkez-2.png` |
+| Otomotiv Merkezi · 3. aşama | Galeri binası, 16:9 | `img/sahne/galeri-merkez-3.png` |
+| Otomotiv Merkezi · 4. aşama | Galeri binası, 16:9 | `img/sahne/galeri-merkez-4.png` |
+| Atölye · 1. aşama | Tesis, 4:3 | `img/sahne/atolye-1.png` |
+| Atölye · 2. aşama | Tesis, 4:3 | `img/sahne/atolye-2.png` |
+| Atölye · 3. aşama | Tesis, 4:3 | `img/sahne/atolye-3.png` |
+| Atölye · 4. aşama | Tesis, 4:3 | `img/sahne/atolye-4.png` |
+| Yıkama · 1. aşama | Tesis, 4:3 | `img/sahne/yikama-1.png` |
+| Yıkama · 2. aşama | Tesis, 4:3 | `img/sahne/yikama-2.png` |
+| Yıkama · 3. aşama | Tesis, 4:3 | `img/sahne/yikama-3.png` |
+| Yıkama · 4. aşama | Tesis, 4:3 | `img/sahne/yikama-4.png` |
+| Usta çardağı · 1. aşama | Tesis, 4:3 | `img/sahne/cardak-1.png` |
+| Usta çardağı · 2. aşama | Tesis, 4:3 | `img/sahne/cardak-2.png` |
+| Usta çardağı · 3. aşama | Tesis, 4:3 | `img/sahne/cardak-3.png` |
+| Usta çardağı · 4. aşama | Tesis, 4:3 | `img/sahne/cardak-4.png` |
+| Otopark · 1. aşama | Tesis, 4:3 | `img/sahne/otopark-1.png` |
+| Otopark · 2. aşama | Tesis, 4:3 | `img/sahne/otopark-2.png` |
+| Otopark · 3. aşama | Tesis, 4:3 | `img/sahne/otopark-3.png` |
+| Otopark · 4. aşama | Tesis, 4:3 | `img/sahne/otopark-4.png` |
 
 ## Kişiler (36)
 
@@ -262,22 +249,6 @@ Omuzdan yukarı gerçek fotoğraf gibi portre, yüz ortada. Her müşteri tipi v
 | Muhasebeci (erkek) | Çalışan portresi | `img/kisiler/personel-muhasebe-e.png` |
 | Ekspertiz ustası (kadın) | Çalışan portresi | `img/kisiler/personel-eksper-k.png` |
 | Ekspertiz ustası (erkek) | Çalışan portresi | `img/kisiler/personel-eksper-e.png` |
-
-## Sahne ve arka planlar (7)
-
-**Öncelik:** İsteğe bağlı · **Boyut:** satırda yazıyor · **Biçim:** satırda yazıyor · **Klasör:** `img/sahne/`
-
-Galeri ekranındaki sahnenin parçaları. Şu anki çizimler iş görüyor; değiştirmek istersen hepsini aynı tarzda bulman gerekir, yoksa sahne karışık görünür.
-
-| Ad | Açıklama | Dosya |
-|---|---|---|
-| Gökyüzü (sabah) | Açık mavi, birkaç bulut — 1600 × 600 px, JPG | `img/sahne/gokyuzu-sabah.jpg` |
-| Gökyüzü (akşam) | Turuncu-pembe gün batımı — 1600 × 600 px, JPG | `img/sahne/gokyuzu-aksam.jpg` |
-| Şehir silüeti | Uzaktaki binalar, soluk renkli — 1600 × 400 px, şeffaf PNG | `img/sahne/sehir.png` |
-| Toprak zemin | Sanayi arsası için, döşenebilir doku — 512 × 512 px, döşenebilir JPG | `img/sahne/zemin-toprak.jpg` |
-| Asfalt zemin | Park alanı için, döşenebilir doku — 512 × 512 px, döşenebilir JPG | `img/sahne/zemin-asfalt.jpg` |
-| Yol | Ortası kesik çizgili cadde, yandan — 1600 × 120 px, PNG | `img/sahne/yol.png` |
-| Yürüyen müşteri figürü | Küçük, tam boy insan figürü — 80 × 160 px, şeffaf PNG | `img/sahne/musteri-figur.png` |
 
 ## Uygulama ve mağaza (3)
 

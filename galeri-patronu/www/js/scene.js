@@ -1,6 +1,7 @@
 /* Galeri Patronu — galeri sahnesi
  * Galerinin önden görünüşü: bina (konuma göre değişir), atölye, çardak, yıkama, vitrin, flamalı park alanı,
  * etiketli araçlar ve müşteriler. Her tesis seviyesi sahneye yeni bir parça ekler (20 seviye = 20 parça).
+ * Adresin galeri fotoğrafı geldiyse (G.SCENE_PHOTOS) çizim yerine fotoğraflı sahne ve tesis kartları gösterilir.
  * Araca, müşteriye, binaya ya da bir tesise dokununca ilgili ekran açılır. */
 (function (G) {
   "use strict";
@@ -276,7 +277,72 @@
     return o + `</g>`;
   }
 
+  // ---- Fotoğraflı sahne ----
+  // Galeri binası fotoğrafı (adres × aşama) üstüne araçlar dizilir; tesisler altta fotoğraflı kartlarda.
+  const PW = 400, PH = 225;
+  function facStages() {
+    const S = G.S;
+    const bays = S.upg.bays || 0;
+    const at = bays ? Math.min(4, Math.min(3, bays) + (S.upg.paint ? 1 : 0)) : 0;
+    return [
+      { k: "atolye", name: "Atölye", lv: bays ? `${bays} bölme${S.upg.paint ? " · boya" : ""}` : "", stage: at, act: `data-a="tab" data-v="atolye"` },
+      { k: "yikama", name: "Yıkama", lv: G.facLevel("yikama"), stage: G.facLevel("yikama") ? G.stageOf(G.facLevel("yikama")) : 0, act: `data-a="fac" data-v="yikama"` },
+      { k: "cardak", name: "Usta çardağı", lv: G.facLevel("cardak"), stage: G.facLevel("cardak") ? G.stageOf(G.facLevel("cardak")) : 0, act: `data-a="fac" data-v="cardak"` },
+      { k: "otopark", name: "Otopark", lv: G.facLevel("otopark"), stage: G.stageOf(G.facLevel("otopark")), act: `data-a="fac" data-v="otopark"` }
+    ];
+  }
+  UI.photoSceneKey = () => `galeri-${G.loc().id}-${G.stageOf(G.facLevel("galeri"))}`;
+  UI.photoScene = () => G.SCENE_PHOTOS.includes(UI.photoSceneKey());
+
+  function photoScene() {
+    const S = G.S;
+    const t = (S.min - G.OPEN) / (G.CLOSE - G.OPEN);
+    const cars = S.cars.filter(c => c.status === "lot").sort((a, b) => (b.show ? 1 : 0) - (a.show ? 1 : 0) || (b.price ? 1 : 0) - (a.price ? 1 : 0));
+    const offerBy = {};
+    S.custs.forEach(c => { if (c.state === "offer") offerBy[c.carId] = c; });
+    const PER = 7, back = cars.slice(PER, PER * 2), front = cars.slice(0, PER);
+    let svg = `<svg class="scene photo" viewBox="0 0 ${PW} ${PH}" role="img" aria-label="${esc(S.name)}: ${esc(G.loc().name)}, parkta ${cars.length} araç">
+      <g data-a="fac" data-v="galeri" class="hit"><image href="${UI.photoSrc(UI.photoSceneKey(), "sahne")}" x="0" y="0" width="${PW}" height="${PH}" preserveAspectRatio="xMidYMid slice"/></g>`;
+    // akşam olurken ışık sıcaklaşır, kapanışa doğru kararır
+    if (t > 0.6) svg += `<rect width="${PW}" height="${PH}" fill="#ff8a3d" opacity="${Math.min(0.18, (t - 0.6) * 0.45).toFixed(3)}" style="mix-blend-mode:multiply" pointer-events="none"/>`;
+    if (t > 0.85) svg += `<rect width="${PW}" height="${PH}" fill="#1b2a55" opacity="${Math.min(0.3, (t - 0.85) * 2).toFixed(3)}" style="mix-blend-mode:multiply" pointer-events="none"/>`;
+    const row = (list, base, sc) => list.map((car, i) => {
+      const w = 120 * sc, gap = (PW - 16 - PER * w) / (PER - 1);
+      const x = 8 + i * (w + gap), y = base - 46 * sc;
+      const tag = car.price
+        ? `<rect x="${x + w * 0.55}" y="${y - 4}" width="21" height="9" rx="1.5" fill="#ffd23f" transform="rotate(4 ${x + w * 0.55 + 10} ${y})"/><text x="${x + w * 0.55 + 10.5}" y="${y + 2.8}" text-anchor="middle" font-size="6.2" font-weight="700" fill="#1d1a10" ${FONT}>${tiny(car.price)}</text>`
+        : `<rect x="${x + w * 0.6}" y="${y - 4}" width="13" height="9" rx="1.5" fill="#ffffff" stroke="#e04a3f" stroke-width=".8"/><text x="${x + w * 0.6 + 6.5}" y="${y + 2.8}" text-anchor="middle" font-size="7" font-weight="800" fill="#e04a3f">?</text>`;
+      const c = offerBy[car.id];
+      const bub = c ? `<g data-a="cust" data-id="${c.id}" class="hit bubble"><rect x="${x + 4}" y="${y - 6}" width="12" height="9" rx="3" fill="#ffffff" stroke="#1d8549"/><text x="${x + 10}" y="${y + 1}" text-anchor="middle" font-size="6.5" font-weight="800" fill="#1d8549">₺</text></g>` : "";
+      return `<g data-a="car" data-id="${car.id}" class="hit">${carAt(car, x, y, sc)}${tag}</g>${bub}`;
+    }).join("");
+    svg += row(back, PH - 34, 0.38) + row(front, PH - 2, 0.46);
+    const more = cars.length - front.length - back.length;
+    const chips = [];
+    const browsing = S.custs.filter(c => c.state === "browse").length;
+    if (browsing) chips.push(`<g data-a="tab" data-v="musteri" class="hit"><rect x="0" y="0" width="86" height="13" rx="6.5" fill="#ffffff" opacity=".92"/><text x="43" y="9" text-anchor="middle" font-size="7.5" font-weight="700" fill="#17202b">${browsing} müşteri bakıyor</text></g>`);
+    if (more > 0) chips.push(`<g data-a="tab" data-v="galeri"><rect x="0" y="0" width="64" height="13" rx="6.5" fill="#17202b" opacity=".85"/><text x="32" y="9" text-anchor="middle" font-size="7.5" font-weight="700" fill="#ffffff">+${more} araç daha</text></g>`);
+    if (G.boostActive()) chips.push(`<g><rect x="0" y="0" width="98" height="13" rx="6.5" fill="#ffd23f"/><text x="49" y="9" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1d1a10">Kampanya: 2× müşteri</text></g>`);
+    const out = S.cars.filter(c => c.status === "shop").length;
+    if (out) chips.push(`<g data-a="tab" data-v="atolye" class="hit"><rect x="0" y="0" width="84" height="13" rx="6.5" fill="#ffffff" opacity=".92"/><text x="42" y="9" text-anchor="middle" font-size="7.5" font-weight="700" fill="#17202b">Dış serviste: ${out} araç</text></g>`);
+    let cx = 6;
+    for (const ch of chips) { const w = +ch.match(/width="(\d+)"/)[1]; svg += `<g transform="translate(${cx} 6)">${ch}</g>`; cx += w + 5; }
+    return svg + `</svg>`;
+  }
+
+  // Tesis kartları: her tesisin bulunduğu aşamanın fotoğrafı (yoksa sade bir kart)
+  UI.sceneCards = function () {
+    if (!UI.photoScene()) return "";
+    return `<div class="fac-cards">${facStages().map(f => {
+      const key = `${f.k}-${f.stage}`;
+      const img = f.stage && G.SCENE_PHOTOS.includes(key) ? `<img src="${UI.photoSrc(key, "sahne")}" alt="">` : "";
+      const lv = f.stage ? (typeof f.lv === "number" ? `Seviye ${f.lv}` : f.lv) : "Kurulmadı";
+      return `<button type="button" class="fac-card ${f.stage ? "" : "off"} ${img ? "has-img" : ""}" ${f.act}>${img}<span class="fc-cap"><b>${esc(f.name)}</b><small>${esc(lv)}</small></span></button>`;
+    }).join("")}</div>`;
+  };
+
   UI.scene = function () {
+    if (UI.photoScene()) return photoScene();
     const S = G.S, L = G.loc(), tier = S.loc;
     const show = S.cars.filter(c => c.show);
     const lot = S.cars.filter(c => !c.show && c.status === "lot");
