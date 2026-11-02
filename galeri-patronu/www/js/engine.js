@@ -595,10 +595,22 @@
   G.auctionSkip = function () {
     const a = S.auction;
     if (!a || !a.live) return;
-    // oyuncu ilgilenmiyorsa lot rakipler arasında hızla kapanır
-    const L = a.live;
+    // oyuncu ilgilenmiyorsa lot rakipler arasında hemen sonuçlanır: en yüksek bütçeli rakip,
+    // ikinci rakibin bırakacağı fiyatın bir artış üstüne (rakip yoksa açılış fiyatına) alır; kimse istemezse satılmaz
+    const L = a.live, lot = a.lots[a.idx];
     if (L.leader === "Sen") return;
-    L.timer = Math.min(L.timer, 1.2);
+    const next = L.leader ? L.bid + lot.inc : L.bid;
+    const rivals = L.npcs.filter(n => n.max >= next).sort((x, y) => y.max - x.max);
+    if (rivals.length) {
+      const top = rivals[0], second = rivals[1];
+      const price = second ? Math.min(top.max, Math.max(next, second.max + lot.inc)) : next;
+      L.bid = R.r1k(price);
+      L.leader = top.name;
+      L.log.unshift(`${top.name}: ${G.fmt(L.bid)} (pas geçtin)`);
+    }
+    L.npcs = [];
+    L.timer = 0;
+    G.auctionTick(0);
   };
 
   // ---- Atölye ----

@@ -1128,7 +1128,7 @@
     auction: () => UI.open("auction"),
     "a-start": () => { G.auctionBegin(); UI.renderSheet(true); },
     "a-bid": () => { msg(G.auctionBid()); UI.renderSheet(true); },
-    "a-skip": () => { G.auctionSkip(); },
+    "a-skip": () => { G.auctionSkip(); UI.renderSheet(true); },
     "a-inspect": () => { const a = S().auction; const r = G.inspect(a.lots[a.idx].car); if (!r.ok) return msg(r); sayInspect(r); UI.renderSheet(true); },
     upg: el => { msg(G.buyUpgrade(el.dataset.v)); UI.render(); },
     move: () => { msg(G.moveTo(S().loc + 1)); UI.render(); },
