@@ -160,7 +160,7 @@ Eşyanın kendisi, ortalanmış ve kart içinde rahat okunur. Mücevherlerde koy
 | Alışveriş merkezi | Yatırım · 400 milyon ₺ — 180 mağazalı AVM, sinema ve yemek katı. | `img/luks/i4.jpg` |
 | Futbol takımı | Yatırım · 1,5 milyar ₺ — Süper Lig kulübü: maç, bilet, yayın ve forma gelirleri. Oyuncu maaşları da senden. | `img/luks/i5.jpg` |
 
-## Galeri sahnesi (36) — sanayi, cadde, plaza ve merkez (16) hazır; mahalle ve tesisler bekleniyor
+## Galeri sahnesi (36) — 24 hazır; mahalle galerisi, usta çardağı ve otopark bekleniyor
 
 **Öncelik:** Sıradaki · **Klasör:** `img/sahne/` · **Promptlar:** `GEMINI_GALERI_PROMPTLARI.md`
 
