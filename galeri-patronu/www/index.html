@@ -515,6 +515,20 @@ body::before { background: var(--hero-1); }
 .offer-pop p { margin: 2px 0 0; }
 .offer-pop .btns .btn { padding: 10px 12px; }
 @media (prefers-reduced-motion: reduce) { .offer-pop { animation: none; } }
+
+/* Bayilik */
+.dl-tier { margin: 14px 0 2px; font: 800 19px/1.1 var(--font-display); text-transform: uppercase; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.dl-tier .small { font: 500 12.5px var(--font-body); text-transform: none; }
+.dl-brand .who { align-items: center; }
+.dl-pic { width: 84px; flex: none; }
+.dl-pic svg { width: 100%; height: auto; display: block; }
+.dl-req { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; font-size: 13.5px; }
+.dl-req .pos, .dl-req .neg { font-weight: 800; display: inline-block; width: 16px; }
+.dl-brand > .btn { justify-self: start; }
+.dl-steps { display: flex; gap: 6px; flex-wrap: wrap; }
+.dl-steps span { font-size: 12.5px; font-weight: 600; padding: 4px 9px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.dl-steps span.done { background: var(--accent-soft); color: var(--accent); }
+.dl-steps span.now { background: var(--sticker); color: var(--sticker-ink); }
 </style>
 
 <header class="top">
@@ -553,6 +567,7 @@ body::before { background: var(--hero-1); }
 <script src="js/ui.js"></script>
 <script src="js/scene.js"></script>
 <script src="js/lux.js"></script>
+<script src="js/bayi.js"></script>
 <script src="js/tour.js"></script>
 <script src="js/main.js"></script>
 <!-- ARTIFACT-END -->

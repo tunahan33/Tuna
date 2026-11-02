@@ -338,7 +338,7 @@
     const gain = (car.price || mv) - car.buy - car.spent;
     return `<article class="crow ${G.M[car.m].seg === "ultra" ? "ultra" : ""}" role="button" tabindex="0" data-a="car" data-id="${car.id}">
       <div class="crow-img">${UI.carSVG(car)}</div>
-      <div class="crow-main"><b>${esc(G.carName(car))}</b><span>${car.year} · ${G.fmtKm(G.realKm(car, false))}</span>${carStatus(car)}</div>
+      <div class="crow-main"><b>${esc(G.carName(car))}${car.zero ? ` <span class="chip acc">Sıfır</span>` : ""}</b><span>${car.year} · ${G.fmtKm(G.realKm(car, false))}</span>${carStatus(car)}</div>
       <div class="crow-side">${car.price ? `<span class="sticker sm">${G.fmtS(car.price)}</span>` : `<span class="muted small">≈ ${G.fmtS(mv)}</span>`}<small class="${gain >= 0 ? "pos" : "neg"}">${gain >= 0 ? "kâr" : "zarar"} ${G.fmtS(Math.abs(gain))}</small></div>
     </article>`;
   }
@@ -373,7 +373,7 @@
   VIEWS.piyasa = function () {
     const s = S(), sub = UI.sub.piyasa;
     let html = `<div class="vh"><div><h2>Araç al</h2><p>Boş park yeri: ${Math.max(0, G.spaceLeft())} · Kasa: ${G.fmtS(s.money)}</p></div></div>
-      <div class="segctl" role="group">${[["ilan", "İlanlar"], ["ihale", "İhale"], ["trend", "Piyasa"]]
+      <div class="segctl" role="group">${[["ilan", "İlanlar"], ["ihale", "İhale"], ...(G.anyLicense && G.anyLicense() ? [["sifir", "Sıfır"]] : []), ["trend", "Piyasa"]]
         .map(([k, l]) => `<button type="button" data-a="sub" data-k="piyasa" data-v="${k}" aria-pressed="${sub === k}">${l}</button>`).join("")}</div>`;
     if (sub === "ilan") {
       const all = s.listings.filter(l => !l.done);
@@ -384,6 +384,8 @@
       if (all.length && !ls.length) return html + `<div class="empty"><b>Bu filtreye uyan ilan yok</b>Filtreleri gevşet ya da sıfırla.<div style="margin-top:10px"><button class="btn" type="button" data-a="lf-reset">Filtreleri sıfırla</button></div></div>`;
       if (!ls.length) return html + `<div class="empty"><b>Şu an bakılacak ilan kalmadı</b>${nd ? `Saat ${G.clock(nd)}'de yeni ilanlar gelecek.` : "Yarın sabah yeni ilanlar gelecek."}</div>`;
       html += `<div class="rows">${ls.map(listingRow).join("")}</div>`;
+    } else if (sub === "sifir") {
+      html += UI.dealerShop();
     } else if (sub === "ihale") {
       const a = s.auction;
       html += `<div class="card"><h3>Günün ihalesi</h3><p class="muted small">Banka, sigorta ve filo araçları piyasanın altında açılır ama ekspertize sokulamaz${s.upg.expert ? "; ekspertiz cihazınla hızlı kontrol yapabilirsin" : ""}.</p>
@@ -533,11 +535,12 @@
   VIEWS.patron = function () {
     const s = S(), sub = UI.sub.patron;
     let html = `<div class="vh"><div><h2>Patron masası</h2><p>${esc(G.loc().name)} · Seviye ${s.level}</p></div></div>
-      <div class="segctl" role="group">${[["tesis", "Tesisler"], ["lux", "Lüks"], ["durum", "Durum"], ["dukkan", "Adres"], ["personel", "Personel"], ["finans", "Banka"]]
+      <div class="segctl" role="group">${[["tesis", "Tesisler"], ["lux", "Lüks"], ["durum", "Durum"], ["dukkan", "Adres"], ["personel", "Personel"], ["bayi", "Bayilik"], ["finans", "Banka"]]
         .map(([k, l]) => `<button type="button" data-a="sub" data-k="patron" data-v="${k}" aria-pressed="${sub === k}">${l}</button>`).join("")}</div>`;
     if (sub === "tesis") html += patronTesis();
     if (sub === "lux") html += UI.luxView();
     if (sub === "durum") html += patronDurum();
+    if (sub === "bayi") html += UI.dealerView();
     if (sub === "dukkan") html += patronDukkan();
     if (sub === "personel") html += patronPersonel();
     if (sub === "finans") html += patronFinans();
@@ -1065,6 +1068,10 @@
 
   const ACT = {
     tour: () => UI.tourRestart(),
+    "dealer-apply": el => { msg(G.dealerApply(el.dataset.v)); UI.sig = ""; UI.render(); },
+    "dealer-order": el => { const r = G.dealerOrder(el.dataset.v); msg(r); if (r.ok) UI.toast("Sipariş verildi, araç yarın sabah gelecek.", "good"); UI.sig = ""; UI.render(); },
+    "dealer-shop": () => { UI.tab = "piyasa"; UI.sub.piyasa = "sifir"; UI.sheet = null; window.scrollTo(0, 0); UI.sig = ""; UI.render(); },
+    "dealer-go": () => { UI.tab = "patron"; UI.sub.patron = "bayi"; UI.sheet = null; window.scrollTo(0, 0); UI.sig = ""; UI.render(); },
     "opt-offerpause": () => { const s = S(); s.opts.offerPause = !s.opts.offerPause; if (!s.opts.offerPause && s.offerPause) { s.offerPause = false; if (!s.summary) s.paused = false; } G.save(); UI.sig = ""; UI.render(); },
     "pop-later": el => { const c = S().custs.find(x => x.id === +el.dataset.id); if (c) c.popDismissed = true; UI.renderOfferPops(); },
     "sales-take": el => { const c = S().custs.find(x => x.id === +el.dataset.id); if (c) { G.salesHandle(c); UI.sig = ""; UI.render(); } },

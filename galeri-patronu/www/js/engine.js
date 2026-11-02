@@ -1399,6 +1399,10 @@
     if (fac) out.push({ text: `${G.FACILITIES[fac.k].name} ${fac.nx.n}. seviyeye yükseltilebilir (${G.fmtS(fac.nx.cost)})`, a: "fac", v: fac.k, btn: "Bak" });
     const lux = G.LUXURY.filter(x => !G.owns(x.id) && x.lvl <= S.level && S.money >= x.price * 3).sort((a, b) => a.price - b.price)[0];
     if (lux && !G.luxOwned().length) out.push({ text: `Kasan dolu: kendine bir ${lux.name.toLocaleLowerCase("tr-TR")} alabilirsin (${G.fmtS(lux.price)})`, a: "tab", v: "patron", btn: "Lüks" });
+    if (G.dealerChecks && G.facLevel("galeri") >= G.DEALER.unlock) {
+      const b = G.DEALER.tiers.flatMap(t => t.brands).find(x => !(S.dealer && S.dealer.lic[x]) && G.dealerChecks(x).every(c => c.ok));
+      if (b) out.push({ text: `${b} bayiliğine başvurabilirsin: sıfır araç satarsın`, a: "dealer-go", btn: "Bayilik" });
+    }
     if (G.partyReady()) out.push({ text: `Yatında parti verebilirsin; yarın zengin müşteriler gelir`, a: "party", btn: "Parti ver" });
     const next = G.LOCS[S.loc + 1];
     if (next && S.level >= next.lvl && S.money >= next.cost * 1.3) out.push({ text: `${next.name} adresine taşınabilirsin`, a: "tab", v: "patron", btn: "Bak" });
@@ -1447,7 +1451,8 @@
     const insurance = S.cars.length * 150;
     const interest = Math.round(S.loan * G.LOAN_RATE);
     const overdraft = S.money < 0 ? Math.round(-S.money * 0.004) : 0;
-    let exp = L.rent + salaries + ads + insurance + interest + overdraft;
+    const dealer = G.dealerFee ? G.dealerFee() : 0;
+    let exp = L.rent + salaries + ads + insurance + interest + overdraft + dealer;
     const accDisc = Math.min(0.15, 0.03 * G.skillSum("muhasebe"));
     const saved = Math.round(exp * accDisc);
     exp -= saved;
@@ -1464,7 +1469,7 @@
     if (S.history.length > 30) S.history.shift();
     const summary = {
       day: S.day, today: Object.assign({}, T), net,
-      lines: [["Kira", L.rent], ["Maaşlar", salaries], ["Reklam", ads], ["Sigorta ve otopark", insurance], ["Kredi faizi", interest], ["Ek hesap faizi", overdraft], ["Muhasebe tasarrufu", -saved], ["Lüks bakım masrafı (kişisel)", luxUp], ["Yatırım gelirleri (kişisel)", -inv.total]].filter(x => x[1]),
+      lines: [["Kira", L.rent], ["Maaşlar", salaries], ["Reklam", ads], ["Sigorta ve otopark", insurance], ["Kredi faizi", interest], ["Ek hesap faizi", overdraft], ["Bayilik aidatı", dealer], ["Muhasebe tasarrufu", -saved], ["Lüks bakım masrafı (kişisel)", luxUp], ["Yatırım gelirleri (kişisel)", -inv.total]].filter(x => x[1]),
       lost: S.lost.slice(0, 6), news: [], invest: inv.total
     };
     summary.news.push(...inv.news);
@@ -1509,6 +1514,7 @@
     if (imp) summary.news.push({ title: "Yurt dışından ilanlar", text: `Uçağın sayesinde bugün piyasada ${imp} ithal ilan var.` });
     if (G.partyActive()) summary.news.push({ title: "Yat partisinin etkisi", text: "Bugün galeriye zengin müşteri akını bekleniyor." });
     G.newAuction();
+    if (G.dealerDay) G.dealerDay(summary);
     if (S.day - S.candDay >= 5) G.newCandidates();
     G.checkQuests();
     summary.bonus = R.r1k(R.clamp(Math.max(0, T.profit) * 0.3, 25000 + S.level * 5000, 150000 + S.level * 60000));
