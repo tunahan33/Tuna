@@ -815,6 +815,15 @@ body::before { background: var(--hero-1); }
     ["volta-speedster","Volta",  "Speedster '57",     "ultra", "coupe", 40e6, [1955, 1959], ["benzin"],   ["manuel"],   1],
     ["anka-prototip",  "Anka",   "Kartal Prototip '64","ultra", "sedan", 35e6, [1964, 1964], ["benzin"],   ["manuel"],   1]
   ].map(a => ({ id: a[0], brand: a[1], name: a[2], seg: a[3], body: a[4], price: a[5], years: a[6], fuels: a[7], gears: a[8], pop: a[9] }));
+  // Her modelin tek fotoğrafı yeni kasa olduğu için modern modeller yalnızca son G.MODEL_YEARS yılın üretimi olarak çıkar;
+  // böylece aynı fotoğraflı aracın fiyatı aşırı oynamaz. Klasik ve ultra lüks araçlar kendi yıl aralığında kalır.
+  G.MODEL_YEARS = 5;
+  // Araçlar yenileşince ortalama değer yükseldi; oyun dengesi bozulmasın diye modern modellerin sıfır fiyatı bu oranla çarpılır
+  G.MODERN_PRICE = 0.65;
+  for (const m of G.MODELS) if (m.seg !== "klasik" && m.seg !== "ultra") {
+    m.years = [Math.max(m.years[0], G.YEAR - G.MODEL_YEARS), m.years[1]];
+    m.price = Math.round(m.price * G.MODERN_PRICE / 1000) * 1000;
+  }
   G.M = {};
   G.MODELS.forEach(m => { G.M[m.id] = m; });
 
@@ -2275,7 +2284,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       S.today.commission += com;
       S.today.expenses += com;
     }
-    G.addXp(Math.round(20 + Math.max(0, profit) / 2500) * (wholesale ? 0.5 : 1));
+    G.addXp(Math.round(10 + Math.max(0, profit) / 3500) * (wholesale ? 0.5 : 1)); // satış başına XP (günde araç başına 3 müşteri geldiği için ölçülü)
     if (!wholesale) {
       const hidden = car.issues.filter(is => !is.known && !is.fixed && G.ISSUES[is.id].part !== undefined);
       if (hidden.length && !c.checked && R.chance(0.65)) {

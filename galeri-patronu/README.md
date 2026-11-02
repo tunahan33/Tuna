@@ -49,7 +49,7 @@ Her tesis seviyesi galeri sahnesine yeni bir parça ekler (20 seviye = 20 parça
 
 ### Araç fotoğrafları
 
-45 modelin hepsinin fotoğrafı var: `www/img/araclar/{model}-{renk}.webp` (1200×480, şeffaf arka plan, araç tabanı y=460, sağa bakar). Her modelin tek fotoğrafı olduğu için o model oyunda hep fotoğraftaki renkte çıkar; hangi modelin hangi renkte olduğu `js/photos.js` içindeki `G.PHOTO_COLOR` tablosunda. Eski kayıtlardaki araçların rengi açılışta fotoğrafa göre düzeltilir. Fotoğraf da durumu gösterir: kirli araç solgun ve çamurlu, kaportası kötü araç çizikli, motoru kötü araç dumanlı, yeni yıkanmış araç parıltılı.
+45 modelin hepsinin fotoğrafı var: `www/img/araclar/{model}-{renk}.webp` (1200×480, şeffaf arka plan, araç tabanı y=460, sağa bakar). Fotoğraflar yeni kasa araçları gösterdiği için modern modeller yalnızca son 5 yılın üretimi olarak çıkar (`G.MODEL_YEARS`); böylece aynı fotoğraflı aracın fiyatı aşırı oynamaz (yaklaşık 3–4 kat içinde: durum, kilometre ve hasara göre). Dengeyi korumak için modern modellerin sıfır fiyatı %65'e çekildi (`G.MODERN_PRICE`). Klasik ve ultra lüks araçlar kendi yıl aralığında kalır. Her modelin tek fotoğrafı olduğu için o model oyunda hep fotoğraftaki renkte çıkar; hangi modelin hangi renkte olduğu `js/photos.js` içindeki `G.PHOTO_COLOR` tablosunda. Eski kayıtlardaki araçların rengi açılışta fotoğrafa göre düzeltilir. Fotoğraf da durumu gösterir: kirli araç solgun ve çamurlu, kaportası kötü araç çizikli, motoru kötü araç dumanlı, yeni yıkanmış araç parıltılı.
 
 Yeni renk eklemek için aynı modelin başka renkteki görselini aynı ölçüde hazırlayıp klasöre koymak ve `photos.js`'i güncellemek yeterli. Fotoğrafı olmayan bir model eklenirse aşağıdaki SVG çizimle gösterilir.
 

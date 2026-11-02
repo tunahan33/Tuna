@@ -987,7 +987,7 @@
       S.today.commission += com;
       S.today.expenses += com;
     }
-    G.addXp(Math.round(20 + Math.max(0, profit) / 2500) * (wholesale ? 0.5 : 1));
+    G.addXp(Math.round(10 + Math.max(0, profit) / 3500) * (wholesale ? 0.5 : 1)); // satış başına XP (günde araç başına 3 müşteri geldiği için ölçülü)
     if (!wholesale) {
       const hidden = car.issues.filter(is => !is.known && !is.fixed && G.ISSUES[is.id].part !== undefined);
       if (hidden.length && !c.checked && R.chance(0.65)) {
