@@ -2043,7 +2043,35 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     }
     S.custs.push(c);
     S.today.visitors++;
+    return c;
   };
+
+  // Her etiketli araca gün içinde ortalama G.CAR_VISITS müşteri gelir ve teklif verir.
+  // Fiyat makulse bunların G.DIRECT_BUY kadarı pazarlık etmeden etiket fiyatından alır.
+  G.CAR_VISITS = 3; G.DIRECT_BUY = 0.4;
+  function carVisitors() {
+    const mins = G.CLOSE - G.OPEN;
+    const taken = new Set(S.custs.filter(o => o.state === "offer").map(o => o.carId));
+    for (const car of S.cars.slice()) {
+      if (car.status !== "lot" || !car.price || taken.has(car.id)) continue;
+      if (!R.chance(G.CAR_VISITS / mins * (G.boostActive() ? 1.5 : 1))) continue;
+      const md = G.M[car.m];
+      const types = md.seg === "ultra" ? [G.CT.milyarder] : G.CTYPES.filter(t => !t.ultra && t.segs[md.seg]);
+      const t = R.wpick(types.length ? types : G.CTYPES.filter(x => !x.ultra), x => (x.segs[md.seg] || 0.2) * (x.w || 1));
+      const c = G.spawnCustomer(t.id);
+      if (!c) continue;
+      c.seg = md.seg;
+      c.budget = Math.max(c.budget, R.r1k(car.price * R.rand(1.0, 1.2)));
+      c.silent = true;
+      makeOffer(c, car);
+      c.silent = false;
+      taken.add(car.id);
+      if (car.price <= c.max && R.chance(G.DIRECT_BUY)) {
+        c.msgs.push({ who: "them", text: "Etiket fiyatına alıyorum, pazarlığa gerek yok." });
+        finalizeSale(car, car.price, c);
+      } else if (G.onOffer) G.onOffer(c, car);
+    }
+  }
 
   G.leave = function (c, lostReason, note) {
     c.state = "gone";
@@ -2170,7 +2198,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     c.msgs = [{ who: "them", text: first }];
     if (c.checked) c.msgs.push({ who: "them", text: "Bu arada aracı bildiğim bir ekspertize gösterdim, bazı kusurlar çıktı." });
     if (c.trade) c.msgs.push({ who: "them", text: `Kendi ${G.carTitle(c.trade)} aracımı takasa veririm, ona ${G.fmt(c.tradeVal)} düşersin.` });
-    if (G.onOffer) G.onOffer(c, car);
+    if (G.onOffer && !c.silent) G.onOffer(c, car);
   }
 
   G.custCar = c => S.cars.find(x => x.id === c.carId);
@@ -2683,6 +2711,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
         }
       }
     }
+    carVisitors();
     salesTick();
     if (S.min >= CLOSE) G.endDay();
   };
