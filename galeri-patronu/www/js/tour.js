@@ -18,7 +18,7 @@
     { tab: "piyasa", el: q("#view .crow"), title: "Araç al", text: "Her sabah ilanlar yenilenir, gün içinde yenileri düşer. İlana dokun ve satıcıyla pazarlık et. Almadan önce ekspertiz yaptırırsan gizli kusurları görürsün." },
     { tab: "piyasa", el: nav(4), title: "Ucuz mu, pahalı mı?", text: "Aracın gerçek değerini ilk başta bilemezsin. Patron → Personel'den ekspertiz ustası işe alırsan fırsatları ve pahalıları söyler; yıldızı yüksek usta daha isabetli tahmin eder." },
     { tab: "atolye", el: nav(3), title: "Atölye", text: "Aldığın aracı temizle, bakımını yap, boyasını düzelt: hazırlanan araç daha pahalıya satılır. Ustalar çalıştıkça yorulur, çardakta dinlenince hızlanır." },
-    { tab: "musteri", el: nav(2), title: "Müşteriler", text: "Fiyat etiketi astığın araçlara müşteriler teklif verir. Kabul et, biraz daha iste ya da reddet. Çok bekletirsen müşteri gider." },
+    { tab: "musteri", el: nav(2), title: "Müşteriler", text: "Fiyat etiketi astığın araçlara müşteriler teklif verir; teklif ekranın altında kart olarak açılır. \"Pazarlık et\" deyip kendin konuşabilirsin. Satış danışmanın varsa sen karışmazsan teklifleri o devralır." },
     { tab: "patron", el: nav(4), title: "Patron masası", text: "Tesisleri yükselt, personel al, daha büyük bir adrese taşın. Para biriktikçe Lüks'ten ev, araba, yat, takım elbise ve daha fazlasını al." },
     { tab: "galeri", title: "Reklamlar isteğe bağlı", text: "Yanında ▶ işareti olan düğmeler kısa bir reklam izletir ve bonus verir. İzlemek zorunda değilsin. Hadi ilk aracını sat!", last: true }
   ];

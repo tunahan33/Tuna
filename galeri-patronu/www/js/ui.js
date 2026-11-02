@@ -250,11 +250,34 @@
   G.onOffer = (c, car) => {
     if (UI.skipping) return;
     const s = S();
-    // teklif gelince zaman durur; bütün teklifler cevaplanınca kendiliğinden devam eder
-    const stop = s.opts && s.opts.offerPause && !s.paused;
+    // Teklif ekranda kart olarak açılır (UI.renderOfferPops). Danışman yoksa zaman durur ki teklif kaçmasın;
+    // danışman varsa zaman akar ve oyuncu karışmazsa danışmanlar boş oldukça teklifleri devralır.
+    const stop = s.opts && s.opts.offerPause && !s.paused && !G.staffOf("satis").length;
     if (stop) { s.paused = true; s.offerPause = true; }
-    if (UI.sheet && UI.sheet.kind === "cust" && UI.sheet.id === c.id) return;
-    UI.toast(`Yeni teklif: ${c.name}, ${G.carName(car)} için ${G.fmtS(c.offer)}. ${s.offerPause ? "Zaman durdu; dokun ve cevap ver." : "Dokun ve cevap ver."}`, "offer", { a: "cust", id: c.id });
+    void car;
+  };
+
+  // Teklif kartları: ekranın altında, en fazla iki tane; danışmana geçen ya da "Sonra" denen kapanır
+  let popSig = "";
+  UI.renderOfferPops = function () {
+    const s = S();
+    let box = $("offerPops");
+    if (!box) { box = document.createElement("div"); box.id = "offerPops"; box.className = "offer-pops"; box.setAttribute("aria-live", "polite"); document.body.appendChild(box); }
+    const list = !s || !s.started || UI.touring && UI.touring() || (UI.sheet && UI.blocking()) ? [] :
+      s.custs.filter(c => c.state === "offer" && !c.popDismissed && c.handler == null && !(UI.sheet && UI.sheet.kind === "cust" && UI.sheet.id === c.id)).slice(-2);
+    const sales = G.staffOf("satis").length;
+    const sig = list.map(c => c.id + "." + c.offer).join() + "|" + sales + "|" + (UI.sheet ? 1 : 0);
+    if (sig === popSig) return;
+    popSig = sig;
+    box.innerHTML = list.map(c => {
+      const car = G.custCar(c);
+      if (!car) return "";
+      const profit = c.offer - car.buy - car.spent;
+      return `<div class="offer-pop" role="dialog" aria-label="${esc(c.name)} teklif veriyor">
+        <div class="who">${UI.avatar(c, "musteri", c.type, 42)}<div><b>${esc(c.name)}</b> <span class="muted small">${esc(G.CT[c.type].name)}</span>${c.love ? ` <span class="chip gold">Araca vuruldu</span>` : ""}
+        <p class="small">${esc(G.carName(car))} için <b class="num">${G.fmtS(c.offer)}</b> veriyor <span class="${profit >= 0 ? "pos" : "neg"}">(${profit >= 0 ? "kâr" : "zarar"} ${G.fmtS(Math.abs(profit))})</span></p></div></div>
+        <div class="btns"><button class="btn pri" type="button" data-a="cust" data-id="${c.id}">Pazarlık et</button>${sales ? `<button class="btn" type="button" data-a="sales-take" data-id="${c.id}">Danışmana bırak</button>` : `<button class="btn" type="button" data-a="pop-later" data-id="${c.id}">Sonra</button>`}</div></div>`;
+    }).join("");
   };
 
   // ---- Üst panel ----
@@ -453,7 +476,7 @@
       ${c.trade ? `<p class="small">Takasa <b>${esc(G.carTitle(c.trade))}</b> veriyor (${G.fmtS(c.tradeVal)})</p>` : ""}
       <div class="prog pat" title="Müşterinin sabrı"><i data-pat="${c.id}" style="width:${c.patience / c.patMax * 100}%"></i></div>
       <div class="btns"><button class="btn pri" type="button" data-a="accept" data-id="${c.id}">Kabul et</button>${raise > c.offer ? `<button class="btn warn" type="button" data-a="raise" data-id="${c.id}">${G.fmtS(raise)} iste</button>` : ""}<button class="btn" type="button" data-a="cust" data-id="${c.id}">Görüş</button></div>
-      ${G.staffOf("satis").length && !c.auto ? `<button class="btn sm block" type="button" data-a="sales-take" data-id="${c.id}">Danışmanım halletsin</button>` : ""}</div>`;
+      ${G.staffOf("satis").length && !c.auto && c.handler == null ? `<button class="btn sm block" type="button" data-a="sales-take" data-id="${c.id}">Danışmana bırak</button>` : ""}${c.handler != null ? `<p class="small muted">Danışmanın bu müşteriyle ilgileniyor.</p>` : ""}</div>`;
   }
 
   VIEWS.atolye = function () {
@@ -559,7 +582,7 @@
     const s = S(), T = s.today;
     const qs = G.activeQuests(3);
     return passiveCard() + `<div class="card"><div class="row"><div><b>Oyun rehberi</b><p class="muted small">Oyunun nasıl oynandığını anlatan tanıtım turu ve ipuçları.</p></div><button class="btn sm" type="button" data-a="tour">Turu baştan izle</button></div>
-      <div class="row"><div><b>Teklif gelince zamanı durdur</b><p class="muted small">Müşteri teklif verince oyun durur; bütün tekliflere cevap verince kendiliğinden devam eder.</p></div><button class="btn sm ${S().opts.offerPause ? "pri" : ""}" type="button" data-a="opt-offerpause" aria-pressed="${S().opts.offerPause}">${S().opts.offerPause ? "Açık" : "Kapalı"}</button></div></div>${appCard()}<div class="card"><h3>Görevler</h3>${qs.length ? qs.map(q => `<div class="row"><div>${esc(q.text)}</div><div class="num small pos">+${G.fmtS(q.reward)}</div></div>`).join("") : `<p class="muted">Bütün görevleri bitirdin. Gerçek bir patronsun.</p>`}
+      <div class="row"><div><b>Teklif gelince zamanı durdur</b><p class="muted small">Satış danışmanın yokken müşteri teklif verince oyun durur; teklife cevap verince ya da "Sonra" deyince devam eder. Danışmanın varsa zaman akar, teklifleri danışmanlar sırayla devralır.</p></div><button class="btn sm ${S().opts.offerPause ? "pri" : ""}" type="button" data-a="opt-offerpause" aria-pressed="${S().opts.offerPause}">${S().opts.offerPause ? "Açık" : "Kapalı"}</button></div></div>${appCard()}<div class="card"><h3>Görevler</h3>${qs.length ? qs.map(q => `<div class="row"><div>${esc(q.text)}</div><div class="num small pos">+${G.fmtS(q.reward)}</div></div>`).join("") : `<p class="muted">Bütün görevleri bitirdin. Gerçek bir patronsun.</p>`}
         <p class="muted small">${s.quests.length}/${G.QUESTS.length} görev tamamlandı</p></div>
       <div class="card"><h3>Bugün</h3><div class="kv">
         <div><span>Satış</span><b>${T.sales}</b></div><div><span>Satış kârı</span><b class="${T.profit >= 0 ? "pos" : "neg"}">${G.fmtS(T.profit)}</b></div>
@@ -967,7 +990,8 @@
   // Sık güncellenen küçük öğeler (ilerleme çubukları, sabır), gerekirse tam yeniden çizim
   UI.tick = function () {
     const st = S();
-    if (st && st.offerPause && !st.custs.some(c => c.state === "offer")) {
+    UI.renderOfferPops();
+    if (st && st.offerPause && !st.custs.some(c => c.state === "offer" && !c.popDismissed)) {
       st.offerPause = false;
       if (!st.summary) { st.paused = false; renderTop(); }
     }
@@ -1042,6 +1066,7 @@
   const ACT = {
     tour: () => UI.tourRestart(),
     "opt-offerpause": () => { const s = S(); s.opts.offerPause = !s.opts.offerPause; if (!s.opts.offerPause && s.offerPause) { s.offerPause = false; if (!s.summary) s.paused = false; } G.save(); UI.sig = ""; UI.render(); },
+    "pop-later": el => { const c = S().custs.find(x => x.id === +el.dataset.id); if (c) c.popDismissed = true; UI.renderOfferPops(); },
     "sales-take": el => { const c = S().custs.find(x => x.id === +el.dataset.id); if (c) { G.salesHandle(c); UI.sig = ""; UI.render(); } },
     staff: () => { UI.tab = "patron"; UI.sub.patron = "personel"; UI.sheet = null; window.scrollTo(0, 0); UI.render(); },
     tab: el => { UI.tab = el.dataset.v; if (UI.sheet && !UI.blocking()) UI.sheet = null; window.scrollTo(0, 0); UI.armed = null; UI.render(); },

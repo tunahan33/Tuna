@@ -824,7 +824,32 @@
   // Teklif veren müşteri ne kadar bekler (tipin sabrı × bu çarpan, dakika) ve kaç kez pazarlığa girer
   G.PATIENCE_MULT = 1.5;
   // Danışman, oyuncu beklemeden teklifi hemen devralır
-  G.salesHandle = c => { if (c.state === "offer" && G.staffOf("satis").length) salesAuto(c); };
+  // Danışmanlar teklifleri sırayla devralır: her danışman aynı anda tek müşteriyle ilgilenir,
+  // görüşme (G.SALES_MINS - 2 × yıldız) dakika sürer. Oyuncu teklifi açıp kendisi pazarlık ediyorsa danışman karışmaz.
+  // Oyuncuya teklifi görmesi için G.SALES_WAIT dakika tanınır; "Danışmana bırak" denirse beklemeden sıraya girer.
+  G.SALES_MINS = 16; G.SALES_WAIT = 6;
+  G.salesFree = () => G.staffOf("satis").filter(st => !S.custs.some(c => c.state === "offer" && c.handler === st.id));
+  G.salesHandle = c => { if (c.state === "offer" && G.staffOf("satis").length) { c.toSales = true; c.popDismissed = true; } };
+  function salesTick() {
+    for (const c of S.custs) {
+      if (c.state !== "offer" || c.handler == null) continue;
+      if (c.userBusy) continue;
+      if (--c.handleLeft <= 0) {
+        const st = S.staff.find(x => x.id === c.handler);
+        if (st) salesAuto(c, st.skill); else c.handler = null; // danışman işten çıktıysa müşteri sıraya döner
+      }
+    }
+    const free = G.salesFree();
+    if (!free.length) return;
+    const waiting = S.custs.filter(c => c.state === "offer" && c.handler == null && !c.auto && !c.userBusy && (c.toSales || c.patMax - c.patience >= G.SALES_WAIT))
+      .sort((a, b) => (b.toSales ? 1 : 0) - (a.toSales ? 1 : 0) || a.patience - b.patience);
+    for (const c of waiting) {
+      const st = free.shift();
+      if (!st) break;
+      c.handler = st.id; c.handleLeft = Math.max(4, G.SALES_MINS - 2 * st.skill); c.popDismissed = true;
+      c.msgs.push({ who: "sales", text: `${st.name} müşteriyle ilgileniyor.` });
+    }
+  }
 
   function makeOffer(c, car, love) {
     const t = G.CT[c.type], md = G.M[car.m];
@@ -943,8 +968,8 @@
   }
 
   // Satış danışmanı: oyuncu bir süre cevap vermezse teklifi o yönetir
-  function salesAuto(c) {
-    const sk = G.staffOf("satis").reduce((a, s) => Math.max(a, s.skill), 0);
+  function salesAuto(c, skill) {
+    const sk = skill || G.staffOf("satis").reduce((a, s) => Math.max(a, s.skill), 0);
     if (!sk) return;
     const car = G.custCar(c);
     if (!car) return;
@@ -1362,7 +1387,7 @@
       if (c.state === "browse") { if (--c.t <= 0) decide(c); }
       else if (c.state === "offer") {
         c.patience--;
-        if (!c.auto && G.staffOf("satis").length && c.patMax - c.patience >= 15 && !c.userBusy) { salesAuto(c); continue; }
+        if (c.handler != null) { c.patience++; continue; } // danışmanla konuşan müşteri beklemez
         if (c.patience <= 0) {
           G.addRep(-0.3);
           const car = G.custCar(c);
@@ -1370,6 +1395,7 @@
         }
       }
     }
+    salesTick();
     if (S.min >= CLOSE) G.endDay();
   };
 

@@ -278,7 +278,8 @@
   }
 
   // ---- Fotoğraflı sahne ----
-  // Galeri binası fotoğrafı (adres × aşama) üstüne araçlar dizilir; tesisler altta fotoğraflı kartlarda.
+  // Yalnızca galeri binasının fotoğrafı (adres × aşama); tesisler altta fotoğraflı kartlarda.
+  // Araçlar stok listesinde, müşteri teklifleri ekranda açılan kartlarda görünür.
   const PW = 400, PH = 225;
   function facStages() {
     const S = G.S;
@@ -297,37 +298,12 @@
   function photoScene() {
     const S = G.S;
     const t = (S.min - G.OPEN) / (G.CLOSE - G.OPEN);
-    const cars = S.cars.filter(c => c.status === "lot").sort((a, b) => (b.show ? 1 : 0) - (a.show ? 1 : 0) || (b.price ? 1 : 0) - (a.price ? 1 : 0));
-    const offerBy = {};
-    S.custs.forEach(c => { if (c.state === "offer") offerBy[c.carId] = c; });
-    const PER = 7, back = cars.slice(PER, PER * 2), front = cars.slice(0, PER);
+    const cars = S.cars.filter(c => c.status === "lot");
     let svg = `<svg class="scene photo" viewBox="0 0 ${PW} ${PH}" role="img" aria-label="${esc(S.name)}: ${esc(G.loc().name)}, parkta ${cars.length} araç">
       <g data-a="fac" data-v="galeri" class="hit"><image href="${UI.photoSrc(UI.photoSceneKey(), "sahne")}" x="0" y="0" width="${PW}" height="${PH}" preserveAspectRatio="xMidYMid slice"/></g>`;
     // akşam olurken ışık sıcaklaşır, kapanışa doğru kararır
     if (t > 0.6) svg += `<rect width="${PW}" height="${PH}" fill="#ff8a3d" opacity="${Math.min(0.18, (t - 0.6) * 0.45).toFixed(3)}" style="mix-blend-mode:multiply" pointer-events="none"/>`;
     if (t > 0.85) svg += `<rect width="${PW}" height="${PH}" fill="#1b2a55" opacity="${Math.min(0.3, (t - 0.85) * 2).toFixed(3)}" style="mix-blend-mode:multiply" pointer-events="none"/>`;
-    const row = (list, base, sc) => list.map((car, i) => {
-      const w = 120 * sc, gap = (PW - 16 - PER * w) / (PER - 1);
-      const x = 8 + i * (w + gap), y = base - 46 * sc;
-      const tag = car.price
-        ? `<rect x="${x + w * 0.55}" y="${y - 4}" width="21" height="9" rx="1.5" fill="#ffd23f" transform="rotate(4 ${x + w * 0.55 + 10} ${y})"/><text x="${x + w * 0.55 + 10.5}" y="${y + 2.8}" text-anchor="middle" font-size="6.2" font-weight="700" fill="#1d1a10" ${FONT}>${tiny(car.price)}</text>`
-        : `<rect x="${x + w * 0.6}" y="${y - 4}" width="13" height="9" rx="1.5" fill="#ffffff" stroke="#e04a3f" stroke-width=".8"/><text x="${x + w * 0.6 + 6.5}" y="${y + 2.8}" text-anchor="middle" font-size="7" font-weight="800" fill="#e04a3f">?</text>`;
-      const c = offerBy[car.id];
-      const bub = c ? `<g data-a="cust" data-id="${c.id}" class="hit bubble"><rect x="${x + 4}" y="${y - 6}" width="12" height="9" rx="3" fill="#ffffff" stroke="#1d8549"/><text x="${x + 10}" y="${y + 1}" text-anchor="middle" font-size="6.5" font-weight="800" fill="#1d8549">₺</text></g>` : "";
-      return `<g data-a="car" data-id="${car.id}" class="hit">${carAt(car, x, y, sc)}${tag}</g>${bub}`;
-    }).join("");
-    // araçlar binanın önündeki alana: ön sıra yolun kenarında, arka sıra binaya yakın ve biraz küçük
-    svg += row(back, Math.round(PH * 0.8), 0.36) + row(front, Math.round(PH * 0.93), 0.44);
-    const more = cars.length - front.length - back.length;
-    const chips = [];
-    const browsing = S.custs.filter(c => c.state === "browse").length;
-    if (browsing) chips.push(`<g data-a="tab" data-v="musteri" class="hit"><rect x="0" y="0" width="86" height="13" rx="6.5" fill="#ffffff" opacity=".92"/><text x="43" y="9" text-anchor="middle" font-size="7.5" font-weight="700" fill="#17202b">${browsing} müşteri bakıyor</text></g>`);
-    if (more > 0) chips.push(`<g data-a="tab" data-v="galeri"><rect x="0" y="0" width="64" height="13" rx="6.5" fill="#17202b" opacity=".85"/><text x="32" y="9" text-anchor="middle" font-size="7.5" font-weight="700" fill="#ffffff">+${more} araç daha</text></g>`);
-    if (G.boostActive()) chips.push(`<g><rect x="0" y="0" width="98" height="13" rx="6.5" fill="#ffd23f"/><text x="49" y="9" text-anchor="middle" font-size="7.5" font-weight="700" fill="#1d1a10">Kampanya: 2× müşteri</text></g>`);
-    const out = S.cars.filter(c => c.status === "shop").length;
-    if (out) chips.push(`<g data-a="tab" data-v="atolye" class="hit"><rect x="0" y="0" width="84" height="13" rx="6.5" fill="#ffffff" opacity=".92"/><text x="42" y="9" text-anchor="middle" font-size="7.5" font-weight="700" fill="#17202b">Dış serviste: ${out} araç</text></g>`);
-    let cx = 6;
-    for (const ch of chips) { const w = +ch.match(/width="(\d+)"/)[1]; svg += `<g transform="translate(${cx} 6)">${ch}</g>`; cx += w + 5; }
     return svg + `</svg>`;
   }
 
