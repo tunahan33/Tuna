@@ -316,7 +316,8 @@
       const bub = c ? `<g data-a="cust" data-id="${c.id}" class="hit bubble"><rect x="${x + 4}" y="${y - 6}" width="12" height="9" rx="3" fill="#ffffff" stroke="#1d8549"/><text x="${x + 10}" y="${y + 1}" text-anchor="middle" font-size="6.5" font-weight="800" fill="#1d8549">₺</text></g>` : "";
       return `<g data-a="car" data-id="${car.id}" class="hit">${carAt(car, x, y, sc)}${tag}</g>${bub}`;
     }).join("");
-    svg += row(back, PH - 34, 0.38) + row(front, PH - 2, 0.46);
+    // araçlar binanın önündeki alana: ön sıra yolun kenarında, arka sıra binaya yakın ve biraz küçük
+    svg += row(back, Math.round(PH * 0.8), 0.36) + row(front, Math.round(PH * 0.93), 0.44);
     const more = cars.length - front.length - back.length;
     const chips = [];
     const browsing = S.custs.filter(c => c.state === "browse").length;

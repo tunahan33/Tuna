@@ -61,7 +61,11 @@
   // Gerçekçi galeri sahnesi: img/sahne/galeri-{adres}-{1..4}.webp (16:9) ve {atolye|yikama|cardak|otopark}-{1..4}.webp (4:3).
   // Aşama seviyeye göre: 1 (0–4), 2 (5–9), 3 (10–14), 4 (15–20). Fotoğrafı gelen anahtar listeye eklenir;
   // o adresin galeri fotoğrafı yoksa sahne çizimle gösterilir.
-  G.SCENE_PHOTOS = [];
+  G.SCENE_PHOTOS = [
+    "galeri-sanayi-1", "galeri-sanayi-2", "galeri-sanayi-3", "galeri-sanayi-4",
+    "galeri-cadde-1", "galeri-cadde-2", "galeri-cadde-3", "galeri-cadde-4",
+    "galeri-plaza-1", "galeri-plaza-2", "galeri-plaza-3", "galeri-plaza-4"
+  ];
   // Lüks eşya fotoğrafları: img/luks/{eşya id}.webp (768×410, 15:8). Listede olmayan eşya çizimle gösterilir.
   G.LUX_PHOTOS = ["e01", "ev1", "e03", "ev2", "e05", "e06", "ev3", "e08", "ev4", "e10", "ev5", "e12", "e13"];
   G.stageOf = n => (n >= 15 ? 4 : n >= 10 ? 3 : n >= 5 ? 2 : 1);
