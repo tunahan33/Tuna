@@ -66,7 +66,8 @@
     "galeri-cadde-1", "galeri-cadde-2", "galeri-cadde-3", "galeri-cadde-4",
     "galeri-plaza-1", "galeri-plaza-2", "galeri-plaza-3", "galeri-plaza-4",
     "galeri-merkez-1", "galeri-merkez-2", "galeri-merkez-3", "galeri-merkez-4",
-    "atolye-1", "atolye-2", "atolye-3", "atolye-4", "yikama-1", "yikama-2", "yikama-3", "yikama-4"
+    "atolye-1", "atolye-2", "atolye-3", "atolye-4", "yikama-1", "yikama-2", "yikama-3", "yikama-4",
+    "cardak-1", "cardak-2", "cardak-3", "cardak-4", "otopark-1", "otopark-2", "otopark-3", "otopark-4"
   ];
   // Lüks eşya fotoğrafları: img/luks/{eşya id}.webp (768×410, 15:8). Listede olmayan eşya çizimle gösterilir.
   G.LUX_PHOTOS = ["e01", "ev1", "e03", "ev2", "e05", "e06", "ev3", "e08", "ev4", "e10", "ev5", "e12", "e13"];
