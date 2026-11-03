@@ -727,6 +727,7 @@ body::before { background: var(--hero-1); }
 .club-top { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .club-top > .small { flex: 1; min-width: 160px; display: grid; gap: 2px; }
 .club-r { display: flex; gap: 10px; align-items: center; }
+.opt.star { background: linear-gradient(90deg, color-mix(in srgb, var(--sticker) 16%, transparent), transparent); border-radius: 10px; padding-left: 8px; padding-right: 8px; }
 .club-r .num { font-size: 20px; min-width: 26px; text-align: right; }
 </style>
 
@@ -5222,7 +5223,25 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     scout: { name: "Scout ekibi", max: 3, power: 0, desc: "Transfer listesine daha iyi oyuncular gelir" }
   };
   G.playerPrice = (r, kind) => R.r1k(G.CLUB[kind].base * Math.pow(1.13, r - 70));
-  G.playerWage = (p, kind) => R.r100(G.playerPrice(p.r, kind) * 0.0015);
+  // Dünya yıldızları: gerçek oyunculara benzeyen ama birebir aynı olmayan (parodi) isimler; transfer listesine ara sıra düşer
+  G.STARS = {
+    futbol: [
+      ["Lyonel Mezzi", "Arjantin", "Forvet", 96, 37], ["Kristiano Ronaldu", "Portekiz", "Forvet", 93, 40], ["Kilian Mbapa", "Fransa", "Forvet", 95, 27],
+      ["Erlin Holand", "Norveç", "Forvet", 94, 26], ["Neimar Junyor", "Brezilya", "Forvet", 90, 33], ["Muhammed Salahi", "Mısır", "Forvet", 92, 34],
+      ["Kevin Dö Broyne", "Belçika", "Orta saha", 91, 35], ["Vinisius Junyor", "Brezilya", "Forvet", 93, 26], ["Jud Bellinghem", "İngiltere", "Orta saha", 93, 23],
+      ["Hari Keyn", "İngiltere", "Forvet", 92, 33], ["Robert Levandovsi", "Polonya", "Forvet", 90, 38], ["Lukas Modrik", "Hırvatistan", "Orta saha", 89, 41],
+      ["Virjil Van Dayk", "Hollanda", "Defans", 91, 35], ["Tibo Kurtoa", "Belçika", "Kaleci", 91, 34], ["Slatan Ibrahimo", "İsveç", "Forvet", 88, 44]
+    ],
+    basket: [
+      ["LöBron Ceyms", "ABD", "Forvet", 95, 41], ["Stefan Köri", "ABD", "Oyun kurucu", 95, 37], ["Kevin Durent", "ABD", "Forvet", 93, 37],
+      ["Yannis Antetokumpo", "Yunanistan", "Uzun forvet", 96, 31], ["Luka Donçik", "Slovenya", "Oyun kurucu", 96, 26], ["Nikola Yokiç", "Sırbistan", "Pivot", 97, 30],
+      ["Coel Embid", "Kamerun", "Pivot", 93, 31], ["Viktor Vembanyama", "Fransa", "Pivot", 94, 21], ["Şey Gilgus Aleksandr", "Kanada", "Şutör", 95, 27],
+      ["Ceysın Teytım", "ABD", "Forvet", 93, 27], ["Entoni Edvırds", "ABD", "Şutör", 92, 24], ["Cimmi Batlır", "ABD", "Forvet", 91, 36]
+    ]
+  };
+  G.STAR_PREMIUM = 2.5; // yıldızın bonservisi ve maaşı aynı güçteki oyuncunun bu katı
+  G.pPrice = (p, kind) => R.r1k(G.playerPrice(p.r, kind) * (p.star ? G.STAR_PREMIUM : 1));
+  G.playerWage = (p, kind) => R.r100(G.pPrice(p, kind) * 0.0015);
   const newPlayer = (kind, lo, hi) => ({ id: G.nid(), name: R.pick(G.FIRST_E) + " " + R.pick(G.LAST), pos: R.pick(G.CLUB[kind].pos), r: R.randi(lo, hi), age: R.randi(19, 33) });
 
   // kulübün eksik alanlarını tamamlar (eski kayıtlar ve yeni kulüp)
@@ -5270,7 +5289,12 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     const x = G.LX[id], c = G.clubData(id), s = S();
     if (!c.market || c.market.day !== s.day) {
       const sc = c.staff.scout;
-      c.market = { day: s.day, list: Array.from({ length: 6 + sc * 2 }, () => newPlayer(x.club, 60 + sc * 3, 84 + sc * 4)).map(p => ({ ...p, r: Math.min(97, p.r) })) };
+      const list = Array.from({ length: 6 + sc * 2 }, () => newPlayer(x.club, 60 + sc * 3, 84 + sc * 4)).map(p => ({ ...p, r: Math.min(97, p.r) }));
+      // ara sıra bir dünya yıldızı (scout ekibi ihtimali artırır); kadroda olan tekrar çıkmaz
+      const have = new Set(c.players.filter(p => p.star).map(p => p.name));
+      const pool = G.STARS[x.club].filter(st => !have.has(st[0]));
+      if (pool.length && R.chance(0.3 + 0.15 * sc)) { const [name, nat, pos, r, age] = R.pick(pool); list.push({ id: G.nid(), name, nat, pos, r, age, star: true }); }
+      c.market = { day: s.day, list };
     }
     return c.market.list;
   };
@@ -5279,10 +5303,11 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     const p = G.clubMarket(id).find(q => q.id === pid);
     if (!p) return { ok: false };
     if (c.players.length >= k.max) return { ok: false, msg: `Kadro dolu (en fazla ${k.max} oyuncu). Önce birini sat.` };
-    const price = G.playerPrice(p.r, x.club);
+    const price = G.pPrice(p, x.club);
     if (S().money < price) return { ok: false, msg: "Kasada yeterli para yok." };
     S().money -= price;
-    c.players.push({ id: p.id, name: p.name, pos: p.pos, r: p.r, age: p.age });
+    c.players.push({ id: p.id, name: p.name, pos: p.pos, r: p.r, age: p.age, star: p.star, nat: p.nat });
+    if (p.star) G.addRep(1);
     c.market.list = c.market.list.filter(q => q !== p);
     G.feed(`${c.name} transferi: ${p.name} (${p.pos}, güç ${p.r}) · ${G.fmt(price)}`, "good");
     return { ok: true };
@@ -5291,7 +5316,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     const x = G.LX[id], c = G.clubData(id);
     const p = c.players.find(q => q.id === pid);
     if (!p) return { ok: false };
-    const back = R.r1k(G.playerPrice(p.r, x.club) * 0.7);
+    const back = R.r1k(G.pPrice(p, x.club) * 0.7);
     S().money += back;
     c.players = c.players.filter(q => q !== p);
     G.feed(`${p.name} satıldı: ${G.fmt(back)}`, "info");
@@ -5322,10 +5347,10 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       <div class="segctl" role="group">${tabs.map(([t, l]) => `<button type="button" data-a="club-tab" data-v="${t}" aria-pressed="${UI.clubTab === t}">${l}</button>`).join("")}</div>`;
     if (UI.clubTab === "kadro") {
       const sorted = c.players.slice().sort((a, b) => b.r - a.r);
-      html += `<p class="small muted">Maçta en iyi ${k.squad} oyuncu oynar; güç onların ortalaması + teknik kadro.</p><div class="list">${sorted.map((p, i) => `<div class="opt"><div><b>${esc(p.name)}</b> <span class="chip ${i < k.squad ? "good" : ""}">${i < k.squad ? "İlk " + k.squad : "Yedek"}</span><small>${esc(p.pos)} · ${p.age} yaş · maaş ${G.fmtS(G.playerWage(p, x.club))}/gün</small></div><div class="club-r"><b class="num">${p.r}</b><button class="btn sm danger" type="button" data-a="club-sell" data-v="${p.id}">Sat · ${G.fmtS(R.r1k(G.playerPrice(p.r, x.club) * 0.7))}</button></div></div>`).join("")}</div>`;
+      html += `<p class="small muted">Maçta en iyi ${k.squad} oyuncu oynar; güç onların ortalaması + teknik kadro.</p><div class="list">${sorted.map((p, i) => `<div class="opt ${p.star ? "star" : ""}"><div><b>${esc(p.name)}</b> ${p.star ? `<span class="chip gold">Yıldız</span> ` : ""}<span class="chip ${i < k.squad ? "good" : ""}">${i < k.squad ? "İlk " + k.squad : "Yedek"}</span><small>${p.nat ? esc(p.nat) + " · " : ""}${esc(p.pos)} · ${p.age} yaş · maaş ${G.fmtS(G.playerWage(p, x.club))}/gün</small></div><div class="club-r"><b class="num">${p.r}</b><button class="btn sm danger" type="button" data-a="club-sell" data-v="${p.id}">Sat · ${G.fmtS(R.r1k(G.pPrice(p, x.club) * 0.7))}</button></div></div>`).join("")}</div>`;
     } else if (UI.clubTab === "transfer") {
-      const list = G.clubMarket(id).slice().sort((a, b) => b.r - a.r);
-      html += `<p class="small muted">Liste her gün yenilenir. Scout ekibi daha iyi oyuncu bulur.</p>${UI.adBtn ? UI.adBtn("scout", "Reklam izle, listeyi hemen yenile", `data-v="${id}"`, "block") : ""}<div class="list">${list.map(p => { const pr = G.playerPrice(p.r, x.club); return `<div class="opt"><div><b>${esc(p.name)}</b><small>${esc(p.pos)} · ${p.age} yaş · maaş ${G.fmtS(G.playerWage(p, x.club))}/gün</small></div><div class="club-r"><b class="num">${p.r}</b><button class="btn sm ${S().money >= pr ? "pri" : ""}" type="button" data-a="club-buy" data-v="${p.id}" ${S().money >= pr ? "" : "disabled"}>${G.fmtS(pr)}</button></div></div>`; }).join("") || `<p class="small">Bugünkü listede oyuncu kalmadı.</p>`}</div>`;
+      const list = G.clubMarket(id).slice().sort((a, b) => (b.star ? 1 : 0) - (a.star ? 1 : 0) || b.r - a.r);
+      html += `<p class="small muted">Liste her gün yenilenir. Scout ekibi daha iyi oyuncu bulur.</p>${UI.adBtn ? UI.adBtn("scout", "Reklam izle, listeyi hemen yenile", `data-v="${id}"`, "block") : ""}<div class="list">${list.map(p => { const pr = G.pPrice(p, x.club); return `<div class="opt ${p.star ? "star" : ""}"><div><b>${esc(p.name)}</b>${p.star ? ` <span class="chip gold">Yıldız</span>` : ""}<small>${p.nat ? esc(p.nat) + " · " : ""}${esc(p.pos)} · ${p.age} yaş · maaş ${G.fmtS(G.playerWage(p, x.club))}/gün</small></div><div class="club-r"><b class="num">${p.r}</b><button class="btn sm ${S().money >= pr ? "pri" : ""}" type="button" data-a="club-buy" data-v="${p.id}" ${S().money >= pr ? "" : "disabled"}>${G.fmtS(pr)}</button></div></div>`; }).join("") || `<p class="small">Bugünkü listede oyuncu kalmadı.</p>`}</div>`;
     } else {
       html += `<div class="list">${Object.entries(G.CLUB_STAFF).map(([key, st]) => { const lv = c.staff[key], full = lv >= st.max, cost = full ? 0 : G.staffCost(id, key); return `<div class="opt"><div><b>${st.name}</b> <span class="chip">${lv}/${st.max}</span><small>${st.desc}${st.power ? ` · seviye başına güç +${String(st.power).replace(".", ",")}` : ""}</small></div>${full ? `<span class="chip good">Tam</span>` : `<button class="btn sm ${S().money >= cost ? "pri" : ""}" type="button" data-a="club-staff" data-v="${key}" ${S().money >= cost ? "" : "disabled"}>${G.fmtS(cost)}</button>`}</div>`; }).join("")}</div>`;
     }
