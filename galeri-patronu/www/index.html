@@ -543,6 +543,23 @@ body::before { background: var(--hero-1); }
 .club-opt.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
 .club-opt .sw { width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, .2); display: block; }
 .club-opts .club-opt:has(.sw) { padding: 4px; }
+
+/* Telefon masası */
+.tap-card h3 { margin: 0; }
+.tap-btn { width: 100%; border: 0; border-radius: 14px; padding: 16px; display: flex; gap: 14px; align-items: center; justify-content: center; color: #1d1a10; background: linear-gradient(135deg, #ffe066, #ffbf1f); box-shadow: 0 6px 0 #d39b00, 0 10px 18px rgba(200, 140, 0, .35); transition: transform .06s; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.tap-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #d39b00, 0 4px 10px rgba(200, 140, 0, .3); }
+.tap-btn:disabled { filter: grayscale(.8); opacity: .6; box-shadow: none; }
+.tap-btn span { display: grid; text-align: left; }
+.tap-btn b { font: 800 26px/1 var(--font-display); }
+.tap-btn small { font-size: 12.5px; font-weight: 600; opacity: .8; }
+.tap-float { position: fixed; z-index: 80; pointer-events: none; transform: translateX(-50%); font: 800 20px/1 var(--font-display); color: var(--good); text-shadow: 0 1px 0 #fff; animation: tap-up .9s ease-out forwards; }
+@keyframes tap-up { to { transform: translate(-50%, -60px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tap-float { animation: none; } }
+
+.club-top { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.club-top > .small { flex: 1; min-width: 160px; display: grid; gap: 2px; }
+.club-r { display: flex; gap: 10px; align-items: center; }
+.club-r .num { font-size: 20px; min-width: 26px; text-align: right; }
 </style>
 
 <header class="top">
@@ -583,6 +600,7 @@ body::before { background: var(--hero-1); }
 <script src="js/lux.js"></script>
 <script src="js/bayi.js"></script>
 <script src="js/kulup.js"></script>
+<script src="js/masa.js"></script>
 <script src="js/tour.js"></script>
 <script src="js/main.js"></script>
 <!-- ARTIFACT-END -->

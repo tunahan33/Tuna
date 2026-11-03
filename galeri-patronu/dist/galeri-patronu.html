@@ -711,6 +711,23 @@ body::before { background: var(--hero-1); }
 .club-opt.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
 .club-opt .sw { width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, .2); display: block; }
 .club-opts .club-opt:has(.sw) { padding: 4px; }
+
+/* Telefon masası */
+.tap-card h3 { margin: 0; }
+.tap-btn { width: 100%; border: 0; border-radius: 14px; padding: 16px; display: flex; gap: 14px; align-items: center; justify-content: center; color: #1d1a10; background: linear-gradient(135deg, #ffe066, #ffbf1f); box-shadow: 0 6px 0 #d39b00, 0 10px 18px rgba(200, 140, 0, .35); transition: transform .06s; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.tap-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #d39b00, 0 4px 10px rgba(200, 140, 0, .3); }
+.tap-btn:disabled { filter: grayscale(.8); opacity: .6; box-shadow: none; }
+.tap-btn span { display: grid; text-align: left; }
+.tap-btn b { font: 800 26px/1 var(--font-display); }
+.tap-btn small { font-size: 12.5px; font-weight: 600; opacity: .8; }
+.tap-float { position: fixed; z-index: 80; pointer-events: none; transform: translateX(-50%); font: 800 20px/1 var(--font-display); color: var(--good); text-shadow: 0 1px 0 #fff; animation: tap-up .9s ease-out forwards; }
+@keyframes tap-up { to { transform: translate(-50%, -60px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tap-float { animation: none; } }
+
+.club-top { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.club-top > .small { flex: 1; min-width: 160px; display: grid; gap: 2px; }
+.club-r { display: flex; gap: 10px; align-items: center; }
+.club-r .num { font-size: 20px; min-width: 26px; text-align: right; }
 </style>
 
 <header class="top">
@@ -1382,7 +1399,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   G.newState = function (name) {
     const st = {
       v: 1, name: name || "Patron Otomotiv",
-      money: 1200000, day: 1, min: OPEN, speed: 1, paused: true,
+      money: 2000000, day: 1, min: OPEN, speed: 1, paused: true,
       rep: 30, xp: 0, level: 1, loc: 0,
       upg: { bays: 0, paint: 0, pdr: 0, expert: 0, cafe: 0, security: 0 },
       fac: { galeri: 0, yikama: 0, cardak: 0, otopark: 0 },
@@ -2102,27 +2119,37 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   // Her etiketli araca gün içinde ortalama G.CAR_VISITS müşteri gelir ve teklif verir.
   // Fiyat makulse bunların G.DIRECT_BUY kadarı pazarlık etmeden etiket fiyatından alır.
   G.CAR_VISITS = 3; G.DIRECT_BUY = 0.4;
+  // Belirli bir araca müşteri getirir (gün içindeki ziyaretler ve reklamla çağrılan müşteri)
+  function visitCar(car) {
+    const md = G.M[car.m];
+    const types = md.seg === "ultra" ? [G.CT.milyarder] : G.CTYPES.filter(t => !t.ultra && t.segs[md.seg]);
+    const t = R.wpick(types.length ? types : G.CTYPES.filter(x => !x.ultra), x => (x.segs[md.seg] || 0.2) * (x.w || 1));
+    const c = G.spawnCustomer(t.id);
+    if (!c) return null;
+    c.seg = md.seg;
+    c.budget = Math.max(c.budget, R.r1k(car.price * R.rand(1.0, 1.2)));
+    c.silent = true;
+    makeOffer(c, car);
+    c.silent = false;
+    if (car.price <= c.max && R.chance(G.DIRECT_BUY)) {
+      c.msgs.push({ who: "them", text: "Etiket fiyatına alıyorum, pazarlığa gerek yok." });
+      finalizeSale(car, car.price, c);
+    } else if (G.onOffer) G.onOffer(c, car);
+    return c;
+  }
+  G.callVisitor = function (car) {
+    if (!car || car.status !== "lot" || !car.price) return null;
+    if (S.custs.some(o => o.state === "offer" && o.carId === car.id)) return null;
+    return visitCar(car);
+  };
   function carVisitors() {
     const mins = G.CLOSE - G.OPEN;
     const taken = new Set(S.custs.filter(o => o.state === "offer").map(o => o.carId));
     for (const car of S.cars.slice()) {
       if (car.status !== "lot" || !car.price || taken.has(car.id)) continue;
       if (!R.chance(G.CAR_VISITS / mins * (G.boostActive() ? 1.5 : 1))) continue;
-      const md = G.M[car.m];
-      const types = md.seg === "ultra" ? [G.CT.milyarder] : G.CTYPES.filter(t => !t.ultra && t.segs[md.seg]);
-      const t = R.wpick(types.length ? types : G.CTYPES.filter(x => !x.ultra), x => (x.segs[md.seg] || 0.2) * (x.w || 1));
-      const c = G.spawnCustomer(t.id);
-      if (!c) continue;
-      c.seg = md.seg;
-      c.budget = Math.max(c.budget, R.r1k(car.price * R.rand(1.0, 1.2)));
-      c.silent = true;
-      makeOffer(c, car);
-      c.silent = false;
       taken.add(car.id);
-      if (car.price <= c.max && R.chance(G.DIRECT_BUY)) {
-        c.msgs.push({ who: "them", text: "Etiket fiyatına alıyorum, pazarlığa gerek yok." });
-        finalizeSale(car, car.price, c);
-      } else if (G.onOffer) G.onOffer(c, car);
+      visitCar(car);
     }
   }
 
@@ -2223,7 +2250,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   function makeOffer(c, car, love) {
     const t = G.CT[c.type], md = G.M[car.m];
     const mv = G.value(car, false), tv = G.value(car, true);
-    c.max = R.r1k(Math.min(c.budget * 1.08, mv * R.rand(1.0, 1.08) * (car.show ? 1.03 : 1) * (1 + S.rep / 1000) * G.facEff("galeri").pay * G.presEff().pay * (1 + G.suitCharm())));
+    c.max = R.r1k(Math.min(c.budget * 1.12, mv * R.rand(1.04, 1.12) * (car.show ? 1.03 : 1) * (1 + S.rep / 1000) * G.facEff("galeri").pay * G.presEff().pay * (1 + G.suitCharm())));
     // titiz müşteri kendi ekspertizini yaptırır
     if (!love && R.chance(t.picky * 0.5) && tv < mv) { c.max = R.r1k(Math.min(c.max, tv * 1.02)); c.checked = true; }
     let offer;
@@ -2316,7 +2343,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       S.today.commission += com;
       S.today.expenses += com;
     }
-    G.addXp(Math.round(10 + Math.max(0, profit) / 3500) * (wholesale ? 0.5 : 1)); // satış başına XP (günde araç başına 3 müşteri geldiği için ölçülü)
+    G.addXp(Math.round(14 + Math.max(0, profit) / 3000) * (wholesale ? 0.5 : 1)); // satış başına XP (günde araç başına 3 müşteri geldiği için ölçülü)
     if (!wholesale) {
       const hidden = car.issues.filter(is => !is.known && !is.fixed && G.ISSUES[is.id].part !== undefined);
       if (hidden.length && !c.checked && R.chance(0.65)) {
@@ -2478,25 +2505,11 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     for (const x of G.luxOwned()) {
       if (!x.income) continue;
       let inc = x.income * R.rand(0.9, 1.1);
-      if (x.club === "basket") {
-        const win = Math.random() < 0.55;
-        const a = R.randi(72, 104), b = win ? a - R.randi(1, 18) : a + R.randi(1, 16);
-        const m = win ? 1.35 : 0.7;
-        inc = x.income * m * R.rand(0.9, 1.1);
-        S.stats.wins = (S.stats.wins || 0) + (win ? 1 : 0);
-        news.push({ title: `${G.clubOf(x.id).name} ${win ? "kazandı" : "kaybetti"}: ${a}-${b}`, text: `Salon, yayın ve sponsor geliri ${G.fmt(R.r1k(inc))}.` });
-        if (win) G.addRep(0.3);
-      } else if (x.football) {
-        const r = Math.random();
-        const g1 = R.randi(0, 4), g2 = R.randi(0, 3);
-        let res, m;
-        if (r < 0.45) { res = "kazandı"; m = 1.4; } else if (r < 0.75) { res = "berabere kaldı"; m = 1; } else { res = "kaybetti"; m = 0.6; }
-        const a = res === "kazandı" ? Math.max(g1, g2 + 1) : res === "kaybetti" ? Math.min(g1, Math.max(0, g2 - 1)) : g2;
-        const b = res === "kazandı" ? Math.min(g2, a - 1) : res === "kaybetti" ? a + 1 + R.randi(0, 1) : g2;
-        inc = x.income * m * R.rand(0.9, 1.1);
-        S.stats.wins = (S.stats.wins || 0) + (res === "kazandı" ? 1 : 0);
-        news.push({ title: `${G.clubOf(x.id).name} ${res}: ${a}-${b}`, text: `Bilet, yayın ve sponsor geliri ${G.fmt(R.r1k(inc))}.` });
-        if (res === "kazandı") G.addRep(0.5);
+      if (x.club && G.playMatch) {
+        // kulübün maçı: sonucu kadro gücü belirler, galibiyette prim gelir (js/kulup.js)
+        const r = G.playMatch(x);
+        inc = r.inc;
+        news.push(r.news);
       }
       total += inc;
     }
@@ -2665,8 +2678,8 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
 
   // ---- Reklam ödülleri ----
   // Ödüllü reklamlar yalnızca oyuncu isteyince açılır; her ödülün ve günün bir sınırı vardır.
-  G.AD_CAPS = { rush: 3, boost: 2, bonus: 1, inspect: 3, tea: 3, ilan: 2, offline: 2, freecar: 2 };
-  G.AD_DAILY = 12;
+  G.AD_CAPS = { rush: 3, boost: 4, bonus: 1, inspect: 3, tea: 3, ilan: 2, offline: 2, freecar: 2, callcar: 4, tap: 3, scout: 2 };
+  G.AD_DAILY = 20;
   function adDay() {
     if (!S.adv) S.adv = { day: 0, n: {}, total: 0, lastInter: 0, lastWatch: 0 };
     if (S.adv.day !== S.day) { S.adv.day = S.day; S.adv.n = {}; S.adv.total = 0; }
@@ -2685,6 +2698,8 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   G.boostActive = () => !!(S.boost && S.boost.day === S.day && S.min < S.boost.until);
   G.reward = {
     rush(job) { if (!S.jobs.includes(job)) return false; finishJob(job); return true; },
+    callcar(id) { const car = S.cars.find(c => c.id === id); const c = G.callVisitor(car); if (c) G.feed(`${c.name}, ${G.carName(car)} için geldi.`, "good"); return !!c; },
+    tap() { S.tapBoost = Date.now() + 180000; G.feed("Telefon masasında 3 dakika boyunca 2 kat kazanç.", "good"); return true; },
     boost() { S.boost = { day: S.day, until: Math.min(G.CLOSE, S.min + 120) }; G.feed("Sosyal medya kampanyası başladı: 2 saat boyunca iki kat müşteri.", "good"); return true; },
     bonus(sm) { if (!sm || sm.bonusTaken) return false; sm.bonusTaken = true; S.money += sm.bonus; G.feed(`Sponsor bonusu: ${G.fmt(sm.bonus)} kasaya girdi.`, "good"); return true; },
     inspect(car) { return G.inspect(car, true); },
@@ -2763,6 +2778,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   // ---- Zaman ----
   G.minute = function () {
     if (G.TEST && S.money < 5e11) S.money = 1e12; // deneme sürümünde para bitmez
+    if (G.tapMinute) G.tapMinute();
     S.min++;
     if (G.LISTING_DROPS.includes(S.min)) { const n = R.randi(2, 3); G.addListings(n, `Piyasaya ${n} yeni ilan düştü.`); if (R.chance(0.03)) G.ultraListing(); }
     // galeride etiketli ultra lüks araç varsa milyarder koleksiyoncular ara sıra uğrar
@@ -3242,6 +3258,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   const signed = x => (x > 0 ? "+" : x < 0 ? "−" : "") + G.fmtS(Math.abs(x));
   const condChip = car => { const v = G.condScore(car); return `<span class="chip ${v >= 70 ? "good" : v >= 50 ? "warn" : "bad"}">Durum ${v} · ${G.condLabel(v)}</span>`; };
   const AD_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5z" fill="currentColor"/></svg>';
+  UI.adBtn = (...a) => adBtn(...a);
   function adBtn(kind, label, attrs, cls) {
     const left = G.adLeft(kind);
     if (!left) return "";
@@ -3308,6 +3325,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   };
 
   // ---- Üst panel ----
+  UI.renderTopNow = () => renderTop();
   function renderTop() {
     const s = S();
     $("gName").textContent = s.name;
@@ -3386,7 +3404,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       bekleyen: (a, b) => b.days - a.days
     };
     cars.sort(sorters[UI.sort] || sorters.yeni);
-    let html = `<div class="scene-card">${UI.scene()}<div class="scene-cap"><span>${esc(G.loc().name)}</span><span>Park <b>${G.carCount()}/${G.capacity()}</b>${G.showSlots() ? ` · Vitrin <b>${G.showUsed()}/${G.showSlots()}</b>` : ""}</span></div></div>` + UI.sceneCards();
+    let html = `<div class="scene-card">${UI.scene()}<div class="scene-cap"><span>${esc(G.loc().name)}</span><span>Park <b>${G.carCount()}/${G.capacity()}</b>${G.showSlots() ? ` · Vitrin <b>${G.showUsed()}/${G.showSlots()}</b>` : ""}</span></div></div>` + UI.sceneCards() + (UI.tapCard ? UI.tapCard() : "") + (G.boostActive() ? "" : (G.adLeft("boost") && S().min < G.CLOSE - 60 ? `<div class="card boost"><div class="row"><div><b>Müşteri kampanyası</b><p class="small muted">Reklam izle, 2 saat boyunca galerine iki kat müşteri gelsin.</p></div>${adBtn("boost", "İzle")}</div></div>` : ""));
     html += todoCard();
     if (!cars.length) {
       return html + `<div class="empty"><b>Galeride araç yok</b>"Araç al" sekmesinden ilanlara bak ya da günün ihalesine katıl.<div style="margin-top:12px"><button class="btn pri" type="button" data-a="tab" data-v="piyasa">Araç al</button></div></div>`;
@@ -3707,6 +3725,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
         <div class="range-out"><b id="prOut">${G.fmt(d.price)}</b><span class="small" id="prInfo">${priceInfo(d.price, mv, cost)}</span></div>
         <input type="range" id="prRange" data-in="price" min="${lo}" max="${hi}" step="1000" value="${d.price}" aria-label="Etiket fiyatı">
         <button class="btn pri" type="button" data-a="price-save" data-id="${car.id}">Bu fiyatı as</button></div></details>
+      ${car.price && car.status === "lot" && !S().custs.some(c => c.state === "offer" && c.carId === car.id) ? adBtn("callcar", "Reklam izle, bu araca hemen müşteri gelsin", `data-id="${car.id}"`, "block") : ""}
       ${car.price ? `<button class="link" type="button" data-a="price-clear" data-id="${car.id}">Etiketi kaldır</button>` : ""}</section>`;
     // 2. hazırlık
     html += `<section class="step"><h3><span class="n">2</span>Satışa hazırla</h3>`;
@@ -4207,6 +4226,8 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     // reklam ödülleri
     "ad-rush": el => { const j = S().jobs.find(x => x.id === +el.dataset.id); if (j) UI.watch("rush", () => G.reward.rush(j)); },
     "ad-boost": () => UI.watch("boost", () => G.reward.boost()),
+    "ad-callcar": el => { const id = +el.dataset.id; UI.watch("callcar", () => G.reward.callcar(id)); },
+    "ad-tap": () => UI.watch("tap", () => G.reward.tap()),
     "ad-bonus": () => UI.watch("bonus", () => G.reward.bonus(S().summary)),
     "ad-ilan": () => UI.watch("ilan", () => G.reward.ilan()),
     "ad-tea": el => { const c = custById(el.dataset.id); if (c) UI.watch("tea", () => G.reward.tea(c)); },
@@ -4916,7 +4937,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       const net = x.income ? x.income - G.itemUpkeep(x) : 0;
       const perk = x.charm ? `Müşteri fiyatı +%${(x.charm * 100).toLocaleString("tr-TR")}` : x.imports ? `Her sabah ${x.imports * 2} ithal ilan` : x.party ? `Parti gücü ${x.party}` : x.club ? `Maç sonucuna göre gelir ±%35` : x.football ? `Maç gününe göre ±%40` : "";
       let btn;
-      if (own) btn = `<span class="lux-own-btns">` + (x.club ? `<button class="btn sm" type="button" data-a="club-edit" data-v="${x.id}">Kulübü düzenle</button>` : "") + `<button class="btn sm danger" type="button" data-a="lux-sell" data-v="${x.id}">${UI.armed === "lux" + x.id ? `${G.fmtS(G.luxResale(x))}'ye sat?` : "Sat"}</button>` + `</span>`;
+      if (own) btn = `<span class="lux-own-btns">` + (x.club ? `<button class="btn sm pri" type="button" data-a="club-manage" data-v="${x.id}">Kulübü yönet</button>` : "") + `<button class="btn sm danger" type="button" data-a="lux-sell" data-v="${x.id}">${UI.armed === "lux" + x.id ? `${G.fmtS(G.luxResale(x))}'ye sat?` : "Sat"}</button>` + `</span>`;
       else if (S.level < x.lvl) btn = `<span class="chip">Seviye ${x.lvl}</span>`;
       else btn = `<button class="btn sm ${S.money >= x.price ? "pri" : ""}" type="button" data-a="lux-buy" data-v="${x.id}" ${S.money >= x.price ? "" : "disabled"}>${G.fmtS(x.price)}</button>`;
       return `<div class="lux-card ${own ? "own" : ""} ${S.level < x.lvl ? "locked" : ""}"><div class="lux-art">${UI.luxArt(x)}${own ? `<span class="chip good own-tag">Senin</span>` : ""}</div>
@@ -5135,7 +5156,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   // ---- Kulüp düzenleme penceresi ----
   UI.openClub = function (id, isNew) {
     const c = G.clubOf(id);
-    UI.clubDraft = { id, isNew: !!isNew, ...c };
+    UI.clubDraft = { id, isNew: !!isNew, name: c.name, code: c.code, shape: c.shape, icon: c.icon, c1: c.c1, c2: c.c2 };
     UI.open("club", id);
   };
   const opt = (k, v, label, on, extra) => `<button type="button" class="club-opt ${on ? "on" : ""}" data-a="club-set" data-k="${k}" data-v="${v}" aria-pressed="${on}" ${extra || ""}>${label}</button>`;
@@ -5164,13 +5185,14 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     readInputs();
     const d = UI.clubDraft;
     S().clubs = S().clubs || {};
-    S().clubs[d.id] = { name: d.name, code: d.code, shape: d.shape, icon: d.icon, c1: d.c1, c2: d.c2 };
+    // yalnızca ad ve logo değişir; kadro, teknik kadro ve maç kaydı korunur
+    S().clubs[d.id] = Object.assign(S().clubs[d.id] || {}, { name: d.name, code: d.code, shape: d.shape, icon: d.icon, c1: d.c1, c2: d.c2 });
     G.feed(`${d.name} kulübün hazır! Maç sonuçları gün sonu raporunda.`, "good");
     UI.clubDraft = null;
     G.save && G.save();
-    UI.close(true);
     UI.sig = "";
     UI.render();
+    UI.open("clubm", d.id);
   };
   UI.ACT["club-edit"] = el => UI.openClub(el.dataset.v, false);
   // ad ve kısa ad yazılırken önizleme anında değişir
@@ -5178,6 +5200,240 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     if (e.target.id === "clubName") { const t = document.getElementById("clubPrevName"); if (t) t.textContent = e.target.value; }
     if (e.target.id === "clubCode") { const t = document.querySelector(".club-prev [data-club-code]"); if (t) t.textContent = e.target.value.toLocaleUpperCase("tr-TR").slice(0, 4); }
   });
+})(window.G);
+
+/* ---- Kulüp yönetimi: kadro, transfer, teknik kadro, maç ---- */
+(function (G) {
+  "use strict";
+  const UI = G.UI, R = G.R;
+  const S = () => G.S;
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+
+  // squad: maçta oynayan sayı (güç en iyi bu kadar oyuncunun ortalaması), max: kadro sınırı,
+  // base: 70 güçlü oyuncunun bonservisi, prize: galibiyet / beraberlik primi, staffBase: teknik kadro ilk seviye ücreti
+  G.CLUB = {
+    futbol: { squad: 11, max: 22, start: 16, base: 3e6, prize: { w: 6e6, d: 1.5e6 }, staffBase: 6e6, sport: "Futbol", pos: ["Kaleci", "Defans", "Defans", "Orta saha", "Orta saha", "Forvet"] },
+    basket: { squad: 5, max: 13, start: 10, base: 1.2e6, prize: { w: 2.5e6, d: 0 }, staffBase: 2.5e6, sport: "Basketbol", pos: ["Oyun kurucu", "Şutör", "Forvet", "Uzun forvet", "Pivot"] }
+  };
+  G.CLUB_STAFF = {
+    td: { name: "Teknik direktör", max: 5, power: 1.6, desc: "Taktik ve oyun planı" },
+    kond: { name: "Kondisyoner", max: 5, power: 0.8, desc: "Oyuncular maç sonuna kadar dayanır" },
+    scout: { name: "Scout ekibi", max: 3, power: 0, desc: "Transfer listesine daha iyi oyuncular gelir" }
+  };
+  G.playerPrice = (r, kind) => R.r1k(G.CLUB[kind].base * Math.pow(1.13, r - 70));
+  G.playerWage = (p, kind) => R.r100(G.playerPrice(p.r, kind) * 0.0015);
+  const newPlayer = (kind, lo, hi) => ({ id: G.nid(), name: R.pick(G.FIRST_E) + " " + R.pick(G.LAST), pos: R.pick(G.CLUB[kind].pos), r: R.randi(lo, hi), age: R.randi(19, 33) });
+
+  // kulübün eksik alanlarını tamamlar (eski kayıtlar ve yeni kulüp)
+  G.clubData = function (id) {
+    const x = G.LX[id], c = G.clubOf(id), k = G.CLUB[x.club];
+    if (!c.players) c.players = Array.from({ length: k.start }, () => newPlayer(x.club, 56, 70));
+    if (!c.staff) c.staff = { td: 0, kond: 0, scout: 0 };
+    if (!c.rec) c.rec = { w: 0, d: 0, l: 0 };
+    return c;
+  };
+  G.clubPower = function (id) {
+    const x = G.LX[id], c = G.clubData(id), k = G.CLUB[x.club];
+    const top = c.players.map(p => p.r).sort((a, b) => b - a).slice(0, k.squad);
+    const avg = top.length ? top.reduce((a, b) => a + b, 0) / k.squad : 0; // eksik oyuncu gücü düşürür
+    return Math.round((avg + c.staff.td * G.CLUB_STAFF.td.power + c.staff.kond * G.CLUB_STAFF.kond.power) * 10) / 10;
+  };
+  G.clubWages = id => { const x = G.LX[id]; return G.clubData(id).players.reduce((a, p) => a + G.playerWage(p, x.club), 0); };
+  G.winChance = (id, opp) => 1 / (1 + Math.exp(-(G.clubPower(id) - opp) / 4));
+
+  // her gün bir maç: rakip gücü 62–84; kazanınca gelir artar ve galibiyet primi gelir; maaşlar düşülür
+  G.playMatch = function (x) {
+    const c = G.clubData(x.id), k = G.CLUB[x.club];
+    const opp = R.randi(62, 84);
+    const p = G.winChance(x.id, opp);
+    const r = Math.random();
+    let res;
+    if (x.club === "basket") res = r < p ? "w" : "l";
+    else res = r < p * 0.8 ? "w" : r < p * 0.8 + 0.22 ? "d" : "l";
+    c.rec[res]++;
+    const m = res === "w" ? 1.3 : res === "d" ? 1 : 0.7;
+    const prize = res === "w" ? k.prize.w : res === "d" ? k.prize.d : 0;
+    const wages = G.clubWages(x.id);
+    const inc = x.income * m * R.rand(0.92, 1.08) + prize - wages;
+    let score;
+    if (x.club === "basket") { const a = R.randi(72, 104), d = R.randi(1, 16); score = res === "w" ? `${a}-${a - d}` : `${a - d}-${a}`; }
+    else { const a = R.randi(1, 4), d = R.randi(1, 2); score = res === "w" ? `${a}-${Math.max(0, a - d)}` : res === "d" ? `${a - 1}-${a - 1}` : `${Math.max(0, a - d)}-${a}`; }
+    S().stats.wins = (S().stats.wins || 0) + (res === "w" ? 1 : 0);
+    if (res === "w") G.addRep(0.4);
+    const word = res === "w" ? "kazandı" : res === "d" ? "berabere kaldı" : "kaybetti";
+    return { inc, news: { title: `${c.name} ${word}: ${score}`, text: `Rakip gücü ${opp}, bizim ${G.clubPower(x.id)}. ${prize ? `Galibiyet primi ${G.fmt(prize)}. ` : ""}Gelir ${G.fmt(R.r1k(x.income * m))}, maaşlar ${G.fmt(wages)}.` } };
+  };
+
+  // transfer listesi: her gün yenilenir; scout ekibi listeyi büyütür ve iyileştirir
+  G.clubMarket = function (id) {
+    const x = G.LX[id], c = G.clubData(id), s = S();
+    if (!c.market || c.market.day !== s.day) {
+      const sc = c.staff.scout;
+      c.market = { day: s.day, list: Array.from({ length: 6 + sc * 2 }, () => newPlayer(x.club, 60 + sc * 3, 84 + sc * 4)).map(p => ({ ...p, r: Math.min(97, p.r) })) };
+    }
+    return c.market.list;
+  };
+  G.clubBuy = function (id, pid) {
+    const x = G.LX[id], c = G.clubData(id), k = G.CLUB[x.club];
+    const p = G.clubMarket(id).find(q => q.id === pid);
+    if (!p) return { ok: false };
+    if (c.players.length >= k.max) return { ok: false, msg: `Kadro dolu (en fazla ${k.max} oyuncu). Önce birini sat.` };
+    const price = G.playerPrice(p.r, x.club);
+    if (S().money < price) return { ok: false, msg: "Kasada yeterli para yok." };
+    S().money -= price;
+    c.players.push({ id: p.id, name: p.name, pos: p.pos, r: p.r, age: p.age });
+    c.market.list = c.market.list.filter(q => q !== p);
+    G.feed(`${c.name} transferi: ${p.name} (${p.pos}, güç ${p.r}) · ${G.fmt(price)}`, "good");
+    return { ok: true };
+  };
+  G.clubSell = function (id, pid) {
+    const x = G.LX[id], c = G.clubData(id);
+    const p = c.players.find(q => q.id === pid);
+    if (!p) return { ok: false };
+    const back = R.r1k(G.playerPrice(p.r, x.club) * 0.7);
+    S().money += back;
+    c.players = c.players.filter(q => q !== p);
+    G.feed(`${p.name} satıldı: ${G.fmt(back)}`, "info");
+    return { ok: true };
+  };
+  G.staffCost = (id, key) => { const x = G.LX[id], lv = G.clubData(id).staff[key]; return R.r1k(G.CLUB[x.club].staffBase * Math.pow(2.2, lv)); };
+  G.clubStaffUp = function (id, key) {
+    const c = G.clubData(id), st = G.CLUB_STAFF[key];
+    if (c.staff[key] >= st.max) return { ok: false };
+    const cost = G.staffCost(id, key);
+    if (S().money < cost) return { ok: false, msg: "Kasada yeterli para yok." };
+    S().money -= cost;
+    c.staff[key]++;
+    if (key === "scout" && c.market) c.market.day = -1; // liste hemen yenilensin
+    return { ok: true };
+  };
+
+  // ---- Kulüp yönetim penceresi ----
+  UI.clubTab = UI.clubTab || "kadro";
+  UI.SHEETS.clubm = function (id) {
+    const x = G.LX[id];
+    if (!x || !G.owns(id)) return null;
+    const c = G.clubData(id), k = G.CLUB[x.club], pw = G.clubPower(id);
+    const tabs = [["kadro", "Kadro"], ["transfer", "Transfer"], ["teknik", "Teknik kadro"]];
+    let html = UI.head(c.name, `${k.sport} · Kadro gücü <b>${pw}</b> · ${c.rec.w}G ${x.club === "basket" ? "" : c.rec.d + "B "}${c.rec.l}M`) + `
+      <div class="club-top">${UI.clubLogo(c, x.club, 64)}<div class="small"><div>Maç başına galibiyet primi <b>${G.fmtS(k.prize.w)}</b>${k.prize.d ? `, beraberlik ${G.fmtS(k.prize.d)}` : ""}</div><div>Ortalama rakibe (73) karşı kazanma şansı <b>%${Math.round(G.winChance(id, 73) * 100)}</b></div><div class="muted">Günlük maaşlar ${G.fmtS(G.clubWages(id))} · ${c.players.length}/${k.max} oyuncu</div></div>
+      <button class="btn sm" type="button" data-a="club-edit" data-v="${id}">Ad ve logo</button></div>
+      <div class="segctl" role="group">${tabs.map(([t, l]) => `<button type="button" data-a="club-tab" data-v="${t}" aria-pressed="${UI.clubTab === t}">${l}</button>`).join("")}</div>`;
+    if (UI.clubTab === "kadro") {
+      const sorted = c.players.slice().sort((a, b) => b.r - a.r);
+      html += `<p class="small muted">Maçta en iyi ${k.squad} oyuncu oynar; güç onların ortalaması + teknik kadro.</p><div class="list">${sorted.map((p, i) => `<div class="opt"><div><b>${esc(p.name)}</b> <span class="chip ${i < k.squad ? "good" : ""}">${i < k.squad ? "İlk " + k.squad : "Yedek"}</span><small>${esc(p.pos)} · ${p.age} yaş · maaş ${G.fmtS(G.playerWage(p, x.club))}/gün</small></div><div class="club-r"><b class="num">${p.r}</b><button class="btn sm danger" type="button" data-a="club-sell" data-v="${p.id}">Sat · ${G.fmtS(R.r1k(G.playerPrice(p.r, x.club) * 0.7))}</button></div></div>`).join("")}</div>`;
+    } else if (UI.clubTab === "transfer") {
+      const list = G.clubMarket(id).slice().sort((a, b) => b.r - a.r);
+      html += `<p class="small muted">Liste her gün yenilenir. Scout ekibi daha iyi oyuncu bulur.</p>${UI.adBtn ? UI.adBtn("scout", "Reklam izle, listeyi hemen yenile", `data-v="${id}"`, "block") : ""}<div class="list">${list.map(p => { const pr = G.playerPrice(p.r, x.club); return `<div class="opt"><div><b>${esc(p.name)}</b><small>${esc(p.pos)} · ${p.age} yaş · maaş ${G.fmtS(G.playerWage(p, x.club))}/gün</small></div><div class="club-r"><b class="num">${p.r}</b><button class="btn sm ${S().money >= pr ? "pri" : ""}" type="button" data-a="club-buy" data-v="${p.id}" ${S().money >= pr ? "" : "disabled"}>${G.fmtS(pr)}</button></div></div>`; }).join("") || `<p class="small">Bugünkü listede oyuncu kalmadı.</p>`}</div>`;
+    } else {
+      html += `<div class="list">${Object.entries(G.CLUB_STAFF).map(([key, st]) => { const lv = c.staff[key], full = lv >= st.max, cost = full ? 0 : G.staffCost(id, key); return `<div class="opt"><div><b>${st.name}</b> <span class="chip">${lv}/${st.max}</span><small>${st.desc}${st.power ? ` · seviye başına güç +${String(st.power).replace(".", ",")}` : ""}</small></div>${full ? `<span class="chip good">Tam</span>` : `<button class="btn sm ${S().money >= cost ? "pri" : ""}" type="button" data-a="club-staff" data-v="${key}" ${S().money >= cost ? "" : "disabled"}>${G.fmtS(cost)}</button>`}</div>`; }).join("")}</div>`;
+    }
+    return html;
+  };
+  UI.openClubManage = id => UI.open("clubm", id);
+  const re = () => { UI.renderSheet(true); };
+  UI.ACT["club-manage"] = el => UI.openClubManage(el.dataset.v);
+  UI.ACT["club-tab"] = el => { UI.clubTab = el.dataset.v; re(); };
+  UI.ACT["club-buy"] = el => { const r = G.clubBuy(UI.sheet.id, +el.dataset.v); if (r.msg) UI.toast(r.msg, "bad"); re(); };
+  UI.ACT["club-sell"] = el => { G.clubSell(UI.sheet.id, +el.dataset.v); re(); };
+  UI.ACT["club-staff"] = el => { const r = G.clubStaffUp(UI.sheet.id, el.dataset.v); if (r.msg) UI.toast(r.msg, "bad"); re(); };
+  UI.ACT["ad-scout"] = el => { const id = el.dataset.v; UI.watch("scout", () => { const c = G.clubData(id); if (c.market) c.market.day = -1; UI.open("clubm", id); }); };
+})(window.G);
+
+</script>
+<script>
+/* Galeri Patronu — telefon masası (tıkla-kazan)
+ * Patron telefonla müşteri arayıp kapora ve komisyon toplar: her dokunuş para getirir, günlük arama hakkı vardır.
+ * "Pazarlık ustalığı" dokunuş başına kazancı, "Çağrı merkezi" oyun saati ilerledikçe kendiliğinden gelen geliri artırır.
+ * Ödüllü reklam 3 dakika boyunca kazancı ikiye katlar. */
+(function (G) {
+  "use strict";
+  const UI = G.UI, R = G.R;
+  const S = () => G.S;
+
+  G.TAP = {
+    max: 20, autoMax: 10,
+    value: lvl => R.r100(300 * Math.pow(1.5, lvl - 1)),
+    cost: lvl => R.r1k(40000 * Math.pow(1.85, lvl - 1)),     // bir sonraki seviyeye geçiş
+    taps: lvl => 150 + 10 * lvl,                              // günlük arama hakkı
+    autoCost: k => R.r1k(250000 * Math.pow(2.2, k)),
+    autoPerMin: 0.04                                          // her çağrı merkezi seviyesi: oyun dakikası başına dokunuş değerinin %4'ü
+  };
+  const T = () => {
+    const s = S();
+    s.tap = s.tap || { lvl: 1, auto: 0, day: 0, used: 0, total: 0 };
+    if (s.tap.day !== s.day) { s.tap.day = s.day; s.tap.used = 0; }
+    return s.tap;
+  };
+  G.tapBoostOn = () => (S().tapBoost || 0) > Date.now();
+  G.tapValue = () => G.TAP.value(T().lvl) * (G.tapBoostOn() ? 2 : 1);
+  G.tapLeft = () => Math.max(0, G.TAP.taps(T().lvl) - T().used);
+  G.tapOnce = function () {
+    const t = T();
+    if (!G.tapLeft()) return 0;
+    const v = G.tapValue();
+    t.used++; t.total += v;
+    S().money += v;
+    return v;
+  };
+  G.tapUp = function () {
+    const t = T();
+    if (t.lvl >= G.TAP.max) return { ok: false };
+    const c = G.TAP.cost(t.lvl);
+    if (S().money < c) return { ok: false, msg: "Kasada yeterli para yok." };
+    S().money -= c; t.lvl++;
+    return { ok: true };
+  };
+  G.tapAutoUp = function () {
+    const t = T();
+    if (t.auto >= G.TAP.autoMax) return { ok: false };
+    const c = G.TAP.autoCost(t.auto);
+    if (S().money < c) return { ok: false, msg: "Kasada yeterli para yok." };
+    S().money -= c; t.auto++;
+    return { ok: true };
+  };
+  // oyun dakikası başına çağrı merkezi geliri (engine.js G.minute çağırır)
+  G.tapMinute = function () {
+    const t = T();
+    if (!t.auto) return;
+    const v = Math.round(G.TAP.value(t.lvl) * G.TAP.autoPerMin * t.auto);
+    S().money += v; t.total += v;
+  };
+
+  const PHONE = `<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.36 2.3.56 3.6.56a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.2 2.5.56 3.6a1 1 0 0 1-.25 1z" fill="currentColor"/></svg>`;
+  UI.tapCard = function () {
+    const t = T(), left = G.tapLeft(), maxT = G.TAP.taps(t.lvl);
+    const up = t.lvl < G.TAP.max ? `<button class="btn sm" type="button" data-a="tap-up">Pazarlık ustalığı ${t.lvl + 1}. sv · ${G.fmtS(G.TAP.cost(t.lvl))}</button>` : `<span class="chip good">Ustalık son seviyede</span>`;
+    const auto = t.auto < G.TAP.autoMax ? `<button class="btn sm" type="button" data-a="tap-auto">Çağrı merkezi ${t.auto + 1}. sv · ${G.fmtS(G.TAP.autoCost(t.auto))}</button>` : `<span class="chip good">Çağrı merkezi tam</span>`;
+    return `<div class="card tap-card"><div class="row"><div><h3>Telefon masası</h3><p class="small muted">Müşteri ara, kapora ve komisyon topla. Arama hakkı her sabah yenilenir.</p></div><span class="chip ${G.tapBoostOn() ? "gold" : ""}" id="tapBoost">${G.tapBoostOn() ? "2× kazanç" : `Sv ${t.lvl}`}</span></div>
+      <button class="tap-btn" type="button" data-a="tap" ${left ? "" : "disabled"}>${PHONE}<span><b id="tapVal">+${G.fmtS(G.tapValue())}</b><small id="tapLeft">${left ? `${left}/${maxT} arama hakkı` : "Bugünlük arama hakkın bitti"}</small></span></button>
+      <div class="small muted">${t.auto ? `Çağrı merkezi oyun saati ilerledikçe saatte ≈ ${G.fmtS(Math.round(G.TAP.value(t.lvl) * G.TAP.autoPerMin * t.auto) * 60)} getiriyor. ` : ""}Bugüne kadar masadan: <span id="tapTotal">${G.fmtS(t.total)}</span></div>
+      <div class="btns">${up}${auto}</div>
+      ${G.tapBoostOn() ? "" : (UI.adBtn ? UI.adBtn("tap", "Reklam izle, 3 dakika 2 kat kazan", "", "block") : "")}</div>`;
+  };
+  function pop(el, v) {
+    const r = el.getBoundingClientRect();
+    const f = document.createElement("div");
+    f.className = "tap-float";
+    f.textContent = "+" + G.fmtS(v);
+    f.style.left = (r.left + r.width / 2 + (Math.random() * 60 - 30)) + "px";
+    f.style.top = (r.top + 6) + "px";
+    document.body.appendChild(f);
+    setTimeout(() => f.remove(), 900);
+  }
+  UI.ACT.tap = el => {
+    const v = G.tapOnce();
+    if (!v) return;
+    pop(el, v);
+    const l = document.getElementById("tapLeft"), left = G.tapLeft();
+    if (l) l.textContent = left ? `${left}/${G.TAP.taps(T().lvl)} arama hakkı` : "Bugünlük arama hakkın bitti";
+    if (!left) { el.disabled = true; }
+    const tt = document.getElementById("tapTotal");
+    if (tt) tt.textContent = G.fmtS(T().total);
+    if (UI.renderTopNow) UI.renderTopNow();
+  };
+  UI.ACT["tap-up"] = () => { const r = G.tapUp(); if (r.msg) UI.toast(r.msg, "bad"); UI.sig = ""; UI.render(); };
+  UI.ACT["tap-auto"] = () => { const r = G.tapAutoUp(); if (r.msg) UI.toast(r.msg, "bad"); UI.sig = ""; UI.render(); };
 })(window.G);
 
 </script>

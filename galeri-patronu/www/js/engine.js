@@ -54,7 +54,7 @@
   G.newState = function (name) {
     const st = {
       v: 1, name: name || "Patron Otomotiv",
-      money: 1200000, day: 1, min: OPEN, speed: 1, paused: true,
+      money: 2000000, day: 1, min: OPEN, speed: 1, paused: true,
       rep: 30, xp: 0, level: 1, loc: 0,
       upg: { bays: 0, paint: 0, pdr: 0, expert: 0, cafe: 0, security: 0 },
       fac: { galeri: 0, yikama: 0, cardak: 0, otopark: 0 },
@@ -774,27 +774,37 @@
   // Her etiketli araca gün içinde ortalama G.CAR_VISITS müşteri gelir ve teklif verir.
   // Fiyat makulse bunların G.DIRECT_BUY kadarı pazarlık etmeden etiket fiyatından alır.
   G.CAR_VISITS = 3; G.DIRECT_BUY = 0.4;
+  // Belirli bir araca müşteri getirir (gün içindeki ziyaretler ve reklamla çağrılan müşteri)
+  function visitCar(car) {
+    const md = G.M[car.m];
+    const types = md.seg === "ultra" ? [G.CT.milyarder] : G.CTYPES.filter(t => !t.ultra && t.segs[md.seg]);
+    const t = R.wpick(types.length ? types : G.CTYPES.filter(x => !x.ultra), x => (x.segs[md.seg] || 0.2) * (x.w || 1));
+    const c = G.spawnCustomer(t.id);
+    if (!c) return null;
+    c.seg = md.seg;
+    c.budget = Math.max(c.budget, R.r1k(car.price * R.rand(1.0, 1.2)));
+    c.silent = true;
+    makeOffer(c, car);
+    c.silent = false;
+    if (car.price <= c.max && R.chance(G.DIRECT_BUY)) {
+      c.msgs.push({ who: "them", text: "Etiket fiyatına alıyorum, pazarlığa gerek yok." });
+      finalizeSale(car, car.price, c);
+    } else if (G.onOffer) G.onOffer(c, car);
+    return c;
+  }
+  G.callVisitor = function (car) {
+    if (!car || car.status !== "lot" || !car.price) return null;
+    if (S.custs.some(o => o.state === "offer" && o.carId === car.id)) return null;
+    return visitCar(car);
+  };
   function carVisitors() {
     const mins = G.CLOSE - G.OPEN;
     const taken = new Set(S.custs.filter(o => o.state === "offer").map(o => o.carId));
     for (const car of S.cars.slice()) {
       if (car.status !== "lot" || !car.price || taken.has(car.id)) continue;
       if (!R.chance(G.CAR_VISITS / mins * (G.boostActive() ? 1.5 : 1))) continue;
-      const md = G.M[car.m];
-      const types = md.seg === "ultra" ? [G.CT.milyarder] : G.CTYPES.filter(t => !t.ultra && t.segs[md.seg]);
-      const t = R.wpick(types.length ? types : G.CTYPES.filter(x => !x.ultra), x => (x.segs[md.seg] || 0.2) * (x.w || 1));
-      const c = G.spawnCustomer(t.id);
-      if (!c) continue;
-      c.seg = md.seg;
-      c.budget = Math.max(c.budget, R.r1k(car.price * R.rand(1.0, 1.2)));
-      c.silent = true;
-      makeOffer(c, car);
-      c.silent = false;
       taken.add(car.id);
-      if (car.price <= c.max && R.chance(G.DIRECT_BUY)) {
-        c.msgs.push({ who: "them", text: "Etiket fiyatına alıyorum, pazarlığa gerek yok." });
-        finalizeSale(car, car.price, c);
-      } else if (G.onOffer) G.onOffer(c, car);
+      visitCar(car);
     }
   }
 
@@ -895,7 +905,7 @@
   function makeOffer(c, car, love) {
     const t = G.CT[c.type], md = G.M[car.m];
     const mv = G.value(car, false), tv = G.value(car, true);
-    c.max = R.r1k(Math.min(c.budget * 1.08, mv * R.rand(1.0, 1.08) * (car.show ? 1.03 : 1) * (1 + S.rep / 1000) * G.facEff("galeri").pay * G.presEff().pay * (1 + G.suitCharm())));
+    c.max = R.r1k(Math.min(c.budget * 1.12, mv * R.rand(1.04, 1.12) * (car.show ? 1.03 : 1) * (1 + S.rep / 1000) * G.facEff("galeri").pay * G.presEff().pay * (1 + G.suitCharm())));
     // titiz müşteri kendi ekspertizini yaptırır
     if (!love && R.chance(t.picky * 0.5) && tv < mv) { c.max = R.r1k(Math.min(c.max, tv * 1.02)); c.checked = true; }
     let offer;
@@ -988,7 +998,7 @@
       S.today.commission += com;
       S.today.expenses += com;
     }
-    G.addXp(Math.round(10 + Math.max(0, profit) / 3500) * (wholesale ? 0.5 : 1)); // satış başına XP (günde araç başına 3 müşteri geldiği için ölçülü)
+    G.addXp(Math.round(14 + Math.max(0, profit) / 3000) * (wholesale ? 0.5 : 1)); // satış başına XP (günde araç başına 3 müşteri geldiği için ölçülü)
     if (!wholesale) {
       const hidden = car.issues.filter(is => !is.known && !is.fixed && G.ISSUES[is.id].part !== undefined);
       if (hidden.length && !c.checked && R.chance(0.65)) {
@@ -1150,25 +1160,11 @@
     for (const x of G.luxOwned()) {
       if (!x.income) continue;
       let inc = x.income * R.rand(0.9, 1.1);
-      if (x.club === "basket") {
-        const win = Math.random() < 0.55;
-        const a = R.randi(72, 104), b = win ? a - R.randi(1, 18) : a + R.randi(1, 16);
-        const m = win ? 1.35 : 0.7;
-        inc = x.income * m * R.rand(0.9, 1.1);
-        S.stats.wins = (S.stats.wins || 0) + (win ? 1 : 0);
-        news.push({ title: `${G.clubOf(x.id).name} ${win ? "kazandı" : "kaybetti"}: ${a}-${b}`, text: `Salon, yayın ve sponsor geliri ${G.fmt(R.r1k(inc))}.` });
-        if (win) G.addRep(0.3);
-      } else if (x.football) {
-        const r = Math.random();
-        const g1 = R.randi(0, 4), g2 = R.randi(0, 3);
-        let res, m;
-        if (r < 0.45) { res = "kazandı"; m = 1.4; } else if (r < 0.75) { res = "berabere kaldı"; m = 1; } else { res = "kaybetti"; m = 0.6; }
-        const a = res === "kazandı" ? Math.max(g1, g2 + 1) : res === "kaybetti" ? Math.min(g1, Math.max(0, g2 - 1)) : g2;
-        const b = res === "kazandı" ? Math.min(g2, a - 1) : res === "kaybetti" ? a + 1 + R.randi(0, 1) : g2;
-        inc = x.income * m * R.rand(0.9, 1.1);
-        S.stats.wins = (S.stats.wins || 0) + (res === "kazandı" ? 1 : 0);
-        news.push({ title: `${G.clubOf(x.id).name} ${res}: ${a}-${b}`, text: `Bilet, yayın ve sponsor geliri ${G.fmt(R.r1k(inc))}.` });
-        if (res === "kazandı") G.addRep(0.5);
+      if (x.club && G.playMatch) {
+        // kulübün maçı: sonucu kadro gücü belirler, galibiyette prim gelir (js/kulup.js)
+        const r = G.playMatch(x);
+        inc = r.inc;
+        news.push(r.news);
       }
       total += inc;
     }
@@ -1337,8 +1333,8 @@
 
   // ---- Reklam ödülleri ----
   // Ödüllü reklamlar yalnızca oyuncu isteyince açılır; her ödülün ve günün bir sınırı vardır.
-  G.AD_CAPS = { rush: 3, boost: 2, bonus: 1, inspect: 3, tea: 3, ilan: 2, offline: 2, freecar: 2 };
-  G.AD_DAILY = 12;
+  G.AD_CAPS = { rush: 3, boost: 4, bonus: 1, inspect: 3, tea: 3, ilan: 2, offline: 2, freecar: 2, callcar: 4, tap: 3, scout: 2 };
+  G.AD_DAILY = 20;
   function adDay() {
     if (!S.adv) S.adv = { day: 0, n: {}, total: 0, lastInter: 0, lastWatch: 0 };
     if (S.adv.day !== S.day) { S.adv.day = S.day; S.adv.n = {}; S.adv.total = 0; }
@@ -1357,6 +1353,8 @@
   G.boostActive = () => !!(S.boost && S.boost.day === S.day && S.min < S.boost.until);
   G.reward = {
     rush(job) { if (!S.jobs.includes(job)) return false; finishJob(job); return true; },
+    callcar(id) { const car = S.cars.find(c => c.id === id); const c = G.callVisitor(car); if (c) G.feed(`${c.name}, ${G.carName(car)} için geldi.`, "good"); return !!c; },
+    tap() { S.tapBoost = Date.now() + 180000; G.feed("Telefon masasında 3 dakika boyunca 2 kat kazanç.", "good"); return true; },
     boost() { S.boost = { day: S.day, until: Math.min(G.CLOSE, S.min + 120) }; G.feed("Sosyal medya kampanyası başladı: 2 saat boyunca iki kat müşteri.", "good"); return true; },
     bonus(sm) { if (!sm || sm.bonusTaken) return false; sm.bonusTaken = true; S.money += sm.bonus; G.feed(`Sponsor bonusu: ${G.fmt(sm.bonus)} kasaya girdi.`, "good"); return true; },
     inspect(car) { return G.inspect(car, true); },
@@ -1435,6 +1433,7 @@
   // ---- Zaman ----
   G.minute = function () {
     if (G.TEST && S.money < 5e11) S.money = 1e12; // deneme sürümünde para bitmez
+    if (G.tapMinute) G.tapMinute();
     S.min++;
     if (G.LISTING_DROPS.includes(S.min)) { const n = R.randi(2, 3); G.addListings(n, `Piyasaya ${n} yeni ilan düştü.`); if (R.chance(0.03)) G.ultraListing(); }
     // galeride etiketli ultra lüks araç varsa milyarder koleksiyoncular ara sıra uğrar

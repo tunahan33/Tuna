@@ -36,7 +36,7 @@
   // ---- Kulüp düzenleme penceresi ----
   UI.openClub = function (id, isNew) {
     const c = G.clubOf(id);
-    UI.clubDraft = { id, isNew: !!isNew, ...c };
+    UI.clubDraft = { id, isNew: !!isNew, name: c.name, code: c.code, shape: c.shape, icon: c.icon, c1: c.c1, c2: c.c2 };
     UI.open("club", id);
   };
   const opt = (k, v, label, on, extra) => `<button type="button" class="club-opt ${on ? "on" : ""}" data-a="club-set" data-k="${k}" data-v="${v}" aria-pressed="${on}" ${extra || ""}>${label}</button>`;
@@ -65,13 +65,14 @@
     readInputs();
     const d = UI.clubDraft;
     S().clubs = S().clubs || {};
-    S().clubs[d.id] = { name: d.name, code: d.code, shape: d.shape, icon: d.icon, c1: d.c1, c2: d.c2 };
+    // yalnızca ad ve logo değişir; kadro, teknik kadro ve maç kaydı korunur
+    S().clubs[d.id] = Object.assign(S().clubs[d.id] || {}, { name: d.name, code: d.code, shape: d.shape, icon: d.icon, c1: d.c1, c2: d.c2 });
     G.feed(`${d.name} kulübün hazır! Maç sonuçları gün sonu raporunda.`, "good");
     UI.clubDraft = null;
     G.save && G.save();
-    UI.close(true);
     UI.sig = "";
     UI.render();
+    UI.open("clubm", d.id);
   };
   UI.ACT["club-edit"] = el => UI.openClub(el.dataset.v, false);
   // ad ve kısa ad yazılırken önizleme anında değişir
@@ -79,4 +80,142 @@
     if (e.target.id === "clubName") { const t = document.getElementById("clubPrevName"); if (t) t.textContent = e.target.value; }
     if (e.target.id === "clubCode") { const t = document.querySelector(".club-prev [data-club-code]"); if (t) t.textContent = e.target.value.toLocaleUpperCase("tr-TR").slice(0, 4); }
   });
+})(window.G);
+
+/* ---- Kulüp yönetimi: kadro, transfer, teknik kadro, maç ---- */
+(function (G) {
+  "use strict";
+  const UI = G.UI, R = G.R;
+  const S = () => G.S;
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+
+  // squad: maçta oynayan sayı (güç en iyi bu kadar oyuncunun ortalaması), max: kadro sınırı,
+  // base: 70 güçlü oyuncunun bonservisi, prize: galibiyet / beraberlik primi, staffBase: teknik kadro ilk seviye ücreti
+  G.CLUB = {
+    futbol: { squad: 11, max: 22, start: 16, base: 3e6, prize: { w: 6e6, d: 1.5e6 }, staffBase: 6e6, sport: "Futbol", pos: ["Kaleci", "Defans", "Defans", "Orta saha", "Orta saha", "Forvet"] },
+    basket: { squad: 5, max: 13, start: 10, base: 1.2e6, prize: { w: 2.5e6, d: 0 }, staffBase: 2.5e6, sport: "Basketbol", pos: ["Oyun kurucu", "Şutör", "Forvet", "Uzun forvet", "Pivot"] }
+  };
+  G.CLUB_STAFF = {
+    td: { name: "Teknik direktör", max: 5, power: 1.6, desc: "Taktik ve oyun planı" },
+    kond: { name: "Kondisyoner", max: 5, power: 0.8, desc: "Oyuncular maç sonuna kadar dayanır" },
+    scout: { name: "Scout ekibi", max: 3, power: 0, desc: "Transfer listesine daha iyi oyuncular gelir" }
+  };
+  G.playerPrice = (r, kind) => R.r1k(G.CLUB[kind].base * Math.pow(1.13, r - 70));
+  G.playerWage = (p, kind) => R.r100(G.playerPrice(p.r, kind) * 0.0015);
+  const newPlayer = (kind, lo, hi) => ({ id: G.nid(), name: R.pick(G.FIRST_E) + " " + R.pick(G.LAST), pos: R.pick(G.CLUB[kind].pos), r: R.randi(lo, hi), age: R.randi(19, 33) });
+
+  // kulübün eksik alanlarını tamamlar (eski kayıtlar ve yeni kulüp)
+  G.clubData = function (id) {
+    const x = G.LX[id], c = G.clubOf(id), k = G.CLUB[x.club];
+    if (!c.players) c.players = Array.from({ length: k.start }, () => newPlayer(x.club, 56, 70));
+    if (!c.staff) c.staff = { td: 0, kond: 0, scout: 0 };
+    if (!c.rec) c.rec = { w: 0, d: 0, l: 0 };
+    return c;
+  };
+  G.clubPower = function (id) {
+    const x = G.LX[id], c = G.clubData(id), k = G.CLUB[x.club];
+    const top = c.players.map(p => p.r).sort((a, b) => b - a).slice(0, k.squad);
+    const avg = top.length ? top.reduce((a, b) => a + b, 0) / k.squad : 0; // eksik oyuncu gücü düşürür
+    return Math.round((avg + c.staff.td * G.CLUB_STAFF.td.power + c.staff.kond * G.CLUB_STAFF.kond.power) * 10) / 10;
+  };
+  G.clubWages = id => { const x = G.LX[id]; return G.clubData(id).players.reduce((a, p) => a + G.playerWage(p, x.club), 0); };
+  G.winChance = (id, opp) => 1 / (1 + Math.exp(-(G.clubPower(id) - opp) / 4));
+
+  // her gün bir maç: rakip gücü 62–84; kazanınca gelir artar ve galibiyet primi gelir; maaşlar düşülür
+  G.playMatch = function (x) {
+    const c = G.clubData(x.id), k = G.CLUB[x.club];
+    const opp = R.randi(62, 84);
+    const p = G.winChance(x.id, opp);
+    const r = Math.random();
+    let res;
+    if (x.club === "basket") res = r < p ? "w" : "l";
+    else res = r < p * 0.8 ? "w" : r < p * 0.8 + 0.22 ? "d" : "l";
+    c.rec[res]++;
+    const m = res === "w" ? 1.3 : res === "d" ? 1 : 0.7;
+    const prize = res === "w" ? k.prize.w : res === "d" ? k.prize.d : 0;
+    const wages = G.clubWages(x.id);
+    const inc = x.income * m * R.rand(0.92, 1.08) + prize - wages;
+    let score;
+    if (x.club === "basket") { const a = R.randi(72, 104), d = R.randi(1, 16); score = res === "w" ? `${a}-${a - d}` : `${a - d}-${a}`; }
+    else { const a = R.randi(1, 4), d = R.randi(1, 2); score = res === "w" ? `${a}-${Math.max(0, a - d)}` : res === "d" ? `${a - 1}-${a - 1}` : `${Math.max(0, a - d)}-${a}`; }
+    S().stats.wins = (S().stats.wins || 0) + (res === "w" ? 1 : 0);
+    if (res === "w") G.addRep(0.4);
+    const word = res === "w" ? "kazandı" : res === "d" ? "berabere kaldı" : "kaybetti";
+    return { inc, news: { title: `${c.name} ${word}: ${score}`, text: `Rakip gücü ${opp}, bizim ${G.clubPower(x.id)}. ${prize ? `Galibiyet primi ${G.fmt(prize)}. ` : ""}Gelir ${G.fmt(R.r1k(x.income * m))}, maaşlar ${G.fmt(wages)}.` } };
+  };
+
+  // transfer listesi: her gün yenilenir; scout ekibi listeyi büyütür ve iyileştirir
+  G.clubMarket = function (id) {
+    const x = G.LX[id], c = G.clubData(id), s = S();
+    if (!c.market || c.market.day !== s.day) {
+      const sc = c.staff.scout;
+      c.market = { day: s.day, list: Array.from({ length: 6 + sc * 2 }, () => newPlayer(x.club, 60 + sc * 3, 84 + sc * 4)).map(p => ({ ...p, r: Math.min(97, p.r) })) };
+    }
+    return c.market.list;
+  };
+  G.clubBuy = function (id, pid) {
+    const x = G.LX[id], c = G.clubData(id), k = G.CLUB[x.club];
+    const p = G.clubMarket(id).find(q => q.id === pid);
+    if (!p) return { ok: false };
+    if (c.players.length >= k.max) return { ok: false, msg: `Kadro dolu (en fazla ${k.max} oyuncu). Önce birini sat.` };
+    const price = G.playerPrice(p.r, x.club);
+    if (S().money < price) return { ok: false, msg: "Kasada yeterli para yok." };
+    S().money -= price;
+    c.players.push({ id: p.id, name: p.name, pos: p.pos, r: p.r, age: p.age });
+    c.market.list = c.market.list.filter(q => q !== p);
+    G.feed(`${c.name} transferi: ${p.name} (${p.pos}, güç ${p.r}) · ${G.fmt(price)}`, "good");
+    return { ok: true };
+  };
+  G.clubSell = function (id, pid) {
+    const x = G.LX[id], c = G.clubData(id);
+    const p = c.players.find(q => q.id === pid);
+    if (!p) return { ok: false };
+    const back = R.r1k(G.playerPrice(p.r, x.club) * 0.7);
+    S().money += back;
+    c.players = c.players.filter(q => q !== p);
+    G.feed(`${p.name} satıldı: ${G.fmt(back)}`, "info");
+    return { ok: true };
+  };
+  G.staffCost = (id, key) => { const x = G.LX[id], lv = G.clubData(id).staff[key]; return R.r1k(G.CLUB[x.club].staffBase * Math.pow(2.2, lv)); };
+  G.clubStaffUp = function (id, key) {
+    const c = G.clubData(id), st = G.CLUB_STAFF[key];
+    if (c.staff[key] >= st.max) return { ok: false };
+    const cost = G.staffCost(id, key);
+    if (S().money < cost) return { ok: false, msg: "Kasada yeterli para yok." };
+    S().money -= cost;
+    c.staff[key]++;
+    if (key === "scout" && c.market) c.market.day = -1; // liste hemen yenilensin
+    return { ok: true };
+  };
+
+  // ---- Kulüp yönetim penceresi ----
+  UI.clubTab = UI.clubTab || "kadro";
+  UI.SHEETS.clubm = function (id) {
+    const x = G.LX[id];
+    if (!x || !G.owns(id)) return null;
+    const c = G.clubData(id), k = G.CLUB[x.club], pw = G.clubPower(id);
+    const tabs = [["kadro", "Kadro"], ["transfer", "Transfer"], ["teknik", "Teknik kadro"]];
+    let html = UI.head(c.name, `${k.sport} · Kadro gücü <b>${pw}</b> · ${c.rec.w}G ${x.club === "basket" ? "" : c.rec.d + "B "}${c.rec.l}M`) + `
+      <div class="club-top">${UI.clubLogo(c, x.club, 64)}<div class="small"><div>Maç başına galibiyet primi <b>${G.fmtS(k.prize.w)}</b>${k.prize.d ? `, beraberlik ${G.fmtS(k.prize.d)}` : ""}</div><div>Ortalama rakibe (73) karşı kazanma şansı <b>%${Math.round(G.winChance(id, 73) * 100)}</b></div><div class="muted">Günlük maaşlar ${G.fmtS(G.clubWages(id))} · ${c.players.length}/${k.max} oyuncu</div></div>
+      <button class="btn sm" type="button" data-a="club-edit" data-v="${id}">Ad ve logo</button></div>
+      <div class="segctl" role="group">${tabs.map(([t, l]) => `<button type="button" data-a="club-tab" data-v="${t}" aria-pressed="${UI.clubTab === t}">${l}</button>`).join("")}</div>`;
+    if (UI.clubTab === "kadro") {
+      const sorted = c.players.slice().sort((a, b) => b.r - a.r);
+      html += `<p class="small muted">Maçta en iyi ${k.squad} oyuncu oynar; güç onların ortalaması + teknik kadro.</p><div class="list">${sorted.map((p, i) => `<div class="opt"><div><b>${esc(p.name)}</b> <span class="chip ${i < k.squad ? "good" : ""}">${i < k.squad ? "İlk " + k.squad : "Yedek"}</span><small>${esc(p.pos)} · ${p.age} yaş · maaş ${G.fmtS(G.playerWage(p, x.club))}/gün</small></div><div class="club-r"><b class="num">${p.r}</b><button class="btn sm danger" type="button" data-a="club-sell" data-v="${p.id}">Sat · ${G.fmtS(R.r1k(G.playerPrice(p.r, x.club) * 0.7))}</button></div></div>`).join("")}</div>`;
+    } else if (UI.clubTab === "transfer") {
+      const list = G.clubMarket(id).slice().sort((a, b) => b.r - a.r);
+      html += `<p class="small muted">Liste her gün yenilenir. Scout ekibi daha iyi oyuncu bulur.</p>${UI.adBtn ? UI.adBtn("scout", "Reklam izle, listeyi hemen yenile", `data-v="${id}"`, "block") : ""}<div class="list">${list.map(p => { const pr = G.playerPrice(p.r, x.club); return `<div class="opt"><div><b>${esc(p.name)}</b><small>${esc(p.pos)} · ${p.age} yaş · maaş ${G.fmtS(G.playerWage(p, x.club))}/gün</small></div><div class="club-r"><b class="num">${p.r}</b><button class="btn sm ${S().money >= pr ? "pri" : ""}" type="button" data-a="club-buy" data-v="${p.id}" ${S().money >= pr ? "" : "disabled"}>${G.fmtS(pr)}</button></div></div>`; }).join("") || `<p class="small">Bugünkü listede oyuncu kalmadı.</p>`}</div>`;
+    } else {
+      html += `<div class="list">${Object.entries(G.CLUB_STAFF).map(([key, st]) => { const lv = c.staff[key], full = lv >= st.max, cost = full ? 0 : G.staffCost(id, key); return `<div class="opt"><div><b>${st.name}</b> <span class="chip">${lv}/${st.max}</span><small>${st.desc}${st.power ? ` · seviye başına güç +${String(st.power).replace(".", ",")}` : ""}</small></div>${full ? `<span class="chip good">Tam</span>` : `<button class="btn sm ${S().money >= cost ? "pri" : ""}" type="button" data-a="club-staff" data-v="${key}" ${S().money >= cost ? "" : "disabled"}>${G.fmtS(cost)}</button>`}</div>`; }).join("")}</div>`;
+    }
+    return html;
+  };
+  UI.openClubManage = id => UI.open("clubm", id);
+  const re = () => { UI.renderSheet(true); };
+  UI.ACT["club-manage"] = el => UI.openClubManage(el.dataset.v);
+  UI.ACT["club-tab"] = el => { UI.clubTab = el.dataset.v; re(); };
+  UI.ACT["club-buy"] = el => { const r = G.clubBuy(UI.sheet.id, +el.dataset.v); if (r.msg) UI.toast(r.msg, "bad"); re(); };
+  UI.ACT["club-sell"] = el => { G.clubSell(UI.sheet.id, +el.dataset.v); re(); };
+  UI.ACT["club-staff"] = el => { const r = G.clubStaffUp(UI.sheet.id, el.dataset.v); if (r.msg) UI.toast(r.msg, "bad"); re(); };
+  UI.ACT["ad-scout"] = el => { const id = el.dataset.v; UI.watch("scout", () => { const c = G.clubData(id); if (c.market) c.market.day = -1; UI.open("clubm", id); }); };
 })(window.G);

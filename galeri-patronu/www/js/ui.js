@@ -215,6 +215,7 @@
   const signed = x => (x > 0 ? "+" : x < 0 ? "−" : "") + G.fmtS(Math.abs(x));
   const condChip = car => { const v = G.condScore(car); return `<span class="chip ${v >= 70 ? "good" : v >= 50 ? "warn" : "bad"}">Durum ${v} · ${G.condLabel(v)}</span>`; };
   const AD_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5z" fill="currentColor"/></svg>';
+  UI.adBtn = (...a) => adBtn(...a);
   function adBtn(kind, label, attrs, cls) {
     const left = G.adLeft(kind);
     if (!left) return "";
@@ -281,6 +282,7 @@
   };
 
   // ---- Üst panel ----
+  UI.renderTopNow = () => renderTop();
   function renderTop() {
     const s = S();
     $("gName").textContent = s.name;
@@ -359,7 +361,7 @@
       bekleyen: (a, b) => b.days - a.days
     };
     cars.sort(sorters[UI.sort] || sorters.yeni);
-    let html = `<div class="scene-card">${UI.scene()}<div class="scene-cap"><span>${esc(G.loc().name)}</span><span>Park <b>${G.carCount()}/${G.capacity()}</b>${G.showSlots() ? ` · Vitrin <b>${G.showUsed()}/${G.showSlots()}</b>` : ""}</span></div></div>` + UI.sceneCards();
+    let html = `<div class="scene-card">${UI.scene()}<div class="scene-cap"><span>${esc(G.loc().name)}</span><span>Park <b>${G.carCount()}/${G.capacity()}</b>${G.showSlots() ? ` · Vitrin <b>${G.showUsed()}/${G.showSlots()}</b>` : ""}</span></div></div>` + UI.sceneCards() + (UI.tapCard ? UI.tapCard() : "") + (G.boostActive() ? "" : (G.adLeft("boost") && S().min < G.CLOSE - 60 ? `<div class="card boost"><div class="row"><div><b>Müşteri kampanyası</b><p class="small muted">Reklam izle, 2 saat boyunca galerine iki kat müşteri gelsin.</p></div>${adBtn("boost", "İzle")}</div></div>` : ""));
     html += todoCard();
     if (!cars.length) {
       return html + `<div class="empty"><b>Galeride araç yok</b>"Araç al" sekmesinden ilanlara bak ya da günün ihalesine katıl.<div style="margin-top:12px"><button class="btn pri" type="button" data-a="tab" data-v="piyasa">Araç al</button></div></div>`;
@@ -680,6 +682,7 @@
         <div class="range-out"><b id="prOut">${G.fmt(d.price)}</b><span class="small" id="prInfo">${priceInfo(d.price, mv, cost)}</span></div>
         <input type="range" id="prRange" data-in="price" min="${lo}" max="${hi}" step="1000" value="${d.price}" aria-label="Etiket fiyatı">
         <button class="btn pri" type="button" data-a="price-save" data-id="${car.id}">Bu fiyatı as</button></div></details>
+      ${car.price && car.status === "lot" && !S().custs.some(c => c.state === "offer" && c.carId === car.id) ? adBtn("callcar", "Reklam izle, bu araca hemen müşteri gelsin", `data-id="${car.id}"`, "block") : ""}
       ${car.price ? `<button class="link" type="button" data-a="price-clear" data-id="${car.id}">Etiketi kaldır</button>` : ""}</section>`;
     // 2. hazırlık
     html += `<section class="step"><h3><span class="n">2</span>Satışa hazırla</h3>`;
@@ -1180,6 +1183,8 @@
     // reklam ödülleri
     "ad-rush": el => { const j = S().jobs.find(x => x.id === +el.dataset.id); if (j) UI.watch("rush", () => G.reward.rush(j)); },
     "ad-boost": () => UI.watch("boost", () => G.reward.boost()),
+    "ad-callcar": el => { const id = +el.dataset.id; UI.watch("callcar", () => G.reward.callcar(id)); },
+    "ad-tap": () => UI.watch("tap", () => G.reward.tap()),
     "ad-bonus": () => UI.watch("bonus", () => G.reward.bonus(S().summary)),
     "ad-ilan": () => UI.watch("ilan", () => G.reward.ilan()),
     "ad-tea": el => { const c = custById(el.dataset.id); if (c) UI.watch("tea", () => G.reward.tea(c)); },

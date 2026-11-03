@@ -145,7 +145,7 @@
       const net = x.income ? x.income - G.itemUpkeep(x) : 0;
       const perk = x.charm ? `Müşteri fiyatı +%${(x.charm * 100).toLocaleString("tr-TR")}` : x.imports ? `Her sabah ${x.imports * 2} ithal ilan` : x.party ? `Parti gücü ${x.party}` : x.club ? `Maç sonucuna göre gelir ±%35` : x.football ? `Maç gününe göre ±%40` : "";
       let btn;
-      if (own) btn = `<span class="lux-own-btns">` + (x.club ? `<button class="btn sm" type="button" data-a="club-edit" data-v="${x.id}">Kulübü düzenle</button>` : "") + `<button class="btn sm danger" type="button" data-a="lux-sell" data-v="${x.id}">${UI.armed === "lux" + x.id ? `${G.fmtS(G.luxResale(x))}'ye sat?` : "Sat"}</button>` + `</span>`;
+      if (own) btn = `<span class="lux-own-btns">` + (x.club ? `<button class="btn sm pri" type="button" data-a="club-manage" data-v="${x.id}">Kulübü yönet</button>` : "") + `<button class="btn sm danger" type="button" data-a="lux-sell" data-v="${x.id}">${UI.armed === "lux" + x.id ? `${G.fmtS(G.luxResale(x))}'ye sat?` : "Sat"}</button>` + `</span>`;
       else if (S.level < x.lvl) btn = `<span class="chip">Seviye ${x.lvl}</span>`;
       else btn = `<button class="btn sm ${S.money >= x.price ? "pri" : ""}" type="button" data-a="lux-buy" data-v="${x.id}" ${S.money >= x.price ? "" : "disabled"}>${G.fmtS(x.price)}</button>`;
       return `<div class="lux-card ${own ? "own" : ""} ${S.level < x.lvl ? "locked" : ""}"><div class="lux-art">${UI.luxArt(x)}${own ? `<span class="chip good own-tag">Senin</span>` : ""}</div>
