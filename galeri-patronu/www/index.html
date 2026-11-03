@@ -529,6 +529,20 @@ body::before { background: var(--hero-1); }
 .dl-steps span { font-size: 12.5px; font-weight: 600; padding: 4px 9px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
 .dl-steps span.done { background: var(--accent-soft); color: var(--accent); }
 .dl-steps span.now { background: var(--sticker); color: var(--sticker-ink); }
+
+/* Kulüp düzenleme */
+.lux-own-btns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.club-prev { display: flex; gap: 14px; align-items: center; padding: 6px 0; }
+.club-prev b { font: 800 22px/1.1 var(--font-display); text-transform: uppercase; }
+.club-prev .club-logo { flex: none; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .25)); }
+.fsel input[type="text"] { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--ink); font-size: 16px; }
+.club-row { display: grid; gap: 6px; }
+.club-row > span { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.club-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.club-opt { border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 11px; font-weight: 600; font-size: 13.5px; display: inline-flex; align-items: center; }
+.club-opt.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.club-opt .sw { width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, .2); display: block; }
+.club-opts .club-opt:has(.sw) { padding: 4px; }
 </style>
 
 <header class="top">
@@ -568,6 +582,7 @@ body::before { background: var(--hero-1); }
 <script src="js/scene.js"></script>
 <script src="js/lux.js"></script>
 <script src="js/bayi.js"></script>
+<script src="js/kulup.js"></script>
 <script src="js/tour.js"></script>
 <script src="js/main.js"></script>
 <!-- ARTIFACT-END -->

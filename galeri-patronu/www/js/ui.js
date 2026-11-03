@@ -648,8 +648,9 @@
   }
 
   // ---- Sayfalar (sheet) ----
-  const SHEETS = {};
+  const SHEETS = UI.SHEETS = {};
   const head = (title, sub, closable) => `<div class="grip"></div><div class="sh-head"><div><h2>${esc(title)}</h2>${sub ? `<p>${sub}</p>` : ""}</div>${closable === false ? "" : `<button class="x" type="button" data-a="close" aria-label="Kapat">×</button>`}</div>`;
+  UI.head = head;
 
   SHEETS.car = function (id) {
     const s = S(), car = s.cars.find(c => c.id === id);
@@ -1066,7 +1067,7 @@
   function sayInspect(r) { UI.toast(r.found.length ? `Ekspertiz: ${r.found.join(", ")}` : "Ekspertiz temiz çıktı.", r.found.length ? "bad" : "good"); }
   function afterSale() { if (UI.sheet && UI.sheet.kind === "cust") UI.sheet = null; UI.render(); }
 
-  const ACT = {
+  const ACT = UI.ACT = {
     tour: () => UI.tourRestart(),
     "dealer-apply": el => { msg(G.dealerApply(el.dataset.v)); UI.sig = ""; UI.render(); },
     "dealer-order": el => { const r = G.dealerOrder(el.dataset.v); msg(r); if (r.ok) UI.toast("Sipariş verildi, araç yarın sabah gelecek.", "good"); UI.sig = ""; UI.render(); },
@@ -1157,7 +1158,7 @@
     "offline-claim": () => { G.claimOffline(UI.offline, 1); UI.offline = null; UI.sheet = S().summary ? { kind: "summary" } : null; G.save(); UI.render(); },
     "ad-offline": () => { const o = UI.offline; if (!o) return; UI.watch("offline", () => { G.claimOffline(o, 2); UI.offline = null; UI.sheet = S().summary ? { kind: "summary" } : null; }); },
     luxcat: el => { UI.luxCat = el.dataset.v; UI.armed = null; UI.render(); },
-    "lux-buy": el => { const r = G.buyLux(el.dataset.v); msg(r); if (r.ok) UI.toast(`Hayırlı olsun: ${G.LX[el.dataset.v].name}`, "good"); UI.render(); },
+    "lux-buy": el => { const r = G.buyLux(el.dataset.v); msg(r); if (r.ok) UI.toast(`Hayırlı olsun: ${G.LX[el.dataset.v].name}`, "good"); UI.render(); if (r.ok && G.LX[el.dataset.v].club) UI.openClub(el.dataset.v, true); },
     "lux-sell": el => {
       const id = el.dataset.v;
       if (UI.armed !== "lux" + id) { UI.armed = "lux" + id; UI.render(); return; }

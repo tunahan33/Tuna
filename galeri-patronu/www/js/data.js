@@ -316,7 +316,8 @@
     { id: "i2", cat: "yatirim", name: "Restoran",          desc: "Boğaz kenarında balık restoranı.",                price: 45e6,   lvl: 9,  pres: 8,   income: 270000 },
     { id: "i3", cat: "yatirim", name: "Butik otel",        desc: "24 odalı, Kapadokya'da taş otel.",               price: 110e6,  lvl: 13, pres: 15,  income: 660000 },
     { id: "i4", cat: "yatirim", name: "Alışveriş merkezi", desc: "180 mağazalı AVM, sinema ve yemek katı.",        price: 400e6,  lvl: 19, pres: 30,  income: 2400000 },
-    { id: "i5", cat: "yatirim", name: "Futbol takımı",     desc: "Süper Lig kulübü: maç, bilet, yayın ve forma gelirleri. Oyuncu maaşları da senden.", price: 1.5e9, lvl: 25, pres: 150, income: 9000000, upkeep: 0.0025, football: true }
+    { id: "i6", cat: "yatirim", name: "Basketbol kulübü",  desc: "Süper Lig basketbol kulübü: salon, bilet, yayın ve sponsor gelirleri. Adını ve logosunu sen belirlersin.", price: 550e6, lvl: 22, pres: 70, income: 3300000, upkeep: 0.0025, club: "basket" },
+    { id: "i5", cat: "yatirim", name: "Futbol kulübü",     desc: "Süper Lig futbol kulübü: maç, bilet, yayın ve forma gelirleri. Adını ve logosunu sen belirlersin; oyuncu maaşları da senden.", price: 1.5e9, lvl: 25, pres: 150, income: 9000000, upkeep: 0.0025, football: true, club: "futbol" }
   ];
   G.LX = {};
   G.LUXURY.forEach(x => { G.LX[x.id] = x; });
@@ -383,7 +384,7 @@
     { id: "tesis10",   text: "Bir tesisi 10. seviyeye çıkar",          reward: 700000,  check: S => Object.values(S.fac || {}).some(n => n >= 10) },
     { id: "ultra",     text: "Ultra lüks bir araç sat",                reward: 3000000, check: S => (S.stats.ultraSold || 0) >= 1 },
     { id: "yatirim",   text: "İlk yatırımını yap",                     reward: 500000,  check: S => (S.lux || []).some(id => id[0] === "i") },
-    { id: "futbol",    text: "Bir futbol takımı satın al",             reward: 50000000, check: S => (S.lux || []).includes("i5") },
+    { id: "futbol",    text: "Bir futbol kulübü satın al",             reward: 50000000, check: S => (S.lux || []).includes("i5") },
     { id: "lux1",      text: "İlk lüks alışverişini yap",              reward: 100000,  check: S => (S.lux || []).length >= 1 },
     { id: "luks",      text: "Bir lüks araç sat",                      reward: 600000,  check: S => S.stats.luxSold >= 1 },
     { id: "plaza",     text: "Oto plazaya taşın",                      reward: 1000000, check: S => S.loc >= 3 },

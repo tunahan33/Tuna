@@ -697,6 +697,20 @@ body::before { background: var(--hero-1); }
 .dl-steps span { font-size: 12.5px; font-weight: 600; padding: 4px 9px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
 .dl-steps span.done { background: var(--accent-soft); color: var(--accent); }
 .dl-steps span.now { background: var(--sticker); color: var(--sticker-ink); }
+
+/* Kulüp düzenleme */
+.lux-own-btns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.club-prev { display: flex; gap: 14px; align-items: center; padding: 6px 0; }
+.club-prev b { font: 800 22px/1.1 var(--font-display); text-transform: uppercase; }
+.club-prev .club-logo { flex: none; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .25)); }
+.fsel input[type="text"] { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--ink); font-size: 16px; }
+.club-row { display: grid; gap: 6px; }
+.club-row > span { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.club-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.club-opt { border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 11px; font-weight: 600; font-size: 13.5px; display: inline-flex; align-items: center; }
+.club-opt.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.club-opt .sw { width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, .2); display: block; }
+.club-opts .club-opt:has(.sw) { padding: 4px; }
 </style>
 
 <header class="top">
@@ -1046,7 +1060,8 @@ body::before { background: var(--hero-1); }
     { id: "i2", cat: "yatirim", name: "Restoran",          desc: "Boğaz kenarında balık restoranı.",                price: 45e6,   lvl: 9,  pres: 8,   income: 270000 },
     { id: "i3", cat: "yatirim", name: "Butik otel",        desc: "24 odalı, Kapadokya'da taş otel.",               price: 110e6,  lvl: 13, pres: 15,  income: 660000 },
     { id: "i4", cat: "yatirim", name: "Alışveriş merkezi", desc: "180 mağazalı AVM, sinema ve yemek katı.",        price: 400e6,  lvl: 19, pres: 30,  income: 2400000 },
-    { id: "i5", cat: "yatirim", name: "Futbol takımı",     desc: "Süper Lig kulübü: maç, bilet, yayın ve forma gelirleri. Oyuncu maaşları da senden.", price: 1.5e9, lvl: 25, pres: 150, income: 9000000, upkeep: 0.0025, football: true }
+    { id: "i6", cat: "yatirim", name: "Basketbol kulübü",  desc: "Süper Lig basketbol kulübü: salon, bilet, yayın ve sponsor gelirleri. Adını ve logosunu sen belirlersin.", price: 550e6, lvl: 22, pres: 70, income: 3300000, upkeep: 0.0025, club: "basket" },
+    { id: "i5", cat: "yatirim", name: "Futbol kulübü",     desc: "Süper Lig futbol kulübü: maç, bilet, yayın ve forma gelirleri. Adını ve logosunu sen belirlersin; oyuncu maaşları da senden.", price: 1.5e9, lvl: 25, pres: 150, income: 9000000, upkeep: 0.0025, football: true, club: "futbol" }
   ];
   G.LX = {};
   G.LUXURY.forEach(x => { G.LX[x.id] = x; });
@@ -1113,7 +1128,7 @@ body::before { background: var(--hero-1); }
     { id: "tesis10",   text: "Bir tesisi 10. seviyeye çıkar",          reward: 700000,  check: S => Object.values(S.fac || {}).some(n => n >= 10) },
     { id: "ultra",     text: "Ultra lüks bir araç sat",                reward: 3000000, check: S => (S.stats.ultraSold || 0) >= 1 },
     { id: "yatirim",   text: "İlk yatırımını yap",                     reward: 500000,  check: S => (S.lux || []).some(id => id[0] === "i") },
-    { id: "futbol",    text: "Bir futbol takımı satın al",             reward: 50000000, check: S => (S.lux || []).includes("i5") },
+    { id: "futbol",    text: "Bir futbol kulübü satın al",             reward: 50000000, check: S => (S.lux || []).includes("i5") },
     { id: "lux1",      text: "İlk lüks alışverişini yap",              reward: 100000,  check: S => (S.lux || []).length >= 1 },
     { id: "luks",      text: "Bir lüks araç sat",                      reward: 600000,  check: S => S.stats.luxSold >= 1 },
     { id: "plaza",     text: "Oto plazaya taşın",                      reward: 1000000, check: S => S.loc >= 3 },
@@ -2441,6 +2456,18 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   G.investIncome = () => G.luxOwned().reduce((a, x) => a + (x.income || 0), 0);
   G.investNet = () => G.luxOwned().filter(x => x.income).reduce((a, x) => a + x.income - G.itemUpkeep(x), 0);
   G.teamName = () => (S.name.trim().split(/\s+/)[0] || "Patron") + "spor";
+  // Oyuncunun kulübü: satın alırken adını, kısa adını ve logosunu kendisi seçer (js/kulup.js)
+  G.clubOf = function (id) {
+    const x = G.LX[id];
+    S.clubs = S.clubs || {};
+    if (!S.clubs[id]) {
+      const first = S.name.trim().split(/\s+/)[0] || "Patron";
+      S.clubs[id] = x.club === "basket"
+        ? { name: first + " Basket", code: first.slice(0, 3).toLocaleUpperCase("tr-TR") + "B", shape: "daire", icon: "top", c1: "#e2742c", c2: "#17191d" }
+        : { name: first + "spor", code: first.slice(0, 3).toLocaleUpperCase("tr-TR") + "S", shape: "kalkan", icon: "yildiz", c1: "#1d8549", c2: "#f2c218" };
+    }
+    return S.clubs[id];
+  };
   // Gün sonunda yatırım gelirleri; futbol takımının geliri maç sonucuna göre değişir
   G.collectInvestments = function () {
     let total = 0;
@@ -2448,7 +2475,15 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     for (const x of G.luxOwned()) {
       if (!x.income) continue;
       let inc = x.income * R.rand(0.9, 1.1);
-      if (x.football) {
+      if (x.club === "basket") {
+        const win = Math.random() < 0.55;
+        const a = R.randi(72, 104), b = win ? a - R.randi(1, 18) : a + R.randi(1, 16);
+        const m = win ? 1.35 : 0.7;
+        inc = x.income * m * R.rand(0.9, 1.1);
+        S.stats.wins = (S.stats.wins || 0) + (win ? 1 : 0);
+        news.push({ title: `${G.clubOf(x.id).name} ${win ? "kazandı" : "kaybetti"}: ${a}-${b}`, text: `Salon, yayın ve sponsor geliri ${G.fmt(R.r1k(inc))}.` });
+        if (win) G.addRep(0.3);
+      } else if (x.football) {
         const r = Math.random();
         const g1 = R.randi(0, 4), g2 = R.randi(0, 3);
         let res, m;
@@ -2457,7 +2492,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
         const b = res === "kazandı" ? Math.min(g2, a - 1) : res === "kaybetti" ? a + 1 + R.randi(0, 1) : g2;
         inc = x.income * m * R.rand(0.9, 1.1);
         S.stats.wins = (S.stats.wins || 0) + (res === "kazandı" ? 1 : 0);
-        news.push({ title: `${G.teamName()} ${res}: ${a}-${b}`, text: `Bilet, yayın ve sponsor geliri ${G.fmt(R.r1k(inc))}.` });
+        news.push({ title: `${G.clubOf(x.id).name} ${res}: ${a}-${b}`, text: `Bilet, yayın ve sponsor geliri ${G.fmt(R.r1k(inc))}.` });
         if (res === "kazandı") G.addRep(0.5);
       }
       total += inc;
@@ -3636,8 +3671,9 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   }
 
   // ---- Sayfalar (sheet) ----
-  const SHEETS = {};
+  const SHEETS = UI.SHEETS = {};
   const head = (title, sub, closable) => `<div class="grip"></div><div class="sh-head"><div><h2>${esc(title)}</h2>${sub ? `<p>${sub}</p>` : ""}</div>${closable === false ? "" : `<button class="x" type="button" data-a="close" aria-label="Kapat">×</button>`}</div>`;
+  UI.head = head;
 
   SHEETS.car = function (id) {
     const s = S(), car = s.cars.find(c => c.id === id);
@@ -4054,7 +4090,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   function sayInspect(r) { UI.toast(r.found.length ? `Ekspertiz: ${r.found.join(", ")}` : "Ekspertiz temiz çıktı.", r.found.length ? "bad" : "good"); }
   function afterSale() { if (UI.sheet && UI.sheet.kind === "cust") UI.sheet = null; UI.render(); }
 
-  const ACT = {
+  const ACT = UI.ACT = {
     tour: () => UI.tourRestart(),
     "dealer-apply": el => { msg(G.dealerApply(el.dataset.v)); UI.sig = ""; UI.render(); },
     "dealer-order": el => { const r = G.dealerOrder(el.dataset.v); msg(r); if (r.ok) UI.toast("Sipariş verildi, araç yarın sabah gelecek.", "good"); UI.sig = ""; UI.render(); },
@@ -4145,7 +4181,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     "offline-claim": () => { G.claimOffline(UI.offline, 1); UI.offline = null; UI.sheet = S().summary ? { kind: "summary" } : null; G.save(); UI.render(); },
     "ad-offline": () => { const o = UI.offline; if (!o) return; UI.watch("offline", () => { G.claimOffline(o, 2); UI.offline = null; UI.sheet = S().summary ? { kind: "summary" } : null; }); },
     luxcat: el => { UI.luxCat = el.dataset.v; UI.armed = null; UI.render(); },
-    "lux-buy": el => { const r = G.buyLux(el.dataset.v); msg(r); if (r.ok) UI.toast(`Hayırlı olsun: ${G.LX[el.dataset.v].name}`, "good"); UI.render(); },
+    "lux-buy": el => { const r = G.buyLux(el.dataset.v); msg(r); if (r.ok) UI.toast(`Hayırlı olsun: ${G.LX[el.dataset.v].name}`, "good"); UI.render(); if (r.ok && G.LX[el.dataset.v].club) UI.openClub(el.dataset.v, true); },
     "lux-sell": el => {
       const id = el.dataset.v;
       if (UI.armed !== "lux" + id) { UI.armed = "lux" + id; UI.render(); return; }
@@ -4759,6 +4795,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     i2: () => SKY + SEA(48) + `<rect x="18" y="22" width="70" height="26" fill="#f2e6d6"/><path d="M14 22 h78 l-4 -8 h-70 z" fill="#2f6fd0"/>` + [0, 1, 2, 3, 4, 5].map(i => `<path d="M${18 + i * 12} 22 h6 l-1 4 h-4 z" fill="${i % 2 ? "#ffffff" : "#2f6fd0"}"/>`).join("") + `<rect x="24" y="30" width="18" height="12" fill="#a9d3ec"/><rect x="62" y="30" width="18" height="12" fill="#a9d3ec"/><rect x="47" y="32" width="10" height="16" fill="#6a5442"/><rect x="30" y="8" width="46" height="8" rx="1" fill="#151b21"/><text x="53" y="14" text-anchor="middle" font-size="5" font-weight="800" fill="#ffd23f">BALIK EVİ</text><circle cx="98" cy="44" r="4" fill="#e85d4a"/><rect x="97.5" y="44" width="1" height="6" fill="#5d6873"/>`,
     i3: () => `<rect width="120" height="64" fill="#fbd9b0"/><circle cx="24" cy="16" r="7" fill="#e85d4a"/><path d="M20 22 h8 l-2 4 h-4 z" fill="#8a5a33"/><circle cx="92" cy="12" r="5" fill="#2f6fd0"/><path d="M89 16 h6 l-1.5 3 h-3 z" fill="#8a5a33"/><circle cx="72" cy="22" r="4" fill="#ffd23f"/><path d="M0 64 L0 44 Q14 30 26 44 Q34 26 46 42 Q60 24 76 42 Q88 30 100 44 Q110 34 120 42 V64 Z" fill="#d9b48a"/><rect x="34" y="36" width="52" height="22" fill="#e8c9a0"/>` + windows(38, 40, 6, 2, 5, 5, 3.4, 3, (r, c) => (r + c) % 3 === 0) + `<rect x="56" y="50" width="8" height="8" rx="4" fill="#6a5442"/>`,
     i4: () => SKY + `<rect y="50" width="120" height="14" fill="#9aa3ac"/><rect x="10" y="18" width="100" height="32" fill="#e8ecef"/><rect x="10" y="16" width="100" height="4" fill="#1f4fa8"/><rect x="40" y="6" width="40" height="12" rx="2" fill="#1f4fa8"/><text x="60" y="15" text-anchor="middle" font-size="8" font-weight="800" fill="#ffffff">AVM</text>` + windows(14, 24, 10, 2, 7, 7, 2.6, 4) + `<rect x="52" y="40" width="16" height="10" fill="#a9d3ec"/>` + [18, 34, 80, 96].map((x, i) => `<rect x="${x}" y="54" width="10" height="5" rx="2" fill="${["#c8323a", "#2f6fd0", "#f2f3f1", "#1d2024"][i]}"/>`).join(""),
+    i6: () => `<rect width="120" height="64" fill="#2a1f3d"/><path d="M8 44 Q60 10 112 44 V60 H8 Z" fill="#3c2e58"/><path d="M14 46 Q60 18 106 46" stroke="#ffd23f" stroke-width="1" fill="none" opacity=".6"/>` + [24, 42, 60, 78, 96].map(x => `<rect x="${x - 4}" y="20" width="8" height="2" fill="#fff6c8" opacity=".85"/>`).join("") + `<rect x="10" y="48" width="100" height="14" fill="#c98a4a"/><path d="M60 48 V62 M10 55 H110" stroke="#f7efe0" stroke-width=".7"/><circle cx="60" cy="55" r="4" fill="none" stroke="#f7efe0" stroke-width=".7"/><rect x="12" y="36" width="1.5" height="12" fill="#9aa3ac"/><rect x="13" y="36" width="6" height="4" fill="#fff" stroke="#e2742c" stroke-width=".5"/><rect x="106.5" y="36" width="1.5" height="12" fill="#9aa3ac"/><rect x="101" y="36" width="6" height="4" fill="#fff" stroke="#e2742c" stroke-width=".5"/><circle cx="60" cy="40" r="3" fill="#e2742c"/>`,
     i5: () => `<rect width="120" height="64" fill="#1b2a44"/><circle cx="14" cy="8" r="1" fill="#fff"/><circle cx="100" cy="6" r="1" fill="#fff"/>` + [10, 110].map(x => `<rect x="${x - 1}" y="6" width="2" height="34" fill="#5d6873"/><rect x="${x - 6}" y="2" width="12" height="6" fill="#dfe3e8"/><path d="M${x} 8 L${x + (x < 60 ? 30 : -30)} 40 L${x + (x < 60 ? 14 : -14)} 40 Z" fill="#fff6c8" opacity=".25"/>`).join("") + `<path d="M4 40 Q60 14 116 40 L116 64 L4 64 Z" fill="#c8323a"/><path d="M8 42 Q60 20 112 42" stroke="#ffd23f" stroke-width="2" fill="none"/><ellipse cx="60" cy="54" rx="44" ry="8" fill="#3f8f46"/><ellipse cx="60" cy="54" rx="44" ry="8" fill="none" stroke="#ffffff" stroke-width=".6"/><path d="M60 46 V62" stroke="#ffffff" stroke-width=".6"/><circle cx="60" cy="54" r="3" fill="none" stroke="#ffffff" stroke-width=".6"/><rect x="44" y="20" width="32" height="10" rx="1" fill="#151b21"/><text x="60" y="27.5" text-anchor="middle" font-size="6" font-weight="800" fill="#ffd23f">${esc(G.S ? G.teamName().toLocaleUpperCase("tr-TR").slice(0, 12) : "PATRONSPOR")}</text>`,
     ev1: () => SKY + GRASS(54) + `<rect x="38" y="10" width="44" height="44" fill="#e8dcc6"/><rect x="36" y="8" width="48" height="4" fill="#b5623a"/>` + windows(42, 15, 4, 5, 6, 5, 4, 3, (r, c) => r === 2 && c === 1) + `<rect x="56" y="46" width="8" height="8" fill="#6a5442"/><circle cx="20" cy="46" r="7" fill="#3f8f46"/><rect x="19" y="46" width="2" height="8" fill="#7a4f2c"/>`,
     ev2: () => SKY + GRASS(52) + `<rect x="8" y="16" width="30" height="36" fill="#f2efe8"/>` + windows(11, 20, 3, 4, 6, 5, 3, 3) + `<rect x="80" y="12" width="32" height="40" fill="#f2efe8"/>` + windows(83, 16, 3, 5, 6, 5, 4, 2.5, (r, c) => r === 3 && c === 2) + `<rect x="42" y="50" width="34" height="8" rx="2" fill="#5ec8f0" stroke="#e8ecef" stroke-width="1.5"/><path d="M0 58 H120" stroke="#e8ecef" stroke-width="1.2" stroke-dasharray="2 2"/>`,
@@ -4839,7 +4876,11 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
 
   UI.luxArt = function (x) {
     let inner;
-    if (G.LUX_PHOTOS && G.LUX_PHOTOS.includes(x.id)) {
+    if (x.club && G.owns(x.id)) {
+      // kendi kulübünün logosu kartın köşesinde
+      const base = G.LUX_PHOTOS && G.LUX_PHOTOS.includes(x.id) ? `<image href="${UI.photoSrc(x.id, "luks")}" x="0" y="0" width="120" height="64" preserveAspectRatio="xMidYMid slice"/>` : (ART[x.id] ? ART[x.id]() : "");
+      inner = base + `<g transform="translate(84 4) scale(.32)">${UI.clubLogoInner(G.clubOf(x.id), x.club)}</g>`;
+    } else if (G.LUX_PHOTOS && G.LUX_PHOTOS.includes(x.id)) {
       inner = `<image href="${UI.photoSrc(x.id, "luks")}" x="0" y="0" width="120" height="64" preserveAspectRatio="xMidYMid slice"/>`;
     } else if (x.cat === "araba") {
       inner = `<rect width="120" height="64" fill="#e9ecef"/><rect y="46" width="120" height="18" fill="#c3cad1"/><ellipse cx="60" cy="52" rx="50" ry="5" fill="#ffffff" opacity=".6"/>` +
@@ -4869,13 +4910,13 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     html += `<div class="lux-grid">${G.LUXURY.filter(x => x.cat === UI.luxCat).map(x => {
       const own = G.owns(x.id);
       const net = x.income ? x.income - G.itemUpkeep(x) : 0;
-      const perk = x.charm ? `Müşteri fiyatı +%${(x.charm * 100).toLocaleString("tr-TR")}` : x.imports ? `Her sabah ${x.imports * 2} ithal ilan` : x.party ? `Parti gücü ${x.party}` : x.football ? `Maç gününe göre ±%40` : "";
+      const perk = x.charm ? `Müşteri fiyatı +%${(x.charm * 100).toLocaleString("tr-TR")}` : x.imports ? `Her sabah ${x.imports * 2} ithal ilan` : x.party ? `Parti gücü ${x.party}` : x.club ? `Maç sonucuna göre gelir ±%35` : x.football ? `Maç gününe göre ±%40` : "";
       let btn;
-      if (own) btn = `<button class="btn sm danger" type="button" data-a="lux-sell" data-v="${x.id}">${UI.armed === "lux" + x.id ? `${G.fmtS(G.luxResale(x))}'ye sat?` : "Sat"}</button>`;
+      if (own) btn = `<span class="lux-own-btns">` + (x.club ? `<button class="btn sm" type="button" data-a="club-edit" data-v="${x.id}">Kulübü düzenle</button>` : "") + `<button class="btn sm danger" type="button" data-a="lux-sell" data-v="${x.id}">${UI.armed === "lux" + x.id ? `${G.fmtS(G.luxResale(x))}'ye sat?` : "Sat"}</button>` + `</span>`;
       else if (S.level < x.lvl) btn = `<span class="chip">Seviye ${x.lvl}</span>`;
       else btn = `<button class="btn sm ${S.money >= x.price ? "pri" : ""}" type="button" data-a="lux-buy" data-v="${x.id}" ${S.money >= x.price ? "" : "disabled"}>${G.fmtS(x.price)}</button>`;
       return `<div class="lux-card ${own ? "own" : ""} ${S.level < x.lvl ? "locked" : ""}"><div class="lux-art">${UI.luxArt(x)}${own ? `<span class="chip good own-tag">Senin</span>` : ""}</div>
-        <div class="lux-body"><b>${esc(x.name)}</b><p class="small muted">${esc(x.desc)}</p>
+        <div class="lux-body"><b>${x.club && own ? `${esc(G.clubOf(x.id).name)} <span class="muted small">· ${esc(x.name)}</span>` : esc(x.name)}</b><p class="small muted">${esc(x.desc)}</p>
         <div class="chips"><span class="chip acc">Şöhret +${x.pres}</span>${x.income ? `<span class="chip good">Gelir +${G.fmtS(x.income)}/gün</span>` : ""}<span class="chip">${x.income ? "Gider" : "Bakım"} ${G.fmtS(G.itemUpkeep(x))}/gün</span>${x.income ? `<span class="chip ${net > 0 ? "good" : "bad"}">Net ${net > 0 ? "+" : ""}${G.fmtS(net)}/gün</span>` : ""}${perk ? `<span class="chip warn">${perk}</span>` : ""}</div>
         <div class="row"><span class="num small">${G.fmtS(x.price)}</span>${btn}</div></div></div>`;
     }).join("")}</div>`;
@@ -5048,6 +5089,91 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     }).join("")}</div>`;
     return html;
   };
+})(window.G);
+
+</script>
+<script>
+/* Galeri Patronu — oyuncunun spor kulüpleri (futbol, basketbol)
+ * Kulüp satın alınınca adı, kısa adı ve logosu (şekil, iki renk, amblem) seçilir; sonradan değiştirilebilir.
+ * Logo lüks kartında ve maç sonuçlarında kulüp adıyla görünür. */
+(function (G) {
+  "use strict";
+  const UI = G.UI;
+  const S = () => G.S;
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+
+  G.CLUB_COLORS = [["Kırmızı", "#c8282d"], ["Sarı", "#f2c218"], ["Lacivert", "#1f2f5a"], ["Mavi", "#2f6fd0"], ["Yeşil", "#1d8549"], ["Siyah", "#17191d"], ["Beyaz", "#ffffff"], ["Bordo", "#6e1f2b"], ["Turuncu", "#e2742c"], ["Mor", "#6b3fa0"]];
+  const SHAPES = {
+    kalkan: ["Kalkan", c => `<path d="M50 3 L91 15 V47 C91 73 72 89 50 97 C28 89 9 73 9 47 V15 Z" fill="${c.c1}" stroke="${c.c2}" stroke-width="5"/>`],
+    daire: ["Daire", c => `<circle cx="50" cy="50" r="45" fill="${c.c1}" stroke="${c.c2}" stroke-width="5"/><circle cx="50" cy="50" r="37" fill="none" stroke="${c.c2}" stroke-width="1.6" opacity=".7"/>`],
+    altigen: ["Altıgen", c => `<path d="M50 4 L90 27 V73 L50 96 L10 73 V27 Z" fill="${c.c1}" stroke="${c.c2}" stroke-width="5"/>`],
+    elmas: ["Elmas", c => `<path d="M50 3 L95 50 L50 97 L5 50 Z" fill="${c.c1}" stroke="${c.c2}" stroke-width="5"/>`]
+  };
+  const ICONS = {
+    top: ["Top", (c, kind) => kind === "basket"
+      ? `<circle cx="50" cy="42" r="15" fill="${c.c2}"/><path d="M35 42 H65 M50 27 V57 M39 31 Q47 42 39 53 M61 31 Q53 42 61 53" stroke="${c.c1}" stroke-width="2" fill="none"/>`
+      : `<circle cx="50" cy="42" r="15" fill="${c.c2}"/><path d="M50 34 L57 39 L54 47 H46 L43 39 Z" fill="${c.c1}"/><path d="M50 34 V27 M57 39 L64 36 M54 47 L58 54 M46 47 L42 54 M43 39 L36 36" stroke="${c.c1}" stroke-width="1.6"/>`],
+    yildiz: ["Yıldız", c => `<path d="M50 24 L55.3 36.7 L69 37.8 L58.6 46.8 L61.8 60.2 L50 53 L38.2 60.2 L41.4 46.8 L31 37.8 L44.7 36.7 Z" fill="${c.c2}"/>`],
+    tac: ["Taç", c => `<path d="M32 55 L30 30 L41 41 L50 25 L59 41 L70 30 L68 55 Z" fill="${c.c2}"/><rect x="32" y="56" width="36" height="5" rx="1" fill="${c.c2}"/>`],
+    simsek: ["Şimşek", c => `<path d="M55 22 L37 46 H49 L44 62 L64 37 H52 Z" fill="${c.c2}"/>`],
+    kartal: ["Kartal", c => `<path d="M50 30 C44 30 41 34 41 38 L22 30 L28 40 L19 40 L32 47 L26 50 L41 50 L46 58 H54 L59 50 L74 50 L68 47 L81 40 L72 40 L78 30 L59 38 C59 34 56 30 50 30 Z" fill="${c.c2}"/><circle cx="52" cy="35" r="1.6" fill="${c.c1}"/>`],
+    aslan: ["Aslan", c => `<circle cx="50" cy="42" r="15" fill="${c.c2}"/><circle cx="50" cy="43" r="9" fill="${c.c1}"/><circle cx="46.5" cy="41" r="1.3" fill="${c.c2}"/><circle cx="53.5" cy="41" r="1.3" fill="${c.c2}"/><path d="M47 47 Q50 49.5 53 47" stroke="${c.c2}" stroke-width="1.4" fill="none"/>`]
+  };
+
+  // Logonun iç çizimi (viewBox 0 0 100 100): şekil, amblem ve kısa ad
+  UI.clubLogoInner = function (c, kind) {
+    const sh = (SHAPES[c.shape] || SHAPES.kalkan)[1](c);
+    const ic = (ICONS[c.icon] || ICONS.yildiz)[1](c, kind);
+    return sh + ic + `<text data-club-code x="50" y="80" text-anchor="middle" font-family="Saira Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="17" letter-spacing="1" fill="${c.c2}">${esc(c.code || "")}</text>`;
+  };
+  UI.clubLogo = (c, kind, size) => `<svg class="club-logo" viewBox="0 0 100 100" width="${size || 64}" height="${size || 64}" role="img" aria-label="${esc(c.name)} logosu">${UI.clubLogoInner(c, kind)}</svg>`;
+
+  // ---- Kulüp düzenleme penceresi ----
+  UI.openClub = function (id, isNew) {
+    const c = G.clubOf(id);
+    UI.clubDraft = { id, isNew: !!isNew, ...c };
+    UI.open("club", id);
+  };
+  const opt = (k, v, label, on, extra) => `<button type="button" class="club-opt ${on ? "on" : ""}" data-a="club-set" data-k="${k}" data-v="${v}" aria-pressed="${on}" ${extra || ""}>${label}</button>`;
+  UI.SHEETS.club = function (id) {
+    const d = UI.clubDraft;
+    if (!d || d.id !== id) return null;
+    const x = G.LX[id], kind = x.club;
+    const sw = (k) => G.CLUB_COLORS.map(([n, hex]) => opt(k, hex, `<span class="sw" style="background:${hex}"></span>`, d[k] === hex, `aria-label="${n}" title="${n}"`)).join("");
+    return UI.head(d.isNew ? "Kulübünü kur" : "Kulübü düzenle", d.isNew ? `Hayırlı olsun! ${esc(x.name)} artık senin. Adını ve logosunu belirle.` : esc(x.name)) + `
+      <div class="club-prev">${UI.clubLogo(d, kind, 120)}<div><b id="clubPrevName">${esc(d.name)}</b><p class="small muted">${kind === "basket" ? "Basketbol" : "Futbol"} · Süper Lig</p></div></div>
+      <label class="fsel"><span>Kulüp adı</span><input id="clubName" type="text" maxlength="24" value="${esc(d.name)}" autocomplete="off"></label>
+      <label class="fsel"><span>Kısa ad (logoda yazar)</span><input id="clubCode" type="text" maxlength="4" value="${esc(d.code)}" autocomplete="off"></label>
+      <div class="club-row"><span>Şekil</span><div class="club-opts">${Object.entries(SHAPES).map(([k, [n]]) => opt("shape", k, n, d.shape === k)).join("")}</div></div>
+      <div class="club-row"><span>Amblem</span><div class="club-opts">${Object.entries(ICONS).map(([k, [n]]) => opt("icon", k, n, d.icon === k)).join("")}</div></div>
+      <div class="club-row"><span>Ana renk</span><div class="club-opts">${sw("c1")}</div></div>
+      <div class="club-row"><span>İkinci renk</span><div class="club-opts">${sw("c2")}</div></div>
+      <button class="btn pri block" type="button" data-a="club-save">Kaydet</button>`;
+  };
+  function readInputs() {
+    const d = UI.clubDraft, n = document.getElementById("clubName"), c = document.getElementById("clubCode");
+    if (n) d.name = n.value.trim().slice(0, 24) || d.name;
+    if (c) d.code = c.value.trim().toLocaleUpperCase("tr-TR").slice(0, 4);
+  }
+  UI.ACT["club-set"] = el => { readInputs(); UI.clubDraft[el.dataset.k] = el.dataset.v; UI.renderSheet(true); };
+  UI.ACT["club-save"] = () => {
+    readInputs();
+    const d = UI.clubDraft;
+    S().clubs = S().clubs || {};
+    S().clubs[d.id] = { name: d.name, code: d.code, shape: d.shape, icon: d.icon, c1: d.c1, c2: d.c2 };
+    G.feed(`${d.name} kulübün hazır! Maç sonuçları gün sonu raporunda.`, "good");
+    UI.clubDraft = null;
+    G.save && G.save();
+    UI.close(true);
+    UI.sig = "";
+    UI.render();
+  };
+  UI.ACT["club-edit"] = el => UI.openClub(el.dataset.v, false);
+  // ad ve kısa ad yazılırken önizleme anında değişir
+  document.addEventListener("input", e => {
+    if (e.target.id === "clubName") { const t = document.getElementById("clubPrevName"); if (t) t.textContent = e.target.value; }
+    if (e.target.id === "clubCode") { const t = document.querySelector(".club-prev [data-club-code]"); if (t) t.textContent = e.target.value.toLocaleUpperCase("tr-TR").slice(0, 4); }
+  });
 })(window.G);
 
 </script>

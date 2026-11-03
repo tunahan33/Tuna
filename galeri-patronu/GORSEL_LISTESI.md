@@ -58,7 +58,7 @@ Aracın yandan görünüşü, ön tarafı sağda. Plaka, logo ve marka yazısı 
 | Volta Speedster '57 | Ultra lüks · Coupe | `img/araclar/volta-speedster.png` |
 | Anka Kartal Prototip '64 | Ultra lüks · Sedan | `img/araclar/anka-prototip.png` |
 
-## Lüks eşyalar (93) — evler (13) hazır
+## Lüks eşyalar (94) — evler (13) hazır
 
 **Öncelik:** Önce · **Boyut:** 960 × 512 px (15:8) · **Biçim:** JPG · **Klasör:** `img/luks/`
 
@@ -158,7 +158,8 @@ Eşyanın kendisi, ortalanmış ve kart içinde rahat okunur. Mücevherlerde koy
 | Restoran | Yatırım · 45 milyon ₺ — Boğaz kenarında balık restoranı. | `img/luks/i2.jpg` |
 | Butik otel | Yatırım · 110 milyon ₺ — 24 odalı, Kapadokya'da taş otel. | `img/luks/i3.jpg` |
 | Alışveriş merkezi | Yatırım · 400 milyon ₺ — 180 mağazalı AVM, sinema ve yemek katı. | `img/luks/i4.jpg` |
-| Futbol takımı | Yatırım · 1,5 milyar ₺ — Süper Lig kulübü: maç, bilet, yayın ve forma gelirleri. Oyuncu maaşları da senden. | `img/luks/i5.jpg` |
+| Basketbol kulübü | Yatırım · 550 milyon ₺ — Salon, bilet, yayın ve sponsor gelirleri. | `img/luks/i6.jpg` |
+| Futbol kulübü | Yatırım · 1,5 milyar ₺ — Süper Lig kulübü: maç, bilet, yayın ve forma gelirleri. Oyuncu maaşları da senden. | `img/luks/i5.jpg` |
 
 ## Galeri sahnesi (36) — hazır
 

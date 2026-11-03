@@ -1130,6 +1130,18 @@
   G.investIncome = () => G.luxOwned().reduce((a, x) => a + (x.income || 0), 0);
   G.investNet = () => G.luxOwned().filter(x => x.income).reduce((a, x) => a + x.income - G.itemUpkeep(x), 0);
   G.teamName = () => (S.name.trim().split(/\s+/)[0] || "Patron") + "spor";
+  // Oyuncunun kulübü: satın alırken adını, kısa adını ve logosunu kendisi seçer (js/kulup.js)
+  G.clubOf = function (id) {
+    const x = G.LX[id];
+    S.clubs = S.clubs || {};
+    if (!S.clubs[id]) {
+      const first = S.name.trim().split(/\s+/)[0] || "Patron";
+      S.clubs[id] = x.club === "basket"
+        ? { name: first + " Basket", code: first.slice(0, 3).toLocaleUpperCase("tr-TR") + "B", shape: "daire", icon: "top", c1: "#e2742c", c2: "#17191d" }
+        : { name: first + "spor", code: first.slice(0, 3).toLocaleUpperCase("tr-TR") + "S", shape: "kalkan", icon: "yildiz", c1: "#1d8549", c2: "#f2c218" };
+    }
+    return S.clubs[id];
+  };
   // Gün sonunda yatırım gelirleri; futbol takımının geliri maç sonucuna göre değişir
   G.collectInvestments = function () {
     let total = 0;
@@ -1137,7 +1149,15 @@
     for (const x of G.luxOwned()) {
       if (!x.income) continue;
       let inc = x.income * R.rand(0.9, 1.1);
-      if (x.football) {
+      if (x.club === "basket") {
+        const win = Math.random() < 0.55;
+        const a = R.randi(72, 104), b = win ? a - R.randi(1, 18) : a + R.randi(1, 16);
+        const m = win ? 1.35 : 0.7;
+        inc = x.income * m * R.rand(0.9, 1.1);
+        S.stats.wins = (S.stats.wins || 0) + (win ? 1 : 0);
+        news.push({ title: `${G.clubOf(x.id).name} ${win ? "kazandı" : "kaybetti"}: ${a}-${b}`, text: `Salon, yayın ve sponsor geliri ${G.fmt(R.r1k(inc))}.` });
+        if (win) G.addRep(0.3);
+      } else if (x.football) {
         const r = Math.random();
         const g1 = R.randi(0, 4), g2 = R.randi(0, 3);
         let res, m;
@@ -1146,7 +1166,7 @@
         const b = res === "kazandı" ? Math.min(g2, a - 1) : res === "kaybetti" ? a + 1 + R.randi(0, 1) : g2;
         inc = x.income * m * R.rand(0.9, 1.1);
         S.stats.wins = (S.stats.wins || 0) + (res === "kazandı" ? 1 : 0);
-        news.push({ title: `${G.teamName()} ${res}: ${a}-${b}`, text: `Bilet, yayın ve sponsor geliri ${G.fmt(R.r1k(inc))}.` });
+        news.push({ title: `${G.clubOf(x.id).name} ${res}: ${a}-${b}`, text: `Bilet, yayın ve sponsor geliri ${G.fmt(R.r1k(inc))}.` });
         if (res === "kazandı") G.addRep(0.5);
       }
       total += inc;
