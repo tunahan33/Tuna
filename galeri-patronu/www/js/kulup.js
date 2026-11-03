@@ -101,22 +101,26 @@
     scout: { name: "Scout ekibi", max: 3, power: 0, desc: "Transfer listesine daha iyi oyuncular gelir" }
   };
   G.playerPrice = (r, kind) => R.r1k(G.CLUB[kind].base * Math.pow(1.13, r - 70));
-  // Dünya yıldızları: gerçek oyunculara benzeyen ama birebir aynı olmayan (parodi) isimler; transfer listesine ara sıra düşer
+  // Dünya yıldızları: tamamen hayali isimler (gerçek kişilerin adı kullanılmaz); transfer listesine ara sıra düşer
   G.STARS = {
     futbol: [
-      ["Lyonel Mezzi", "Arjantin", "Forvet", 96, 37], ["Kristiano Ronaldu", "Portekiz", "Forvet", 93, 40], ["Kilian Mbapa", "Fransa", "Forvet", 95, 27],
-      ["Erlin Holand", "Norveç", "Forvet", 94, 26], ["Neimar Junyor", "Brezilya", "Forvet", 90, 33], ["Muhammed Salahi", "Mısır", "Forvet", 92, 34],
-      ["Kevin Dö Broyne", "Belçika", "Orta saha", 91, 35], ["Vinisius Junyor", "Brezilya", "Forvet", 93, 26], ["Jud Bellinghem", "İngiltere", "Orta saha", 93, 23],
-      ["Hari Keyn", "İngiltere", "Forvet", 92, 33], ["Robert Levandovsi", "Polonya", "Forvet", 90, 38], ["Lukas Modrik", "Hırvatistan", "Orta saha", 89, 41],
-      ["Virjil Van Dayk", "Hollanda", "Defans", 91, 35], ["Tibo Kurtoa", "Belçika", "Kaleci", 91, 34], ["Slatan Ibrahimo", "İsveç", "Forvet", 88, 44]
+      ["Leandro Vesti", "Arjantin", "Forvet", 96, 34], ["Duarte Velaso", "Portekiz", "Forvet", 93, 36], ["Kenzo Darbois", "Fransa", "Forvet", 95, 26],
+      ["Sverre Halvorsen", "Norveç", "Forvet", 94, 25], ["Caio Brandão", "Brezilya", "Forvet", 90, 31], ["Karim Nassef", "Mısır", "Forvet", 92, 30],
+      ["Joris Vandermeer", "Belçika", "Orta saha", 91, 32], ["Thiago Arcanjo", "Brezilya", "Forvet", 93, 25], ["Oliver Ashworth", "İngiltere", "Orta saha", 93, 23],
+      ["Harvey Lindell", "İngiltere", "Forvet", 92, 30], ["Tomasz Wierzbicki", "Polonya", "Forvet", 90, 33], ["Ivo Matkovac", "Hırvatistan", "Orta saha", 89, 34],
+      ["Daan Verhoeven", "Hollanda", "Defans", 91, 31], ["Lucien Marchetti", "Fransa", "Kaleci", 91, 32], ["Erik Söderlund", "İsveç", "Forvet", 88, 35]
     ],
     basket: [
-      ["LöBron Ceyms", "ABD", "Forvet", 95, 41], ["Stefan Köri", "ABD", "Oyun kurucu", 95, 37], ["Kevin Durent", "ABD", "Forvet", 93, 37],
-      ["Yannis Antetokumpo", "Yunanistan", "Uzun forvet", 96, 31], ["Luka Donçik", "Slovenya", "Oyun kurucu", 96, 26], ["Nikola Yokiç", "Sırbistan", "Pivot", 97, 30],
-      ["Coel Embid", "Kamerun", "Pivot", 93, 31], ["Viktor Vembanyama", "Fransa", "Pivot", 94, 21], ["Şey Gilgus Aleksandr", "Kanada", "Şutör", 95, 27],
-      ["Ceysın Teytım", "ABD", "Forvet", 93, 27], ["Entoni Edvırds", "ABD", "Şutör", 92, 24], ["Cimmi Batlır", "ABD", "Forvet", 91, 36]
+      ["Marcus Wellford", "ABD", "Forvet", 95, 34], ["Devon Kittredge", "ABD", "Oyun kurucu", 95, 32], ["Jalen Ashby", "ABD", "Forvet", 93, 31],
+      ["Nikos Papadakis", "Yunanistan", "Uzun forvet", 96, 29], ["Matej Kovač", "Slovenya", "Oyun kurucu", 96, 25], ["Dušan Ristović", "Sırbistan", "Pivot", 97, 29],
+      ["Ibrahim Ndoye", "Senegal", "Pivot", 93, 28], ["Théo Lavigne", "Fransa", "Pivot", 94, 22], ["Darnell Okafor", "Kanada", "Şutör", 95, 26],
+      ["Terrence Holloway", "ABD", "Forvet", 93, 27], ["Quentin Mayes", "ABD", "Şutör", 92, 24], ["Corey Banfield", "ABD", "Forvet", 91, 31]
     ]
   };
+  // önceki sürümdeki yıldız isimleri kayıtlı oyunlarda yeni hayali isimlere çevrilir (aynı sıra)
+  const OLD_STARS = ["Lyonel Mezzi", "Kristiano Ronaldu", "Kilian Mbapa", "Erlin Holand", "Neimar Junyor", "Muhammed Salahi", "Kevin Dö Broyne", "Vinisius Junyor", "Jud Bellinghem", "Hari Keyn", "Robert Levandovsi", "Lukas Modrik", "Virjil Van Dayk", "Tibo Kurtoa", "Slatan Ibrahimo",
+    "LöBron Ceyms", "Stefan Köri", "Kevin Durent", "Yannis Antetokumpo", "Luka Donçik", "Nikola Yokiç", "Coel Embid", "Viktor Vembanyama", "Şey Gilgus Aleksandr", "Ceysın Teytım", "Entoni Edvırds", "Cimmi Batlır"];
+  const renameOld = list => { const all = G.STARS.futbol.concat(G.STARS.basket); for (const p of list || []) { const k = OLD_STARS.indexOf(p.name); if (k >= 0) p.name = all[k][0]; } };
   G.STAR_PREMIUM = 2.5; // yıldızın bonservisi ve maaşı aynı güçteki oyuncunun bu katı
   G.pPrice = (p, kind) => R.r1k(G.playerPrice(p.r, kind) * (p.star ? G.STAR_PREMIUM : 1));
   G.playerWage = (p, kind) => R.r100(G.pPrice(p, kind) * 0.0015);
@@ -128,6 +132,7 @@
     if (!c.players) c.players = Array.from({ length: k.start }, () => newPlayer(x.club, 56, 70));
     if (!c.staff) c.staff = { td: 0, kond: 0, scout: 0 };
     if (!c.rec) c.rec = { w: 0, d: 0, l: 0 };
+    if (!c.starNames) { renameOld(c.players); if (c.market) renameOld(c.market.list); c.starNames = 2; }
     return c;
   };
   G.clubPower = function (id) {
