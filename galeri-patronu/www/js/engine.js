@@ -89,6 +89,7 @@
     G.newAuction();
     G.newCandidates();
     S.started = true;
+    if (G.TEST) { S.level = 40; S.money = 1e12; S.rep = 100; S.stats.sold = 500; }
     G.feed(`${S.name} kapılarını açtı. Kasada ${G.fmt(S.money)} var, arsada bir Anka Serçe duruyor.`, "info");
   };
 
@@ -1433,6 +1434,7 @@
 
   // ---- Zaman ----
   G.minute = function () {
+    if (G.TEST && S.money < 5e11) S.money = 1e12; // deneme sürümünde para bitmez
     S.min++;
     if (G.LISTING_DROPS.includes(S.min)) { const n = R.randi(2, 3); G.addListings(n, `Piyasaya ${n} yeni ilan düştü.`); if (R.chance(0.03)) G.ultraListing(); }
     // galeride etiketli ultra lüks araç varsa milyarder koleksiyoncular ara sıra uğrar

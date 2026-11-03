@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """www/ klasöründeki oyunu tek bir HTML dosyasında birleştirir: dist/galeri-patronu.html
 Fotoğraflar (www/img/araclar, kisiler, luks, sahne altındaki *.webp) base64 olarak gömülür (G.CAR_PHOTO_DATA).
-Kullanım: python3 build-single.py [--artifact ÇIKTI.html]
+Kullanım: python3 build-single.py [--test] [--artifact ÇIKTI.html]
   --artifact: yalnızca ARTIFACT-START/END arasını (head/body iskeleti olmadan) ayrıca yazar."""
 import base64
 import os
@@ -31,6 +31,11 @@ def photo_data():
     return "<script>\nwindow.G.CAR_PHOTO_DATA = {" + ",\n".join(items) + "};\n</script>"
 
 
+# --test: deneme sürümü (son seviye, sınırsız para); çıktı dist/galeri-patronu-test.html
+TEST = "--test" in sys.argv
+if TEST:
+    html = html.replace('<script src="js/data.js"></script>', '<script>window.GP_TEST = true;</script>\n<script src="js/data.js"></script>', 1)
+    html = html.replace("<title>Galeri Patronu</title>", "<title>Galeri Patronu Test</title>", 1)
 html = re.sub(r'<script src="(js/[a-z]+\.js)"></script>', inline, html)
 
 
@@ -57,6 +62,6 @@ if "--artifact" in sys.argv:
 
 html = html.replace("<!-- ARTIFACT-START -->\n", "").replace("<!-- ARTIFACT-END -->\n", "")
 os.makedirs(os.path.join(root, "dist"), exist_ok=True)
-out = os.path.join(root, "dist", "galeri-patronu.html")
+out = os.path.join(root, "dist", "galeri-patronu-test.html" if TEST else "galeri-patronu.html")
 open(out, "w", encoding="utf-8").write(html)
 print(out, f"{len(html.encode('utf-8')) / 1024:.0f} KB")

@@ -4,6 +4,8 @@
   "use strict";
 
   G.YEAR = 2026;
+  // Deneme sürümü (build-single.py --test): son seviyede, sınırsız parayla başlar
+  G.TEST = !!window.GP_TEST;
 
   // Uygulama bilgileri. Sürümü package.json ve mağazadaki sürümle birlikte artır.
   G.VERSION = "0.1.0";
