@@ -850,6 +850,12 @@
     if (!F) return null;
     const n = G.facLevel(key), nx = G.facNext(key);
     let html = head(F.name, `Seviye ${n}/${G.FAC_MAX}`);
+    // tesisin şu anki görünümü en üstte: yükseltince pencereyi kapatmadan değişimi görürsün
+    const stage = G.stageOf(n), pk = key === "galeri" ? UI.photoSceneKey() : `${key}-${stage}`;
+    if (G.SCENE_PHOTOS.includes(pk)) {
+      const nextAt = [5, 10, 15].find(x => x > n);
+      html += `<div class="fac-hero ${key === "galeri" ? "wide" : ""} ${n || key === "galeri" || key === "otopark" ? "" : "off"}"><img src="${UI.photoSrc(pk, "sahne")}" alt="${esc(F.name)} görünümü"><span class="fc-cap"><b>${n || key === "galeri" || key === "otopark" ? `${stage}. aşama` : "Kurulunca böyle olacak"}</b><small>${nextAt ? `Görünüm ${nextAt}. seviyede değişir` : "Son görünüm"}</small></span></div>`;
+    }
     html += `<div class="card"><p class="small">${esc(F.desc)}</p>${pips(n)}</div>`;
     const cur = G.facLines(key, n);
     html += `<div class="card"><h3>Şu an</h3><ul class="facl">${cur.map(l => `<li>${esc(l)}</li>`).join("")}</ul></div>`;
@@ -1171,7 +1177,13 @@
     },
     lux: () => { UI.tab = "patron"; UI.sub.patron = "lux"; UI.sheet = null; window.scrollTo(0, 0); UI.render(); },
     party: () => { const r = G.throwParty(); msg(r); if (r.ok) UI.toast("Parti verildi! Yarın galeriye zengin müşteriler gelecek.", "good"); UI.render(); },
-    facup: el => { const r = G.buyFac(el.dataset.v); msg(r); if (r.ok) UI.toast(`${G.FACILITIES[el.dataset.v].name}: seviye ${G.facLevel(el.dataset.v)}`, "good"); UI.render(); },
+    facup: el => {
+      const r = G.buyFac(el.dataset.v); msg(r);
+      if (r.ok) UI.toast(`${G.FACILITIES[el.dataset.v].name}: seviye ${G.facLevel(el.dataset.v)}`, "good");
+      UI.render();
+      // pencere açıksa yeni görünümü göstermek için en üste kay
+      if (r.ok && UI.sheet && UI.sheet.kind === "fac") { UI.renderSheet(true); const sh = $("sheet"); if (sh) sh.scrollTo({ top: 0, behavior: "smooth" }); }
+    },
     rest: el => { const u = S().staff.find(x => x.id === +el.dataset.id); if (u) { msg(G.sendRest(u)); UI.render(); } },
     recall: el => { const u = S().staff.find(x => x.id === +el.dataset.id); if (u) { G.recall(u); UI.render(); } },
     ads: el => { S().ads = +el.dataset.v; UI.render(); },
