@@ -121,7 +121,7 @@
   const tick = ok => `<span class="${ok ? "pos" : "neg"}" aria-hidden="true">${ok ? "✓" : "✗"}</span>`;
   UI.dealerView = function () {
     const s = S(), d = D(), gl = G.facLevel("galeri");
-    let html = `<div class="card"><h3>Sıfır araç bayiliği</h3><p class="muted small">Markaların bayisi ol, sıfır aracı üreticiden %${Math.round((1 - G.DEALER.cost) * 100)} indirimli bayi fiyatına al, liste fiyatından sat. Başvuru: ${G.DEALER.steps.map(x => `${x.name} (${x.days} gün)`).join(" → ")} → karar. Denetim günü araçların temiz (ortalama ${G.DEALER.inspectClean}+) ve itibarın yüksek olsun.</p></div>`;
+    let html = `<div class="card"><h3>Sıfır araç bayiliği</h3><p class="muted small">Sıfır aracı %${Math.round((1 - G.DEALER.cost) * 100)} ucuza al, liste fiyatından sat. Denetim günü araçlar temiz olsun.</p></div>`;
     if (gl < G.DEALER.unlock) return html + `<div class="card"><p class="small">Bayilik başvuruları galeri binası <b>${G.DEALER.unlock}. seviyeye</b> gelince açılır. Şu an ${gl}. seviye.</p></div>`;
     for (const t of G.DEALER.tiers) {
       html += `<h3 class="dl-tier">${esc(t.name)} <span class="muted small">Başvuru ${G.fmtS(t.fee)} · lisans başına günlük aidat ${G.fmtS(t.daily)}</span></h3>`;

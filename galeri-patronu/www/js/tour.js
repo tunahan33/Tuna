@@ -10,27 +10,27 @@
 
   // tab: adımda açılacak sekme, el: vurgulanacak öğe (yoksa ekranın ortasında çıkar)
   G.TOUR = [
-    { title: "Hoş geldin patron!", text: "Galeri Patronu'nda ikinci el araç alır, hazırlar ve kârla satarsın. Sana kısa bir tur yaptırayım; istemezsen \"Eğitimi atla\"ya bas." },
-    { tab: "galeri", el: q(".top .kpis"), title: "Kasa, itibar, seviye", text: "Kasa senin paran. İtibar yükseldikçe daha çok müşteri gelir ve daha iyi fiyat verir. Sattıkça seviye atlarsın; yeni araç sınıfları ve tesisler açılır." },
-    { tab: "galeri", el: q(".top .speed"), title: "Zaman", text: "Galeri 09:00'da açılır, 19:00'da kapanır. Oyunu durdurabilir, 2× ya da 4× hızlandırabilir, en sağdaki düğmeyle günü bitirebilirsin." },
-    { tab: "galeri", el: q(".scene-card"), title: "Galerin", text: "Araçların parkta durur, müşteriler gelip bakar. Sahnedeki araca, müşteriye ya da binaya dokununca ilgili ekran açılır. Tesisleri yükselttikçe galerin büyür." },
-    { tab: "galeri", el: q(".card.todo"), title: "Şimdi ne yapmalı?", text: "Ne yapacağını bilmezsen buraya bak: sıradaki en önemli iki adım ve düğmesi burada." },
-    { tab: "piyasa", el: q("#view .crow"), title: "Araç al", text: "Her sabah ilanlar yenilenir, gün içinde yenileri düşer. İlana dokun ve satıcıyla pazarlık et. Almadan önce ekspertiz yaptırırsan gizli kusurları görürsün." },
-    { tab: "piyasa", el: nav(4), title: "Ucuz mu, pahalı mı?", text: "Aracın gerçek değerini ilk başta bilemezsin. Patron → Personel'den ekspertiz ustası işe alırsan fırsatları ve pahalıları söyler; yıldızı yüksek usta daha isabetli tahmin eder." },
-    { tab: "atolye", el: nav(3), title: "Atölye", text: "Aldığın aracı temizle, bakımını yap, boyasını düzelt: hazırlanan araç daha pahalıya satılır. Ustalar çalıştıkça yorulur, çardakta dinlenince hızlanır." },
-    { tab: "musteri", el: nav(2), title: "Müşteriler", text: "Fiyat etiketi astığın araçlara müşteriler teklif verir; teklif ekranın altında kart olarak açılır. \"Pazarlık et\" deyip kendin konuşabilirsin. Satış danışmanın varsa sen karışmazsan teklifleri o devralır." },
-    { tab: "patron", el: nav(4), title: "Patron masası", text: "Tesisleri yükselt, personel al, daha büyük bir adrese taşın. Para biriktikçe Lüks'ten ev, araba, yat, takım elbise ve daha fazlasını al." },
-    { tab: "galeri", title: "Reklamlar isteğe bağlı", text: "Yanında ▶ işareti olan düğmeler kısa bir reklam izletir ve bonus verir. İzlemek zorunda değilsin. Hadi ilk aracını sat!", last: true }
+    { title: "Hoş geldin patron!", text: "Ucuza al, hazırla, kârla sat. Kısa bir tur?" },
+    { tab: "galeri", el: q(".top .kpis"), title: "Kasa, itibar, seviye", text: "Paran, itibarın ve seviyen. Sattıkça büyürsün." },
+    { tab: "galeri", el: q(".top .speed"), title: "Zaman", text: "Durdur, hızlandır ya da günü bitir." },
+    { tab: "galeri", el: q(".scene-card"), title: "Galerin", text: "Galerin. Yükselttikçe görünümü değişir." },
+    { tab: "galeri", el: q(".card.todo"), title: "Şimdi ne yapmalı?", text: "Takılınca buraya bak." },
+    { tab: "piyasa", el: q("#view .crow"), title: "Araç al", text: "İlana dokun, pazarlık et. Ekspertiz gizli kusuru bulur." },
+    { tab: "piyasa", el: nav(4), title: "Ucuz mu, pahalı mı?", text: "Değeri görmek için ekspertiz ustası al." },
+    { tab: "atolye", el: nav(3), title: "Atölye", text: "Aracı hazırla, daha pahalıya sat." },
+    { tab: "musteri", el: nav(2), title: "Müşteriler", text: "Teklifler alttaki kartta açılır. Danışman alırsan o halleder." },
+    { tab: "patron", el: nav(4), title: "Patron masası", text: "Tesis, personel, adres ve lüks burada." },
+    { tab: "galeri", title: "Reklamlar isteğe bağlı", text: "▶ işaretli düğmeler reklamla bonus verir. Hadi başla!", last: true }
   ];
 
   // Bir ekran ilk kez açılınca çıkan kısa ipuçları (pencere türüne göre)
   G.TIPS = {
-    listing: ["Pazarlık", "Önerilen teklifle başla. Çok düşük teklif satıcıyı kızdırır ve sabrı biter. Ekspertiz yaptırmadan alırsan gizli kusur çıkabilir."],
-    car: ["Kendi aracın", "Önce önerilen atölye işini yap, sonra fiyat etiketini as. Etiketsiz araca müşteri bakmaz; \"Dengeli\" fiyat çoğu zaman en iyisidir."],
-    cust: ["Müşteri teklifi", "Teklif etikete yakınsa kabul et, değilse \"biraz daha iste\". Çok zorlarsan müşteri kapıdan çıkar gider."],
-    auction: ["İhale", "Rakip galericiler saniye saniye teklif verir. Son tekliften sonra 4 saniye kimse artırmazsa çekiç iner. Aracın değerinin üstüne çıkma!"],
-    summary: ["Gün sonu", "Günün satışı, kârı ve giderleri burada. Sponsor bonusu için reklam izlemek isteğe bağlı; istemezsen geç."],
-    fac: ["Tesisler", "Her yükseltme galerinin görünümünü de değiştirir. Yeni seviyeler sen seviye atladıkça açılır."]
+    listing: ["Pazarlık", "Önerilen teklifle başla; çok düşük teklif satıcıyı kızdırır."],
+    car: ["Kendi aracın", "Önce hazırla, sonra fiyat etiketini as."],
+    cust: ["Müşteri teklifi", "Teklif iyiyse kabul et, değilse biraz daha iste."],
+    auction: ["İhale", "Değerinin üstüne çıkma!"],
+    summary: ["Gün sonu", "Günün kârı ve giderlerin."],
+    fac: ["Tesisler", "Her yükseltme görünümü de değiştirir."]
   };
 
   let step = -1, wasPaused = false;

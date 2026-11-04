@@ -61,7 +61,7 @@
     const t = T(), left = G.tapLeft(), maxT = G.TAP.taps(t.lvl);
     const up = t.lvl < G.TAP.max ? `<button class="btn sm" type="button" data-a="tap-up">Pazarlık ustalığı ${t.lvl + 1}. sv · ${G.fmtS(G.TAP.cost(t.lvl))}</button>` : `<span class="chip good">Ustalık son seviyede</span>`;
     const auto = t.auto < G.TAP.autoMax ? `<button class="btn sm" type="button" data-a="tap-auto">Çağrı merkezi ${t.auto + 1}. sv · ${G.fmtS(G.TAP.autoCost(t.auto))}</button>` : `<span class="chip good">Çağrı merkezi tam</span>`;
-    return `<div class="card tap-card"><div class="row"><div><h3>Telefon masası</h3><p class="small muted">Müşteri ara, kapora ve komisyon topla. Arama hakkı her sabah yenilenir.</p></div><span class="chip ${G.tapBoostOn() ? "gold" : ""}" id="tapBoost">${G.tapBoostOn() ? "2× kazanç" : `Sv ${t.lvl}`}</span></div>
+    return `<div class="card tap-card"><div class="row"><div><h3>Telefon masası</h3><p class="small muted">Her dokunuş para.</p></div><span class="chip ${G.tapBoostOn() ? "gold" : ""}" id="tapBoost">${G.tapBoostOn() ? "2× kazanç" : `Sv ${t.lvl}`}</span></div>
       <button class="tap-btn" type="button" data-a="tap" ${left ? "" : "disabled"}>${PHONE}<span><b id="tapVal">+${G.fmtS(G.tapValue())}</b><small id="tapLeft">${left ? `${left}/${maxT} arama hakkı` : "Bugünlük arama hakkın bitti"}</small></span></button>
       <div class="small muted">${t.auto ? `Çağrı merkezi oyun saati ilerledikçe saatte ≈ ${G.fmtS(Math.round(G.TAP.value(t.lvl) * G.TAP.autoPerMin * t.auto) * 60)} getiriyor. ` : ""}Bugüne kadar masadan: <span id="tapTotal">${G.fmtS(t.total)}</span></div>
       <div class="btns">${up}${auto}</div>

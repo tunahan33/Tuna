@@ -128,10 +128,10 @@
   UI.luxCat = UI.luxCat || "ev";
   UI.luxView = function () {
     const S = G.S, p = G.prestige(), e = G.presEff(p);
-    let html = `<div class="card lux-head"><div class="row"><div><h3>Patronun hayatı</h3><p class="muted small">Kişisel lüks harcamalar. Her eşya şöhret kazandırır; şöhret müşterilerin sana güvenini ve ödemeye razı olduğu fiyatı artırır.</p></div><div class="fame"><span>Şöhret</span><b>${p}</b></div></div>
-      <div class="kv"><div><span>Müşteri ödemesi</span><b>+%${(Math.round((e.pay - 1) * 1000) / 10).toString().replace(".", ",")}</b></div><div><span>Günlük itibar</span><b>+${e.rep.toFixed(2).replace(".", ",")}</b></div>
+    let html = `<div class="card lux-head"><div class="row"><div><h3>Patronun hayatı</h3><p class="muted small">Her eşya şöhret kazandırır.</p></div><div class="fame"><span>Şöhret</span><b>${p}</b></div></div>
+      <div class="kv"><div><span>Müşteri ödemesi</span><b>+%${(Math.round((e.pay - 1) * 1000) / 10).toString().replace(".", ",")}</b></div>
       <div><span>Zengin müşteri</span><b>${e.gate ? `+${e.gate} kademe` : "50 şöhrette"}</b></div><div><span>Günlük bakım</span><b>${G.fmtS(G.luxUpkeep())}</b></div>
-      <div><span>Yatırım geliri/gün</span><b class="pos">${G.fmtS(G.investIncome())}</b></div><div><span>Toplam yatırım kazancı</span><b>${G.fmtS(S.stats.investIncome || 0)}</b></div></div></div>`;
+      <div><span>Yatırım geliri/gün</span><b class="pos">${G.fmtS(G.investIncome())}</b></div></div></div>`;
     if (G.bestOf("yat")) {
       const ready = G.partyReady(), pe = G.partyEff();
       html += `<div class="card party"><div class="row"><div><b>Yat partisi · ${esc(G.bestOf("yat").name)}</b><p class="small muted">${G.partyActive() ? "Bugün partinin etkisi sürüyor: zengin müşteri akını!" : ready ? `Parti ver: itibar +${pe.rep}, ertesi gün ${pe.traffic.toFixed(2).replace(".", ",")}× müşteri ve zengin müşteri akını. Masraf ${G.fmtS(G.partyCost())}.` : `Bir sonraki parti ${S.lastParty + G.PARTY_COOLDOWN}. günde.`}</p></div>
@@ -139,7 +139,7 @@
     }
     html += `<div class="segctl wrap3" role="group">${Object.keys(G.LUX_CATS).map(k => `<button type="button" data-a="luxcat" data-v="${k}" aria-pressed="${UI.luxCat === k}">${G.LUX_CATS[k].name} <small>${G.LUXURY.filter(x => x.cat === k && G.owns(x.id)).length}/${G.LUXURY.filter(x => x.cat === k).length}</small></button>`).join("")}</div>`;
     const C = G.LUX_CATS[UI.luxCat];
-    html += `<p class="muted small" style="margin:0">${esc(C.perk)} ${UI.luxCat === "yatirim" ? "" : `Bakım: fiyatın günde %${(C.upkeep * 100).toLocaleString("tr-TR", { maximumFractionDigits: 3 })}'i · `}Satarsan ödediğin fiyatın %${Math.round(C.resale * 100)}'i geri gelir.</p>`;
+    html += `<p class="muted small" style="margin:0">${esc(C.perk)}</p>`;
     html += `<div class="lux-grid">${G.LUXURY.filter(x => x.cat === UI.luxCat).map(x => {
       const own = G.owns(x.id);
       const net = x.income ? x.income - G.itemUpkeep(x) : 0;

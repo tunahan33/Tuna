@@ -985,13 +985,13 @@ body::before { background: var(--hero-1); }
   // upkeep: fiyatın günlük yüzdesi, resale: satışta geri alınan oran
   // Fiyatlar uzun vadeli hedef olsun diye yüksek tutuldu; bakım oranları düşük ki sahip olmak oyunu batırmasın.
   G.LUX_CATS = {
-    ev:    { name: "Ev",    upkeep: 0.00016, resale: 0.95, perk: "Evler en çok şöhreti verir ve değerini korur." },
-    araba: { name: "Araba", upkeep: 0.00032, resale: 0.7,  perk: "En iyi araban galerinin önüne park eder; müşteriler patronun arabasını görür." },
-    mucevher: { name: "Mücevher", upkeep: 0.0001, resale: 0.85, perk: "Mücevherler değerini korur, sigortası ucuzdur; şöhret kazandırır." },
-    takim: { name: "Takım elbise", upkeep: 0.0004, resale: 0.4, perk: "Şık patrona müşteri güvenir: en iyi takım elbisen müşterinin ödemeye razı olduğu fiyatı artırır." },
-    ucak:  { name: "Uçak",  upkeep: 0.00048, resale: 0.75, perk: "Yurt dışı bağlantısı: her sabah piyasaya ithal premium, spor ve lüks araç ilanları gelir." },
-    yat:   { name: "Yat",   upkeep: 0.00048, resale: 0.7,  perk: "Haftada bir yat partisi: ertesi gün galeriye zengin müşteri akını ve itibar." },
-    yatirim:  { name: "Yatırım",  upkeep: 0.0015, resale: 0.85, perk: "Yatırımlar her gün gelir getirir ama bakım ve işletme gideri de vardır. Oyundan çıkınca da kazandırır." }
+    ev:    { name: "Ev",    upkeep: 0.00016, resale: 0.95, perk: "En çok şöhreti verir, değerini korur." },
+    araba: { name: "Araba", upkeep: 0.00032, resale: 0.7,  perk: "En iyi araban galerinin önünde durur." },
+    mucevher: { name: "Mücevher", upkeep: 0.0001, resale: 0.85, perk: "Değerini korur, şöhret kazandırır." },
+    takim: { name: "Takım elbise", upkeep: 0.0004, resale: 0.4, perk: "Müşteri daha çok öder." },
+    ucak:  { name: "Uçak",  upkeep: 0.00048, resale: 0.75, perk: "Her sabah ithal ilanlar gelir." },
+    yat:   { name: "Yat",   upkeep: 0.00048, resale: 0.7,  perk: "Haftada bir parti: zengin müşteri akını." },
+    yatirim:  { name: "Yatırım",  upkeep: 0.0015, resale: 0.85, perk: "Her gün gelir getirir, gideri de var." }
   };
   G.LUXURY = [
     { id: "e01", cat: "ev", name: "Stüdyo daire", desc: "Şehir merkezinde, metroya 3 dakika.", price: 4e6, lvl: 2, pres: 2, art: { t: "studio" } },
@@ -1101,12 +1101,12 @@ body::before { background: var(--hero-1); }
   ];
 
   G.ROLES = {
-    satis:    { name: "Satış danışmanı", base: 1300, desc: "Sen meşgulken teklifleri karşılar, pazarlık eder. Satıştan %1,5 prim alır." },
-    usta:     { name: "Usta",            base: 1600, desc: "Atölye işlerini hızlandırır. Çalıştıkça yorulur; çardakta dinlenir." },
-    yikama:   { name: "Yıkamacı",        base: 750,  desc: "Her sabah araçları siler, temiz tutar." },
-    muhasebe: { name: "Muhasebeci",      base: 1150, desc: "Günlük giderleri düşürür, vergi denetiminde ceza yemezsin." },
-    alim:     { name: "Satın alım uzmanı", base: 1500, desc: "Bütçene göre ilanlardan en kârlı aracı bulur, pazarlık edip alır. Ekspertiz ustanla birlikte çalışır: usta varsa almadan önce araca ekspertiz yaptırır. Yıldızı arttıkça değer tahmini isabetli olur." },
-    eksper:   { name: "Ekspertiz ustası", base: 1400, desc: "İlandaki ve ihaledeki aracın piyasa değerini tahmin eder; fırsat mı pahalı mı söyler. Yıldızı arttıkça tahmini isabetli olur." }
+    satis:    { name: "Satış danışmanı", base: 1300, desc: "Teklifleri senin yerine bağlar, satıştan %1,5 prim alır." },
+    usta:     { name: "Usta",            base: 1600, desc: "Atölye işlerini hızlandırır; yorulunca çardakta dinlenir." },
+    yikama:   { name: "Yıkamacı",        base: 750,  desc: "Her sabah araçları temizler." },
+    muhasebe: { name: "Muhasebeci",      base: 1150, desc: "Giderleri düşürür, vergi cezası yedirmez." },
+    alim:     { name: "Satın alım uzmanı", base: 1500, desc: "Bütçenle en kârlı aracı bulup alır." },
+    eksper:   { name: "Ekspertiz ustası", base: 1400, desc: "Aracın değerini tahmin eder; yıldızı arttıkça isabetli." }
   };
 
   // Atölye işleri. cost: araç değerine göre maliyet (v = aracın kusursuz hâldeki piyasa değeri)
@@ -3414,7 +3414,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       bekleyen: (a, b) => b.days - a.days
     };
     cars.sort(sorters[UI.sort] || sorters.yeni);
-    let html = `<div class="scene-card">${UI.scene()}<div class="scene-cap"><span>${esc(G.loc().name)}</span><span>Park <b>${G.carCount()}/${G.capacity()}</b>${G.showSlots() ? ` · Vitrin <b>${G.showUsed()}/${G.showSlots()}</b>` : ""}</span></div></div>` + UI.sceneCards() + (UI.tapCard ? UI.tapCard() : "") + (G.boostActive() ? "" : (G.adLeft("boost") && S().min < G.CLOSE - 60 ? `<div class="card boost"><div class="row"><div><b>Müşteri kampanyası</b><p class="small muted">Reklam izle, 2 saat boyunca galerine iki kat müşteri gelsin.</p></div>${adBtn("boost", "İzle")}</div></div>` : ""));
+    let html = `<div class="scene-card">${UI.scene()}<div class="scene-cap"><span>${esc(G.loc().name)}</span><span>Park <b>${G.carCount()}/${G.capacity()}</b>${G.showSlots() ? ` · Vitrin <b>${G.showUsed()}/${G.showSlots()}</b>` : ""}</span></div></div>` + UI.sceneCards() + (UI.tapCard ? UI.tapCard() : "") + (G.boostActive() ? "" : (G.adLeft("boost") && S().min < G.CLOSE - 60 ? `<div class="card boost"><div class="row"><div><b>Müşteri kampanyası</b><p class="small muted">2 saat 2× müşteri</p></div>${adBtn("boost", "İzle")}</div></div>` : ""));
     html += todoCard();
     if (!cars.length) {
       return html + `<div class="empty"><b>Galeride araç yok</b>"Araç al" sekmesinden ilanlara bak ya da günün ihalesine katıl.<div style="margin-top:12px"><button class="btn pri" type="button" data-a="tab" data-v="piyasa">Araç al</button></div></div>`;
@@ -3444,18 +3444,18 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       html += UI.dealerShop();
     } else if (sub === "ihale") {
       const a = s.auction;
-      html += `<div class="card"><h3>Günün ihalesi</h3><p class="muted small">Banka, sigorta ve filo araçları piyasanın altında açılır ama ekspertize sokulamaz${s.upg.expert ? "; ekspertiz cihazınla hızlı kontrol yapabilirsin" : ""}.</p>
+      html += `<div class="card"><h3>Günün ihalesi</h3>
         ${a.lots.map((lot, i) => `<div class="opt"><div><b>${esc(G.carTitle(lot.car))}</b><small>${esc(G.aucSrc(lot.src))} · açılış ${G.fmtS(lot.start)}</small></div>
           <div class="small">${lot.done ? (lot.winner === "Sen" ? `<span class="pos">Senin · ${G.fmtS(lot.price)}</span>` : `<span class="muted">${esc(lot.winner || "Satılmadı")}</span>`) : (i === a.idx && a.live ? "<b>Şimdi</b>" : "Sırada")}</div></div>`).join("")}
         <button class="btn pri block" type="button" data-a="auction" ${a.finished ? "disabled" : ""}>${a.finished ? "Bugünkü ihale bitti" : a.idx > 0 || a.live ? "İhale salonuna dön" : "İhale salonuna gir"}</button></div>`;
     } else {
       const segs = Object.keys(G.SEGMENTS);
-      html += `<div class="card"><h3>Segment fiyatları</h3><p class="muted small">Yükselen segmentte alınan araç daha kârlı satılır.</p><div class="list">${segs.map(k => {
+      html += `<div class="card"><h3>Segment fiyatları</h3><div class="list">${segs.map(k => {
         const t = G.trendOf(k), p = Math.round((t - 1) * 100);
         const open = G.segUnlocked(k);
         return `<div class="row"><div><b>${G.SEGMENTS[k].name}</b>${open ? "" : ` <span class="chip">Seviye ${G.SEGMENTS[k].lvl}</span>`}</div><div class="num ${p > 0 ? "pos" : p < 0 ? "neg" : "muted"}">${p > 0 ? "▲ +" : p < 0 ? "▼ " : ""}${p}%</div></div>`;
       }).join("")}</div></div>`;
-      html += `<div class="card"><h3>Gündem</h3>${s.events.length ? s.events.map(e => { const d = G.EVENTS.find(x => x.id === e.id); return `<div><b>${esc(d.title)}</b><p class="muted small">${esc(d.text)} · ${e.until - s.day + 1} gün daha</p></div>`; }).join("") : `<p class="muted small">Piyasada olağan bir hafta. Haberler gün sonunda gelir.</p>`}</div>`;
+      html += `<div class="card"><h3>Gündem</h3>${s.events.length ? s.events.map(e => { const d = G.EVENTS.find(x => x.id === e.id); return `<div><b>${esc(d.title)}</b><p class="muted small">${esc(d.text)} · ${e.until - s.day + 1} gün daha</p></div>`; }).join("") : `<p class="muted small">Sakin bir hafta.</p>`}</div>`;
     }
     return html;
   };
@@ -3509,7 +3509,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     let html = `<div class="vh"><div><h2>Müşteriler</h2><p>Bugün ${s.today.visitors} ziyaretçi · ${s.today.sales} satış</p></div></div>`;
     if (offers.length) html += `<div class="list">${offers.map(offerCard).join("")}</div>`;
     if (G.boostActive()) html += `<div class="card boost"><b>Kampanya sürüyor</b><p class="small">Saat ${G.clock(s.boost.until)}'e kadar iki kat müşteri geliyor.</p></div>`;
-    else if (s.min < G.CLOSE - 60 && G.adLeft("boost")) html += `<div class="card boost"><div class="row"><div><b>Müşteri kampanyası</b><p class="small muted">Kısa bir reklam izle, 2 saat boyunca galerine iki kat müşteri gelsin.</p></div>${adBtn("boost", "İzle")}</div></div>`;
+    else if (s.min < G.CLOSE - 60 && G.adLeft("boost")) html += `<div class="card boost"><div class="row"><div><b>Müşteri kampanyası</b><p class="small muted">2 saat 2× müşteri</p></div>${adBtn("boost", "İzle")}</div></div>`;
     if (!offers.length && !browsing.length) {
       html += `<div class="empty"><b>Şu an galeride müşteri yok</b>${s.min >= G.CLOSE ? "Galeri kapalı." : "Fiyat etiketli, temiz araçlar ve iyi itibar müşteri getirir."}</div>`;
     }
@@ -3517,7 +3517,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       html += `<div class="card"><h3>Araçlara bakıyor</h3>${browsing.map(c => `<div class="row small"><div class="who">${UI.avatar(c, "musteri", c.type, 30)}<div><b>${esc(c.name)}</b> · ${esc(G.CT[c.type].name)}</div></div><div class="muted">${G.SEGMENTS[c.seg].name} arıyor</div></div>`).join("")}</div>`;
     }
     if (s.lost.length) {
-      html += `<div class="card"><h3>Bugün kaçanlar</h3><p class="muted small">Ne aradıklarına bakıp stoğunu ona göre kur.</p>${s.lost.map(l => `<div class="row small"><div><b>${esc(l.type)}</b></div><div class="muted" style="text-align:right">${esc(l.text)}</div></div>`).join("")}</div>`;
+      html += `<div class="card"><h3>Bugün kaçanlar</h3>${s.lost.map(l => `<div class="row small"><div><b>${esc(l.type)}</b></div><div class="muted" style="text-align:right">${esc(l.text)}</div></div>`).join("")}</div>`;
     }
     return html;
   };
@@ -3552,7 +3552,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     html += `<div class="card"><h3>Atölye düzeni</h3><div class="kv">
       <div><span>Bölme</span><b>${s.upg.bays}</b></div><div><span>Yıkama</span><b>${G.facLevel("yikama") ? "Seviye " + G.facLevel("yikama") : "Yok"}</b></div>
       <div><span>Boya kabini</span><b>${s.upg.paint ? "Var" : "Yok"}</b></div><div><span>Göçük seti</span><b>${s.upg.pdr ? "Var" : "Yok"}</b></div></div>
-      <p class="muted small">İşler galeri açıkken (09:00–19:00) ilerler. Usta olmadan kendi atölyende işler yavaş gider. Yeni ekipman Patron sekmesinde.</p></div>`;
+      </div>`;
     return html;
   };
 
@@ -3560,7 +3560,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   function ustaCard() {
     const s = S(), us = G.ustas(), cl = G.facLevel("cardak"), ce = G.facEff("cardak");
     let html = `<div class="card"><div class="row"><h3>Ustalar ve çardak</h3><span class="pill">Atölye hızı <b>×${G.workRate().toFixed(2).replace(".", ",")}</b></span></div>`;
-    if (!us.length) return html + `<p class="muted small">Ustan yok; içerideki işler yavaş ilerler. Patron → Personel'den usta al.</p></div>`;
+    if (!us.length) return html + `<p class="muted small">Usta yok: işler yavaş.</p></div>`;
     html += `<p class="muted small">${cl ? `Çardak ${cl}. seviye · ${G.restingCount()}/${ce.cap} yer dolu · saatte +${Math.round(ce.rest)} enerji. Dinlenen usta en az 30 dakika kalırsa ${G.fmtDur(ce.buffMins)} boyunca ×${ce.buffMult.toFixed(2).replace(".", ",")} hızlı çalışır.${ce.auto ? " Otomatik mola açık." : ""}` : "Çalışan usta yorulur ve yavaşlar. Usta çardağı kurarsan gün içinde dinlendirebilirsin."}</p>`;
     html += us.map(u => {
       const e = Math.round(u.energy == null ? 100 : u.energy);
@@ -3585,7 +3585,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       ${pips(n)}<ul class="facl">${lines.slice(0, 3).map(l => `<li>${esc(l)}</li>`).join("")}</ul><div class="row">${nx ? `<span class="small muted">Sonraki: ${G.facLines(key, nx.n).find((l, i) => l !== lines[i]) || ""}</span>` : "<span></span>"}${btn}</div></div>`;
   }
   function patronTesis() {
-    return `<p class="muted small" style="margin:0">Her tesis 20 seviyedir. Yeni seviyeler sen seviye atladıkça açılır; aldığın her seviye galeri görünümünde belirir.</p>` + Object.keys(G.FACILITIES).map(facCard).join("");
+    return `` + Object.keys(G.FACILITIES).map(facCard).join("");
   }
 
   VIEWS.patron = function () {
@@ -3623,7 +3623,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   function passiveCard() {
     const pr = G.passiveRate();
     return `<div class="card"><div class="row"><h3>Pasif gelir</h3><span class="pill">Saatte <b>${G.fmtS(pr.total)}</b></span></div>
-      <p class="muted small">Oyundan çıkınca galerin çalışmaya devam eder; döndüğünde en fazla ${G.OFFLINE_MAX_H} saatlik kazancı alırsın. Saatlik gelir son 7 günün ortalama satış kârına göre hesaplanır; satış danışmanları ve şöhret artırır, Lüks → Yatırım'daki işletmeler ayrıca ekler.</p>
+      <p class="muted small">Oyun kapalıyken de kazanırsın (en fazla ${G.OFFLINE_MAX_H} saat).</p>
       <div class="kv"><div><span>Temel</span><b>${G.fmtS(pr.base)}/sa</b></div><div><span>Danışman bonusu</span><b>+%${Math.round(pr.sales * 100)}</b></div><div><span>Şöhret bonusu</span><b>+%${Math.round(pr.fame * 100)}</b></div><div><span>Yatırımlar</span><b>+${G.fmtS(pr.invest)}/sa</b></div><div><span>Şimdiye kadar</span><b>${G.fmtS(S().stats.passive || 0)}</b></div></div></div>`;
   }
   // Sürüm, geri bildirim ve gizlilik bağlantısı
@@ -3640,8 +3640,8 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   function patronDurum() {
     const s = S(), T = s.today;
     const qs = G.activeQuests(3);
-    return passiveCard() + `<div class="card"><div class="row"><div><b>Oyun rehberi</b><p class="muted small">Oyunun nasıl oynandığını anlatan tanıtım turu ve ipuçları.</p></div><button class="btn sm" type="button" data-a="tour">Turu baştan izle</button></div>
-      <div class="row"><div><b>Teklif gelince zamanı durdur</b><p class="muted small">Satış danışmanın yokken müşteri teklif verince oyun durur; teklife cevap verince ya da "Sonra" deyince devam eder. Danışmanın varsa zaman akar, teklifleri danışmanlar sırayla devralır.</p></div><button class="btn sm ${S().opts.offerPause ? "pri" : ""}" type="button" data-a="opt-offerpause" aria-pressed="${S().opts.offerPause}">${S().opts.offerPause ? "Açık" : "Kapalı"}</button></div></div>${appCard()}<div class="card"><h3>Görevler</h3>${qs.length ? qs.map(q => `<div class="row"><div>${esc(q.text)}</div><div class="num small pos">+${G.fmtS(q.reward)}</div></div>`).join("") : `<p class="muted">Bütün görevleri bitirdin. Gerçek bir patronsun.</p>`}
+    return passiveCard() + `<div class="card"><div class="row"><div><b>Oyun rehberi</b></div><button class="btn sm" type="button" data-a="tour">Turu baştan izle</button></div>
+      <div class="row"><div><b>Teklif gelince zamanı durdur</b><p class="muted small">Danışman yokken teklif gelince oyun durur.</p></div><button class="btn sm ${S().opts.offerPause ? "pri" : ""}" type="button" data-a="opt-offerpause" aria-pressed="${S().opts.offerPause}">${S().opts.offerPause ? "Açık" : "Kapalı"}</button></div></div>${appCard()}<div class="card"><h3>Görevler</h3>${qs.length ? qs.map(q => `<div class="row"><div>${esc(q.text)}</div><div class="num small pos">+${G.fmtS(q.reward)}</div></div>`).join("") : `<p class="muted">Bütün görevleri bitirdin. Gerçek bir patronsun.</p>`}
         <p class="muted small">${s.quests.length}/${G.QUESTS.length} görev tamamlandı</p></div>
       <div class="card"><h3>Bugün</h3><div class="kv">
         <div><span>Satış</span><b>${T.sales}</b></div><div><span>Satış kârı</span><b class="${T.profit >= 0 ? "pos" : "neg"}">${G.fmtS(T.profit)}</b></div>
@@ -3663,7 +3663,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
         <div class="kv"><div><span>Kapasite</span><b>${N.cap} araç</b></div><div><span>Personel</span><b>${N.staff}</b></div><div><span>Kira</span><b>${G.fmt(N.rent)}</b></div><div><span>Taşınma</span><b>${G.fmtS(N.cost)}</b></div></div>
         <button class="btn pri block" type="button" data-a="move" ${ok ? "" : "disabled"}>${s.level < N.lvl ? `Seviye ${N.lvl} gerekir` : s.money < N.cost ? `Kasada ${G.fmtS(N.cost)} olmalı` : "Taşın"}</button></div>`;
     }
-    html += `<div class="card"><h3>Ekipman</h3><p class="muted small">Galeri, yıkama, çardak ve otopark Tesisler bölümünde.</p>${Object.keys(G.UPGRADES).map(k => {
+    html += `<div class="card"><h3>Ekipman</h3>${Object.keys(G.UPGRADES).map(k => {
       const u = G.UPGRADES[k], n = G.upgNext(k), lv = s.upg[k];
       const lvTxt = u.levels.length > 1 ? ` <span class="chip">${lv}/${u.levels.length}</span>` : lv ? ` <span class="chip good">Kurulu</span>` : "";
       let btn;
@@ -3680,13 +3680,13 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     let html = `<div class="card"><div class="row"><h3>Kadro</h3><span class="pill">Kadro <b>${s.staff.length}/${L.staff}</b></span></div>`;
     html += s.staff.length ? s.staff.map(st => `<div class="opt"><div class="who">${UI.avatar(st, "personel", st.role)}<div><b>${esc(st.name)}</b> · ${esc(G.ROLES[st.role].name)} <span class="chip">${"★".repeat(st.skill)}${"☆".repeat(5 - st.skill)}</span><small>Günlük ${G.fmt(st.salary)}</small></div></div>
       <button class="btn sm danger" type="button" data-a="fire" data-id="${st.id}">${UI.armed === "fire" + st.id ? "Emin misin?" : "Çıkar"}</button></div>`).join("")
-      : `<p class="muted small">Henüz çalışanın yok. Her şeyi sen yapıyorsun.</p>`;
+      : `<p class="muted small">Henüz çalışanın yok.</p>`;
     html += `</div>`;
     if (UI.buyerCard) html += UI.buyerCard();
     if (G.staffOf("satis").length) {
-      html += `<div class="card"><h3>Danışmanın indirim yetkisi</h3><p class="muted small">15 dakika içinde cevap vermediğin teklifleri danışmanın bu indirime kadar kendisi bağlar.</p><div class="quick">${[0, 3, 5, 8, 12].map(v => `<button class="btn ${Math.round(s.maxDisc * 100) === v ? "pri" : ""}" type="button" data-a="disc" data-v="${v}">%${v}</button>`).join("")}</div></div>`;
+      html += `<div class="card"><h3>Danışmanın indirim yetkisi</h3><p class="muted small">Danışman en fazla bu indirimi yapar.</p><div class="quick">${[0, 3, 5, 8, 12].map(v => `<button class="btn ${Math.round(s.maxDisc * 100) === v ? "pri" : ""}" type="button" data-a="disc" data-v="${v}">%${v}</button>`).join("")}</div></div>`;
     }
-    html += `<div class="card"><h3>İş başvuruları</h3><p class="muted small">Başvurular 5 günde bir yenilenir.</p>${s.cands.length ? s.cands.map(c => `<div class="opt"><div class="who">${UI.avatar(c, "personel", c.role)}<div><b>${esc(c.name)}</b> · ${esc(G.ROLES[c.role].name)} <span class="chip">${"★".repeat(c.skill)}${"☆".repeat(5 - c.skill)}</span><small>${esc(G.ROLES[c.role].desc)} Günlük ${G.fmt(c.salary)}.</small></div></div>
+    html += `<div class="card"><h3>İş başvuruları</h3><p class="muted small">5 günde bir yenilenir.</p>${s.cands.length ? s.cands.map(c => `<div class="opt"><div class="who">${UI.avatar(c, "personel", c.role)}<div><b>${esc(c.name)}</b> · ${esc(G.ROLES[c.role].name)} <span class="chip">${"★".repeat(c.skill)}${"☆".repeat(5 - c.skill)}</span><small>${esc(G.ROLES[c.role].desc)} Günlük ${G.fmt(c.salary)}.</small></div></div>
       <button class="btn sm pri" type="button" data-a="hire" data-id="${c.id}" ${s.staff.length >= L.staff ? "disabled" : ""}>İşe al</button></div>`).join("") : `<p class="muted small">Şu an başvuru yok.</p>`}</div>`;
     return html;
   }
@@ -3694,13 +3694,13 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   function patronFinans() {
     const s = S();
     const lim = G.loanLimit();
-    let html = `<div class="card"><h3>Galeri tanıtımı</h3><p class="muted small">Oyun içindeki tanıtım bütçen; her gün kasadan düşer.</p>${G.ADS.map((a, i) => `<div class="opt"><div><b>${esc(a.name)}</b><small>${a.cost ? `Günlük ${G.fmt(a.cost)} · müşteri ×${String(a.mult).replace(".", ",")}${a.rep ? " · itibar her gün artar" : ""}` : "Müşteriler yalnızca yoldan geçerken gelir."}</small></div>
+    let html = `<div class="card"><h3>Galeri tanıtımı</h3>${G.ADS.map((a, i) => `<div class="opt"><div><b>${esc(a.name)}</b><small>${a.cost ? `Günlük ${G.fmt(a.cost)} · müşteri ×${String(a.mult).replace(".", ",")}${a.rep ? " · itibar her gün artar" : ""}` : "Müşteriler yalnızca yoldan geçerken gelir."}</small></div>
       <button class="btn sm ${s.ads === i ? "pri" : ""}" type="button" data-a="ads" data-v="${i}" ${s.ads === i ? "disabled" : ""}>${s.ads === i ? "Seçili" : "Seç"}</button></div>`).join("")}</div>`;
     html += `<div class="card"><h3>Banka</h3><div class="kv"><div><span>Kredi borcu</span><b>${G.fmt(s.loan)}</b></div><div><span>Limit</span><b>${G.fmtS(lim)}</b></div><div><span>Günlük faiz</span><b>%0,15</b></div></div>
-      <p class="muted small">Kasa eksiye düşerse ek hesaptan günlük %0,4 faiz işler.</p>
+      <p class="muted small">Eksi kasada günlük %0,4 faiz.</p>
       <div class="btns"><button class="btn" type="button" data-a="borrow" data-v="250000" ${s.loan + 250000 > lim ? "disabled" : ""}>250 bin çek</button><button class="btn" type="button" data-a="borrow" data-v="1000000" ${s.loan + 1e6 > lim ? "disabled" : ""}>1 milyon çek</button>
       <button class="btn" type="button" data-a="repay" data-v="250000" ${s.loan <= 0 ? "disabled" : ""}>250 bin öde</button><button class="btn" type="button" data-a="repay" data-v="${s.loan}" ${s.loan <= 0 || s.money < s.loan ? "disabled" : ""}>Hepsini öde</button></div></div>`;
-    html += `<div class="card"><h3>Oyun</h3><p class="muted small">Oyun bu cihazda otomatik kaydedilir.</p><div class="btns"><button class="btn danger" type="button" data-a="reset">${UI.armed === "reset" ? "Bütün ilerleme silinecek. Tekrar dokun." : "Sıfırdan başla"}</button></div></div>`;
+    html += `<div class="card"><h3>Oyun</h3><div class="btns"><button class="btn danger" type="button" data-a="reset">${UI.armed === "reset" ? "Bütün ilerleme silinecek. Tekrar dokun." : "Sıfırdan başla"}</button></div></div>`;
     return html;
   }
 
@@ -3742,7 +3742,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     // 2. hazırlık
     html += `<section class="step"><h3><span class="n">2</span>Satışa hazırla</h3>`;
     if (!car.inspected) {
-      html += `<div class="card rec"><div><b>Ekspertiz yaptır</b><p class="small muted">Gizli kusurları ortaya çıkarır. Bilinmeyen kusurla satılan araç şikâyet ve tazminat getirebilir.</p></div>
+      html += `<div class="card rec"><div><b>Ekspertiz yaptır</b><p class="small muted">Gizli kusurları bulur.</p></div>
         <div class="btns"><button class="btn warn" type="button" data-a="inspect" data-id="${car.id}">${G.fmt(G.expertCost())} öde</button>${adBtn("inspect", "Reklamla ücretsiz", `data-id="${car.id}"`)}</div></div>`;
     }
     if (car.status === "lot") {
@@ -3752,7 +3752,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
         html += `<div class="card rec"><div><b>Önerilen: ${esc(rec.name)}</b><p class="small muted">${G.fmtS(rec.cost)} · ${G.fmtDur(rec.mins)} · ${rec.inhouse ? "kendi atölyende" : "dış serviste"}${gain > 0 ? ` · değeri <span class="pos">+${G.fmtS(gain)}</span>` : " · müşteriler temiz aracı daha çok sever"}</p></div>
           <button class="btn pri" type="button" data-a="job" data-id="${car.id}" data-t="${rec.type}" data-is="${rec.issue || ""}" ${rec.why ? "disabled" : ""}>${rec.why ? esc(rec.why) : "Başlat"}</button></div>`;
       } else if (car.inspected) {
-        html += `<p class="muted small">Bu araç satışa hazır. Ekstra iş değerini masrafından fazla artırmaz.</p>`;
+        html += `<p class="muted small">Satışa hazır.</p>`;
       }
       const opts = G.jobOptions(car);
       html += `<details class="more"><summary>Bütün atölye işleri (${opts.length})</summary>${opts.map(o => {
@@ -3796,11 +3796,11 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     let html = head(G.carName(car), `${esc(G.SELLERS[l.seller].name)} · ${esc(l.sellerName)}`);
     html += `<div class="hero">${UI.carSVG(car)}<span class="sticker">${G.fmtS(l.last)}</span></div>
       <div class="tiles"><div><span>İstenen</span><b>${G.fmtS(l.last)}</b></div><div><span>Tahmini değer</span><b>${ap ? "≈ " + G.fmtS(ap) : "?"}</b></div><div><span>Değerlendirme</span><b class="${deal && deal.c === "good" ? "pos" : deal && deal.c === "bad" ? "neg" : "muted"}">${deal ? deal.t : "Bilinmiyor"}</b></div></div>
-      ${sk ? `<p class="small muted">Ekspertiz ustanın tahmini <span class="stars">${"★".repeat(sk)}${"☆".repeat(5 - sk)}</span> · hata payı ±%${Math.round(G.EST_SPREAD[sk] * 100)}</p>` : `<p class="small muted">Aracın değerini bilmiyorsun. <b>Ekspertiz ustası</b> işe alırsan (Patron → Personel) fırsat mı pahalı mı söyler.</p>`}
+      ${sk ? `<p class="small muted">Ekspertiz ustanın tahmini <span class="stars">${"★".repeat(sk)}${"☆".repeat(5 - sk)}</span> · hata payı ±%${Math.round(G.EST_SPREAD[sk] * 100)}</p>` : `<p class="small muted">Değeri görmek için ekspertiz ustası al.</p>`}
       <p class="small">${spec(car)} · ${esc(car.color)}</p>
       <div class="chips">${paintChips(car)}${car.inspected ? issueChips(car) : ""}<span class="chip ${cs >= 70 ? "good" : cs >= 50 ? "warn" : "bad"}">Durum ${cs}${car.inspected ? "" : " (satıcı beyanı)"}</span></div>`;
     if (!car.inspected && !l.done) {
-      html += `<div class="card rec"><div><b>Almadan önce ekspertiz</b><p class="small muted">Satıcının söylediği ile gerçek durum farklı olabilir.</p></div>
+      html += `<div class="card rec"><div><b>Almadan önce ekspertiz</b></div>
         <div class="btns"><button class="btn warn" type="button" data-a="l-inspect" data-id="${l.id}">${G.fmt(G.expertCost())} öde</button>${adBtn("inspect", "Reklamla ücretsiz", `data-l="${l.id}"`)}</div></div>`;
     }
     if (l.msgs.length) html += `<div class="chat">${l.msgs.map(m => `<div class="msg ${m.who}">${esc(m.text)}</div>`).join("")}</div>`;
@@ -3810,7 +3810,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
         <details class="more"><summary>Kendi teklifimi vereyim</summary><div class="range"><div class="range-out"><b id="ofOut">${G.fmt(d.offer)}</b><span class="small muted" id="ofInfo">${offerInfo(d.offer, l, ap)}</span></div>
         <input type="range" id="ofRange" data-in="offer" min="${lo}" max="${hi}" step="1000" value="${d.offer}" aria-label="Teklif">
         <button class="btn pri" type="button" data-a="l-offer" data-id="${l.id}">Bu teklifi ver</button></div></details>
-        <p class="muted small">Satıcının sabrı: ${"●".repeat(Math.max(0, l.rounds))}${"○".repeat(Math.max(0, G.SELLERS[l.seller].rounds - l.rounds))} · Çok düşük teklif satıcıyı kızdırır.</p>`;
+        <p class="muted small">Satıcının sabrı: ${"●".repeat(Math.max(0, l.rounds))}${"○".repeat(Math.max(0, G.SELLERS[l.seller].rounds - l.rounds))}</p>`;
     } else if (l.bought) html += `<div class="card"><p class="pos"><b>Araç artık senin.</b> Şimdi fiyat etiketini as.</p><button class="btn pri" type="button" data-a="car" data-id="${car.id}">Araca git</button></div>`;
     return html;
   };
@@ -3849,7 +3849,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       <details class="more"><summary>Kendi karşı teklifimi vereyim</summary><div class="range"><div class="range-out"><b id="coOut">${G.fmt(d.counter)}</b><span class="small" id="coInfo">${counterInfo(d.counter, cost)}</span></div>
       <input type="range" id="coRange" data-in="counter" min="${lo}" max="${hi}" step="1000" value="${d.counter}" aria-label="Karşı teklif">
       <button class="btn warn" type="button" data-a="counter" data-id="${c.id}">Bu fiyatı söyle</button></div></details>
-      <p class="muted small">Çok yüksek karşı teklif müşteriyi kaçırır. Pazarlık hakkı bitince müşteri gider.</p>`;
+      `;
     return html;
   };
   function counterInfo(v, cost) { const m = v - cost; return `<span class="${m >= 0 ? "pos" : "neg"}">${m >= 0 ? "kâr" : "zarar"} ${G.fmtS(Math.abs(m))}</span>`; }
@@ -3869,7 +3869,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     if (!L) {
       html += `${s.upg.expert && !car.inspected ? `<button class="btn warn block" type="button" data-a="a-inspect">Hızlı kontrol · ${G.fmt(G.expertCost())}</button>` : ""}
         <button class="btn pri block" type="button" data-a="a-start">${a.idx === 0 ? "İhaleyi başlat" : "Sıradaki lotu aç"}</button>
-        <p class="muted small">Açılış ${G.fmt(lot.start)} · artış ${G.fmt(lot.inc)}. Son tekliften sonra 4 saniye kimse artırmazsa çekiç iner.</p>`;
+        <p class="muted small">Açılış ${G.fmt(lot.start)} · artış ${G.fmt(lot.inc)}.</p>`;
     } else {
       const next = L.leader ? L.bid + lot.inc : L.bid;
       html += `<div class="card"><div class="row"><div><div class="muted small">${L.leader ? "En yüksek teklif · " + esc(L.leader) : "Açılış fiyatı"}</div><div class="auc-big ${L.leader === "Sen" ? "pos" : ""}">${G.fmt(L.bid)}</div></div><div class="num" style="font-size:22px;font-weight:700">${Math.max(0, L.timer).toFixed(1).replace(".", ",")} sn</div></div>
@@ -3887,7 +3887,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     let html = head(`Gün ${sm.day} kapandı`, "Kepenkler indi. Günün hesabı:", false);
     html += `<div class="tiles"><div><span>Satış</span><b>${T.sales}</b></div><div><span>Satış kârı</span><b class="${T.profit >= 0 ? "pos" : "neg"}">${G.fmtS(T.profit)}</b></div><div><span>Günün neti</span><b class="${sm.net >= 0 ? "pos" : "neg"}">${G.fmtS(sm.net)}</b></div></div>`;
     if (!sm.bonusTaken && G.adLeft("bonus")) {
-      html += `<div class="card bonus"><div><b>Sponsor bonusu: ${G.fmt(sm.bonus)}</b><p class="small muted">Kısa bir reklam izle, bu para kasana girsin. İstemezsen geç.</p></div>${adBtn("bonus", "İzle ve al", "", "block")}</div>`;
+      html += `<div class="card bonus"><div><b>Sponsor bonusu: ${G.fmt(sm.bonus)}</b></div>${adBtn("bonus", "İzle ve al", "", "block")}</div>`;
     } else if (sm.bonusTaken) html += `<p class="pos small"><b>Sponsor bonusu kasaya girdi: ${G.fmt(sm.bonus)}</b></p>`;
     html += `<details class="more"><summary>Giderler ve ayrıntılar</summary><div class="card">${sm.lines.map(([l, v]) => `<div class="row small"><div>${esc(l)}</div><div class="num">${v < 0 ? "−" : ""}${G.fmt(Math.abs(v))}</div></div>`).join("")}
       ${T.commission ? `<div class="row small"><div>Danışman primi</div><div class="num">${G.fmt(T.commission)}</div></div>` : ""}${T.invest ? `<div class="row small"><div>Yatırım (ekipman, taşınma)</div><div class="num">${G.fmt(T.invest)}</div></div>` : ""}
@@ -3909,7 +3909,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       const nextAt = [5, 10, 15].find(x => x > n);
       html += `<div class="fac-hero ${key === "galeri" ? "wide" : ""} ${n || key === "galeri" || key === "otopark" ? "" : "off"}"><img src="${UI.photoSrc(pk, "sahne")}" alt="${esc(F.name)} görünümü"><span class="fc-cap"><b>${n || key === "galeri" || key === "otopark" ? `${stage}. aşama` : "Kurulunca böyle olacak"}</b><small>${nextAt ? `Görünüm ${nextAt}. seviyede değişir` : "Son görünüm"}</small></span></div>`;
     }
-    html += `<div class="card"><p class="small">${esc(F.desc)}</p>${pips(n)}</div>`;
+    html += `<div class="card">${pips(n)}</div>`;
     const cur = G.facLines(key, n);
     html += `<div class="card"><h3>Şu an</h3><ul class="facl">${cur.map(l => `<li>${esc(l)}</li>`).join("")}</ul></div>`;
     if (nx) {
@@ -3958,9 +3958,9 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     const offers = s.custs.filter(c => c.state === "offer").length;
     const sales = G.staffOf("satis").length;
     return head("Günü bitir", `Saat ${G.clock(s.min)} · kapanışa ${G.fmtDur(G.CLOSE - s.min)} var`) + `
-      <div class="card"><p class="small">Zaman 19:00'a kadar hızla akar: atölye işleri ilerler, müşteriler gelir, ilan saatlerinde yeni ilanlar düşer.</p>
+      <div class="card"><p class="small">Gün 19:00'a kadar hızla akar.</p>
         ${offers ? `<p class="small ${sales ? "" : "neg"}">${offers} müşteri teklif bekliyor. ${sales ? "Satış danışmanın onlarla ilgilenecek." : "Danışmanın olmadığı için cevapsız kalırlarsa beklemekten sıkılıp gidebilirler."}</p>` : ""}
-        <p class="small muted">Danışmanın yoksa gün içinde gelen yeni müşterilerin teklifleri de cevapsız kalır.</p></div>
+        </div>
       <div class="btns big-btns"><button class="btn pri" type="button" data-a="skip-go">Günü bitir</button><button class="btn" type="button" data-a="close">Vazgeç</button></div>`;
   };
 
@@ -3974,11 +3974,11 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       <div class="intro-art">${demo}</div>
       <div class="field"><label for="nameIn"><b>Galerinin adı</b></label><input type="text" id="nameIn" maxlength="28" value="${esc(UI.draft.name || "Patron Otomotiv")}" autocomplete="off"></div>
       <div class="card"><h3>Nasıl oynanır</h3><ol class="steps small">
-        <li><b>Araç al</b>: ilanlara bak, pazarlık et ya da ihaleye gir. Aracın değerini bilmek için ekspertiz ustası işe al.</li>
-        <li><b>Hazırla</b>: araca dokun, önerilen atölye işini başlat.</li>
-        <li><b>Fiyat koy</b>: tek dokunuşla etiketi as. Müşteri gelince teklifini kabul et ya da biraz daha iste.</li>
-        <li><b>Büyü</b>: kârla vitrin, atölye, personel ve yeni adresler al.</li></ol>
-        <p class="muted small">Ne yapacağını bilmezsen Galeri ekranındaki "Şimdi ne yapmalı?" kartına bak. Reklam izlemek tamamen isteğe bağlıdır; izlersen bonus kazanırsın.</p></div>
+        <li><b>Al</b>: ilanda pazarlık et.</li>
+        <li><b>Hazırla</b>: atölyede değerini artır.</li>
+        <li><b>Sat</b>: etiketi as, teklifi kabul et.</li>
+        <li><b>Büyü</b>: tesis, personel, yeni adres.</li></ol>
+        <p class="muted small">Takılırsan "Şimdi ne yapmalı?" kartına bak.</p></div>
       <button class="btn pri block" type="button" data-a="begin">Kepenkleri aç</button>`;
   };
 
@@ -4944,10 +4944,10 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   UI.luxCat = UI.luxCat || "ev";
   UI.luxView = function () {
     const S = G.S, p = G.prestige(), e = G.presEff(p);
-    let html = `<div class="card lux-head"><div class="row"><div><h3>Patronun hayatı</h3><p class="muted small">Kişisel lüks harcamalar. Her eşya şöhret kazandırır; şöhret müşterilerin sana güvenini ve ödemeye razı olduğu fiyatı artırır.</p></div><div class="fame"><span>Şöhret</span><b>${p}</b></div></div>
-      <div class="kv"><div><span>Müşteri ödemesi</span><b>+%${(Math.round((e.pay - 1) * 1000) / 10).toString().replace(".", ",")}</b></div><div><span>Günlük itibar</span><b>+${e.rep.toFixed(2).replace(".", ",")}</b></div>
+    let html = `<div class="card lux-head"><div class="row"><div><h3>Patronun hayatı</h3><p class="muted small">Her eşya şöhret kazandırır.</p></div><div class="fame"><span>Şöhret</span><b>${p}</b></div></div>
+      <div class="kv"><div><span>Müşteri ödemesi</span><b>+%${(Math.round((e.pay - 1) * 1000) / 10).toString().replace(".", ",")}</b></div>
       <div><span>Zengin müşteri</span><b>${e.gate ? `+${e.gate} kademe` : "50 şöhrette"}</b></div><div><span>Günlük bakım</span><b>${G.fmtS(G.luxUpkeep())}</b></div>
-      <div><span>Yatırım geliri/gün</span><b class="pos">${G.fmtS(G.investIncome())}</b></div><div><span>Toplam yatırım kazancı</span><b>${G.fmtS(S.stats.investIncome || 0)}</b></div></div></div>`;
+      <div><span>Yatırım geliri/gün</span><b class="pos">${G.fmtS(G.investIncome())}</b></div></div></div>`;
     if (G.bestOf("yat")) {
       const ready = G.partyReady(), pe = G.partyEff();
       html += `<div class="card party"><div class="row"><div><b>Yat partisi · ${esc(G.bestOf("yat").name)}</b><p class="small muted">${G.partyActive() ? "Bugün partinin etkisi sürüyor: zengin müşteri akını!" : ready ? `Parti ver: itibar +${pe.rep}, ertesi gün ${pe.traffic.toFixed(2).replace(".", ",")}× müşteri ve zengin müşteri akını. Masraf ${G.fmtS(G.partyCost())}.` : `Bir sonraki parti ${S.lastParty + G.PARTY_COOLDOWN}. günde.`}</p></div>
@@ -4955,7 +4955,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     }
     html += `<div class="segctl wrap3" role="group">${Object.keys(G.LUX_CATS).map(k => `<button type="button" data-a="luxcat" data-v="${k}" aria-pressed="${UI.luxCat === k}">${G.LUX_CATS[k].name} <small>${G.LUXURY.filter(x => x.cat === k && G.owns(x.id)).length}/${G.LUXURY.filter(x => x.cat === k).length}</small></button>`).join("")}</div>`;
     const C = G.LUX_CATS[UI.luxCat];
-    html += `<p class="muted small" style="margin:0">${esc(C.perk)} ${UI.luxCat === "yatirim" ? "" : `Bakım: fiyatın günde %${(C.upkeep * 100).toLocaleString("tr-TR", { maximumFractionDigits: 3 })}'i · `}Satarsan ödediğin fiyatın %${Math.round(C.resale * 100)}'i geri gelir.</p>`;
+    html += `<p class="muted small" style="margin:0">${esc(C.perk)}</p>`;
     html += `<div class="lux-grid">${G.LUXURY.filter(x => x.cat === UI.luxCat).map(x => {
       const own = G.owns(x.id);
       const net = x.income ? x.income - G.itemUpkeep(x) : 0;
@@ -5098,7 +5098,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
   const tick = ok => `<span class="${ok ? "pos" : "neg"}" aria-hidden="true">${ok ? "✓" : "✗"}</span>`;
   UI.dealerView = function () {
     const s = S(), d = D(), gl = G.facLevel("galeri");
-    let html = `<div class="card"><h3>Sıfır araç bayiliği</h3><p class="muted small">Markaların bayisi ol, sıfır aracı üreticiden %${Math.round((1 - G.DEALER.cost) * 100)} indirimli bayi fiyatına al, liste fiyatından sat. Başvuru: ${G.DEALER.steps.map(x => `${x.name} (${x.days} gün)`).join(" → ")} → karar. Denetim günü araçların temiz (ortalama ${G.DEALER.inspectClean}+) ve itibarın yüksek olsun.</p></div>`;
+    let html = `<div class="card"><h3>Sıfır araç bayiliği</h3><p class="muted small">Sıfır aracı %${Math.round((1 - G.DEALER.cost) * 100)} ucuza al, liste fiyatından sat. Denetim günü araçlar temiz olsun.</p></div>`;
     if (gl < G.DEALER.unlock) return html + `<div class="card"><p class="small">Bayilik başvuruları galeri binası <b>${G.DEALER.unlock}. seviyeye</b> gelince açılır. Şu an ${gl}. seviye.</p></div>`;
     for (const t of G.DEALER.tiers) {
       html += `<h3 class="dl-tier">${esc(t.name)} <span class="muted small">Başvuru ${G.fmtS(t.fee)} · lisans başına günlük aidat ${G.fmtS(t.daily)}</span></h3>`;
@@ -5229,7 +5229,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     const sk = G.buyerSkill();
     if (!sk) return "";
     const b = B(), withEks = G.appraiser && G.appraiser() > 0;
-    return `<div class="card"><h3>Satın alım bütçesi</h3><p class="muted small">Uzmanın günde en fazla ${G.BUYER.perDay(sk)} araç alır; tahmini değeri istenen fiyatın en az %${Math.round((G.BUYER.minDeal - 1) * 100)} üstünde olan ilanlara bakar. Hata payı ±%${Math.round(G.BUYER.spread[sk] * 100)}.${withEks ? " Ekspertiz ustanla birlikte çalışıyor: almadan önce ekspertiz yaptırır." : " Ekspertiz ustan yok: araçlar ekspertizsiz alınır, gizli kusur çıkabilir."}</p>
+    return `<div class="card"><h3>Satın alım bütçesi</h3><p class="muted small">Günde ${G.BUYER.perDay(sk)} araç · hata ±%${Math.round(G.BUYER.spread[sk] * 100)} · ${withEks ? "ekspertizle" : "ekspertizsiz"}</p>
       <div class="presets">${G.BUYER.budgets.map(([v, l]) => `<button type="button" class="btn sm ${b.budget === v ? "pri" : ""}" data-a="buyer-budget" data-v="${v}" aria-pressed="${b.budget === v}">${l}</button>`).join("")}</div>
       <p class="small">Bugün: ${b.n} araç · ${G.fmtS(b.spent)} harcandı${b.budget ? ` · kalan ${G.fmtS(G.buyerBudgetLeft())}` : ""}</p>
       ${b.log.length ? `<div class="small muted">${b.log.slice(0, 4).map(x => `<div>• ${esc(x)}</div>`).join("")}</div>` : ""}</div>`;
@@ -5478,10 +5478,10 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
       <div class="segctl" role="group">${tabs.map(([t, l]) => `<button type="button" data-a="club-tab" data-v="${t}" aria-pressed="${UI.clubTab === t}">${l}</button>`).join("")}</div>`;
     if (UI.clubTab === "kadro") {
       const sorted = c.players.slice().sort((a, b) => b.r - a.r);
-      html += `<p class="small muted">Maçta en iyi ${k.squad} oyuncu oynar; güç onların ortalaması + teknik kadro.</p><div class="list">${sorted.map((p, i) => `<div class="opt ${p.star ? "star" : ""}"><div><b>${esc(p.name)}</b> ${p.star ? `<span class="chip gold">Yıldız</span> ` : ""}<span class="chip ${i < k.squad ? "good" : ""}">${i < k.squad ? "İlk " + k.squad : "Yedek"}</span><small>${p.nat ? esc(p.nat) + " · " : ""}${esc(p.pos)} · ${p.age} yaş · maaş ${G.fmtS(G.playerWage(p, x.club))}/gün</small></div><div class="club-r"><b class="num">${p.r}</b><button class="btn sm danger" type="button" data-a="club-sell" data-v="${p.id}">Sat · ${G.fmtS(R.r1k(G.pPrice(p, x.club) * 0.7))}</button></div></div>`).join("")}</div>`;
+      html += `<div class="list">${sorted.map((p, i) => `<div class="opt ${p.star ? "star" : ""}"><div><b>${esc(p.name)}</b> ${p.star ? `<span class="chip gold">Yıldız</span> ` : ""}<span class="chip ${i < k.squad ? "good" : ""}">${i < k.squad ? "İlk " + k.squad : "Yedek"}</span><small>${p.nat ? esc(p.nat) + " · " : ""}${esc(p.pos)} · ${p.age} yaş · maaş ${G.fmtS(G.playerWage(p, x.club))}/gün</small></div><div class="club-r"><b class="num">${p.r}</b><button class="btn sm danger" type="button" data-a="club-sell" data-v="${p.id}">Sat · ${G.fmtS(R.r1k(G.pPrice(p, x.club) * 0.7))}</button></div></div>`).join("")}</div>`;
     } else if (UI.clubTab === "transfer") {
       const list = G.clubMarket(id).slice().sort((a, b) => (b.star ? 1 : 0) - (a.star ? 1 : 0) || b.r - a.r);
-      html += `<p class="small muted">Liste her gün yenilenir. Scout ekibi daha iyi oyuncu bulur.</p>${UI.adBtn ? UI.adBtn("scout", "Reklam izle, listeyi hemen yenile", `data-v="${id}"`, "block") : ""}<div class="list">${list.map(p => { const pr = G.pPrice(p, x.club); return `<div class="opt ${p.star ? "star" : ""}"><div><b>${esc(p.name)}</b>${p.star ? ` <span class="chip gold">Yıldız</span>` : ""}<small>${p.nat ? esc(p.nat) + " · " : ""}${esc(p.pos)} · ${p.age} yaş · maaş ${G.fmtS(G.playerWage(p, x.club))}/gün</small></div><div class="club-r"><b class="num">${p.r}</b><button class="btn sm ${S().money >= pr ? "pri" : ""}" type="button" data-a="club-buy" data-v="${p.id}" ${S().money >= pr ? "" : "disabled"}>${G.fmtS(pr)}</button></div></div>`; }).join("") || `<p class="small">Bugünkü listede oyuncu kalmadı.</p>`}</div>`;
+      html += `${UI.adBtn ? UI.adBtn("scout", "Reklam izle, listeyi hemen yenile", `data-v="${id}"`, "block") : ""}<div class="list">${list.map(p => { const pr = G.pPrice(p, x.club); return `<div class="opt ${p.star ? "star" : ""}"><div><b>${esc(p.name)}</b>${p.star ? ` <span class="chip gold">Yıldız</span>` : ""}<small>${p.nat ? esc(p.nat) + " · " : ""}${esc(p.pos)} · ${p.age} yaş · maaş ${G.fmtS(G.playerWage(p, x.club))}/gün</small></div><div class="club-r"><b class="num">${p.r}</b><button class="btn sm ${S().money >= pr ? "pri" : ""}" type="button" data-a="club-buy" data-v="${p.id}" ${S().money >= pr ? "" : "disabled"}>${G.fmtS(pr)}</button></div></div>`; }).join("") || `<p class="small">Bugünkü listede oyuncu kalmadı.</p>`}</div>`;
     } else {
       html += `<div class="list">${Object.entries(G.CLUB_STAFF).map(([key, st]) => { const lv = c.staff[key], full = lv >= st.max, cost = full ? 0 : G.staffCost(id, key); return `<div class="opt"><div><b>${st.name}</b> <span class="chip">${lv}/${st.max}</span><small>${st.desc}${st.power ? ` · seviye başına güç +${String(st.power).replace(".", ",")}` : ""}</small></div>${full ? `<span class="chip good">Tam</span>` : `<button class="btn sm ${S().money >= cost ? "pri" : ""}" type="button" data-a="club-staff" data-v="${key}" ${S().money >= cost ? "" : "disabled"}>${G.fmtS(cost)}</button>`}</div>`; }).join("")}</div>`;
     }
@@ -5562,7 +5562,7 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
     const t = T(), left = G.tapLeft(), maxT = G.TAP.taps(t.lvl);
     const up = t.lvl < G.TAP.max ? `<button class="btn sm" type="button" data-a="tap-up">Pazarlık ustalığı ${t.lvl + 1}. sv · ${G.fmtS(G.TAP.cost(t.lvl))}</button>` : `<span class="chip good">Ustalık son seviyede</span>`;
     const auto = t.auto < G.TAP.autoMax ? `<button class="btn sm" type="button" data-a="tap-auto">Çağrı merkezi ${t.auto + 1}. sv · ${G.fmtS(G.TAP.autoCost(t.auto))}</button>` : `<span class="chip good">Çağrı merkezi tam</span>`;
-    return `<div class="card tap-card"><div class="row"><div><h3>Telefon masası</h3><p class="small muted">Müşteri ara, kapora ve komisyon topla. Arama hakkı her sabah yenilenir.</p></div><span class="chip ${G.tapBoostOn() ? "gold" : ""}" id="tapBoost">${G.tapBoostOn() ? "2× kazanç" : `Sv ${t.lvl}`}</span></div>
+    return `<div class="card tap-card"><div class="row"><div><h3>Telefon masası</h3><p class="small muted">Her dokunuş para.</p></div><span class="chip ${G.tapBoostOn() ? "gold" : ""}" id="tapBoost">${G.tapBoostOn() ? "2× kazanç" : `Sv ${t.lvl}`}</span></div>
       <button class="tap-btn" type="button" data-a="tap" ${left ? "" : "disabled"}>${PHONE}<span><b id="tapVal">+${G.fmtS(G.tapValue())}</b><small id="tapLeft">${left ? `${left}/${maxT} arama hakkı` : "Bugünlük arama hakkın bitti"}</small></span></button>
       <div class="small muted">${t.auto ? `Çağrı merkezi oyun saati ilerledikçe saatte ≈ ${G.fmtS(Math.round(G.TAP.value(t.lvl) * G.TAP.autoPerMin * t.auto) * 60)} getiriyor. ` : ""}Bugüne kadar masadan: <span id="tapTotal">${G.fmtS(t.total)}</span></div>
       <div class="btns">${up}${auto}</div>
@@ -5607,27 +5607,27 @@ window.G.CAR_PHOTO_DATA = {"anka-ekartal-gri":"UklGRvj2AABXRUJQVlA4WAoAAAAQAAAAr
 
   // tab: adımda açılacak sekme, el: vurgulanacak öğe (yoksa ekranın ortasında çıkar)
   G.TOUR = [
-    { title: "Hoş geldin patron!", text: "Galeri Patronu'nda ikinci el araç alır, hazırlar ve kârla satarsın. Sana kısa bir tur yaptırayım; istemezsen \"Eğitimi atla\"ya bas." },
-    { tab: "galeri", el: q(".top .kpis"), title: "Kasa, itibar, seviye", text: "Kasa senin paran. İtibar yükseldikçe daha çok müşteri gelir ve daha iyi fiyat verir. Sattıkça seviye atlarsın; yeni araç sınıfları ve tesisler açılır." },
-    { tab: "galeri", el: q(".top .speed"), title: "Zaman", text: "Galeri 09:00'da açılır, 19:00'da kapanır. Oyunu durdurabilir, 2× ya da 4× hızlandırabilir, en sağdaki düğmeyle günü bitirebilirsin." },
-    { tab: "galeri", el: q(".scene-card"), title: "Galerin", text: "Araçların parkta durur, müşteriler gelip bakar. Sahnedeki araca, müşteriye ya da binaya dokununca ilgili ekran açılır. Tesisleri yükselttikçe galerin büyür." },
-    { tab: "galeri", el: q(".card.todo"), title: "Şimdi ne yapmalı?", text: "Ne yapacağını bilmezsen buraya bak: sıradaki en önemli iki adım ve düğmesi burada." },
-    { tab: "piyasa", el: q("#view .crow"), title: "Araç al", text: "Her sabah ilanlar yenilenir, gün içinde yenileri düşer. İlana dokun ve satıcıyla pazarlık et. Almadan önce ekspertiz yaptırırsan gizli kusurları görürsün." },
-    { tab: "piyasa", el: nav(4), title: "Ucuz mu, pahalı mı?", text: "Aracın gerçek değerini ilk başta bilemezsin. Patron → Personel'den ekspertiz ustası işe alırsan fırsatları ve pahalıları söyler; yıldızı yüksek usta daha isabetli tahmin eder." },
-    { tab: "atolye", el: nav(3), title: "Atölye", text: "Aldığın aracı temizle, bakımını yap, boyasını düzelt: hazırlanan araç daha pahalıya satılır. Ustalar çalıştıkça yorulur, çardakta dinlenince hızlanır." },
-    { tab: "musteri", el: nav(2), title: "Müşteriler", text: "Fiyat etiketi astığın araçlara müşteriler teklif verir; teklif ekranın altında kart olarak açılır. \"Pazarlık et\" deyip kendin konuşabilirsin. Satış danışmanın varsa sen karışmazsan teklifleri o devralır." },
-    { tab: "patron", el: nav(4), title: "Patron masası", text: "Tesisleri yükselt, personel al, daha büyük bir adrese taşın. Para biriktikçe Lüks'ten ev, araba, yat, takım elbise ve daha fazlasını al." },
-    { tab: "galeri", title: "Reklamlar isteğe bağlı", text: "Yanında ▶ işareti olan düğmeler kısa bir reklam izletir ve bonus verir. İzlemek zorunda değilsin. Hadi ilk aracını sat!", last: true }
+    { title: "Hoş geldin patron!", text: "Ucuza al, hazırla, kârla sat. Kısa bir tur?" },
+    { tab: "galeri", el: q(".top .kpis"), title: "Kasa, itibar, seviye", text: "Paran, itibarın ve seviyen. Sattıkça büyürsün." },
+    { tab: "galeri", el: q(".top .speed"), title: "Zaman", text: "Durdur, hızlandır ya da günü bitir." },
+    { tab: "galeri", el: q(".scene-card"), title: "Galerin", text: "Galerin. Yükselttikçe görünümü değişir." },
+    { tab: "galeri", el: q(".card.todo"), title: "Şimdi ne yapmalı?", text: "Takılınca buraya bak." },
+    { tab: "piyasa", el: q("#view .crow"), title: "Araç al", text: "İlana dokun, pazarlık et. Ekspertiz gizli kusuru bulur." },
+    { tab: "piyasa", el: nav(4), title: "Ucuz mu, pahalı mı?", text: "Değeri görmek için ekspertiz ustası al." },
+    { tab: "atolye", el: nav(3), title: "Atölye", text: "Aracı hazırla, daha pahalıya sat." },
+    { tab: "musteri", el: nav(2), title: "Müşteriler", text: "Teklifler alttaki kartta açılır. Danışman alırsan o halleder." },
+    { tab: "patron", el: nav(4), title: "Patron masası", text: "Tesis, personel, adres ve lüks burada." },
+    { tab: "galeri", title: "Reklamlar isteğe bağlı", text: "▶ işaretli düğmeler reklamla bonus verir. Hadi başla!", last: true }
   ];
 
   // Bir ekran ilk kez açılınca çıkan kısa ipuçları (pencere türüne göre)
   G.TIPS = {
-    listing: ["Pazarlık", "Önerilen teklifle başla. Çok düşük teklif satıcıyı kızdırır ve sabrı biter. Ekspertiz yaptırmadan alırsan gizli kusur çıkabilir."],
-    car: ["Kendi aracın", "Önce önerilen atölye işini yap, sonra fiyat etiketini as. Etiketsiz araca müşteri bakmaz; \"Dengeli\" fiyat çoğu zaman en iyisidir."],
-    cust: ["Müşteri teklifi", "Teklif etikete yakınsa kabul et, değilse \"biraz daha iste\". Çok zorlarsan müşteri kapıdan çıkar gider."],
-    auction: ["İhale", "Rakip galericiler saniye saniye teklif verir. Son tekliften sonra 4 saniye kimse artırmazsa çekiç iner. Aracın değerinin üstüne çıkma!"],
-    summary: ["Gün sonu", "Günün satışı, kârı ve giderleri burada. Sponsor bonusu için reklam izlemek isteğe bağlı; istemezsen geç."],
-    fac: ["Tesisler", "Her yükseltme galerinin görünümünü de değiştirir. Yeni seviyeler sen seviye atladıkça açılır."]
+    listing: ["Pazarlık", "Önerilen teklifle başla; çok düşük teklif satıcıyı kızdırır."],
+    car: ["Kendi aracın", "Önce hazırla, sonra fiyat etiketini as."],
+    cust: ["Müşteri teklifi", "Teklif iyiyse kabul et, değilse biraz daha iste."],
+    auction: ["İhale", "Değerinin üstüne çıkma!"],
+    summary: ["Gün sonu", "Günün kârı ve giderlerin."],
+    fac: ["Tesisler", "Her yükseltme görünümü de değiştirir."]
   };
 
   let step = -1, wasPaused = false;

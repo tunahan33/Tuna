@@ -216,13 +216,13 @@
   // upkeep: fiyatın günlük yüzdesi, resale: satışta geri alınan oran
   // Fiyatlar uzun vadeli hedef olsun diye yüksek tutuldu; bakım oranları düşük ki sahip olmak oyunu batırmasın.
   G.LUX_CATS = {
-    ev:    { name: "Ev",    upkeep: 0.00016, resale: 0.95, perk: "Evler en çok şöhreti verir ve değerini korur." },
-    araba: { name: "Araba", upkeep: 0.00032, resale: 0.7,  perk: "En iyi araban galerinin önüne park eder; müşteriler patronun arabasını görür." },
-    mucevher: { name: "Mücevher", upkeep: 0.0001, resale: 0.85, perk: "Mücevherler değerini korur, sigortası ucuzdur; şöhret kazandırır." },
-    takim: { name: "Takım elbise", upkeep: 0.0004, resale: 0.4, perk: "Şık patrona müşteri güvenir: en iyi takım elbisen müşterinin ödemeye razı olduğu fiyatı artırır." },
-    ucak:  { name: "Uçak",  upkeep: 0.00048, resale: 0.75, perk: "Yurt dışı bağlantısı: her sabah piyasaya ithal premium, spor ve lüks araç ilanları gelir." },
-    yat:   { name: "Yat",   upkeep: 0.00048, resale: 0.7,  perk: "Haftada bir yat partisi: ertesi gün galeriye zengin müşteri akını ve itibar." },
-    yatirim:  { name: "Yatırım",  upkeep: 0.0015, resale: 0.85, perk: "Yatırımlar her gün gelir getirir ama bakım ve işletme gideri de vardır. Oyundan çıkınca da kazandırır." }
+    ev:    { name: "Ev",    upkeep: 0.00016, resale: 0.95, perk: "En çok şöhreti verir, değerini korur." },
+    araba: { name: "Araba", upkeep: 0.00032, resale: 0.7,  perk: "En iyi araban galerinin önünde durur." },
+    mucevher: { name: "Mücevher", upkeep: 0.0001, resale: 0.85, perk: "Değerini korur, şöhret kazandırır." },
+    takim: { name: "Takım elbise", upkeep: 0.0004, resale: 0.4, perk: "Müşteri daha çok öder." },
+    ucak:  { name: "Uçak",  upkeep: 0.00048, resale: 0.75, perk: "Her sabah ithal ilanlar gelir." },
+    yat:   { name: "Yat",   upkeep: 0.00048, resale: 0.7,  perk: "Haftada bir parti: zengin müşteri akını." },
+    yatirim:  { name: "Yatırım",  upkeep: 0.0015, resale: 0.85, perk: "Her gün gelir getirir, gideri de var." }
   };
   G.LUXURY = [
     { id: "e01", cat: "ev", name: "Stüdyo daire", desc: "Şehir merkezinde, metroya 3 dakika.", price: 4e6, lvl: 2, pres: 2, art: { t: "studio" } },
@@ -332,12 +332,12 @@
   ];
 
   G.ROLES = {
-    satis:    { name: "Satış danışmanı", base: 1300, desc: "Sen meşgulken teklifleri karşılar, pazarlık eder. Satıştan %1,5 prim alır." },
-    usta:     { name: "Usta",            base: 1600, desc: "Atölye işlerini hızlandırır. Çalıştıkça yorulur; çardakta dinlenir." },
-    yikama:   { name: "Yıkamacı",        base: 750,  desc: "Her sabah araçları siler, temiz tutar." },
-    muhasebe: { name: "Muhasebeci",      base: 1150, desc: "Günlük giderleri düşürür, vergi denetiminde ceza yemezsin." },
-    alim:     { name: "Satın alım uzmanı", base: 1500, desc: "Bütçene göre ilanlardan en kârlı aracı bulur, pazarlık edip alır. Ekspertiz ustanla birlikte çalışır: usta varsa almadan önce araca ekspertiz yaptırır. Yıldızı arttıkça değer tahmini isabetli olur." },
-    eksper:   { name: "Ekspertiz ustası", base: 1400, desc: "İlandaki ve ihaledeki aracın piyasa değerini tahmin eder; fırsat mı pahalı mı söyler. Yıldızı arttıkça tahmini isabetli olur." }
+    satis:    { name: "Satış danışmanı", base: 1300, desc: "Teklifleri senin yerine bağlar, satıştan %1,5 prim alır." },
+    usta:     { name: "Usta",            base: 1600, desc: "Atölye işlerini hızlandırır; yorulunca çardakta dinlenir." },
+    yikama:   { name: "Yıkamacı",        base: 750,  desc: "Her sabah araçları temizler." },
+    muhasebe: { name: "Muhasebeci",      base: 1150, desc: "Giderleri düşürür, vergi cezası yedirmez." },
+    alim:     { name: "Satın alım uzmanı", base: 1500, desc: "Bütçenle en kârlı aracı bulup alır." },
+    eksper:   { name: "Ekspertiz ustası", base: 1400, desc: "Aracın değerini tahmin eder; yıldızı arttıkça isabetli." }
   };
 
   // Atölye işleri. cost: araç değerine göre maliyet (v = aracın kusursuz hâldeki piyasa değeri)

@@ -85,7 +85,7 @@
     const sk = G.buyerSkill();
     if (!sk) return "";
     const b = B(), withEks = G.appraiser && G.appraiser() > 0;
-    return `<div class="card"><h3>Satın alım bütçesi</h3><p class="muted small">Uzmanın günde en fazla ${G.BUYER.perDay(sk)} araç alır; tahmini değeri istenen fiyatın en az %${Math.round((G.BUYER.minDeal - 1) * 100)} üstünde olan ilanlara bakar. Hata payı ±%${Math.round(G.BUYER.spread[sk] * 100)}.${withEks ? " Ekspertiz ustanla birlikte çalışıyor: almadan önce ekspertiz yaptırır." : " Ekspertiz ustan yok: araçlar ekspertizsiz alınır, gizli kusur çıkabilir."}</p>
+    return `<div class="card"><h3>Satın alım bütçesi</h3><p class="muted small">Günde ${G.BUYER.perDay(sk)} araç · hata ±%${Math.round(G.BUYER.spread[sk] * 100)} · ${withEks ? "ekspertizle" : "ekspertizsiz"}</p>
       <div class="presets">${G.BUYER.budgets.map(([v, l]) => `<button type="button" class="btn sm ${b.budget === v ? "pri" : ""}" data-a="buyer-budget" data-v="${v}" aria-pressed="${b.budget === v}">${l}</button>`).join("")}</div>
       <p class="small">Bugün: ${b.n} araç · ${G.fmtS(b.spent)} harcandı${b.budget ? ` · kalan ${G.fmtS(G.buyerBudgetLeft())}` : ""}</p>
       ${b.log.length ? `<div class="small muted">${b.log.slice(0, 4).map(x => `<div>• ${esc(x)}</div>`).join("")}</div>` : ""}</div>`;
