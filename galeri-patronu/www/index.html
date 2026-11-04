@@ -567,6 +567,12 @@ body::before { background: var(--hero-1); }
 .fac-hero.wide img { aspect-ratio: 16 / 9; }
 .fac-hero.off img { filter: grayscale(.6) brightness(.8); }
 .fac-hero .fc-cap { color: #fff; background: linear-gradient(transparent, rgba(5, 12, 20, .72)); }
+
+.stage-pop { position: fixed; z-index: 75; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: min(320px, calc(100% - 32px)); border-radius: 14px; overflow: hidden; box-shadow: 0 14px 36px rgba(0, 0, 0, .4); background: var(--surface); pointer-events: none; animation: stage-pop 2.6s ease forwards; }
+.stage-pop img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.stage-pop span { display: block; padding: 8px 12px; font: 800 15px/1.1 var(--font-display); text-transform: uppercase; color: var(--ink); }
+@keyframes stage-pop { 0% { opacity: 0; transform: translate(-50%, 16px) scale(.96); } 10%, 85% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, 8px); } }
+@media (prefers-reduced-motion: reduce) { .stage-pop { animation: none; } }
 </style>
 
 <header class="top">

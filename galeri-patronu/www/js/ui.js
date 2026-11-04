@@ -1178,11 +1178,20 @@
     lux: () => { UI.tab = "patron"; UI.sub.patron = "lux"; UI.sheet = null; window.scrollTo(0, 0); UI.render(); },
     party: () => { const r = G.throwParty(); msg(r); if (r.ok) UI.toast("Parti verildi! Yarın galeriye zengin müşteriler gelecek.", "good"); UI.render(); },
     facup: el => {
-      const r = G.buyFac(el.dataset.v); msg(r);
-      if (r.ok) UI.toast(`${G.FACILITIES[el.dataset.v].name}: seviye ${G.facLevel(el.dataset.v)}`, "good");
+      const key = el.dataset.v, before = G.stageOf(G.facLevel(key));
+      const r = G.buyFac(key); msg(r);
+      if (r.ok) UI.toast(`${G.FACILITIES[key].name}: seviye ${G.facLevel(key)}`, "good");
       UI.render();
-      // pencere açıksa yeni görünümü göstermek için en üste kay
-      if (r.ok && UI.sheet && UI.sheet.kind === "fac") { UI.renderSheet(true); const sh = $("sheet"); if (sh) sh.scrollTo({ top: 0, behavior: "smooth" }); }
+      if (r.ok && UI.sheet && UI.sheet.kind === "fac") UI.renderSheet(true); // kaydırma yeri korunur
+      // görünüm değiştiyse yeni fotoğraf ekranın altında kısa süre belirir (pencere kaymaz)
+      const after = G.stageOf(G.facLevel(key)), pk = key === "galeri" ? UI.photoSceneKey() : `${key}-${after}`;
+      if (r.ok && (after !== before || G.facLevel(key) === 1) && G.SCENE_PHOTOS.includes(pk)) {
+        const f = document.createElement("div");
+        f.className = "stage-pop";
+        f.innerHTML = `<img src="${UI.photoSrc(pk, "sahne")}" alt=""><span>Yeni görünüm · ${after}. aşama</span>`;
+        document.body.appendChild(f);
+        setTimeout(() => f.remove(), 2600);
+      }
     },
     rest: el => { const u = S().staff.find(x => x.id === +el.dataset.id); if (u) { msg(G.sendRest(u)); UI.render(); } },
     recall: el => { const u = S().staff.find(x => x.id === +el.dataset.id); if (u) { G.recall(u); UI.render(); } },
