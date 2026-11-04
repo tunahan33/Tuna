@@ -14,15 +14,15 @@
 /* Düzen: üstte sabit patron paneli (kasa, saat, hız), ortada sekme içeriği, altta uygulama sekme çubuğu.
    Araç kartlarında ön camdaki sarı fiyat etiketi tek vurgulu öğe. */
 :root {
-  --bg: #e6f4ef;
+  --bg: #eaf6ff;
   --surface: #ffffff;
   --surface-2: #f2f4f7;
   --ink: #17202b;
   --muted: #5c6977;
   --line: #d2e2dc;
-  --accent: #00a676;
+  --accent: #00b386;
   --accent-ink: #ffffff;
-  --accent-soft: #d2f5e8;
+  --accent-soft: #d4f8ec;
   --sticker: #ffd23f;
   --sticker-ink: #1d1a10;
   --good: #0fa958;
@@ -30,7 +30,7 @@
   --bad: #e8304a;
   --ground: #cfd5dc;
   --plate: #1f4fa8;
-  --hero-1: #00936b; --hero-2: #00b88a; --hero-3: #14b8d4;
+  --hero-1: #00b37e; --hero-2: #00bcd4; --hero-3: #4d6bff;
   --pop: #ff3d7f; --violet: #7b5cff;
   --shadow: 0 1px 2px rgba(20, 30, 40, .08), 0 4px 14px rgba(20, 30, 40, .06);
   --font-display: "Saira Condensed", "Arial Narrow", system-ui, sans-serif;
@@ -39,16 +39,16 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0b1320; --surface: #142033; --surface-2: #1b2a40; --ink: #eaf2fb; --muted: #9db0c6; --line: #263851;
+    --bg: #0a0f22; --surface: #141c34; --surface-2: #1c2746; --ink: #eaf2fb; --muted: #9db0c6; --line: #263851;
     --accent: #2fe0a8; --accent-ink: #032419; --accent-soft: #123b33; --good: #35e08a; --warn: #ffab2e; --bad: #ff5a70;
-    --hero-1: #006e57; --hero-2: #00946f; --hero-3: #0d8fb3;
+    --hero-1: #009f70; --hero-2: #0aa6c9; --hero-3: #5161f5;
     --ground: #26313d; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px rgba(0, 0, 0, .25); color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0b1320; --surface: #142033; --surface-2: #1b2a40; --ink: #eaf2fb; --muted: #9db0c6; --line: #263851;
+  --bg: #0a0f22; --surface: #141c34; --surface-2: #1c2746; --ink: #eaf2fb; --muted: #9db0c6; --line: #263851;
   --accent: #2fe0a8; --accent-ink: #032419; --accent-soft: #123b33; --good: #35e08a; --warn: #ffab2e; --bad: #ff5a70;
-  --hero-1: #006e57; --hero-2: #00946f; --hero-3: #0d8fb3;
+  --hero-1: #009f70; --hero-2: #0aa6c9; --hero-3: #5161f5;
   --ground: #26313d; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px rgba(0, 0, 0, .25); color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -89,6 +89,7 @@ h1, h2, h3 { text-wrap: balance; }
 #kMoney { font-size: 21px; }
 #kMoney[data-len="l"] { font-size: 18px; }
 #kMoney[data-len="xl"] { font-size: 15.5px; }
+#kMoney[data-len="xxl"] { font-size: 12.5px; }
 .kpi-v { font: 700 17px/1.25 var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kpi-v.neg { color: var(--bad); }
 .meter { height: 4px; background: var(--surface-2); border-radius: 2px; overflow: hidden; margin-top: 3px; }
@@ -573,6 +574,27 @@ body::before { background: var(--hero-1); }
 .stage-pop span { display: block; padding: 8px 12px; font: 800 15px/1.1 var(--font-display); text-transform: uppercase; color: var(--ink); }
 @keyframes stage-pop { 0% { opacity: 0; transform: translate(-50%, 16px) scale(.96); } 10%, 85% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, 8px); } }
 @media (prefers-reduced-motion: reduce) { .stage-pop { animation: none; } }
+
+/* Canlı palet: renkli arka plan, parlak kartlar ve sekmeler */
+body { background: radial-gradient(120% 60% at 0% 0%, color-mix(in srgb, var(--hero-1) 14%, transparent), transparent 60%), radial-gradient(100% 50% at 100% 30%, color-mix(in srgb, var(--hero-3) 12%, transparent), transparent 60%), var(--bg); background-attachment: fixed; }
+.top { box-shadow: 0 6px 24px color-mix(in srgb, var(--hero-3) 35%, transparent); }
+.card { border-radius: 16px; box-shadow: 0 1px 2px rgba(20, 30, 60, .06), 0 8px 24px color-mix(in srgb, var(--hero-3) 10%, transparent); }
+.btn.pri { background: linear-gradient(120deg, var(--hero-1), var(--hero-2) 55%, var(--hero-3)); box-shadow: 0 4px 14px color-mix(in srgb, var(--hero-2) 45%, transparent); }
+.btn.warn { background: linear-gradient(120deg, #ffd23f, #ffad1f); border-color: transparent; }
+.btn.ad { background: color-mix(in srgb, var(--hero-2) 12%, var(--surface)); border-color: var(--hero-2); color: color-mix(in srgb, var(--hero-2) 70%, var(--ink)); }
+.segctl button[aria-pressed="true"] { background: linear-gradient(120deg, var(--hero-1), var(--hero-2)); color: #fff; box-shadow: 0 3px 10px color-mix(in srgb, var(--hero-2) 40%, transparent); }
+.nav { background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.nav button[aria-current="page"] { color: var(--hero-2); }
+.nav button[aria-current="page"]::before { background: linear-gradient(90deg, var(--hero-1), var(--hero-3)); height: 4px; }
+.vh h2 { background: linear-gradient(90deg, var(--hero-1), var(--hero-2) 50%, var(--hero-3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chip.good { background: color-mix(in srgb, var(--good) 22%, transparent); }
+.chip.acc { background: linear-gradient(120deg, #ff3d7f, #ff7a45); color: #fff; }
+.chip.gold { background: linear-gradient(90deg, #f5b700, #ffe27a); color: #2a1f00; }
+.sticker { background: linear-gradient(120deg, #ffe066, #ffc01f); }
+.card.todo { border-left: 5px solid #ffb000; }
+.fac-card:not(.off) { box-shadow: 0 6px 18px color-mix(in srgb, var(--hero-3) 25%, transparent); }
+.tap-btn { background: linear-gradient(135deg, #ffe066, #ffb000 60%, #ff8a00); }
+.kpi-v.neg { color: #ff8a9a; }
 </style>
 
 <header class="top">

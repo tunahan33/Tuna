@@ -292,7 +292,7 @@
     const km = $("kMoney");
     km.textContent = G.fmt(s.money);
     km.classList.toggle("neg", s.money < 0);
-    km.dataset.len = km.textContent.length > 13 ? "xl" : km.textContent.length > 11 ? "l" : "";
+    km.dataset.len = km.textContent.length > 17 ? "xxl" : km.textContent.length > 13 ? "xl" : km.textContent.length > 11 ? "l" : "";
     $("kRep").textContent = Math.round(s.rep) + "/100";
     $("kRepBar").style.width = s.rep + "%";
     $("kLvlL").textContent = `Seviye ${s.level}`;
@@ -382,7 +382,7 @@
       const all = s.listings.filter(l => !l.done);
       const ls = filterListings(all);
       const nd = G.nextDrop();
-      html += `<div class="card ilan-info"><div class="row"><div><b>Bugün ${all.length} ilan</b><p class="small muted">${nd ? `Sıradaki yeni ilanlar saat ${G.clock(nd)}'de düşer.` : "Bugün yeni ilan düşmeyecek."} Her sabah bütün ilanlar yenilenir.</p></div>${adBtn("ilan", "+4 ilan")}</div></div>`;
+      html += `<div class="card ilan-info"><div class="row"><div><b>Bugün ${all.length} ilan</b><p class="small muted">${nd ? `Yeni ilanlar ${G.clock(nd)}'de` : "Yeni ilanlar yarın sabah"}</p></div>${adBtn("ilan", "+4 ilan")}</div></div>`;
       html += listingFilters(all, ls.length);
       if (all.length && !ls.length) return html + `<div class="empty"><b>Bu filtreye uyan ilan yok</b>Filtreleri gevşet ya da sıfırla.<div style="margin-top:10px"><button class="btn" type="button" data-a="lf-reset">Filtreleri sıfırla</button></div></div>`;
       if (!ls.length) return html + `<div class="empty"><b>Şu an bakılacak ilan kalmadı</b>${nd ? `Saat ${G.clock(nd)}'de yeni ilanlar gelecek.` : "Yarın sabah yeni ilanlar gelecek."}</div>`;
