@@ -378,6 +378,7 @@
       <div class="segctl" role="group">${[["ilan", "İlanlar"], ["ihale", "İhale"], ...(G.anyLicense && G.anyLicense() ? [["sifir", "Sıfır"]] : []), ["trend", "Piyasa"]]
         .map(([k, l]) => `<button type="button" data-a="sub" data-k="piyasa" data-v="${k}" aria-pressed="${sub === k}">${l}</button>`).join("")}</div>`;
     if (sub === "ilan") {
+      if (UI.buyerNote) html += UI.buyerNote();
       const all = s.listings.filter(l => !l.done);
       const ls = filterListings(all);
       const nd = G.nextDrop();
@@ -628,6 +629,7 @@
       <button class="btn sm danger" type="button" data-a="fire" data-id="${st.id}">${UI.armed === "fire" + st.id ? "Emin misin?" : "Çıkar"}</button></div>`).join("")
       : `<p class="muted small">Henüz çalışanın yok. Her şeyi sen yapıyorsun.</p>`;
     html += `</div>`;
+    if (UI.buyerCard) html += UI.buyerCard();
     if (G.staffOf("satis").length) {
       html += `<div class="card"><h3>Danışmanın indirim yetkisi</h3><p class="muted small">15 dakika içinde cevap vermediğin teklifleri danışmanın bu indirime kadar kendisi bağlar.</p><div class="quick">${[0, 3, 5, 8, 12].map(v => `<button class="btn ${Math.round(s.maxDisc * 100) === v ? "pri" : ""}" type="button" data-a="disc" data-v="${v}">%${v}</button>`).join("")}</div></div>`;
     }

@@ -336,6 +336,7 @@
     usta:     { name: "Usta",            base: 1600, desc: "Atölye işlerini hızlandırır. Çalıştıkça yorulur; çardakta dinlenir." },
     yikama:   { name: "Yıkamacı",        base: 750,  desc: "Her sabah araçları siler, temiz tutar." },
     muhasebe: { name: "Muhasebeci",      base: 1150, desc: "Günlük giderleri düşürür, vergi denetiminde ceza yemezsin." },
+    alim:     { name: "Satın alım uzmanı", base: 1500, desc: "Bütçene göre ilanlardan en kârlı aracı bulur, pazarlık edip alır. Ekspertiz ustanla birlikte çalışır: usta varsa almadan önce araca ekspertiz yaptırır. Yıldızı arttıkça değer tahmini isabetli olur." },
     eksper:   { name: "Ekspertiz ustası", base: 1400, desc: "İlandaki ve ihaledeki aracın piyasa değerini tahmin eder; fırsat mı pahalı mı söyler. Yıldızı arttıkça tahmini isabetli olur." }
   };
 

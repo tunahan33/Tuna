@@ -1041,7 +1041,7 @@
   G.newCandidates = function () {
     S.cands = [];
     const roles = Object.keys(G.ROLES);
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < roles.length; i++) {
       const role = i < roles.length ? roles[i] : R.pick(roles);
       const skill = R.wpick([1, 2, 3, 4, 5], s => [5, 5, 3, 1.5, 0.6][s - 1] * (s >= 4 && S.level < 5 ? 0.4 : 1));
       S.cands.push({ id: G.nid(), role, skill, ...G.person(), salary: R.r100(G.ROLES[role].base * (0.7 + 0.3 * skill) * R.rand(0.92, 1.1)) });
@@ -1434,6 +1434,7 @@
   G.minute = function () {
     if (G.TEST && S.money < 5e11) S.money = 1e12; // deneme sürümünde para bitmez
     if (G.tapMinute) G.tapMinute();
+    if (G.buyerMinute) G.buyerMinute();
     S.min++;
     if (G.LISTING_DROPS.includes(S.min)) { const n = R.randi(2, 3); G.addListings(n, `Piyasaya ${n} yeni ilan düştü.`); if (R.chance(0.03)) G.ultraListing(); }
     // galeride etiketli ultra lüks araç varsa milyarder koleksiyoncular ara sıra uğrar
