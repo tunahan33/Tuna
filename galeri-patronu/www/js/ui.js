@@ -382,11 +382,15 @@
       const all = s.listings.filter(l => !l.done);
       const ls = filterListings(all);
       const nd = G.nextDrop();
-      html += `<div class="card ilan-info"><div class="row"><div><b>Bugün ${all.length} ilan</b><p class="small muted">${nd ? `Yeni ilanlar ${G.clock(nd)}'de` : "Yeni ilanlar yarın sabah"}</p></div>${adBtn("ilan", "+4 ilan")}</div></div>`;
-      html += listingFilters(all, ls.length);
-      if (all.length && !ls.length) return html + `<div class="empty"><b>Bu filtreye uyan ilan yok</b>Filtreleri gevşet ya da sıfırla.<div style="margin-top:10px"><button class="btn" type="button" data-a="lf-reset">Filtreleri sıfırla</button></div></div>`;
-      if (!ls.length) return html + `<div class="empty"><b>Şu an bakılacak ilan kalmadı</b>${nd ? `Saat ${G.clock(nd)}'de yeni ilanlar gelecek.` : "Yarın sabah yeni ilanlar gelecek."}</div>`;
-      html += `<div class="rows">${ls.map(listingRow).join("")}</div>`;
+      // ilanlar bir ilan sitesinde geziniyormuş gibi: tarayıcı çubuğu, site başlığı, ilan satırları
+      html += `<div class="site"><div class="site-bar"><span class="site-dots"><i></i><i></i><i></i></span><div class="site-url"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2 0h6V7a3 3 0 0 0-6 0z" fill="currentColor"/></svg>saklabenden.com/vasita/otomobil</div></div>
+        <div class="site-head"><div class="site-logo">sakla<b>benden</b><small>.com</small></div><div class="site-meta"><b>${all.length}</b> ilan · ${nd ? `yeni ilan ${G.clock(nd)}` : "yeni ilan yarın"}</div></div>
+        <div class="site-crumb"><span>Vasıta › Otomobil</span>${adBtn("ilan", "+4 ilan")}</div>
+        <div class="site-body">${listingFilters(all, ls.length)}`;
+      if (all.length && !ls.length) html += `<div class="empty"><b>Bu filtreye uyan ilan yok</b><div style="margin-top:10px"><button class="btn" type="button" data-a="lf-reset">Filtreleri sıfırla</button></div></div>`;
+      else if (!ls.length) html += `<div class="empty"><b>Şu an ilan yok</b>${nd ? `${G.clock(nd)}'de yeni ilanlar gelecek.` : "Yarın sabah yeni ilanlar gelecek."}</div>`;
+      else html += `<div class="site-rows">${ls.map(listingRow).join("")}</div>`;
+      html += `</div></div>`;
     } else if (sub === "sifir") {
       html += UI.dealerShop();
     } else if (sub === "ihale") {
@@ -439,13 +443,19 @@
   }
 
   const isNew = l => (l.day === S().day && l.born > G.OPEN && S().min - l.born < 120 ? 1 : 0);
+  const CITIES = ["İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Kocaeli", "Konya", "Adana", "Eskişehir", "Gaziantep", "Samsun", "Trabzon", "Mersin", "Kayseri", "Tekirdağ", "Muğla"];
+  const cityOf = l => l.city || (l.city = l.ultra ? "İstanbul" : CITIES[(l.id * 7) % CITIES.length]);
+  UI.ilanNo = l => 482000 + l.id * 37;
   function listingRow(l) {
     const car = l.car;
     const ev = G.estimate(car), deal = ev ? G.dealLabel(l.last, ev) : null;
-    return `<article class="crow ${l.ultra ? "ultra" : ""}" role="button" tabindex="0" data-a="listing" data-id="${l.id}">
-      <div class="crow-img">${UI.carSVG(car)}</div>
-      <div class="crow-main"><b>${esc(G.carName(car))}</b><span>${car.year} · ${G.fmtKm(G.realKm(car, false))} · ${esc(G.SELLERS[l.seller].name)}</span><span class="chips">${l.ultra ? `<span class="chip gold">Ultra lüks</span>` : ""}${deal ? `<span class="chip ${deal.c}">${deal.t}</span>` : ""}${isNew(l) ? `<span class="chip acc">Yeni</span>` : ""}</span></div>
-      <div class="crow-side"><span class="sticker sm">${G.fmtS(l.last)}</span><small class="muted">${G.SEGMENTS[G.M[car.m].seg].name}</small></div>
+    const when = l.day === S().day ? (isNew(l) ? "Az önce" : "Bugün") : "Dün";
+    const tags = [l.ultra ? `<span class="tag gold">Ultra lüks</span>` : "", l.seller === "acil" ? `<span class="tag red">Acil</span>` : "", l.seller === "hasarli" ? `<span class="tag dark">Hasar kayıtlı</span>` : "",
+      deal ? `<span class="tag ${deal.c === "good" ? "green" : deal.c === "bad" ? "red2" : "gray"}">${deal.t}</span>` : "", isNew(l) ? `<span class="tag new">Yeni</span>` : ""].join("");
+    return `<article class="site-row ${l.ultra ? "ultra" : ""}" role="button" tabindex="0" data-a="listing" data-id="${l.id}">
+      <div class="sr-img">${UI.carSVG(car)}</div>
+      <div class="sr-main"><b>${car.year} ${esc(G.carName(car))}</b><span>${G.fmtKm(G.realKm(car, false))} · ${esc(car.color)} · ${esc(G.SELLERS[l.seller].name)}</span><span class="sr-tags">${tags}</span></div>
+      <div class="sr-side"><b class="sr-price">${G.fmt(l.last)}</b><small>${esc(cityOf(l))}</small><small>${when}</small></div>
     </article>`;
   }
 
@@ -740,7 +750,7 @@
     const lo = R.r1k(l.last * 0.6), hi = l.last;
     d.offer = R.clamp(d.offer, lo, hi);
     const cs = G.condScore(car);
-    let html = head(G.carName(car), `${esc(G.SELLERS[l.seller].name)} · ${esc(l.sellerName)}`);
+    let html = head(G.carName(car), `${esc(G.SELLERS[l.seller].name)} · ${esc(l.sellerName)} · saklabenden.com · İlan no ${UI.ilanNo(l)}`);
     html += `<div class="hero">${UI.carSVG(car)}<span class="sticker">${G.fmtS(l.last)}</span></div>
       <div class="tiles"><div><span>İstenen</span><b>${G.fmtS(l.last)}</b></div><div><span>Tahmini değer</span><b>${ap ? "≈ " + G.fmtS(ap) : "?"}</b></div><div><span>Değerlendirme</span><b class="${deal && deal.c === "good" ? "pos" : deal && deal.c === "bad" ? "neg" : "muted"}">${deal ? deal.t : "Bilinmiyor"}</b></div></div>
       ${sk ? `<p class="small muted">Ekspertiz ustanın tahmini <span class="stars">${"★".repeat(sk)}${"☆".repeat(5 - sk)}</span> · hata payı ±%${Math.round(G.EST_SPREAD[sk] * 100)}</p>` : `<p class="small muted">Değeri görmek için ekspertiz ustası al.</p>`}
