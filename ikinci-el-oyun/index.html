@@ -204,6 +204,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:30px}
 /* lüks alışveriş */
 .chips-row{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;margin:0 -2px}
 .chipbtn{flex:none;display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:9px 14px;background:var(--surface);box-shadow:var(--shadow);font-weight:800;font-size:14px}
+.chipbtn:disabled{opacity:.5;cursor:not-allowed}
 .chipbtn.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-fg)}
 .chipbtn .cnt{font-size:11px;font-weight:900;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:color-mix(in srgb,currentColor 18%,transparent);text-align:center;padding:0 4px}
 .luxc{cursor:default}.luxc:hover{transform:none}
@@ -367,10 +368,14 @@ const RIVALS=['Rıza','Selim','Nermin','Hakan','Defne'];
 const BUYERS={pazarlik:{lo:.7,hi:.95,acc:.3},acil:{lo:.88,hi:1.05,acc:.55},vip:{lo:.98,hi:1.22,acc:.7}};
 const STAFF=[
  {id:'temizlikci',ad:'Temizlikçi',ic:'sparkle',desc:'Stoktaki her ürünü her gün temizler.',hire:8000,wage:400,lvl:0},
- {id:'eksper',ad:'Eksper',ic:'barcode',desc:'Her sabah ilanların ve stoğun seri no kaydına bakar, sahteyi yakalar.',hire:15000,wage:800,lvl:1},
+ {id:'eksper',ad:'Eksper',ic:'barcode',desc:'Sen hangi ürünü gösterirsen onun orijinalliğine bakar. Eğittikçe daha az yanılır.',hire:15000,wage:800,lvl:1},
  {id:'tamirci',ad:'Tamirci usta',ic:'wrench',desc:'Stoktaki gizli kusurları bulur, tamirler %40 ucuzlar.',hire:20000,wage:1000,lvl:1},
  {id:'fotografci',ad:'Fotoğrafçı',ic:'camera',desc:'Tüm ürünlerin profesyonel fotoğrafını çeker.',hire:12000,wage:600,lvl:1},
  {id:'satisci',ad:'Satış danışmanı',ic:'phone',desc:'Daha çok alıcı arar, teklifler %5 yüksek gelir.',hire:40000,wage:2000,lvl:2}];
+const EKS=[{acc:.75,cost:0},{acc:.8,cost:10000},{acc:.85,cost:25000},{acc:.9,cost:60000},{acc:.95,cost:120000}];
+const eksAcc=()=>EKS[S.eksLvl-1].acc;
+const eksLimit=()=>2+S.eksLvl;
+const wageOf=id=>STAFF.find(x=>x.id===id).wage+(id==='eksper'?(S.eksLvl-1)*200:0);
 const LUX=[
  {k:'ev',ad:'Ev',ic:'home',hue:20,items:[['Stüdyo daire',120000],['1+1 daire',180000],['2+1 site dairesi',320000],['Bahçeli müstakil ev',550000],['Dubleks daire',800000],['Deniz manzaralı rezidans',1300000],['Çiftlik evi',1800000],['Modern villa',2800000],['Dağ evi şale',3500000],['Boğaz yalısı',8000000]]},
  {k:'araba',ad:'Araba',ic:'car',hue:220,items:[['Şehir hatchback',90000],['Elektrikli şehir arabası',180000],['Konforlu sedan',260000],['Coupe',450000],['Arazi aracı',650000],['Lüks sedan',1000000],['Spor araba',1600000],['Lüks SUV',2200000],['Klasik koleksiyon aracı',3000000],['Süper spor araba',5000000]]},
@@ -422,6 +427,8 @@ function auth(it){
   if(it.full) return it.fake?['bad','x']:['good','check'];
   if(it.serial==='temiz') return ['good','check'];
   if(it.serial==='supheli') return ['warn','alert'];
+  if(it.eks==='temiz') return ['good','check'];
+  if(it.eks==='supheli') return ['warn','alert'];
   return ['muted','help'];
 }
 function shieldBadge(it,size=20){const [c,i]=auth(it);return `<span class="bdg ${c}-c" title="Orijinallik">${shieldIco(i,size)}</span>`}
@@ -631,7 +638,7 @@ function defTags(it){
   return `<div class="tags">${kd.length?kd.map(d=>`<span class="tag warn">${ico('crack',14)} ${DEF[d].ad}</span>`).join(''):`<span class="tag good">${ico('check',14,2.6)} Kusursuz</span>`}</div>`;
 }
 const dealText=(p,it)=>({good:'Ucuz',warn:'Normal fiyat',bad:'Pahalı'})[deal(p,it)[0]];
-const authText=it=>({check:'Orijinal',x:'Sahte',alert:'Şüpheli',help:'Orijinallik bilinmiyor'})[auth(it)[1]];
+const authText=it=>(!it.full&&!it.serial&&it.eks)?`Eksper: ${it.eks==='temiz'?'orijinal':'şüpheli'} · %${Math.round(it.eksAcc*100)} emin`:({check:'Orijinal',x:'Sahte',alert:'Şüpheli',help:'Orijinallik bilinmiyor'})[auth(it)[1]];
 function listingView(){
   const l=S.listings.find(x=>x.id===view.id); if(!l){view.id=null;return ilanView()}
   l.seen=true; const it=l.item, [lo,mid,hi]=est(it), P=PERSONAS[l.persona];
@@ -655,7 +662,7 @@ function listingView(){
        ${!l.asked.includes('kusur')?`<button class="qb" data-act="ask" data-q="kusur" data-id="${l.id}">${ico('crack',20)} Kusuru var mı?</button>`:''}</div>
    </div>
    <div class="sect">${ico('lup',18)} Ekspertiz <span class="sub">· gerçeği öğren</span></div>
-   <div class="acts">${testsHTML(it,'L'+l.id)}</div>
+   ${eksHTML(it,'L'+l.id)}<div class="acts">${testsHTML(it,'L'+l.id)}</div>
    <div class="sect">${ico('hand',18)} Pazarlık</div>
    <div class="card" style="display:flex;flex-direction:column;gap:6px">
      <div class="muted" style="font-size:13px;text-align:center">Teklifin</div>
@@ -674,7 +681,22 @@ function bubble(l,m){
   const mark=m.ok===true?`<span class="good-c">${ico('check',18,2.8)}</span>`:m.ok===false?`<span class="bad-c">${ico('x',18,2.8)}</span>`:'';
   return `<div class="msg ${m.me?'me':'them'} ${lie?'lie':''}">${lie?ico('alert',18):''}${m.ic?ico(m.ic,18):''}${mark}${m.t?`<span>${lie?'Yalan! ':''}${esc(m.t)}</span>`:''}</div>`;
 }
-function caught(l,c){return !!c.lie&&((c.k==='kusur'&&l.item.lup&&l.item.defects.length>0)||(c.k==='belge'&&(l.item.serial==='supheli'||(l.item.full&&l.item.fake))))}
+function caught(l,c){return !!c.lie&&((c.k==='kusur'&&l.item.lup&&l.item.defects.length>0)||(c.k==='belge'&&(l.item.serial==='supheli'||l.item.eks==='supheli'||(l.item.full&&l.item.fake))))}
+function eksHTML(it,ref){
+  if(!hasStaff('eksper')||it.full) return '';
+  if(it.eks) return `<div class="card row" style="padding:12px"><span class="ricon ${it.eks==='temiz'?'good-c':'warn-c'}">${ico('user',24)}</span>
+    <div style="min-width:0"><b>Eksperin: ${it.eks==='temiz'?'“Orijinal görünüyor.”':'“Bu sahte olabilir!”'}</b><div class="muted" style="font-size:13px">%${Math.round(it.eksAcc*100)} emin. Kesin sonuç için uzman raporu al.</div></div></div>`;
+  const left=eksLimit()-S.daily.eks;
+  return `<button class="bigbtn" style="background:var(--surface);box-shadow:var(--shadow)" data-act="eks" data-ref="${ref}" ${left<=0?'disabled':''}>${ico('user',22)} Eksperine sor
+    <span class="tag">%${Math.round(eksAcc()*100)} doğruluk</span><span class="tag ${left>0?'good':'bad'}">Bugün ${left}/${eksLimit()} hak</span></button>`;
+}
+function eksCheck(it){
+  if(!hasStaff('eksper')||it.eks||it.full) return;
+  if(S.daily.eks>=eksLimit()) return toast('user','Eksperin bugünlük yoruldu, yarın yine bakar','bad-c');
+  const acc=eksAcc(), truth=it.fake?'supheli':'temiz';
+  it.eks=Math.random()<acc?truth:(truth==='temiz'?'supheli':'temiz'); it.eksAcc=acc; S.daily.eks++;
+  toast(it.eks==='temiz'?'check':'alert',it.eks==='temiz'?'Eksper: orijinal görünüyor':'Eksper: sahte olabilir!',it.eks==='temiz'?'good-c':'warn-c');
+}
 function testsHTML(it,ref){
   return [['lup','lup','Lup',it.lup],['seri','barcode','Seri no',!!it.serial],['uzman','cert','Uzman raporu',it.full]].map(([k,i,ad,done])=>
     done||it.full?`<div class="ib done">${ico(i,28)}<span class="lbl">${ad}</span><span class="ok">${ico('check',13,3)}</span></div>`
@@ -732,7 +754,7 @@ function itemView(){
      ${kd.length?`<button class="ib ${it.disclose?'good':'flat'}" data-act="disc" data-id="${it.id}">${ico(it.disclose?'eye':'eyeoff',26)}<span class="lbl">${it.disclose?'Kusuru yazıyorum':'Kusuru saklıyorum'}</span></button>`:'<span></span>'}
    </div>
    <div class="sect">${ico('lup',18)} Ekspertiz</div>
-   <div class="acts">${testsHTML(it,'I'+it.id)}</div>
+   ${eksHTML(it,'I'+it.id)}<div class="acts">${testsHTML(it,'I'+it.id)}</div>
    <div class="sect">${ico('tag',18)} Satış fiyatı</div>
    <div class="card" style="display:flex;flex-direction:column;gap:8px">
      <div class="stepper"><button data-act="pstep" data-v="-1" aria-label="Azalt">${ico('minus',24,2.6)}</button>
@@ -773,6 +795,7 @@ function migrate(s){
   if(!s.owned){s.owned=[]; const L=s.life||{}, map={ev:[null,1,3,7,9],araba:[null,0,2,6,7],stil:[null,1,3,7]};
     for(const k in map){const t=L[k]||0; if(t>0&&map[k][t]!=null) s.owned.push(k+map[k][t])}}
   s.rel=s.rel||{aile:70,arkadas:60,sevgili:65}; s.daily=s.daily||{done:[],ads:0};
+  s.eksLvl=s.eksLvl||1; s.daily.eks=s.daily.eks||0;
   return s;
 }
 const serialRoll=it=>it.fake?(Math.random()<.85?'supheli':'temiz'):(Math.random()<.95?'temiz':'supheli');
@@ -781,9 +804,7 @@ function applyStaff(){
     if(hasStaff('temizlikci')) it.clean=true;
     if(hasStaff('fotografci')) it.photo=true;
     if(hasStaff('tamirci')) it.lup=true;
-    if(hasStaff('eksper')&&!it.serial) it.serial=serialRoll(it);
   }
-  if(hasStaff('eksper')) for(const l of S.listings) if(!l.item.serial){l.item.serial=serialRoll(l.item); if(l.claims.some(c=>caught(l,c))) l.leverage=true}
 }
 const bestIdx=k=>S.owned.filter(id=>id.startsWith(k)).reduce((m,id)=>Math.max(m,+id.slice(k.length)),-1);
 const possH=()=>LUX.reduce((s,c)=>{const b=bestIdx(c.k); if(b<0) return s; const n=S.owned.filter(id=>id.startsWith(c.k)).length; return s+c.items[b].h+Math.min(5,n-1)},0);
@@ -805,7 +826,9 @@ function staffCard(st){
   const hired=hasStaff(st.id), lock=S.level<st.lvl;
   return `<div class="card staff"><span class="ricon ${hired?'grad':''}">${ico(st.ic,24)}</span>
    <div style="min-width:0"><b>${st.ad}</b><div class="muted" style="font-size:13px">${st.desc}</div>
-   <div class="tags" style="margin-top:6px"><span class="tag">Maaş ${TL(st.wage)}/gün</span>${hired?'<span class="tag good">Çalışıyor</span>':''}</div></div>
+   <div class="tags" style="margin-top:6px"><span class="tag">Maaş ${TL(wageOf(st.id))}/gün</span>${hired?'<span class="tag good">Çalışıyor</span>':''}
+   ${st.id==='eksper'?`<span class="tag warn">Seviye ${S.eksLvl} · %${Math.round(eksAcc()*100)} doğruluk</span>`:''}</div>
+   ${st.id==='eksper'&&hired&&EKS[S.eksLvl]?`<button class="chipbtn" style="margin-top:8px;font-size:13px;padding:8px 12px;white-space:nowrap" data-act="eksup" ${S.cash<EKS[S.eksLvl].cost?'disabled':''}>${ico('up',16,2.6)} Eğit: %${Math.round(EKS[S.eksLvl].acc*100)} · ${TL(EKS[S.eksLvl].cost)}</button>`:''}</div>
    ${hired?`<button class="ib flat sm" data-act="fire" data-s="${st.id}">${ico('x',20,2.6)}<span class="lbl">Çıkar</span></button>`
      :`<button class="ib ${lock?'flat':'primary'} sm" data-act="hire" data-s="${st.id}" ${lock||S.cash<st.hire?'disabled':''}>${ico(lock?'lock':'plus',20,2.4)}<span class="lbl">${lock?LEVELS[st.lvl].ad+' gerekir':'İşe al'}</span>${lock?'':`<span class="num">${TL(st.hire)}</span>`}</button>`}</div>`;
 }
@@ -972,13 +995,13 @@ function endDay(){
   S.pending=[]; S.offers=[];
   S.cash-=lvl().rent; rep.push({ic:'home',m:'Kira',v:-lvl().rent,c:'bad'});
   if(S.debt>0){const f=r100(S.debt*.01);S.debt+=f;rep.push({ic:'percent',m:'Kredi faizi',v:-f,c:'bad'})}
-  const wages=S.staff.reduce((s,id)=>s+STAFF.find(x=>x.id===id).wage,0);
+  const wages=S.staff.reduce((s,id)=>s+wageOf(id),0);
   if(wages){S.cash-=wages;rep.push({ic:'friends',m:'Çalışan maaşları',v:-wages,c:'bad'})}
   for(const r of RELS){S.rel[r.k]=clamp(S.rel[r.k]-R(3,6),0,100); if(S.rel[r.k]<30) rep.push({ic:r.ic,m:r.warn,c:'bad'})}
   const hp=happy();
   if(hp>=70){S.rep=clamp(S.rep+1,0,100);rep.push({ic:'happy',m:'Mutlusun, itibarın arttı',txt:'+1',c:'good'})}
   else if(hp<30){S.rep=clamp(S.rep-1,0,100);rep.push({ic:'sad',m:'Mutsuzsun, itibarın düştü',txt:'−1',c:'bad'})}
-  S.daily={done:[],ads:0};
+  S.daily={done:[],ads:0,eks:0};
   const oldSeason=season();
   S.day++;
   for(const c in CATS) S.trend[c]=clamp(S.trend[c]*R(.95,1.05)+(1-S.trend[c])*.08,.6,1.6);
@@ -1051,6 +1074,11 @@ document.addEventListener('click',e=>{
     case 'repay': {const v=b.dataset.v==='all'?Math.min(S.debt,S.cash):Math.min(10000,S.debt,S.cash); if(v>0){S.debt-=v;S.cash-=v;save();render();toast('check',`${TL(v)} borç ödendi`,'good-c')} break}
     case 'hire': {const st=STAFF.find(x=>x.id===b.dataset.s); if(st&&S.cash>=st.hire&&S.level>=st.lvl&&!hasStaff(st.id)){S.cash-=st.hire;S.staff.push(st.id);save();render();toast(st.ic,`${st.ad} işe başladı`,'good-c')} break}
     case 'fire': {const st=STAFF.find(x=>x.id===b.dataset.s); S.staff=S.staff.filter(x=>x!==b.dataset.s); save(); render(); st&&toast('x',`${st.ad} işten ayrıldı`); break}
+    case 'eks': {const r=b.dataset.ref, n=+r.slice(1);
+      if(r[0]==='L'){const l=S.listings.find(x=>x.id===n); if(l){eksCheck(l.item); checkLeverage(l)}} else {const it=S.inv.find(x=>x.id===n); it&&eksCheck(it)}
+      save(); render(); break}
+    case 'eksup': {const nx=EKS[S.eksLvl]; if(!nx)break; if(S.cash<nx.cost){NOCASH();break}
+      S.cash-=nx.cost; S.eksLvl++; save(); render(); toast('up',`Eksper seviye ${S.eksLvl}: %${Math.round(nx.acc*100)} doğruluk`,'good-c'); break}
     case 'luxcat': luxCat=b.dataset.k; render(); break;
     case 'lux': {const id=b.dataset.lux, c=LUX.find(x=>id.startsWith(x.k)&&/^\d+$/.test(id.slice(x.k.length))), it=c&&c.items.find(x=>x.id===id);
       if(!it||S.owned.includes(id)||S.level<it.lvl) break; if(S.cash<it.p){NOCASH();break}
