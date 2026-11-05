@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
 <style>
-/* Tek tema: oyun her zaman açık pastel görünür (karanlık mod bilerek yok). */
+/* Varsayılan açık pastel; üstteki ay/güneş düğmesi html[data-mode="dark"] ile karanlık moda geçirir. */
 /* Layout: ikon ağırlıklı yumuşak telefon uygulaması — buzlu üst çubuk, 2 sütun görsel kartlar, yuvarlak alt menü */
 :root{
   --bg:#f5f1f6; --surface:#ffffff; --sunk:#f0eaf2; --line:#e8e0ec; --fg:#3a3245; --muted:#857c90;
@@ -19,6 +19,12 @@
   color-scheme:light;
 }
 
+html[data-mode="dark"]{
+  --bg:#1e1a25; --surface:#2a2533; --sunk:#241f2c; --line:#3a3345; --fg:#f2ecf6; --muted:#ada3b9;
+  --accent:#f29ab0; --accent2:#c9a4ef; --accent-fg:#2b1520; --brass:#e6c483; --good:#86d1aa; --bad:#f3a0aa; --warn:#f2bd85;
+  --shadow:0 2px 8px rgba(0,0,0,.25),0 10px 28px rgba(0,0,0,.25); color-scheme:dark}
+.mode{border:0;background:var(--sunk);border-radius:14px;width:42px;height:42px;display:grid;place-items:center;flex:none;color:var(--accent)}
+.mode.float{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));z-index:7;background:var(--surface);box-shadow:var(--shadow)}
 [hidden]{display:none!important}
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font:700 15.5px/1.4 var(--f-body);
@@ -199,6 +205,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:30px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
+<button class="mode float" data-act="mode" id="modeMenu"></button>
 <section id="menu">
   <div class="menu-box">
     <div class="logo grad" id="logo"></div>
@@ -218,6 +225,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:30px}
     <div class="pill day num" id="hDay"></div>
     <div class="pill num" id="hCash"></div>
     <div class="pill num" id="hRep"></div>
+    <button class="mode" data-act="mode" id="modeBar"></button>
   </div></header>
   <main class="app" id="screen"></main>
   <nav class="tabbar"><div class="app" id="tabs"></div></nav>
@@ -438,14 +446,14 @@ const art=(it,cls)=>artC(T(it).cat,cls);
 
 /* ================= EKRANLAR ================= */
 function showMenu(){
-  $('#game').hidden=true; $('#menu').hidden=false;
+  $('#game').hidden=true; $('#menu').hidden=false; $('#modeMenu').hidden=false;
   const s=load();
   $('#logo').innerHTML=icoF('tag',60);
   $('#playBtn').innerHTML=`${icoF('play',28)} ${s?'Devam':'Oyna'}`;
   $('#helpBtn').innerHTML=ico('help',26)+'<span class="lbl">Nasıl?</span>';
   $('#newBtn').innerHTML=ico('plus',26)+'<span class="lbl">Yeni</span>'; $('#newBtn').hidden=!s;
 }
-function showGame(){$('#menu').hidden=true;$('#game').hidden=false;render();scrollTo(0,0)}
+function showGame(){$('#menu').hidden=true;$('#modeMenu').hidden=true;$('#game').hidden=false;render();scrollTo(0,0)}
 function go(tab,id=null){view={tab,id};render();scrollTo(0,0)}
 
 function render(){
@@ -856,11 +864,20 @@ document.addEventListener('click',e=>{
         <button class="bigbtn grad" data-act="close">${ico('check',22,2.6)} Harika</button>`)} break}
     case 'borrow': {const v=+b.dataset.v; if(S.debt+v<=loanLimit()){S.debt+=v;S.cash+=v;save();render();toast('coins',`${TL(v)} kredi kasada`,'good-c')} break}
     case 'repay': {const v=b.dataset.v==='all'?Math.min(S.debt,S.cash):Math.min(10000,S.debt,S.cash); if(v>0){S.debt-=v;S.cash-=v;save();render();toast('check',`${TL(v)} borç ödendi`,'good-c')} break}
+    case 'mode': setMode(document.documentElement.dataset.mode==='dark'?'light':'dark'); break;
     case 'endday': endDay(); break;
   }
 });
 $('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeDlg()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#overlay').hidden)closeDlg()});
+function setMode(m){
+  document.documentElement.dataset.mode=m;
+  try{localStorage.setItem('ikinci-vitrin-mode',m)}catch(e){}
+  const dark=m==='dark', h=dark?ico('sun',22):ico('moon',22), lab=dark?'Açık moda geç':'Karanlık moda geç';
+  for(const id of ['modeMenu','modeBar']){const b=$('#'+id);b.innerHTML=h;b.setAttribute('aria-label',lab);b.title=lab}
+}
+let savedMode='light'; try{savedMode=localStorage.getItem('ikinci-vitrin-mode')||'light'}catch(e){}
+setMode(savedMode);
 showMenu();
 </script>
 
