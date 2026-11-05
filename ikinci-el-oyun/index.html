@@ -469,7 +469,10 @@ function render(){
   bindInputs(); hint();
 }
 
-/* sıradaki hamle: ilgili buton nabız gibi parlar */
+/* sıradaki hamle: ilgili buton nabız gibi parlar; oyuncu o hamleyi bir kez yapınca o ipucu bir daha çıkmaz */
+let learned=[]; try{learned=JSON.parse(localStorage.getItem('ikinci-vitrin-learned'))||[]}catch(e){}
+const hintKey=el=>el.dataset.act+(el.dataset.tab?':'+el.dataset.tab:el.dataset.t?':'+el.dataset.t:el.dataset.k?':'+el.dataset.k:'');
+function learn(el){const k=hintKey(el);if(learned.includes(k))return;learned.push(k);try{localStorage.setItem('ikinci-vitrin-learned',JSON.stringify(learned))}catch(e){}}
 function hint(){
   let sel=null, scope='#screen ';
   if(view.tab==='home'){
@@ -492,7 +495,7 @@ function hint(){
     else if(!it.listed) sel='[data-act=list]';
   }
   const el=sel&&document.querySelector(scope+sel+':not(:disabled)');
-  el&&el.classList.add('pulse');
+  if(el&&!learned.includes(hintKey(el))) el.classList.add('pulse');
 }
 
 /* ---- Dükkân ---- */
@@ -608,7 +611,7 @@ function mezatView(){
       <span class="row">${a.leader==='Sen'?`<span class="avatar sm" style="--h:150">${ico('user',18)}</span><b class="good-c">Öndesin</b>`:a.leader?`${avatar(a.leader,1)}<b class="bad-c">${esc(a.leader)} önde</b>`:''}</span></div>
      <div class="acts">
       <button class="ib primary" data-act="bid" data-id="${a.id}" ${a.leader==='Sen'?'disabled':''}>${ico('hammer',26)}<span class="lbl">${a.leader?'Artır +'+TL(a.step):'Teklif ver'}</span></button>
-      ${a.leader==='Sen'?`<button class="ib good pulse" data-act="hammer" data-id="${a.id}">${icoF('trophy',26)}<span class="lbl">Çekici indir</span></button>`:'<span></span>'}
+      ${a.leader==='Sen'?`<button class="ib good ${learned.includes('hammer')?'':'pulse'}" data-act="hammer" data-id="${a.id}">${icoF('trophy',26)}<span class="lbl">Çekici indir</span></button>`:'<span></span>'}
       <button class="ib flat" data-act="fold" data-id="${a.id}">${ico('x',26,2.6)}<span class="lbl">Çekil</span></button></div>`}
    </div>`}).join('');
 }
@@ -822,6 +825,7 @@ function howto(){
 }
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]'); if(!b||b.disabled)return;
+  learn(b);
   const act=b.dataset.act, id=+b.dataset.id;
   const L=()=>S.listings.find(x=>x.id===id), I=()=>S.inv.find(x=>x.id===id), A=()=>S.auctions.find(x=>x.id===id);
   switch(act){
