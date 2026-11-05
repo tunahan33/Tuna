@@ -47,7 +47,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent2);outlin
   box-shadow:0 12px 28px color-mix(in srgb,var(--accent) 35%,transparent);transition:transform .15s}
 .play:hover{transform:translateY(-2px)}
 .round-row{display:flex;gap:14px}
-.rbtn{width:64px;height:64px;border-radius:22px;border:0;background:var(--surface);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--accent)}
+.rbtn{width:76px;height:76px;border-radius:24px;border:0;background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--accent)}
 
 /* ---------- Oyun iskeleti ---------- */
 #game{padding-block:0 104px}
@@ -189,6 +189,19 @@ input[type=range]{width:100%;accent-color:var(--accent);height:30px}
 .bigbtn:disabled{background:var(--sunk);color:var(--muted);cursor:not-allowed}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--fg);color:var(--bg);
   padding:10px 16px;border-radius:20px;font-size:15px;font-weight:900;max-width:calc(100% - 32px);box-shadow:var(--shadow);display:flex;align-items:center;gap:8px}
+/* kısa etiketler */
+.h1{font-size:24px;font-weight:900;margin:0;letter-spacing:-.01em}
+.h1 small{display:block;font-size:13px;color:var(--muted);font-weight:700;letter-spacing:0}
+.sect{font-size:14px;color:var(--fg)}
+.sect .sub{color:var(--muted);font-weight:700;font-size:13px}
+.lbl{font-size:12.5px;font-weight:800;line-height:1.2;text-align:center}
+.ib .num{font-size:12px;opacity:.85}
+.stat small{font-size:11.5px;color:var(--muted);font-weight:800}
+.tname{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:-4px}
+.qrow{flex-wrap:wrap}
+.qb{width:auto;height:auto;display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:800;font-size:14px}
+.rep .r .m{font-size:14px;min-width:0}
+.tip{font-size:13.5px;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -196,6 +209,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:30px}
   <div class="menu-box">
     <div class="logo grad" id="logo"></div>
     <h1 class="wordmark">İkinci <b>Vitrin</b></h1>
+    <p class="tip" style="margin:-14px 0 0">İkinci el lüks eşya al, pazarlık et, kârla sat.</p>
     <button class="play grad" data-act="play" id="playBtn"></button>
     <div class="round-row">
       <button class="rbtn" data-act="howto" aria-label="Nasıl oynanır" id="helpBtn"></button>
@@ -434,8 +448,8 @@ function showMenu(){
   const s=load();
   $('#logo').innerHTML=icoF('tag',60);
   $('#playBtn').innerHTML=`${icoF('play',28)} ${s?'Devam':'Oyna'}`;
-  $('#helpBtn').innerHTML=ico('help',30);
-  $('#newBtn').innerHTML=ico('plus',30); $('#newBtn').hidden=!s;
+  $('#helpBtn').innerHTML=ico('help',26)+'<span class="lbl">Nasıl?</span>';
+  $('#newBtn').innerHTML=ico('plus',26)+'<span class="lbl">Yeni</span>'; $('#newBtn').hidden=!s;
 }
 function showGame(){$('#menu').hidden=true;$('#game').hidden=false;render();scrollTo(0,0)}
 function go(tab,id=null){view={tab,id};render();scrollTo(0,0)}
@@ -480,162 +494,186 @@ function hint(){
 }
 
 /* ---- Dükkân ---- */
+const BUYER_AD={pazarlik:'Pazarlıkçı',acil:'Acil alıcı',vip:'VIP koleksiyoner'};
 function homeView(){
   const next=LEVELS[S.level+1];
   const trends=Object.keys(CATS).map(c=>[c,catMul(c)]).filter(([,m])=>m>1.08||m<.92).sort((a,b)=>b[1]-a[1]);
-  return `<div class="card">
+  return `<h2 class="h1">${lvl().ad}<small>${season().ad} · ${S.day}. gün</small></h2>
+    <div class="card">
       <div class="steps">${LEVELS.map((L,i)=>`${i?`<span class="ln ${i<=S.level?'on':''}"></span>`:''}<span class="st ${i<=S.level?'on':''}" title="${L.ad}">${ico(L.ic,22)}</span>`).join('')}</div>
       <div class="stat3">
-        <div class="stat" title="Stok yeri">${ico('box',22)}<span class="num">${S.inv.length}/${lvl().cap}</span></div>
-        <div class="stat" title="İtibar">${starsH(repStars(S.rep),14)}<span class="num">${Math.round(S.rep)}</span></div>
-        <div class="stat bad-c" title="Günlük kira">${ico('home',22)}<span class="num">−${FMT.format(lvl().rent)}</span></div>
+        <div class="stat">${ico('box',22)}<span class="num">${S.inv.length}/${lvl().cap}</span><small>Stok yeri</small></div>
+        <div class="stat">${starsH(repStars(S.rep),14)}<span class="num">${Math.round(S.rep)}</span><small>İtibar</small></div>
+        <div class="stat bad-c">${ico('home',22)}<span class="num">−${FMT.format(lvl().rent)}</span><small>Günlük kira</small></div>
       </div>
-      ${next?`<button class="bigbtn grad" style="margin-top:12px" data-act="upgrade" ${S.cash<next.price?'disabled':''} title="${next.ad}">${ico('up',22,2.6)} ${ico(next.ic,22)} <span class="num">${TL(next.price)}</span></button>`
-            :`<div class="row center brass-c" style="margin-top:12px">${icoF('trophy',34)}</div>`}
+      ${next?`<button class="bigbtn grad" style="margin-top:12px" data-act="upgrade" ${S.cash<next.price?'disabled':''}>${ico('up',22,2.6)} ${next.ad}'a büyüt · <span class="num">${TL(next.price)}</span></button>`
+            :`<div class="row center brass-c" style="margin-top:12px">${icoF('trophy',30)} En büyük showroom senin!</div>`}
     </div>
-    ${S.offers.length?`<div class="sect">${ico('phone',18)} ${S.offers.length}</div>${S.offers.map(offerCard).join('')}`:''}
-    ${trends.length?`<div class="sect">${ico(season().ic,18)}</div><div class="trends">${trends.map(([c,m])=>`<div class="trend">${artC(c)}<span class="${m>1?'good-c':'bad-c'}">${ico(m>1?'up':'down',22,2.6)}</span></div>`).join('')}</div>`:''}
-    ${S.reviews.length?`<div class="sect">${icoF('star',16)}</div><div class="revs">${S.reviews.slice(0,8).map(r=>`<div class="rev">${avatar(r.n,1)}${starsH(r.s,12)}</div>`).join('')}</div>`:''}
-    <button class="endday grad" data-act="endday">${ico('moon',24)} Günü bitir</button>`;
+    ${S.offers.length?`<div class="sect">${ico('phone',18)} Telefon <span class="sub">· ${S.offers.length} alıcı aradı</span></div>${S.offers.map(offerCard).join('')}`:''}
+    ${trends.length?`<div class="sect">${ico(season().ic,18)} Piyasa <span class="sub">· bugün ne aranıyor?</span></div><div class="trends">${trends.map(([c,m])=>`<div class="trend">${artC(c)}<span class="lbl">${CATS[c][0]}</span><span class="${m>1?'good-c':'bad-c'}">${ico(m>1?'up':'down',20,2.6)}</span></div>`).join('')}</div>`:''}
+    ${S.reviews.length?`<div class="sect">${icoF('star',16)} Müşteri yorumları</div><div class="revs">${S.reviews.slice(0,8).map(r=>`<div class="rev">${avatar(r.n,1)}<span class="lbl">${esc(r.n)}</span>${starsH(r.s,12)}</div>`).join('')}</div>`:''}
+    <button class="endday grad" data-act="endday">${ico('moon',24)} Dükkânı kapat, günü bitir</button>`;
 }
 function offerCard(o){
   const it=S.inv.find(i=>i.id===o.itemId); if(!it) return '';
   const p=o.amount-it.paid;
   return `<div class="card call">${avatar(o.buyer,0,o.type==='vip')}${art(it)}
-    <div style="min-width:0"><div class="price num">${TL(o.amount)}</div>
-    <span class="tag ${p>=0?'good':'bad'}">${ico(p>=0?'up':'down',14,2.6)} ${TL(Math.abs(p))}</span></div>
-    <div class="acts"><button class="ib good" data-act="accept" data-id="${o.id}" aria-label="Sat">${ico('check',30,2.6)}</button>
-    ${o.amount<it.listed&&!o.countered?`<button class="ib" data-act="counter" data-id="${o.id}" aria-label="Karşı teklif">${ico('undo',24)}<span class="num">${TL(it.listed)}</span></button>`:'<span></span>'}
-    <button class="ib bad" data-act="reject" data-id="${o.id}" aria-label="Reddet">${ico('x',30,2.6)}</button></div></div>`;
+    <div style="min-width:0"><div class="tname" style="margin:0">${esc(o.buyer)} · ${BUYER_AD[o.type]}</div><div class="price num">${TL(o.amount)}</div>
+    <span class="tag ${p>=0?'good':'bad'}">${ico(p>=0?'up':'down',14,2.6)} ${p>=0?'Kâr':'Zarar'} ${TL(Math.abs(p))}</span></div>
+    <div class="acts"><button class="ib good" data-act="accept" data-id="${o.id}">${ico('check',26,2.6)}<span class="lbl">Sat</span></button>
+    ${o.amount<it.listed&&!o.countered?`<button class="ib" data-act="counter" data-id="${o.id}">${ico('undo',22)}<span class="lbl">${TL(it.listed)} de</span></button>`:'<span></span>'}
+    <button class="ib bad" data-act="reject" data-id="${o.id}">${ico('x',26,2.6)}<span class="lbl">Reddet</span></button></div></div>`;
 }
 
 /* ---- İlanlar ---- */
 function ilanView(){
-  if(!S.listings.length) return `<div class="empty">${ico('moon',40)}${ico('search',28)}</div>`;
-  return `<div class="grid2">${S.listings.map(l=>{const it=l.item;return `<button class="tcard" data-act="openL" data-id="${l.id}" aria-label="${esc(T(it).ad)}">
+  const head=`<h2 class="h1">Bugünün ilanları<small>Yüze bak: gülen ucuz, üzgün pahalı</small></h2>`;
+  if(!S.listings.length) return head+`<div class="empty">${ico('moon',40)}Bugünkü ilanlar bitti, yarın yenileri gelir.</div>`;
+  return head+`<div class="grid2">${S.listings.map(l=>{const it=l.item;return `<button class="tcard" data-act="openL" data-id="${l.id}">
     ${art(it)}<div class="badges">${dealBadge(l.ask,it)}${it.serial||it.full?shieldBadge(it):''}</div>
     ${l.seen?'':'<div class="badges left"><span class="bdg new"></span></div>'}
-    <div class="price num">${TL(l.ask)}</div><div class="row between">${dots(it.cond)}${avatar(l.seller,1)}</div></button>`}).join('')}</div>`;
+    <div class="price num">${TL(l.ask)}</div><div class="tname">${esc(T(it).ad)}</div><div class="row between">${dots(it.cond)}${avatar(l.seller,1)}</div></button>`}).join('')}</div>`;
 }
 function defTags(it){
   const kd=knownDefs(it);
   if(!kd.length&&!it.lup) return '';
-  return `<div class="tags">${kd.length?kd.map(d=>`<span class="tag warn">${ico('crack',14)} ${DEF[d].ad}</span>`).join(''):`<span class="tag good">${ico('crack',14)} ${ico('check',14,2.6)}</span>`}</div>`;
+  return `<div class="tags">${kd.length?kd.map(d=>`<span class="tag warn">${ico('crack',14)} ${DEF[d].ad}</span>`).join(''):`<span class="tag good">${ico('check',14,2.6)} Kusursuz</span>`}</div>`;
 }
+const dealText=(p,it)=>({good:'Ucuz',warn:'Normal fiyat',bad:'Pahalı'})[deal(p,it)[0]];
+const authText=it=>({check:'Orijinal',x:'Sahte',alert:'Şüpheli',help:'Orijinallik bilinmiyor'})[auth(it)[1]];
 function listingView(){
   const l=S.listings.find(x=>x.id===view.id); if(!l){view.id=null;return ilanView()}
   l.seen=true; const it=l.item, [lo,mid,hi]=est(it), P=PERSONAS[l.persona];
   const max=Math.max(hi,l.ask)*1.15;
   return `<div class="hero">${art(it,'big')}<div class="badges">${dealBadge(l.ask,it,28)}${shieldBadge(it,26)}</div></div>
-   <div class="row between"><b style="font-size:18px">${esc(T(it).ad)}</b>${dots(it.cond)}</div>
+   <div class="row between"><b style="font-size:19px">${esc(T(it).ad)}</b>${dots(it.cond)}</div>
+   <div class="tags"><span class="tag">${KOND[it.cond].ad}</span><span class="tag ${deal(l.ask,it)[0]}">${dealText(l.ask,it)}</span><span class="tag ${auth(it)[0]==='muted'?'':auth(it)[0]}">${authText(it)}</span></div>
    ${defTags(it)}
    <div class="card">
-     <div class="row between"><span class="row">${ico('tag',22)}<span class="price num">${TL(l.ask)}</span></span><span class="row muted">${ico('coins',20)}<span class="num">${lo===hi?TL(mid):TL(lo)+' – '+TL(hi)}</span></span></div>
+     <div class="row between"><span class="muted" style="font-size:13px">İstenen fiyat</span><span class="muted" style="font-size:13px">Tahmini değer</span></div>
+     <div class="row between"><span class="price num">${TL(l.ask)}</span><span class="num">${lo===hi?TL(mid):TL(lo)+' – '+TL(hi)}</span></div>
      <div class="meter" aria-hidden="true"><i style="left:${lo/max*100}%;width:${Math.max(2,(hi-lo)/max*100)}%"></i><em style="left:${l.ask/max*100}%"></em></div>
    </div>
+   <div class="sect">${ico('user',18)} Satıcı</div>
    <div class="card chat">
-     <div class="row between"><span class="row">${avatar(l.seller)}<span class="muted" style="font-size:13px">${esc(l.seller)}<br>${esc(P.ad)}</span></span>
-       <span class="hearts" aria-label="Sabır">${[0,1,2].map(i=>`<span class="${i<l.patience?'':'off'}">${icoF('heart',20)}</span>`).join('')}</span></div>
+     <div class="row between"><span class="row">${avatar(l.seller)}<span><b>${esc(l.seller)}</b><br><span class="muted" style="font-size:13px">${esc(P.ad)}</span></span></span>
+       <span style="text-align:right"><span class="hearts" aria-label="Sabır">${[0,1,2].map(i=>`<span class="${i<l.patience?'':'off'}">${icoF('heart',18)}</span>`).join('')}</span><span class="muted" style="font-size:12px">Sabrı</span></span></div>
+     <div class="msg them">${ico('tag',18)} Fiyat ${TL(l.ask)}, ciddi alıcı arasın.</div>
      ${l.chat.map(m=>bubble(l,m)).join('')}
-     <div class="qrow">${!l.asked.includes('belge')?`<button class="qb" data-act="ask" data-q="belge" data-id="${l.id}" aria-label="Belgesi var mı?">${ico('doc',28)}</button>`:''}
-       ${!l.asked.includes('kusur')?`<button class="qb" data-act="ask" data-q="kusur" data-id="${l.id}" aria-label="Kusuru var mı?">${ico('crack',28)}</button>`:''}</div>
+     <div class="qrow">${!l.asked.includes('belge')?`<button class="qb" data-act="ask" data-q="belge" data-id="${l.id}">${ico('doc',20)} Belgesi var mı?</button>`:''}
+       ${!l.asked.includes('kusur')?`<button class="qb" data-act="ask" data-q="kusur" data-id="${l.id}">${ico('crack',20)} Kusuru var mı?</button>`:''}</div>
    </div>
+   <div class="sect">${ico('lup',18)} Ekspertiz <span class="sub">· gerçeği öğren</span></div>
    <div class="acts">${testsHTML(it,'L'+l.id)}</div>
-   <div class="card" style="display:flex;flex-direction:column;gap:8px">
+   <div class="sect">${ico('hand',18)} Pazarlık</div>
+   <div class="card" style="display:flex;flex-direction:column;gap:6px">
+     <div class="muted" style="font-size:13px;text-align:center">Teklifin</div>
      <div class="bigprice num" id="offerShow">${TL(r100(l.ask*.85))}</div>
      <input id="offerRange" type="range" min="40" max="100" value="85" data-base="${l.ask}" aria-label="Teklif">
    </div>
    <div class="acts four">
-     <button class="ib primary" data-act="offer" data-id="${l.id}" aria-label="Teklif ver">${ico('hand',32)}</button>
-     <button class="ib good" data-act="buyL" data-id="${l.id}" ${S.cash<l.ask?'disabled':''} aria-label="Hemen al">${ico('cart',28)}<span class="num">${TL(l.ask)}</span></button>
-     ${l.leverage&&!l.used?`<button class="ib bad" data-act="evidence" data-id="${l.id}" aria-label="Kanıtı göster">${ico('alert',30)}</button>`:`<span></span>`}
-     <button class="ib flat" data-act="walk" data-id="${l.id}" aria-label="Kalkıp git">${ico('door',30)}</button>
+     <button class="ib primary" data-act="offer" data-id="${l.id}">${ico('hand',28)}<span class="lbl">Teklif ver</span></button>
+     <button class="ib good" data-act="buyL" data-id="${l.id}" ${S.cash<l.ask?'disabled':''}>${ico('cart',26)}<span class="lbl">Hemen al</span></button>
+     ${l.leverage&&!l.used?`<button class="ib bad" data-act="evidence" data-id="${l.id}">${ico('alert',26)}<span class="lbl">Yalanı yüzüne vur</span></button>`:`<span></span>`}
+     <button class="ib flat" data-act="walk" data-id="${l.id}">${ico('door',26)}<span class="lbl">Kalkıp git</span></button>
    </div>`;
 }
 function bubble(l,m){
   const c=m.claim!=null?l.claims[m.claim]:null, lie=c&&caught(l,c);
-  const mark=m.ok===true?`<span class="good-c">${ico('check',20,2.8)}</span>`:m.ok===false?`<span class="bad-c">${ico('x',20,2.8)}</span>`:'';
-  return `<div class="msg ${m.me?'me':'them'} ${lie?'lie':''}">${lie?ico('alert',20):''}${m.ic?ico(m.ic,20):''}${mark}${m.t?`<span class="num">${esc(m.t)}</span>`:''}</div>`;
+  const mark=m.ok===true?`<span class="good-c">${ico('check',18,2.8)}</span>`:m.ok===false?`<span class="bad-c">${ico('x',18,2.8)}</span>`:'';
+  return `<div class="msg ${m.me?'me':'them'} ${lie?'lie':''}">${lie?ico('alert',18):''}${m.ic?ico(m.ic,18):''}${mark}${m.t?`<span>${lie?'Yalan! ':''}${esc(m.t)}</span>`:''}</div>`;
 }
 function caught(l,c){return !!c.lie&&((c.k==='kusur'&&l.item.lup&&l.item.defects.length>0)||(c.k==='belge'&&(l.item.serial==='supheli'||(l.item.full&&l.item.fake))))}
 function testsHTML(it,ref){
-  return [['lup','lup','Lup',it.lup],['seri','barcode','Seri no',!!it.serial],['uzman','cert','Uzman',it.full]].map(([k,i,ad,done])=>
-    done||it.full?`<div class="ib done" aria-label="${ad}: yapıldı">${ico(i,30)}<span class="ok">${ico('check',13,3)}</span></div>`
-    :`<button class="ib" data-act="test" data-t="${k}" data-ref="${ref}" ${S.cash<testCost[k](it)?'disabled':''} aria-label="${ad}">${ico(i,30)}<span class="num">${TL(testCost[k](it))}</span></button>`).join('');
+  return [['lup','lup','Lup',it.lup],['seri','barcode','Seri no',!!it.serial],['uzman','cert','Uzman raporu',it.full]].map(([k,i,ad,done])=>
+    done||it.full?`<div class="ib done">${ico(i,28)}<span class="lbl">${ad}</span><span class="ok">${ico('check',13,3)}</span></div>`
+    :`<button class="ib" data-act="test" data-t="${k}" data-ref="${ref}" ${S.cash<testCost[k](it)?'disabled':''}>${ico(i,28)}<span class="lbl">${ad}</span><span class="num">${TL(testCost[k](it))}</span></button>`).join('');
 }
 
 /* ---- Mezat ---- */
 function mezatView(){
-  return S.auctions.map(a=>{const it=a.item, repc=it.defects.reduce((s,d)=>s+fixCost(d)(it),0);
+  return `<h2 class="h1">Mezat<small>Hasarlı ürünü ucuza kap, onar, kârla sat</small></h2>`+S.auctions.map(a=>{const it=a.item, repc=it.defects.reduce((s,d)=>s+fixCost(d)(it),0);
    return `<div class="card" style="display:flex;flex-direction:column;gap:12px">
-    <div class="row">${art(it)}<div style="min-width:0;flex:1"><b>${esc(T(it).ad)}</b><div class="row between">${dots(it.cond)}<span class="tags">${it.defects.map(()=>`<span class="tag warn">${ico('crack',14)}</span>`).join('')}</span></div></div></div>
+    <div class="row">${art(it)}<div style="min-width:0;flex:1"><b>${esc(T(it).ad)}</b><div class="row between">${dots(it.cond)}</div>
+      <div class="tags" style="margin-top:4px">${it.defects.map(d=>`<span class="tag warn">${ico('crack',13)} ${DEF[d].ad}</span>`).join('')}</div></div></div>
     <div class="lot-stats">
-      <div class="stat bad-c" title="Onarım">${ico('wrench',20)}<span class="num" style="font-size:13px">${TL(repc)}</span></div>
-      <div class="stat good-c" title="Onarım sonrası değer">${ico('up',20,2.6)}<span class="num" style="font-size:13px">${TL(mkt(it))}</span></div>
-      <div class="stat" title="Komisyon">${ico('percent',20)}<span class="num" style="font-size:13px">5</span></div>
+      <div class="stat bad-c">${ico('wrench',20)}<span class="num" style="font-size:13px">${TL(repc)}</span><small>Onarım</small></div>
+      <div class="stat good-c">${ico('up',20,2.6)}<span class="num" style="font-size:13px">${TL(mkt(it))}</span><small>Onarınca değer</small></div>
+      <div class="stat">${ico('percent',20)}<span class="num" style="font-size:13px">%5</span><small>Komisyon</small></div>
     </div>
-    ${a.done?`<div class="row center">${a.won?`<span class="good-c">${icoF('trophy',30)}</span>`:avatar(a.leader||a.rival)}<span class="price num">${TL(a.bid)}</span>${a.won?'':`<span class="bad-c">${ico('x',26,2.6)}</span>`}</div>`:
-    `<div class="row between"><span class="bigprice num" style="font-size:28px">${TL(a.bid)}</span>
-      <span class="row">${a.leader==='Sen'?`<span class="avatar sm" style="--h:150">${ico('user',18)}</span><span class="good-c">${ico('check',22,2.8)}</span>`:a.leader?`${avatar(a.leader,1)}<span class="bad-c">${ico('up',20,2.6)}</span>`:''}</span></div>
+    ${a.done?`<div class="row center">${a.won?`<span class="good-c">${icoF('trophy',28)}</span> <b class="good-c">Kazandın!</b>`:`${avatar(a.leader||a.rival,1)} <b class="bad-c">${esc(a.leader||a.rival)} aldı</b>`}<span class="price num">${TL(a.bid)}</span></div>`:
+    `<div class="row between"><span><span class="muted" style="font-size:13px">${a.leader?'Son teklif':'Açılış'}</span><br><span class="bigprice num" style="font-size:28px">${TL(a.bid)}</span></span>
+      <span class="row">${a.leader==='Sen'?`<span class="avatar sm" style="--h:150">${ico('user',18)}</span><b class="good-c">Öndesin</b>`:a.leader?`${avatar(a.leader,1)}<b class="bad-c">${esc(a.leader)} önde</b>`:''}</span></div>
      <div class="acts">
-      <button class="ib primary" data-act="bid" data-id="${a.id}" ${a.leader==='Sen'?'disabled':''} aria-label="Teklif ver">${ico('hammer',28)}<span class="num">${a.leader?'+'+TL(a.step):TL(a.bid)}</span></button>
-      ${a.leader==='Sen'?`<button class="ib good pulse" data-act="hammer" data-id="${a.id}" aria-label="Al">${icoF('trophy',30)}</button>`:'<span></span>'}
-      <button class="ib flat" data-act="fold" data-id="${a.id}" aria-label="Çekil">${ico('x',28,2.6)}</button></div>`}
+      <button class="ib primary" data-act="bid" data-id="${a.id}" ${a.leader==='Sen'?'disabled':''}>${ico('hammer',26)}<span class="lbl">${a.leader?'Artır +'+TL(a.step):'Teklif ver'}</span></button>
+      ${a.leader==='Sen'?`<button class="ib good pulse" data-act="hammer" data-id="${a.id}">${icoF('trophy',26)}<span class="lbl">Çekici indir</span></button>`:'<span></span>'}
+      <button class="ib flat" data-act="fold" data-id="${a.id}">${ico('x',26,2.6)}<span class="lbl">Çekil</span></button></div>`}
    </div>`}).join('');
 }
 
 /* ---- Stok ---- */
 function stokView(){
   const cap=lvl().cap;
-  return `<div class="row">${ico('box',22)}<div class="meter" style="flex:1"><i style="left:0;width:${S.inv.length/cap*100}%;background:linear-gradient(90deg,var(--accent),var(--accent2))"></i></div><span class="num">${S.inv.length}/${cap}</span></div>
-   ${S.inv.length?`<div class="grid2">${S.inv.map(it=>{const mid=est(it)[1];return `<button class="tcard" data-act="openI" data-id="${it.id}" aria-label="${esc(T(it).ad)}">
+  return `<h2 class="h1">Stokun<small>Ürüne dokun: onar, temizle, ilana koy</small></h2>
+   <div class="row">${ico('box',22)}<div class="meter" style="flex:1"><i style="left:0;width:${S.inv.length/cap*100}%;background:linear-gradient(90deg,var(--accent),var(--accent2))"></i></div><span class="num">${S.inv.length}/${cap}</span></div>
+   ${S.inv.length?`<div class="grid2">${S.inv.map(it=>{const mid=est(it)[1];return `<button class="tcard" data-act="openI" data-id="${it.id}">
     ${art(it)}<div class="badges">${it.listed?`<span class="bdg brass-c">${icoF('tag',18)}</span>`:''}${it.serial||it.full?shieldBadge(it):''}${knownDefs(it).length?`<span class="bdg warn-c">${ico('crack',18)}</span>`:''}</div>
-    <div class="price num">${TL(it.listed||mid)}</div><div class="row between">${dots(it.cond)}<span class="tag ${mid>=it.paid?'good':'bad'}">${ico(mid>=it.paid?'up':'down',14,2.6)}</span></div></button>`}).join('')}</div>`
-   :`<div class="empty">${ico('box',40)}<span class="row">${ico('search',24)} ${ico('hammer',24)}</span></div>`}`;
+    <div class="price num">${TL(it.listed||mid)}</div><div class="tname">${esc(T(it).ad)}</div>
+    <div class="row between">${dots(it.cond)}<span class="tag ${it.listed?'warn':''}">${it.listed?'İlanda':'Depoda'}</span></div></button>`}).join('')}</div>`
+   :`<div class="empty">${ico('box',40)}Stok boş. İlanlardan ya da mezattan ürün al.</div>`}`;
 }
 function itemView(){
   const it=S.inv.find(x=>x.id===view.id); if(!it){view.id=null;return stokView()}
   const [lo,mid,hi]=est(it), kd=knownDefs(it), fc=fixCosts(it), price=it.listed||r100(mid*1.1);
-  const fixBtn=(k,n)=>fc[k]==null?`<div class="ib done">${ico('wrench',28)}<span class="lvl">${icoF('star',11).repeat(n)}</span><span class="ok">${ico('check',13,3)}</span></div>`
-     :`<button class="ib" data-act="fix" data-k="${k}" data-id="${it.id}" ${S.cash<fc[k]?'disabled':''} aria-label="Tamir ${n}">${ico('wrench',28)}<span class="lvl">${icoF('star',11).repeat(n)}</span><span class="num">${TL(fc[k])}</span></button>`;
+  const FIXN={ucuz:'Ucuz tamir',standart:'Standart tamir',premium:'Usta tamiri'};
+  const fixBtn=(k,n)=>fc[k]==null?`<div class="ib done">${ico('wrench',26)}<span class="lvl">${icoF('star',11).repeat(n)}</span><span class="lbl">${FIXN[k]}</span><span class="ok">${ico('check',13,3)}</span></div>`
+     :`<button class="ib" data-act="fix" data-k="${k}" data-id="${it.id}" ${S.cash<fc[k]?'disabled':''}>${ico('wrench',26)}<span class="lvl">${icoF('star',11).repeat(n)}</span><span class="lbl">${FIXN[k]}</span><span class="num">${TL(fc[k])}</span></button>`;
   return `<div class="hero">${art(it,'big')}<div class="badges">${shieldBadge(it,26)}${it.clean?`<span class="bdg brass-c">${icoF('sparkle',22)}</span>`:''}${it.photo?`<span class="bdg">${ico('camera',22)}</span>`:''}</div></div>
-   <div class="row between"><b style="font-size:18px">${esc(T(it).ad)}</b>${dots(it.cond)}</div>
+   <div class="row between"><b style="font-size:19px">${esc(T(it).ad)}</b>${dots(it.cond)}</div>
+   <div class="tags"><span class="tag">${KOND[it.cond].ad}</span><span class="tag ${auth(it)[0]==='muted'?'':auth(it)[0]}">${authText(it)}</span>${it.listed?`<span class="tag warn">İlanda</span>`:''}</div>
    ${defTags(it)}
-   <div class="card row between"><span class="row muted">${ico('cart',20)}<span class="num">${TL(it.paid)}</span></span><span class="muted">${ico('next',18)}</span>
-     <span class="row">${ico('coins',20)}<span class="num">${lo===hi?TL(mid):TL(lo)+' – '+TL(hi)}</span></span></div>
+   <div class="card row between"><span><span class="muted" style="font-size:13px">Aldığın fiyat</span><br><span class="num">${TL(it.paid)}</span></span><span class="muted">${ico('next',18)}</span>
+     <span style="text-align:right"><span class="muted" style="font-size:13px">Tahmini değer</span><br><span class="num">${lo===hi?TL(mid):TL(lo)+' – '+TL(hi)}</span></span></div>
+   <div class="sect">${ico('wrench',18)} Hazırlık <span class="sub">· değerini artır</span></div>
    <div class="acts">${fixBtn('ucuz',1)}${fixBtn('standart',2)}${fixBtn('premium',3)}
-     ${it.clean?`<div class="ib done">${icoF('sparkle',28)}<span class="ok">${ico('check',13,3)}</span></div>`:`<button class="ib" data-act="clean" data-id="${it.id}" ${S.cash<cleanCost(it)?'disabled':''} aria-label="Temizlik">${ico('sparkle',28)}<span class="num">${TL(cleanCost(it))}</span></button>`}
-     ${it.photo?`<div class="ib done">${ico('camera',28)}<span class="ok">${ico('check',13,3)}</span></div>`:`<button class="ib" data-act="photo" data-id="${it.id}" ${S.cash<PHOTO?'disabled':''} aria-label="Fotoğraf">${ico('camera',28)}<span class="num">${TL(PHOTO)}</span></button>`}
-     ${kd.length?`<button class="ib ${it.disclose?'good':'flat'}" data-act="disc" data-id="${it.id}" aria-label="Kusurları ilanda göster">${ico(it.disclose?'eye':'eyeoff',28)}${ico('crack',16)}</button>`:'<span></span>'}
+     ${it.clean?`<div class="ib done">${icoF('sparkle',26)}<span class="lbl">Temizlik</span><span class="ok">${ico('check',13,3)}</span></div>`:`<button class="ib" data-act="clean" data-id="${it.id}" ${S.cash<cleanCost(it)?'disabled':''}>${ico('sparkle',26)}<span class="lbl">Temizlik</span><span class="num">${TL(cleanCost(it))}</span></button>`}
+     ${it.photo?`<div class="ib done">${ico('camera',26)}<span class="lbl">Fotoğraf</span><span class="ok">${ico('check',13,3)}</span></div>`:`<button class="ib" data-act="photo" data-id="${it.id}" ${S.cash<PHOTO?'disabled':''}>${ico('camera',26)}<span class="lbl">Fotoğraf</span><span class="num">${TL(PHOTO)}</span></button>`}
+     ${kd.length?`<button class="ib ${it.disclose?'good':'flat'}" data-act="disc" data-id="${it.id}">${ico(it.disclose?'eye':'eyeoff',26)}<span class="lbl">${it.disclose?'Kusuru yazıyorum':'Kusuru saklıyorum'}</span></button>`:'<span></span>'}
    </div>
+   <div class="sect">${ico('lup',18)} Ekspertiz</div>
    <div class="acts">${testsHTML(it,'I'+it.id)}</div>
+   <div class="sect">${ico('tag',18)} Satış fiyatı</div>
    <div class="card" style="display:flex;flex-direction:column;gap:8px">
      <div class="stepper"><button data-act="pstep" data-v="-1" aria-label="Azalt">${ico('minus',24,2.6)}</button>
        <div class="bigprice num" id="priceShow">${TL(price)}</div>
        <button data-act="pstep" data-v="1" aria-label="Artır">${ico('plus',24,2.6)}</button></div>
      <input id="priceRange" type="range" min="50" max="170" value="${clamp(Math.round(price/mid*100),50,170)}" data-base="${mid}" aria-label="Satış fiyatı">
-     <div class="row between"><span class="good-c" title="Hızlı satılır">${ico('happy',20)}</span><span class="bad-c" title="Zor satılır">${ico('sad',20)}</span></div>
+     <div class="row between" style="font-size:12.5px"><span class="row good-c">${ico('happy',18)} Hızlı satılır</span><span class="row bad-c">Zor satılır ${ico('sad',18)}</span></div>
    </div>
    <div class="acts two">
-     <button class="ib primary" data-act="list" data-id="${it.id}" aria-label="İlana koy">${icoF('tag',30)}</button>
-     ${it.listed?`<button class="ib flat" data-act="unlist" data-id="${it.id}" aria-label="İlanı kaldır">${ico('x',28,2.6)}</button>`:'<span></span>'}
-   </div>`;
+     <button class="ib primary" data-act="list" data-id="${it.id}">${icoF('tag',26)}<span class="lbl">${it.listed?'Fiyatı güncelle':'İlana koy'}</span></button>
+     ${it.listed?`<button class="ib flat" data-act="unlist" data-id="${it.id}">${ico('x',26,2.6)}<span class="lbl">İlandan kaldır</span></button>`:'<span></span>'}
+   </div>
+   <p class="tip">Alıcılar gün sonunda arar. Kusuru yazarsan itibar kazanırsın.</p>`;
 }
 
 /* ---- Banka ---- */
 function bankaView(){
   const lim=loanLimit(), free=Math.max(0,lim-S.debt);
-  return `<div class="grid2">
-     <div class="card" style="text-align:center">${ico('coins',30)}<div class="price num">${TL(S.cash)}</div></div>
-     <div class="card bad-c" style="text-align:center">${ico('percent',30)}<div class="price num">${TL(S.debt)}</div></div></div>
-   <div class="card"><div class="row">${ico('bank',22)}<div class="meter" style="flex:1"><i style="left:0;width:${Math.min(100,S.debt/lim*100)}%;background:linear-gradient(90deg,var(--warn),var(--bad))"></i></div><span class="num" style="font-size:13px">${TL(lim)}</span></div></div>
-   <div class="acts">${[10000,25000,100000].map(v=>`<button class="ib good" data-act="borrow" data-v="${v}" ${free<v?'disabled':''} aria-label="Kredi çek">${ico('plus',24,2.6)}<span class="num">${FMT.format(v)}</span></button>`).join('')}</div>
-   <div class="acts two"><button class="ib" data-act="repay" data-v="10000" ${S.debt<=0||S.cash<=0?'disabled':''} aria-label="Borç öde">${ico('minus',24,2.6)}<span class="num">10.000</span></button>
-     <button class="ib primary" data-act="repay" data-v="all" ${S.debt<=0||S.cash<=0?'disabled':''} aria-label="Tamamını öde">${ico('check',30,2.6)}</button></div>
+  return `<h2 class="h1">Banka<small>Günlük faiz %1</small></h2>
+   <div class="grid2">
+     <div class="card" style="text-align:center">${ico('coins',28)}<div class="price num">${TL(S.cash)}</div><span class="muted" style="font-size:13px">Kasa</span></div>
+     <div class="card bad-c" style="text-align:center">${ico('percent',28)}<div class="price num">${TL(S.debt)}</div><span class="muted" style="font-size:13px">Borç</span></div></div>
+   <div class="card"><div class="muted" style="font-size:13px;margin-bottom:4px">Kredi limiti</div><div class="row">${ico('bank',22)}<div class="meter" style="flex:1"><i style="left:0;width:${Math.min(100,S.debt/lim*100)}%;background:linear-gradient(90deg,var(--warn),var(--bad))"></i></div><span class="num" style="font-size:13px">${TL(lim)}</span></div></div>
+   <div class="sect">${ico('plus',18)} Kredi çek</div>
+   <div class="acts">${[10000,25000,100000].map(v=>`<button class="ib good" data-act="borrow" data-v="${v}" ${free<v?'disabled':''}>${ico('plus',22,2.6)}<span class="lbl num">${TL(v)}</span></button>`).join('')}</div>
+   <div class="sect">${ico('minus',18)} Borç öde</div>
+   <div class="acts two"><button class="ib" data-act="repay" data-v="10000" ${S.debt<=0||S.cash<=0?'disabled':''}>${ico('minus',22,2.6)}<span class="lbl num">${TL(10000)}</span></button>
+     <button class="ib primary" data-act="repay" data-v="all" ${S.debt<=0||S.cash<=0?'disabled':''}>${ico('check',26,2.6)}<span class="lbl">Tamamını öde</span></button></div>
    <div class="card"><div class="stat3" style="margin:0">
-     <div class="stat">${ico('cart',22)}<span class="num">${S.stats.bought}</span></div>
-     <div class="stat">${ico('tag',22)}<span class="num">${S.stats.sold}</span></div>
-     <div class="stat ${S.stats.profit>=0?'good-c':'bad-c'}">${ico(S.stats.profit>=0?'up':'down',22,2.6)}<span class="num" style="font-size:13px">${TL(S.stats.profit)}</span></div></div></div>`;
+     <div class="stat">${ico('cart',22)}<span class="num">${S.stats.bought}</span><small>Alınan</small></div>
+     <div class="stat">${ico('tag',22)}<span class="num">${S.stats.sold}</span><small>Satılan</small></div>
+     <div class="stat ${S.stats.profit>=0?'good-c':'bad-c'}">${ico(S.stats.profit>=0?'up':'down',22,2.6)}<span class="num" style="font-size:13px">${TL(S.stats.profit)}</span><small>Toplam kâr</small></div></div></div>`;
 }
 
 /* ================= EYLEMLER ================= */
@@ -646,64 +684,65 @@ function bindInputs(){
 const curOffer=()=>{const rg=$('#offerRange');return r100(+rg.dataset.base*rg.value/100)};
 const curPrice=()=>{const pr=$('#priceRange');return r100(+pr.dataset.base*pr.value/100)};
 let toastT;
-function toast(ic,txt,cls=''){const t=$('#toast');t.innerHTML=`<span class="${cls}">${ico(ic,20,2.4)}</span>${txt?`<span class="num">${esc(txt)}</span>`:''}`;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2200)}
+function toast(ic,txt,cls=''){const t=$('#toast');t.innerHTML=`<span class="${cls}">${ico(ic,20,2.4)}</span>${txt?`<span>${esc(txt)}</span>`:''}`;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2400)}
 function openDlg(html){$('#dialog').innerHTML=html;$('#overlay').hidden=false;const f=$('#dialog').querySelector('button');f&&f.focus()}
 function closeDlg(){$('#overlay').hidden=true}
 const say=(l,m)=>l.chat.push(m);
+const NOCASH=()=>toast('coins','Kasada yeterli para yok','bad-c');
 
 function ask(l,q){
   const it=l.item,P=PERSONAS[l.persona]; l.asked.push(q);
-  if(q==='belge'){say(l,{me:1,ic:'doc'});
-    if(it.docs){l.claims.push({k:'belge'});say(l,{ic:'doc',ok:true,claim:l.claims.length-1})}
-    else if(it.fake){l.claims.push({k:'belge',lie:true});say(l,{ic:'doc',ok:true,claim:l.claims.length-1})}
-    else say(l,{ic:'doc',ok:false})}
-  if(q==='kusur'){say(l,{me:1,ic:'crack'});
-    if(!it.defects.length){l.claims.push({k:'kusur'});say(l,{ic:'crack',ok:false,claim:l.claims.length-1})}
-    else if(Math.random()<P.honest){const d=it.defects[0];it.kd.push(d);say(l,{ic:'crack',t:DEF[d].ad})}
-    else {l.claims.push({k:'kusur',lie:true});say(l,{ic:'crack',ok:false,claim:l.claims.length-1})}}
+  if(q==='belge'){say(l,{me:1,ic:'doc',t:'Belgesi var mı?'});
+    if(it.docs){l.claims.push({k:'belge'});say(l,{ok:true,t:'Kutusu, faturası tam.',claim:l.claims.length-1})}
+    else if(it.fake){l.claims.push({k:'belge',lie:true});say(l,{ok:true,t:'Var var, evde duruyor.',claim:l.claims.length-1})}
+    else say(l,{ok:false,t:'Maalesef belgesi yok.'})}
+  if(q==='kusur'){say(l,{me:1,ic:'crack',t:'Kusuru var mı?'});
+    if(!it.defects.length){l.claims.push({k:'kusur'});say(l,{ok:true,t:'Hiç kusuru yok.',claim:l.claims.length-1})}
+    else if(Math.random()<P.honest){const d=it.defects[0];it.kd.push(d);say(l,{ic:'crack',t:`Saklamayayım: ${DEF[d].ad.toLowerCase()} var.`})}
+    else {l.claims.push({k:'kusur',lie:true});say(l,{ok:true,t:'Sıfır gibi, kusursuz.',claim:l.claims.length-1})}}
   checkLeverage(l);
 }
-function checkLeverage(l){if(!l.leverage&&l.claims.some(c=>caught(l,c))){l.leverage=true;toast('alert','!','bad-c')}}
+function checkLeverage(l){if(!l.leverage&&l.claims.some(c=>caught(l,c))){l.leverage=true;toast('alert','Satıcının yalanını yakaladın!','bad-c')}}
 function runTest(it,k,l){
-  const c=testCost[k](it); if(S.cash<c) return toast('coins','','bad-c');
+  const c=testCost[k](it); if(S.cash<c) return NOCASH();
   S.cash-=c;
-  if(k==='lup'){it.lup=true;toast('crack',String(it.defects.length),it.defects.length?'warn-c':'good-c')}
-  if(k==='seri'){it.serial=it.fake?(Math.random()<.85?'supheli':'temiz'):(Math.random()<.95?'temiz':'supheli');toast(it.serial==='temiz'?'check':'alert','',it.serial==='temiz'?'good-c':'warn-c')}
-  if(k==='uzman'){it.full=true;it.lup=true;it.serial=it.fake?'supheli':'temiz';toast(it.fake?'x':'check',TL(real(it)),it.fake?'bad-c':'good-c')}
+  if(k==='lup'){it.lup=true;toast('crack',it.defects.length?`${it.defects.length} kusur bulundu`:'Kusur yok',it.defects.length?'warn-c':'good-c')}
+  if(k==='seri'){it.serial=it.fake?(Math.random()<.85?'supheli':'temiz'):(Math.random()<.95?'temiz':'supheli');toast(it.serial==='temiz'?'check':'alert',it.serial==='temiz'?'Kayıt temiz':'Kayıt şüpheli!',it.serial==='temiz'?'good-c':'warn-c')}
+  if(k==='uzman'){it.full=true;it.lup=true;it.serial=it.fake?'supheli':'temiz';toast(it.fake?'x':'check',it.fake?'Sahte çıktı!':`Orijinal · ${TL(real(it))}`,it.fake?'bad-c':'good-c')}
   if(l) checkLeverage(l);
   save(); render();
 }
 function buyListing(l,price){
-  if(S.inv.length>=lvl().cap) return toast('box','✕','bad-c');
-  if(S.cash<price) return toast('coins','','bad-c');
+  if(S.inv.length>=lvl().cap) return toast('box','Stok dolu, önce sat','bad-c');
+  if(S.cash<price) return NOCASH();
   S.cash-=price; l.item.paid=price; l.item.disclose=true; S.inv.push(l.item); S.stats.bought++;
-  S.listings=S.listings.filter(x=>x!==l); save(); go('stok',l.item.id); toast('cart',TL(price),'good-c');
+  S.listings=S.listings.filter(x=>x!==l); save(); go('stok',l.item.id); toast('cart',`${TL(price)}'ye aldın`,'good-c');
 }
 function offer(l){
   const v=curOffer();
-  if(v>S.cash) return toast('coins','','bad-c');
+  if(v>S.cash) return NOCASH();
   if(v>=l.ask) return buyListing(l,l.ask);
-  say(l,{me:1,ic:'hand',t:TL(v)});
-  if(v>=l.min){say(l,{ic:'hand',ok:true});return buyListing(l,v)}
+  say(l,{me:1,ic:'hand',t:`${TL(v)} veririm.`});
+  if(v>=l.min){say(l,{ok:true,t:'Tamam, anlaştık!'});return buyListing(l,v)}
   l.patience-= v<l.min*.65?2:1;
-  if(l.patience<=0){S.listings=S.listings.filter(x=>x!==l);save();go('ilan');return toast('sad','','bad-c')}
+  if(l.patience<=0){S.listings=S.listings.filter(x=>x!==l);save();go('ilan');return toast('sad','Satıcı kızdı ve gitti','bad-c')}
   l.ask=r100(Math.max(l.min,(l.ask+l.min)/2));
-  say(l,{ic:'undo',t:TL(l.ask)}); save(); render();
+  say(l,{ic:'undo',t:`Olmaz. ${TL(l.ask)} olur.`}); save(); render();
 }
 function evidence(l){
-  l.used=true; say(l,{me:1,ic:'alert'});
+  l.used=true; say(l,{me:1,ic:'alert',t:'Yalan söylediniz, ortada!'});
   l.min=r100(l.min*.85); l.ask=r100(Math.max(l.min,l.ask*.85)); l.patience=Math.max(l.patience,2);
-  say(l,{ic:'down',t:TL(l.ask)}); save(); render();
+  say(l,{ic:'down',t:`Peki... ${TL(l.ask)} olsun.`}); save(); render();
 }
 function walk(l){
-  say(l,{me:1,ic:'door'});
-  if(Math.random()<.45&&l.ask>l.min){l.ask=r100(Math.max(l.min,l.ask*.9));say(l,{ic:'phone',t:TL(l.ask)});save();render();return toast('phone',TL(l.ask),'good-c')}
+  say(l,{me:1,ic:'door',t:'Kolay gelsin.'});
+  if(Math.random()<.45&&l.ask>l.min){l.ask=r100(Math.max(l.min,l.ask*.9));say(l,{ic:'phone',t:`Dur dur! ${TL(l.ask)} olsun.`});save();render();return toast('phone','Satıcı geri aradı!','good-c')}
   S.listings=S.listings.filter(x=>x!==l); save(); go('ilan');
 }
 function bid(a){
   const price=a.leader?a.bid+a.step:a.bid;
-  if(S.cash<price*1.05) return toast('coins','','bad-c');
-  if(S.inv.length>=lvl().cap) return toast('box','✕','bad-c');
+  if(S.cash<price*1.05) return NOCASH();
+  if(S.inv.length>=lvl().cap) return toast('box','Stok dolu','bad-c');
   a.bid=price; a.leader='Sen';
   if(price+a.step<=a.rivalMax){a.bid=price+a.step;a.leader=Math.random()<.7?a.rival:pick(RIVALS)}
   save(); render();
@@ -711,16 +750,16 @@ function bid(a){
 function hammer(a){
   if(a.leader!=='Sen') return;
   a.done=true; a.won=true; const cost=r100(a.bid*1.05);
-  S.cash-=cost; a.item.paid=cost; S.inv.push(a.item); S.stats.bought++; save(); render(); toast('hammer',TL(cost),'good-c');
+  S.cash-=cost; a.item.paid=cost; S.inv.push(a.item); S.stats.bought++; save(); render(); toast('hammer',`Senin oldu · ${TL(cost)}`,'good-c');
 }
 function fold(a){a.done=true;a.won=false;if(a.leader==='Sen'||!a.leader)a.leader=a.rival;save();render()}
 function fix(it,k){
   const kd=knownDefs(it), cost=fixCosts(it)[k];
-  if(cost==null) return; if(S.cash<cost) return toast('coins','','bad-c');
+  if(cost==null) return; if(S.cash<cost) return NOCASH();
   S.cash-=cost;
-  if(k==='ucuz'){const fixed=kd.filter(()=>Math.random()<.6);it.defects=it.defects.filter(d=>!fixed.includes(d));toast('wrench',`${fixed.length}/${kd.length}`,fixed.length===kd.length?'good-c':'warn-c')}
-  if(k==='standart'){it.defects=it.defects.filter(d=>!kd.includes(d));toast('wrench','','good-c')}
-  if(k==='premium'){it.defects=[];it.cond=Math.min(3,it.cond+1);toast('sparkle','','good-c')}
+  if(k==='ucuz'){const fixed=kd.filter(()=>Math.random()<.6);it.defects=it.defects.filter(d=>!fixed.includes(d));toast('wrench',fixed.length===kd.length?'Hepsi düzeldi':`${kd.length-fixed.length} kusur düzelmedi`,fixed.length===kd.length?'good-c':'warn-c')}
+  if(k==='standart'){it.defects=it.defects.filter(d=>!kd.includes(d));toast('wrench','Kusurlar giderildi','good-c')}
+  if(k==='premium'){it.defects=[];it.cond=Math.min(3,it.cond+1);toast('sparkle',`Usta işi! ${KOND[it.cond].ad}`,'good-c')}
   it.kd=it.kd.filter(d=>it.defects.includes(d)); save(); render();
 }
 function sell(it,price){
@@ -735,13 +774,13 @@ function review(s,n){S.reviews.unshift({s,n});S.reviews=S.reviews.slice(0,12)}
 
 /* ================= GÜN SONU ================= */
 function endDay(){
-  const rep=[]; // {ic, v|txt, c, cat}
+  const rep=[]; // {ic, m, v|txt, c, cat}
   for(const s of S.pending){
-    if(s.fake&&Math.random()<.65){S.cash-=s.price;S.rep=clamp(S.rep-15,0,100);review(1,s.buyer);rep.push({ic:'shieldx',cat:s.cat,v:-s.price,c:'bad'});continue}
+    if(s.fake&&Math.random()<.65){S.cash-=s.price;S.rep=clamp(S.rep-15,0,100);review(1,s.buyer);rep.push({ic:'shieldx',cat:s.cat,m:'Sahte çıktı, iade edildi',v:-s.price,c:'bad'});continue}
     let comp=0; for(const h of s.hidden) if(Math.random()<.5) comp+=h;
-    if(comp){S.cash-=comp;S.rep=clamp(S.rep-6,0,100);review(2,s.buyer);rep.push({ic:'crack',cat:s.cat,v:-comp,c:'bad'});continue}
+    if(comp){S.cash-=comp;S.rep=clamp(S.rep-6,0,100);review(2,s.buyer);rep.push({ic:'crack',cat:s.cat,m:'Gizli kusur tazminatı',v:-comp,c:'bad'});continue}
     const up=1+(s.disclosed?1:0)+(s.cert?1:0); S.rep=clamp(S.rep+up,0,100); review(s.cert||s.disclosed?5:4,s.buyer);
-    rep.push({ic:'star',cat:s.cat,txt:'+'+up,c:'brass'});
+    rep.push({ic:'star',cat:s.cat,m:'Mutlu müşteri, itibar',txt:'+'+up,c:'brass'});
   }
   S.pending=[]; S.offers=[];
   for(const it of S.inv) if(it.listed){
@@ -751,32 +790,33 @@ function endDay(){
     if(amt<it.listed*.5) continue;
     S.offers.push({id:S.uid++,itemId:it.id,amount:amt,type,buyer:pick(NAMES),countered:false});
   }
-  if(S.offers.length) rep.push({ic:'phone',txt:String(S.offers.length),c:'good'});
-  S.cash-=lvl().rent; rep.push({ic:'home',v:-lvl().rent,c:'bad'});
-  if(S.debt>0){const f=r100(S.debt*.01);S.debt+=f;rep.push({ic:'percent',v:-f,c:'bad'})}
+  if(S.offers.length) rep.push({ic:'phone',m:'Alıcı aradı',txt:String(S.offers.length),c:'good'});
+  S.cash-=lvl().rent; rep.push({ic:'home',m:'Kira',v:-lvl().rent,c:'bad'});
+  if(S.debt>0){const f=r100(S.debt*.01);S.debt+=f;rep.push({ic:'percent',m:'Kredi faizi',v:-f,c:'bad'})}
   const oldSeason=season();
   S.day++;
   for(const c in CATS) S.trend[c]=clamp(S.trend[c]*R(.95,1.05)+(1-S.trend[c])*.08,.6,1.6);
   const c=pick(Object.keys(CATS)), up=Math.random()<.55;
   S.trend[c]=clamp(S.trend[c]*(up?R(1.15,1.3):R(.75,.87)),.6,1.6);
-  rep.push({ic:up?'up':'down',cat:c,c:up?'good':'bad'});
-  if(season()!==oldSeason) rep.push({ic:season().ic,c:'brass'});
-  if(S.cash<0&&S.debt-S.cash<=loanLimit()){const need=r100(-S.cash);S.debt+=need;S.cash+=need;rep.push({ic:'bank',v:need,c:'warn'})}
+  rep.push({ic:up?'up':'down',cat:c,m:`${CATS[c][0]} talebi ${up?'arttı':'düştü'}`,c:up?'good':'bad'});
+  if(season()!==oldSeason) rep.push({ic:season().ic,m:`${season().ad} geldi`,c:'brass'});
+  if(S.cash<0&&S.debt-S.cash<=loanLimit()){const need=r100(-S.cash);S.debt+=need;S.cash+=need;rep.push({ic:'bank',m:'Kasa eksideydi, otomatik kredi',v:need,c:'warn'})}
   genListings(); genAuctions(); save(); view={tab:'home',id:null}; render(); scrollTo(0,0);
-  openDlg(`<div class="dhead"><div class="big-ico grad">${ico('sunrise',40)}</div><h2>${S.day}</h2></div>
+  openDlg(`<div class="dhead"><div class="big-ico grad">${ico('sunrise',40)}</div><h2>${S.day}. gün başladı</h2></div>
     <div class="rep">${rep.map(r=>`<div class="r"><span class="ic ${r.c}-c">${r.ic==='shieldx'?shieldIco('x',22):ico(r.ic,22,2.4)}</span>${r.cat?artC(r.cat,'sm'):''}
-      <span class="v num ${r.c}-c">${r.v!=null?sTL(r.v):r.txt||''}</span></div>`).join('')}</div>
-    <button class="bigbtn grad" data-act="close" aria-label="Devam">${ico('play',22)}</button>`);
+      <span class="m">${esc(r.m)}</span><span class="v num ${r.c}-c">${r.v!=null?sTL(r.v):r.txt||''}</span></div>`).join('')}</div>
+    <button class="bigbtn grad" data-act="close">${ico('play',20)} Dükkânı aç</button>`);
 }
 
 /* ================= OLAYLAR ================= */
 function howto(){
-  const st=[['search','Bul'],['lup','İncele'],['hand','Pazarlık'],['wrench','Onar'],['tag','Sat'],['coins','Kazan']];
-  openDlg(`<div class="dhead"><div class="big-ico grad">${ico('help',40)}</div></div>
+  const st=[['search','İlan bul'],['lup','İncele'],['hand','Pazarlık et'],['wrench','Onar'],['tag','İlana koy'],['coins','Kâr et']];
+  openDlg(`<div class="dhead"><div class="big-ico grad">${ico('help',40)}</div><h2>Nasıl oynanır?</h2></div>
     <div class="flow">${st.map(([i,t],n)=>`<div><b>${n+1}</b>${ico(i,30)}${t}</div>`).join('')}</div>
     <div class="legend"><div class="good-c">${ico('happy',34)}Ucuz</div><div class="warn-c">${ico('meh',34)}Normal</div><div class="bad-c">${ico('sad',34)}Pahalı</div></div>
     <div class="legend"><div class="good-c">${shieldIco('check',30)}Orijinal</div><div class="warn-c">${shieldIco('alert',30)}Şüpheli</div><div class="bad-c">${shieldIco('x',30)}Sahte</div></div>
-    <button class="bigbtn grad" data-act="close" aria-label="Başla">${ico('play',22)}</button>`);
+    <p class="tip">Parlayan butona basarak ilerleyebilirsin. Dükkânını tezgâhtan showroom'a büyüt!</p>
+    <button class="bigbtn grad" data-act="close">${ico('play',20)} Başla</button>`);
 }
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]'); if(!b||b.disabled)return;
@@ -784,8 +824,8 @@ document.addEventListener('click',e=>{
   const L=()=>S.listings.find(x=>x.id===id), I=()=>S.inv.find(x=>x.id===id), A=()=>S.auctions.find(x=>x.id===id);
   switch(act){
     case 'play': {const s=load(); if(s){S=s;view={tab:'home',id:null};showGame()} else {newGame();howto()} break}
-    case 'newask': openDlg(`<div class="dhead"><div class="big-ico grad">${ico('plus',40)}</div></div>
-      <div class="acts two"><button class="ib flat" data-act="close" aria-label="Vazgeç">${ico('x',30,2.6)}</button><button class="ib primary" data-act="new" aria-label="Yeni oyun">${ico('check',30,2.6)}</button></div>`); break;
+    case 'newask': openDlg(`<div class="dhead"><div class="big-ico grad">${ico('plus',40)}</div><h2>Yeni oyun?</h2><p class="tip" style="margin:0">Kayıtlı oyunun silinir.</p></div>
+      <div class="acts two"><button class="ib flat" data-act="close">${ico('x',26,2.6)}<span class="lbl">Vazgeç</span></button><button class="ib primary" data-act="new">${ico('check',26,2.6)}<span class="lbl">Baştan başla</span></button></div>`); break;
     case 'new': closeDlg(); newGame(); break;
     case 'howto': howto(); break;
     case 'close': closeDlg(); break;
@@ -803,25 +843,25 @@ document.addEventListener('click',e=>{
     case 'hammer': {const a=A(); a&&hammer(a); break}
     case 'fold': {const a=A(); a&&fold(a); break}
     case 'fix': {const it=I(); it&&fix(it,b.dataset.k); break}
-    case 'clean': {const it=I(); if(it){S.cash-=cleanCost(it);it.clean=true;save();render();toast('sparkle','','good-c')} break}
-    case 'photo': {const it=I(); if(it){S.cash-=PHOTO;it.photo=true;save();render();toast('camera','','good-c')} break}
+    case 'clean': {const it=I(); if(it){S.cash-=cleanCost(it);it.clean=true;save();render();toast('sparkle','Pırıl pırıl oldu','good-c')} break}
+    case 'photo': {const it=I(); if(it){S.cash-=PHOTO;it.photo=true;save();render();toast('camera','Profesyonel fotoğraflar hazır','good-c')} break}
     case 'disc': {const it=I(); if(it){it.disclose=!it.disclose;save();render()} break}
     case 'pstep': {const pr=$('#priceRange'); pr.value=clamp(+pr.value+5*+b.dataset.v,50,170); pr.oninput(); break}
-    case 'list': {const it=I(); if(it){const v=curPrice(); it.listed=v; S.offers=S.offers.filter(o=>o.itemId!==it.id); save(); render(); toast('tag',TL(v),'brass-c')} break}
+    case 'list': {const it=I(); if(it){const v=curPrice(); it.listed=v; S.offers=S.offers.filter(o=>o.itemId!==it.id); save(); render(); toast('tag',`İlanda: ${TL(v)}`,'brass-c')} break}
     case 'unlist': {const it=I(); if(it){it.listed=null;S.offers=S.offers.filter(o=>o.itemId!==it.id);save();render()} break}
     case 'accept': {const o=S.offers.find(x=>x.id===id), it=o&&S.inv.find(x=>x.id===o.itemId);
-      if(it){const p=sell(it,o.amount);save();render();toast(p>=0?'up':'down',TL(Math.abs(p)),p>=0?'good-c':'bad-c')} break}
+      if(it){const p=sell(it,o.amount);save();render();toast(p>=0?'up':'down',`Satıldı! ${p>=0?'Kâr':'Zarar'} ${TL(Math.abs(p))}`,p>=0?'good-c':'bad-c')} break}
     case 'counter': {const o=S.offers.find(x=>x.id===id), it=o&&S.inv.find(x=>x.id===o.itemId); if(!it)break;
-      if(Math.random()<BUYERS[o.type].acc){o.amount=it.listed;o.countered=true;toast('check','','good-c')}
-      else {S.offers=S.offers.filter(x=>x!==o);toast('x','','bad-c')} save(); render(); break}
+      if(Math.random()<BUYERS[o.type].acc){o.amount=it.listed;o.countered=true;toast('check',`${o.buyer} kabul etti`,'good-c')}
+      else {S.offers=S.offers.filter(x=>x!==o);toast('x',`${o.buyer} vazgeçti`,'bad-c')} save(); render(); break}
     case 'reject': S.offers=S.offers.filter(x=>x.id!==id); save(); render(); break;
     case 'upgrade': {const n=LEVELS[S.level+1]; if(n&&S.cash>=n.price){S.cash-=n.price;S.level++;genListings();save();render();
-      openDlg(`<div class="dhead"><div class="big-ico grad">${ico(n.ic,44)}</div><h2>${n.ad}</h2></div>
-        <div class="stat3" style="margin:0"><div class="stat good-c">${ico('box',22)}<span class="num">${n.cap}</span></div>
-        <div class="stat good-c">${ico('gem',22)}${ico('up',16,2.6)}</div><div class="stat bad-c">${ico('home',22)}<span class="num">−${FMT.format(n.rent)}</span></div></div>
-        <button class="bigbtn grad" data-act="close" aria-label="Tamam">${ico('check',24,2.6)}</button>`)} break}
-    case 'borrow': {const v=+b.dataset.v; if(S.debt+v<=loanLimit()){S.debt+=v;S.cash+=v;save();render();toast('coins','+'+TL(v),'good-c')} break}
-    case 'repay': {const v=b.dataset.v==='all'?Math.min(S.debt,S.cash):Math.min(10000,S.debt,S.cash); if(v>0){S.debt-=v;S.cash-=v;save();render();toast('check',TL(v),'good-c')} break}
+      openDlg(`<div class="dhead"><div class="big-ico grad">${ico(n.ic,44)}</div><h2>${n.ad} açıldı!</h2></div>
+        <div class="stat3" style="margin:0"><div class="stat good-c">${ico('box',22)}<span class="num">${n.cap}</span><small>Stok yeri</small></div>
+        <div class="stat good-c">${ico('gem',22)}<small>Daha değerli ilanlar</small></div><div class="stat bad-c">${ico('home',22)}<span class="num">−${FMT.format(n.rent)}</span><small>Günlük kira</small></div></div>
+        <button class="bigbtn grad" data-act="close">${ico('check',22,2.6)} Harika</button>`)} break}
+    case 'borrow': {const v=+b.dataset.v; if(S.debt+v<=loanLimit()){S.debt+=v;S.cash+=v;save();render();toast('coins',`${TL(v)} kredi kasada`,'good-c')} break}
+    case 'repay': {const v=b.dataset.v==='all'?Math.min(S.debt,S.cash):Math.min(10000,S.debt,S.cash); if(v>0){S.debt-=v;S.cash-=v;save();render();toast('check',`${TL(v)} borç ödendi`,'good-c')} break}
     case 'endday': endDay(); break;
   }
 });
@@ -829,5 +869,6 @@ $('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeDlg()
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#overlay').hidden)closeDlg()});
 showMenu();
 </script>
+
 
 </html>
