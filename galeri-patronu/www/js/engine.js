@@ -90,7 +90,7 @@
     G.newCandidates();
     S.started = true;
     if (G.TEST) { S.level = 40; S.money = 1e12; S.rep = 100; S.stats.sold = 500; }
-    G.feed(`${S.name} kapılarını açtı. Kasada ${G.fmt(S.money)} var, arsada bir Anka Serçe duruyor.`, "info");
+    G.feed(`${S.name} kapılarını açtı. Kasada ${G.fmt(S.money)} var, arsada bir Tufan Atmaca duruyor.`, "info");
   };
 
   G.nid = () => S.nextId++;
@@ -236,6 +236,9 @@
     }
     delete st.upg.showroom;
     delete st.upg.wash;
+    // markalar yeniden adlandırıldı: eski kayıtlardaki bayilik lisansları yeni adlara taşınır
+    const BR = { Anka: "Tufan", Ferro: "Fiamma", Rivo: "Ravex", Kaizen: "Raijin", Hanbit: "Hwarang", Volta: "Wolfram", Nordik: "Valkyr", Mirage: "Vantor", Stahl: "Sturm" };
+    if (st.dealer && st.dealer.lic) for (const k of Object.keys(st.dealer.lic)) if (BR[k]) { st.dealer.lic[BR[k]] = st.dealer.lic[k]; delete st.dealer.lic[k]; }
     if (!st.lux) { st.lux = []; st.party = null; st.lastParty = -99; }
     // lüks fiyatları 2,5 katına çıkmadan önce alınan eşyalar eski fiyatlarıyla kayda geçer
     if (!st.luxPaid) { st.luxPaid = {}; for (const id of st.lux) if (G.LX[id]) st.luxPaid[id] = Math.round(G.LX[id].price / 2.5); }

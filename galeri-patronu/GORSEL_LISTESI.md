@@ -12,51 +12,51 @@ Aracın yandan görünüşü, ön tarafı sağda. Plaka, logo ve marka yazısı 
 
 | Ad | Açıklama | Dosya |
 |---|---|---|
-| Anka Serçe | Ekonomi · Hatchback | `img/araclar/anka-serce.png` |
-| Ferro Punta | Ekonomi · Hatchback | `img/araclar/ferro-punta.png` |
-| Rivo Kanto | Ekonomi · Hatchback | `img/araclar/rivo-kanto.png` |
-| Kaizen Mio | Ekonomi · Hatchback | `img/araclar/kaizen-mio.png` |
-| Hanbit Arı | Ekonomi · Sedan | `img/araclar/hanbit-ari.png` |
-| Volta Pira | Ekonomi · Hatchback | `img/araclar/volta-pira.png` |
-| Ferro Egeo | Aile · Sedan | `img/araclar/ferro-egeo.png` |
-| Rivo Megara | Aile · Sedan | `img/araclar/rivo-megara.png` |
-| Kaizen Sora | Aile · Sedan | `img/araclar/kaizen-sora.png` |
-| Hanbit Elan | Aile · Sedan | `img/araclar/hanbit-elan.png` |
-| Volta Arcus | Aile · Sedan | `img/araclar/volta-arcus.png` |
-| Nordik S70 Kombi | Aile · Station wagon | `img/araclar/nordik-s70.png` |
-| Ferro Dobo | Ticari · Hafif ticari | `img/araclar/ferro-dobo.png` |
-| Anka Yükçü | Ticari · Hafif ticari | `img/araclar/anka-yukcu.png` |
-| Volta Kargo | Ticari · Hafif ticari | `img/araclar/volta-kargo.png` |
-| Kaizen Atlas | Ticari · Pick-up | `img/araclar/kaizen-atlas.png` |
-| Rivo Dunar | SUV · SUV | `img/araclar/rivo-dunar.png` |
-| Hanbit Toros | SUV · SUV | `img/araclar/hanbit-toros.png` |
-| Kaizen Taiga | SUV · SUV | `img/araclar/kaizen-taiga.png` |
-| Volta Terra | SUV · SUV | `img/araclar/volta-terra.png` |
-| Anka e-Kartal | Elektrikli · SUV | `img/araclar/anka-ekartal.png` |
-| Volta e.Pira | Elektrikli · Hatchback | `img/araclar/volta-epira.png` |
-| Hanbit Ion 5 | Elektrikli · SUV | `img/araclar/hanbit-ion.png` |
-| Mirage Voltis | Elektrikli · Sedan | `img/araclar/mirage-voltis.png` |
-| Stahl S3 | Premium · Sedan | `img/araclar/stahl-s3.png` |
-| Stahl S5 | Premium · Sedan | `img/araclar/stahl-s5.png` |
-| Nordik XR40 | Premium · SUV | `img/araclar/nordik-xr40.png` |
-| Kaizen Luxa ES | Premium · Sedan | `img/araclar/kaizen-luxa.png` |
-| Kaizen Ryu | Spor · Coupe | `img/araclar/kaizen-ryu.png` |
-| Mirage Stallion GT | Spor · Coupe | `img/araclar/mirage-stallion.png` |
-| Ferro Veloce | Spor · Coupe | `img/araclar/ferro-veloce.png` |
-| Stahl R Coupe | Spor · Coupe | `img/araclar/stahl-rcoupe.png` |
-| Anka Kartal SLX | Klasik · Sedan | `img/araclar/anka-kartal.png` |
-| Volta Böcek | Klasik · Hatchback | `img/araclar/volta-bocek.png` |
-| Ferro Spider | Klasik · Coupe | `img/araclar/ferro-spider.png` |
-| Mirage Comet '68 | Klasik · Coupe | `img/araclar/mirage-comet.png` |
-| Stahl S8 | Lüks · Sedan | `img/araclar/stahl-s8.png` |
-| Nordik XR90 | Lüks · SUV | `img/araclar/nordik-xr90.png` |
-| Mirage Escala | Lüks · SUV | `img/araclar/mirage-escala.png` |
-| Ferro Leggenda | Ultra lüks · Coupe | `img/araclar/ferro-leggenda.png` |
-| Mirage Apex Hiper | Ultra lüks · Coupe | `img/araclar/mirage-apex.png` |
-| Nordik Aurora EV Hiper | Ultra lüks · Coupe | `img/araclar/nordik-aurora.png` |
-| Stahl Phantom V12 | Ultra lüks · Sedan | `img/araclar/stahl-phantom.png` |
-| Volta Speedster '57 | Ultra lüks · Coupe | `img/araclar/volta-speedster.png` |
-| Anka Kartal Prototip '64 | Ultra lüks · Sedan | `img/araclar/anka-prototip.png` |
+| Tufan Atmaca | Ekonomi · Hatchback | `img/araclar/anka-serce.png` |
+| Fiamma Brio | Ekonomi · Hatchback | `img/araclar/ferro-punta.png` |
+| Ravex Zipo | Ekonomi · Hatchback | `img/araclar/rivo-kanto.png` |
+| Raijin Hoshi | Ekonomi · Hatchback | `img/araclar/kaizen-mio.png` |
+| Hwarang Bora | Ekonomi · Sedan | `img/araclar/hanbit-ari.png` |
+| Wolfram Flink | Ekonomi · Hatchback | `img/araclar/volta-pira.png` |
+| Fiamma Aria | Aile · Sedan | `img/araclar/ferro-egeo.png` |
+| Ravex Mistral | Aile · Sedan | `img/araclar/rivo-megara.png` |
+| Raijin Sora | Aile · Sedan | `img/araclar/kaizen-sora.png` |
+| Hwarang Seren | Aile · Sedan | `img/araclar/hanbit-elan.png` |
+| Wolfram Arcus | Aile · Sedan | `img/araclar/volta-arcus.png` |
+| Valkyr Fjord Kombi | Aile · Station wagon | `img/araclar/nordik-s70.png` |
+| Fiamma Mulo | Ticari · Hafif ticari | `img/araclar/ferro-dobo.png` |
+| Tufan Hamal | Ticari · Hafif ticari | `img/araclar/anka-yukcu.png` |
+| Wolfram Kargo | Ticari · Hafif ticari | `img/araclar/volta-kargo.png` |
+| Raijin Oni | Ticari · Pick-up | `img/araclar/kaizen-atlas.png` |
+| Ravex Dunar | SUV · SUV | `img/araclar/rivo-dunar.png` |
+| Hwarang Toros | SUV · SUV | `img/araclar/hanbit-toros.png` |
+| Raijin Taiga | SUV · SUV | `img/araclar/kaizen-taiga.png` |
+| Wolfram Terra | SUV · SUV | `img/araclar/volta-terra.png` |
+| Tufan e-Kartal | Elektrikli · SUV | `img/araclar/anka-ekartal.png` |
+| Wolfram e.Flink | Elektrikli · Hatchback | `img/araclar/volta-epira.png` |
+| Hwarang Pulse 5 | Elektrikli · SUV | `img/araclar/hanbit-ion.png` |
+| Vantor Voltis | Elektrikli · Sedan | `img/araclar/mirage-voltis.png` |
+| Sturm D3 | Premium · Sedan | `img/araclar/stahl-s3.png` |
+| Sturm D5 | Premium · Sedan | `img/araclar/stahl-s5.png` |
+| Valkyr Freya | Premium · SUV | `img/araclar/nordik-xr40.png` |
+| Raijin Kensei | Premium · Sedan | `img/araclar/kaizen-luxa.png` |
+| Raijin Ryu | Spor · Coupe | `img/araclar/kaizen-ryu.png` |
+| Vantor Outlaw GT | Spor · Coupe | `img/araclar/mirage-stallion.png` |
+| Fiamma Furia | Spor · Coupe | `img/araclar/ferro-veloce.png` |
+| Sturm Blitz RS | Spor · Coupe | `img/araclar/stahl-rcoupe.png` |
+| Tufan Kırlangıç SLX | Klasik · Sedan | `img/araclar/anka-kartal.png` |
+| Wolfram Kaplumbağa | Klasik · Hatchback | `img/araclar/volta-bocek.png` |
+| Fiamma Scorpione | Klasik · Coupe | `img/araclar/ferro-spider.png` |
+| Vantor Rodeo '68 | Klasik · Coupe | `img/araclar/mirage-comet.png` |
+| Sturm D8 | Lüks · Sedan | `img/araclar/stahl-s8.png` |
+| Valkyr Odin | Lüks · SUV | `img/araclar/nordik-xr90.png` |
+| Vantor Baron | Lüks · SUV | `img/araclar/mirage-escala.png` |
+| Fiamma Leggenda | Ultra lüks · Coupe | `img/araclar/ferro-leggenda.png` |
+| Vantor Apex Hiper | Ultra lüks · Coupe | `img/araclar/mirage-apex.png` |
+| Valkyr Ragnarök EV | Ultra lüks · Coupe | `img/araclar/nordik-aurora.png` |
+| Sturm Imperator V12 | Ultra lüks · Sedan | `img/araclar/stahl-phantom.png` |
+| Wolfram Speedster '57 | Ultra lüks · Coupe | `img/araclar/volta-speedster.png` |
+| Tufan Kırlangıç Prototip '64 | Ultra lüks · Sedan | `img/araclar/anka-prototip.png` |
 
 ## Lüks eşyalar (94) — evler (13) hazır
 
@@ -79,32 +79,32 @@ Eşyanın kendisi, ortalanmış ve kart içinde rahat okunur. Mücevherlerde koy
 | Sahil yalısı | Ev · 450 milyon ₺ — Ahşap cephe, kendi iskelesi, deniz kapıda. | `img/luks/ev5.jpg` |
 | Özel ada | Ev · 900 milyon ₺ — Ege'de kendine ait bir ada. | `img/luks/e12.jpg` |
 | Avrupa'da şato | Ev · 1,4 milyar ₺ — Bağları ve kuleleriyle 400 yıllık şato. | `img/luks/e13.jpg` |
-| Anka Serçe Full Paket | Araba · 2,5 milyon ₺ — Sıfır kilometre, ilk kendi araban. | `img/luks/a01.jpg` |
-| Kaizen Mio Hibrit | Araba · 3,2 milyon ₺ — Şehir içinde litresine 25 km. | `img/luks/a02.jpg` |
-| Volta Pira GT | Araba · 4 milyon ₺ — Sportif paket, kırmızı dikişli koltuklar. | `img/luks/a03.jpg` |
-| Rivo Dunar 4x4 | Araba · 4,6 milyon ₺ — Hafta sonu yaylaya çıkar. | `img/luks/a04.jpg` |
-| Anka e-Kartal Uzun Menzil | Araba · 5,2 milyon ₺ — Yerli elektrikli, 520 km menzil. | `img/luks/a05.jpg` |
-| Kaizen Taiga Hibrit | Araba · 6 milyon ₺ — Aile için geniş ve sessiz. | `img/luks/a06.jpg` |
-| Volta Arcus Elegance | Araba · 6,8 milyon ₺ — Masaj koltuklu iş sedanı. | `img/luks/a07.jpg` |
-| Hanbit Ion 5 | Araba · 7,5 milyon ₺ — Ultra hızlı şarj, panoramik cam tavan. | `img/luks/a08.jpg` |
-| Nordik S70 Kombi | Araba · 8,5 milyon ₺ — Bagajı geniş, güvenlikte sınıfının en iyisi. | `img/luks/a09.jpg` |
-| Kaizen Ryu | Araba · 9,5 milyon ₺ — Arkadan itişli, manuel spor coupe. | `img/luks/a10.jpg` |
-| Stahl S5 | Araba · 11 milyon ₺ — Siyah, tam donanım. İlk patron arabası. | `img/luks/ar1.jpg` |
-| Mirage Stallion GT | Araba · 13 milyon ₺ — Kırmızı, V8, manuel. | `img/luks/ar2.jpg` |
-| Nordik XR40 | Araba · 15 milyon ₺ — İskandinav tasarımı kompakt SUV. | `img/luks/a13.jpg` |
-| Kaizen Luxa ES | Araba · 17 milyon ₺ — Sessiz hibrit, makam aracı konforu. | `img/luks/a14.jpg` |
-| Mirage Voltis Plaid | Araba · 19 milyon ₺ — 0-100 km/s 2,1 saniye. | `img/luks/a15.jpg` |
-| Nordik XR90 | Araba · 20 milyon ₺ — Beyaz, 7 koltuk, her yola çıkar. | `img/luks/ar3.jpg` |
-| Ferro Veloce | Araba · 24 milyon ₺ — İtalyan V12, el yapımı iç mekân. | `img/luks/a17.jpg` |
-| Mirage Escala | Araba · 26 milyon ₺ — Kırmızı halı SUV'u. | `img/luks/a18.jpg` |
-| Stahl S8 uzun şasi | Araba · 28 milyon ₺ — Lacivert, arkada masaj koltukları. | `img/luks/ar4.jpg` |
-| Stahl R Coupe | Araba · 34 milyon ₺ — Pist modlu süper otomobil. | `img/luks/a20.jpg` |
-| Stahl Phantom V12 | Araba · 55 milyon ₺ — Yıldızlı tavan, kapıda şemsiye. | `img/luks/a21.jpg` |
-| Ferro Inferno | Araba · 80 milyon ₺ — Sarı hiper otomobil. Dünyada 99 tane. | `img/luks/ar5.jpg` |
-| Mirage Apex Hiper | Araba · 110 milyon ₺ — 1.500 beygir, karbon gövde. | `img/luks/a23.jpg` |
-| Nordik Aurora EV Hiper | Araba · 140 milyon ₺ — Elektrikli hiper otomobil, 2.000 beygir. | `img/luks/a24.jpg` |
-| Volta Speedster '57 (müze parçası) | Araba · 175 milyon ₺ — Yarış geçmişi olan koleksiyon klasiği. | `img/luks/a25.jpg` |
-| Ferro Leggenda | Araba · 250 milyon ₺ — Dünyada sadece 12 tane üretildi. | `img/luks/a26.jpg` |
+| Tufan Atmaca Full Paket | Araba · 2,5 milyon ₺ — Sıfır kilometre, ilk kendi araban. | `img/luks/a01.jpg` |
+| Raijin Hoshi Hibrit | Araba · 3,2 milyon ₺ — Şehir içinde litresine 25 km. | `img/luks/a02.jpg` |
+| Wolfram Flink GT | Araba · 4 milyon ₺ — Sportif paket, kırmızı dikişli koltuklar. | `img/luks/a03.jpg` |
+| Ravex Dunar 4x4 | Araba · 4,6 milyon ₺ — Hafta sonu yaylaya çıkar. | `img/luks/a04.jpg` |
+| Tufan e-Kartal Uzun Menzil | Araba · 5,2 milyon ₺ — Yerli elektrikli, 520 km menzil. | `img/luks/a05.jpg` |
+| Raijin Taiga Hibrit | Araba · 6 milyon ₺ — Aile için geniş ve sessiz. | `img/luks/a06.jpg` |
+| Wolfram Arcus Elegance | Araba · 6,8 milyon ₺ — Masaj koltuklu iş sedanı. | `img/luks/a07.jpg` |
+| Hwarang Pulse 5 | Araba · 7,5 milyon ₺ — Ultra hızlı şarj, panoramik cam tavan. | `img/luks/a08.jpg` |
+| Valkyr Fjord Kombi | Araba · 8,5 milyon ₺ — Bagajı geniş, güvenlikte sınıfının en iyisi. | `img/luks/a09.jpg` |
+| Raijin Ryu | Araba · 9,5 milyon ₺ — Arkadan itişli, manuel spor coupe. | `img/luks/a10.jpg` |
+| Sturm D5 | Araba · 11 milyon ₺ — Siyah, tam donanım. İlk patron arabası. | `img/luks/ar1.jpg` |
+| Vantor Outlaw GT | Araba · 13 milyon ₺ — Kırmızı, V8, manuel. | `img/luks/ar2.jpg` |
+| Valkyr Freya | Araba · 15 milyon ₺ — İskandinav tasarımı kompakt SUV. | `img/luks/a13.jpg` |
+| Raijin Kensei | Araba · 17 milyon ₺ — Sessiz hibrit, makam aracı konforu. | `img/luks/a14.jpg` |
+| Vantor Voltis Turbo X | Araba · 19 milyon ₺ — 0-100 km/s 2,1 saniye. | `img/luks/a15.jpg` |
+| Valkyr Odin | Araba · 20 milyon ₺ — Beyaz, 7 koltuk, her yola çıkar. | `img/luks/ar3.jpg` |
+| Fiamma Furia | Araba · 24 milyon ₺ — İtalyan V12, el yapımı iç mekân. | `img/luks/a17.jpg` |
+| Vantor Baron | Araba · 26 milyon ₺ — Kırmızı halı SUV'u. | `img/luks/a18.jpg` |
+| Sturm D8 uzun şasi | Araba · 28 milyon ₺ — Lacivert, arkada masaj koltukları. | `img/luks/ar4.jpg` |
+| Sturm Blitz RS | Araba · 34 milyon ₺ — Pist modlu süper otomobil. | `img/luks/a20.jpg` |
+| Sturm Imperator V12 | Araba · 55 milyon ₺ — Yıldızlı tavan, kapıda şemsiye. | `img/luks/a21.jpg` |
+| Fiamma Inferno | Araba · 80 milyon ₺ — Sarı hiper otomobil. Dünyada 99 tane. | `img/luks/ar5.jpg` |
+| Vantor Apex Hiper | Araba · 110 milyon ₺ — 1.500 beygir, karbon gövde. | `img/luks/a23.jpg` |
+| Valkyr Ragnarök EV | Araba · 140 milyon ₺ — Elektrikli hiper otomobil, 2.000 beygir. | `img/luks/a24.jpg` |
+| Wolfram Speedster '57 (müze parçası) | Araba · 175 milyon ₺ — Yarış geçmişi olan koleksiyon klasiği. | `img/luks/a25.jpg` |
+| Fiamma Leggenda | Araba · 250 milyon ₺ — Dünyada sadece 12 tane üretildi. | `img/luks/a26.jpg` |
 | Gümüş künye | Mücevher · 150 bin ₺ — Adın kazınmış, el işi. | `img/luks/j01.jpg` |
 | 22 ayar altın bilezik | Mücevher · 400 bin ₺ — Kapalıçarşı işçiliği burgulu bilezik. | `img/luks/j02.jpg` |
 | Oniks kol düğmeleri | Mücevher · 600 bin ₺ — Gümüş kasa, siyah oniks taş. | `img/luks/j03.jpg` |

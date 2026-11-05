@@ -16,9 +16,9 @@
     inspectClean: 60,   // denetim günü parktaki araçların ortalama temizliği en az bu kadar olmalı
     retryDays: 3,
     tiers: [
-      { id: 1, name: "Bayi", brands: ["Anka", "Rivo", "Hanbit", "Volta"], req: { galeri: 8, rep: 55, sold: 40, loc: 1 }, fee: 1e6, daily: 4000 },
-      { id: 2, name: "Yetkili bayi", brands: ["Ferro", "Kaizen"], req: { galeri: 12, rep: 65, sold: 120, loc: 2 }, fee: 4e6, daily: 12000 },
-      { id: 3, name: "Premium bayi", brands: ["Nordik", "Mirage", "Stahl"], req: { galeri: 16, rep: 80, sold: 300, loc: 3 }, fee: 15e6, daily: 40000 }
+      { id: 1, name: "Bayi", brands: ["Tufan", "Ravex", "Hwarang", "Wolfram"], req: { galeri: 8, rep: 55, sold: 40, loc: 1 }, fee: 1e6, daily: 4000 },
+      { id: 2, name: "Yetkili bayi", brands: ["Fiamma", "Raijin"], req: { galeri: 12, rep: 65, sold: 120, loc: 2 }, fee: 4e6, daily: 12000 },
+      { id: 3, name: "Premium bayi", brands: ["Valkyr", "Vantor", "Sturm"], req: { galeri: 16, rep: 80, sold: 300, loc: 3 }, fee: 15e6, daily: 40000 }
     ]
   };
   const D = () => (S().dealer = S().dealer || { lic: {}, orders: [] });

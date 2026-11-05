@@ -40,7 +40,7 @@
     pickup: { seams: [52, 65.5, 91], handles: [58, 80], mirror: [86, 18], belt: 20, rear: 6, front: 114, deck: 22 }
   };
   const WHEEL = { ultra: "gold", ekonomi: "steel", ticari: "steel", aile: "alloy", suv: "offroad", elektrik: "aero", premium: "multi", luks: "multi", spor: "sport", klasik: "white" };
-  const BRAND = { Anka: "#c8102e", Ferro: "#1f4fa8", Rivo: "#d4a72c", Kaizen: "#5d6873", Hanbit: "#2e6e4a", Volta: "#2f6fd0", Nordik: "#1d2024", Stahl: "#9aa3ac", Mirage: "#7b2d8e" };
+  const BRAND = { Tufan: "#c8102e", Fiamma: "#1f4fa8", Ravex: "#d4a72c", Raijin: "#5d6873", Hwarang: "#2e6e4a", Wolfram: "#2f6fd0", Valkyr: "#1d2024", Sturm: "#9aa3ac", Vantor: "#7b2d8e" };
   let cid = 0;
 
   function spokes(n, r0, r1, color, w) {
