@@ -54,9 +54,9 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent2);outlin
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:color-mix(in srgb,var(--surface) 82%,transparent);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 4px 18px rgba(110,80,140,.07);
   margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px))) 16px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
-.bar .app{display:flex;align-items:center;gap:8px}
+.bar .app{display:flex;align-items:center;gap:6px}
 .back{border:0;background:var(--sunk);border-radius:14px;width:42px;height:42px;display:grid;place-items:center;flex:none}
-.pill{display:flex;align-items:center;gap:6px;background:var(--sunk);border-radius:999px;padding:7px 12px;font-size:15px;white-space:nowrap}
+.pill{display:flex;align-items:center;gap:5px;background:var(--sunk);border-radius:999px;padding:7px 10px;font-size:14.5px;white-space:nowrap;min-width:0}
 .pill.day{margin-right:auto}
 .pill.neg{color:var(--bad)}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-radius:28px 28px 0 0;box-shadow:0 -6px 24px rgba(110,80,140,.1);
@@ -186,8 +186,9 @@ input[type=range]{width:100%;accent-color:var(--accent);height:30px}
 .legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;text-align:center;font-size:12.5px}
 .legend div{display:flex;flex-direction:column;align-items:center;gap:4px}
 .bigbtn{width:100%;padding:16px;border:0;border-radius:22px;font-size:17px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:8px}
+.bigbtn{flex-wrap:wrap}.bigbtn .num{white-space:nowrap}
 .bigbtn:disabled{background:var(--sunk);color:var(--muted);cursor:not-allowed}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--fg);color:var(--bg);
+.toast{position:fixed;left:16px;right:16px;margin:0 auto;width:fit-content;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--fg);color:var(--bg);
   padding:10px 16px;border-radius:20px;font-size:15px;font-weight:900;max-width:calc(100% - 32px);box-shadow:var(--shadow);display:flex;align-items:center;gap:8px}
 /* çalışanlar, hayat */
 .staff{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px}
@@ -200,6 +201,19 @@ input[type=range]{width:100%;accent-color:var(--accent);height:30px}
 .next{display:flex;gap:10px;align-items:center;padding:10px;border-radius:18px;background:var(--sunk)}
 .next .ib{box-shadow:none}
 .lifelink{border:0;width:100%;text-align:left;display:flex;align-items:center;gap:12px}
+/* lüks alışveriş */
+.chips-row{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;margin:0 -2px}
+.chipbtn{flex:none;display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:9px 14px;background:var(--surface);box-shadow:var(--shadow);font-weight:800;font-size:14px}
+.chipbtn.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-fg)}
+.chipbtn .cnt{font-size:11px;font-weight:900;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:color-mix(in srgb,currentColor 18%,transparent);text-align:center;padding:0 4px}
+.luxc{cursor:default}.luxc:hover{transform:none}
+.luxart{position:relative;aspect-ratio:16/11;max-width:100%;border-radius:18px;display:grid;place-items:center;color:var(--fg);
+  background:linear-gradient(145deg,color-mix(in srgb,hsl(var(--h) 70% 72%) 40%,var(--surface)),color-mix(in srgb,hsl(calc(var(--h) + 50) 70% 80%) 20%,var(--surface)))}
+.luxart .ok{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:var(--good);color:var(--surface);display:grid;place-items:center}
+.luxname{font-size:14px;line-height:1.2;min-height:2.4em}
+.btnbuy{border:0;border-radius:14px;padding:10px 6px;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--sunk);margin-top:auto}
+.btnbuy:disabled{opacity:.5;cursor:not-allowed}
+.btnbuy.owned{background:color-mix(in srgb,var(--good) 15%,var(--surface));color:var(--good)}
 /* kısa etiketler */
 .h1{font-size:24px;font-weight:900;margin:0;letter-spacing:-.01em}
 .h1 small{display:block;font-size:13px;color:var(--muted);font-weight:700;letter-spacing:0}
@@ -307,6 +321,8 @@ const IC={
  gift:'<rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v8h14v-8M12 8v13M12 8C10.5 4 6.5 4 6.5 6.3S10 8 12 8c2 0 5.5.6 5.5-1.7S13.5 4 12 8"/>',
  ball:'<circle cx="12" cy="12" r="9"/><path d="m12 7.5 3.8 2.8-1.4 4.4H9.6l-1.4-4.4z"/>',
  msg:'<path d="M4 5h16v11H9l-5 4z"/>',
+ boat:'<path d="M3 16.5h18l-2.8 4H5.8z"/><path d="M12 3v12M12 4.5l6.5 9.5H12M12 7l-5 7h5"/>',
+ plane:'<path d="M12 2.5c-.9 0-1.4.9-1.4 2v4.3L3 13v2l7.6-2.2v4.4l-2.1 1.6V20l3.5-1 3.5 1v-1.2l-2.1-1.6v-4.4L21 15v-2l-7.6-4.2V4.5c0-1.1-.5-2-1.4-2z"/>',
  trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4.5c0 3 1.5 4.5 4 4.5M16 6h3.5c0 3-1.5 4.5-4 4.5M12 13v4M8 20h8M9.5 17h5"/>'
 };
 const ico=(n,s=24,w=2)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
@@ -355,18 +371,24 @@ const STAFF=[
  {id:'tamirci',ad:'Tamirci usta',ic:'wrench',desc:'Stoktaki gizli kusurları bulur, tamirler %40 ucuzlar.',hire:20000,wage:1000,lvl:1},
  {id:'fotografci',ad:'Fotoğrafçı',ic:'camera',desc:'Tüm ürünlerin profesyonel fotoğrafını çeker.',hire:12000,wage:600,lvl:1},
  {id:'satisci',ad:'Satış danışmanı',ic:'phone',desc:'Daha çok alıcı arar, teklifler %5 yüksek gelir.',hire:40000,wage:2000,lvl:2}];
-const LIFE=[
- {k:'ev',ad:'Evim',ic:'home',tiers:[{ad:'Kiralık oda'},{ad:'1+1 daire',p:150000,h:8,r:2},{ad:'Bahçeli ev',p:450000,h:14,r:4},{ad:'Villa',p:1200000,h:20,r:7},{ad:'Boğaz yalısı',p:3000000,h:26,r:12}]},
- {k:'araba',ad:'Arabam',ic:'car',tiers:[{ad:'Toplu taşıma'},{ad:'İkinci el hatchback',p:90000,h:6,r:1},{ad:'Sedan',p:250000,h:10,r:3},{ad:'Spor araba',p:700000,h:16,r:6},{ad:'Lüks SUV',p:1500000,h:20,r:9}]},
- {k:'stil',ad:'Tarzım',ic:'shirt',tiers:[{ad:'Sade giyim'},{ad:'Markalı gardırop',p:40000,h:4,r:2},{ad:'Terzi takım elbise',p:120000,h:7,r:3},{ad:'Koleksiyon saati',p:300000,h:10,r:5}]}];
+const LUX=[
+ {k:'ev',ad:'Ev',ic:'home',hue:20,items:[['Stüdyo daire',120000],['1+1 daire',180000],['2+1 site dairesi',320000],['Bahçeli müstakil ev',550000],['Dubleks daire',800000],['Deniz manzaralı rezidans',1300000],['Çiftlik evi',1800000],['Modern villa',2800000],['Dağ evi şale',3500000],['Boğaz yalısı',8000000]]},
+ {k:'araba',ad:'Araba',ic:'car',hue:220,items:[['Şehir hatchback',90000],['Elektrikli şehir arabası',180000],['Konforlu sedan',260000],['Coupe',450000],['Arazi aracı',650000],['Lüks sedan',1000000],['Spor araba',1600000],['Lüks SUV',2200000],['Klasik koleksiyon aracı',3000000],['Süper spor araba',5000000]]},
+ {k:'yat',ad:'Tekne & Yat',ic:'boat',hue:185,items:[['Şişme bot',25000],['Balıkçı teknesi',120000],['Sürat teknesi',350000],['Ahşap gulet',700000],['Yelkenli',1000000],['Katamaran',1600000],['Motor yat',2500000],['Flybridge yat',4000000],['Mega yat',9000000],['Süper yat',15000000]]},
+ {k:'ucak',ad:'Uçak',ic:'plane',hue:255,items:[['Paramotor',60000],['Ultralight uçak',250000],['Tek motorlu pervaneli',600000],['Amfibi deniz uçağı',1200000],['Helikopter',2000000],['Çift motorlu turboprop',3000000],['Hafif jet',5000000],['Orta boy iş jeti',8000000],['Uzun menzil jet',14000000],['Özel jumbo jet',25000000]]},
+ {k:'stil',ad:'Tarz',ic:'shirt',hue:320,items:[['Güneş gözlüğü seti',20000],['Markalı gardırop',40000],['El yapımı ayakkabılar',60000],['Terzi takım elbise',120000],['Kaşmir palto koleksiyonu',180000],['Altın kol düğmeleri',250000],['Pırlanta yüzük',400000],['Koleksiyon saati',700000],['Özel kuyumcu seti',1200000],['Tarihi mücevher',2500000]]}
+].map(c=>({...c,items:c.items.map(([ad,p],i)=>({id:c.k+i,i,ad,p,
+   h:Math.round(3+Math.log10(p/20000)*5), r:Math.max(1,Math.round(1+Math.log10(p/20000)*2.5)),
+   lvl:p<200000?0:p<800000?1:p<3000000?2:3}))}));
 const RELS=[
  {k:'aile',ad:'Ailem',ic:'family',warn:'Annen kırgın, uzun zamandır aramadın.',acts:[{ad:'Telefonla ara',ic:'phone',cost:0,g:6},{ad:'Akşam yemeği',ic:'food',cost:2000,g:15},{ad:'Hediye al',ic:'gift',cost:10000,g:25}]},
- {k:'arkadas',ad:'Arkadaşlarım',ic:'friends',warn:'Arkadaşların seni unutmaya başladı.',acts:[{ad:'Mesajlaş',ic:'msg',cost:0,g:6},{ad:'Maça git',ic:'ball',cost:1500,g:15},{ad:'Ev partisi',ic:'sparkle',cost:8000,g:25,need:['ev',2],needTxt:'Bahçeli ev'}]},
- {k:'sevgili',ad:'Sevgilim',ic:'heart',warn:'Sevgilin ilgisizlikten şikâyetçi!',acts:[{ad:'Mesaj at',ic:'msg',cost:0,g:6},{ad:'Akşam yemeği',ic:'food',cost:3000,g:15},{ad:'Hafta sonu kaçamağı',ic:'car',cost:20000,g:30,need:['araba',1],needTxt:'Araba'}]}];
+ {k:'arkadas',ad:'Arkadaşlarım',ic:'friends',warn:'Arkadaşların seni unutmaya başladı.',acts:[{ad:'Mesajlaş',ic:'msg',cost:0,g:6},{ad:'Maça git',ic:'ball',cost:1500,g:15},{ad:'Ev partisi',ic:'sparkle',cost:8000,g:25,need:['ev',3],needTxt:'Bahçeli ev'}]},
+ {k:'sevgili',ad:'Sevgilim',ic:'heart',warn:'Sevgilin ilgisizlikten şikâyetçi!',acts:[{ad:'Mesaj at',ic:'msg',cost:0,g:6},{ad:'Akşam yemeği',ic:'food',cost:3000,g:15},{ad:'Hafta sonu kaçamağı',ic:'car',cost:20000,g:30,need:['araba',0],needTxt:'Araba'}]}];
 
 /* ================= YARDIMCILAR ================= */
 const FMT=new Intl.NumberFormat('tr-TR');
 const TL=n=>(n<0?'−':'')+FMT.format(Math.abs(Math.round(n)))+' ₺';
+const shortTL=n=>Math.abs(n)>=1e6?(n<0?'−':'')+(Math.abs(n)/1e6).toLocaleString('tr-TR',{maximumFractionDigits:2})+' Mn ₺':TL(n);
 const sTL=n=>(n>=0?'+':'')+TL(n);
 const R=(a,b)=>a+Math.random()*(b-a);
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -496,17 +518,42 @@ function go(tab,id=null){view={tab,id};render();scrollTo(0,0)}
 function render(){
   applyStaff();
   $('#hDay').innerHTML=`${ico(season().ic,18)} ${S.day}`;
-  const hc=$('#hCash'); hc.innerHTML=`${ico('coins',18)} ${TL(S.cash)}`; hc.classList.toggle('neg',S.cash<0);
+  const hc=$('#hCash'); hc.innerHTML=`${ico('coins',18)} ${shortTL(S.cash)}`; hc.classList.toggle('neg',S.cash<0);
   $('#hRep').innerHTML=`<span class="brass-c">${icoF('star',16)}</span> ${Math.round(S.rep)}`;
   $('#backBtn').innerHTML=ico('back',22); $('#backBtn').setAttribute('aria-label',view.id?'Geri':'Ana menü');
-  const unseen=S.listings.filter(l=>!l.seen).length, liveA=S.auctions.filter(a=>!a.done).length;
-  const tabs=[['home','home','Dükkân',S.offers.length],['ilan','search','İlan',unseen],['mezat','hammer','Mezat',liveA],['stok','box','Stok',0],['hayat','happy','Hayat',RELS.filter(r=>S.rel[r.k]<30).length],['banka','bank','Banka',0]];
-  $('#tabs').innerHTML=tabs.map(([k,i,ad,n])=>`<button data-act="tab" data-tab="${k}" ${view.tab===k?'aria-current="page"':''}>${ico(i,26)}${ad}${n?`<span class="dot">${n}</span>`:''}</button>`).join('');
+  renderTabs();
   const fn={home:homeView,ilan:view.id?listingView:ilanView,mezat:mezatView,stok:view.id?itemView:stokView,hayat:hayatView,banka:bankaView}[view.tab];
   $('#screen').innerHTML=`<div class="screen">${fn()}</div>`;
   bindInputs(); hint();
 }
 
+function renderTabs(){
+  const unseen=S.listings.filter(l=>!l.seen).length, liveA=S.auctions.filter(a=>!a.done).length;
+  const tabs=[['home','home','Dükkân',S.offers.length],['ilan','search','İlan',unseen],['mezat','hammer','Mezat',liveA],['stok','box','Stok',0],['hayat','happy','Hayat',RELS.filter(r=>S.rel[r.k]<30).length],['banka','bank','Banka',0]];
+  $('#tabs').innerHTML=tabs.map(([k,i,ad,n])=>`<button data-act="tab" data-tab="${k}" ${view.tab===k?'aria-current="page"':''}>${ico(i,26)}${ad}${n?`<span class="dot">${n}</span>`:''}</button>`).join('');
+}
+/* canlı alıcılar: oyun açıkken ilandaki ürünlere her an teklif gelebilir */
+function makeOffer(it){
+  const r=Math.random(), type=S.level>=2&&r<.22?'vip':r<.45?'acil':'pazarlik', B=BUYERS[type];
+  const amt=Math.min(it.listed,r100(buyerValue(it)*R(B.lo,B.hi)*(hasStaff('satisci')?1.05:1)));
+  if(amt<it.listed*.5) return null;
+  return {id:S.uid++,itemId:it.id,amount:amt,type,buyer:pick(NAMES),countered:false};
+}
+function liveTick(){
+  if(!S||$('#game').hidden||document.hidden||adBusy) return;
+  const fresh=[];
+  for(const it of S.inv) if(it.listed&&!S.offers.some(o=>o.itemId===it.id)){
+    const p=Math.min(.95,.5+(it.photo?.2:0)+S.level*.05+(hasStaff('satisci')?.15:0))/7;
+    if(Math.random()<p){const o=makeOffer(it); if(o){S.offers.push(o);fresh.push(o)}}
+  }
+  if(!fresh.length) return;
+  save();
+  if(!$('#overlay').hidden||view.id) renderTabs(); else render();
+  const o=fresh[0], it=S.inv.find(i=>i.id===o.itemId);
+  toast('phone',fresh.length>1?`${fresh.length} alıcı aradı!`:`${o.buyer} aradı: ${T(it).ad} için ${TL(o.amount)}`,'good-c');
+  const t=$('#toast'); t.style.cursor='pointer'; t.onclick=()=>{t.hidden=true;go('home')};
+}
+setInterval(liveTick,4000);
 /* sıradaki hamle: ilgili buton nabız gibi parlar; oyuncu o hamleyi bir kez yapınca o ipucu bir daha çıkmaz */
 let learned=[]; try{learned=JSON.parse(localStorage.getItem('ikinci-vitrin-learned'))||[]}catch(e){}
 const hintKey=el=>el.dataset.act+(el.dataset.tab?':'+el.dataset.tab:el.dataset.t?':'+el.dataset.t:el.dataset.k?':'+el.dataset.k:'');
@@ -549,7 +596,7 @@ function homeView(){
         <div class="stat">${starsH(repStars(S.rep),14)}<span class="num">${Math.round(S.rep)}</span><small>İtibar</small></div>
         <div class="stat bad-c">${ico('home',22)}<span class="num">−${FMT.format(lvl().rent)}</span><small>Günlük kira</small></div>
       </div>
-      ${next?`<button class="bigbtn grad" style="margin-top:12px" data-act="upgrade" ${S.cash<next.price?'disabled':''}>${ico('up',22,2.6)} ${next.ad}'a büyüt · <span class="num">${TL(next.price)}</span></button>`
+      ${next?`<button class="bigbtn grad" style="margin-top:12px" data-act="upgrade" ${S.cash<next.price?'disabled':''}>${ico('up',22,2.6)} ${next.ad}'a büyüt <span class="num">${TL(next.price)}</span></button>`
             :`<div class="row center brass-c" style="margin-top:12px">${icoF('trophy',30)} En büyük showroom senin!</div>`}
     </div>
     ${S.offers.length?`<div class="sect">${ico('phone',18)} Telefon <span class="sub">· ${S.offers.length} alıcı aradı</span></div>${S.offers.map(offerCard).join('')}`:''}
@@ -698,7 +745,7 @@ function itemView(){
      <button class="ib primary" data-act="list" data-id="${it.id}">${icoF('tag',26)}<span class="lbl">${it.listed?'Fiyatı güncelle':'İlana koy'}</span></button>
      ${it.listed?`<button class="ib flat" data-act="unlist" data-id="${it.id}">${ico('x',26,2.6)}<span class="lbl">İlandan kaldır</span></button>`:'<span></span>'}
    </div>
-   <p class="tip">Alıcılar gün sonunda arar. Kusuru yazarsan itibar kazanırsın.</p>`;
+   <p class="tip">İlandaki ürüne alıcılar her an arayabilir. Kusuru yazarsan itibar kazanırsın.</p>`;
 }
 
 /* ---- Banka ---- */
@@ -722,7 +769,9 @@ function bankaView(){
 
 /* ---- Çalışanlar ve hayat ---- */
 function migrate(s){
-  s.staff=s.staff||[]; s.life=s.life||{ev:0,araba:0,stil:0};
+  s.staff=s.staff||[];
+  if(!s.owned){s.owned=[]; const L=s.life||{}, map={ev:[null,1,3,7,9],araba:[null,0,2,6,7],stil:[null,1,3,7]};
+    for(const k in map){const t=L[k]||0; if(t>0&&map[k][t]!=null) s.owned.push(k+map[k][t])}}
   s.rel=s.rel||{aile:70,arkadas:60,sevgili:65}; s.daily=s.daily||{done:[],ads:0};
   return s;
 }
@@ -736,7 +785,8 @@ function applyStaff(){
   }
   if(hasStaff('eksper')) for(const l of S.listings) if(!l.item.serial){l.item.serial=serialRoll(l.item); if(l.claims.some(c=>caught(l,c))) l.leverage=true}
 }
-const possH=()=>LIFE.reduce((s,c)=>s+(c.tiers[S.life[c.k]].h||0),0);
+const bestIdx=k=>S.owned.filter(id=>id.startsWith(k)).reduce((m,id)=>Math.max(m,+id.slice(k.length)),-1);
+const possH=()=>LUX.reduce((s,c)=>{const b=bestIdx(c.k); if(b<0) return s; const n=S.owned.filter(id=>id.startsWith(c.k)).length; return s+c.items[b].h+Math.min(5,n-1)},0);
 const relAvg=()=>RELS.reduce((s,r)=>s+S.rel[r.k],0)/RELS.length;
 const happy=()=>clamp(Math.round(15+possH()+relAvg()*.3),0,100);
 const moodOf=h=>h>=65?['happy','good']:h>=35?['meh','warn']:['sad','bad'];
@@ -770,26 +820,35 @@ function hayatView(){
   <div class="sect">${ico('heart',18)} İlişkilerim <span class="sub">· ilgilenmezsen her gün azalır</span></div>
   <button class="bigbtn" style="background:var(--surface);box-shadow:var(--shadow)" data-act="ad" ${S.daily.ads>=3?'disabled':''}>${ico('tv',22)} Reklam izle, ilişkin +10 · ${3-S.daily.ads}/3</button>
   ${RELS.map(relCard).join('')}
-  <div class="sect">${ico('crown',18)} Eşyalarım <span class="sub">· mutluluk ve itibar getirir</span></div>
-  ${LIFE.map(lifeCard).join('')}`;
+  ${luxShop()}`;
 }
 function relCard(r){
   const v=Math.round(S.rel[r.k]), c=v>=60?'good':v>=30?'warn':'bad';
   return `<div class="card" style="display:flex;flex-direction:column;gap:10px">
    <div class="row"><span class="ricon ${c}-c">${ico(r.ic,26)}</span><div style="flex:1;min-width:0"><div class="row between"><b>${r.ad}</b><span class="num ${c}-c">${v}</span></div><div class="pbar"><i class="${c}-bg" style="width:${v}%"></i></div></div></div>
    ${v<30?`<div class="tip bad-c" style="text-align:left">${ico('alert',15)} ${r.warn}</div>`:''}
-   <div class="acts">${r.acts.map((a,i)=>{const key=r.k+':'+i, done=S.daily.done.includes(key), lock=a.need&&S.life[a.need[0]]<a.need[1];
+   <div class="acts">${r.acts.map((a,i)=>{const key=r.k+':'+i, done=S.daily.done.includes(key), lock=a.need&&bestIdx(a.need[0])<a.need[1];
      return done?`<div class="ib done">${ico(a.ic,24)}<span class="lbl">${a.ad}</span><span class="ok">${ico('check',13,3)}</span></div>`
        :`<button class="ib" data-act="rel" data-r="${r.k}" data-i="${i}" ${lock||S.cash<a.cost?'disabled':''}>${ico(lock?'lock':a.ic,24)}<span class="lbl">${a.ad}</span><span class="num">${lock?a.needTxt+' gerekir':(a.cost?TL(a.cost):'Bedava')+' · +'+a.g}</span></button>`}).join('')}</div></div>`;
 }
-function lifeCard(c){
-  const cur=S.life[c.k], t=c.tiers[cur], nx=c.tiers[cur+1], lock=nx&&S.level<cur;
-  return `<div class="card" style="display:flex;flex-direction:column;gap:10px">
-   <div class="row"><span class="ricon grad">${ico(c.ic,26)}</span><div style="flex:1;min-width:0"><span class="muted" style="font-size:13px">${c.ad}</span><br><b>${t.ad}</b></div>${t.h?`<span class="tag good">${ico('happy',13)} +${t.h}</span>`:''}</div>
-   ${nx?`<div class="next"><div style="min-width:0;flex:1"><span class="muted" style="font-size:12.5px">Sıradaki</span><br><b>${nx.ad}</b>
-       <div class="tags" style="margin-top:6px"><span class="tag good">${ico('happy',13)} Mutluluk +${nx.h-(t.h||0)}</span><span class="tag warn">${icoF('star',12)} İtibar +${nx.r}</span></div></div>
-     <button class="ib ${lock?'flat':'primary'} sm" data-act="life" data-k="${c.k}" ${lock||S.cash<nx.p?'disabled':''}>${ico(lock?'lock':'cart',22)}<span class="lbl">${lock?LEVELS[cur].ad+' gerekir':'Satın al'}</span><span class="num">${TL(nx.p)}</span></button></div>`
-   :`<div class="tip brass-c">${icoF('trophy',18)} En iyisi sende!</div>`}</div>`;
+let luxCat='ev';
+function luxShop(){
+  const c=LUX.find(x=>x.k===luxCat);
+  return `<div class="sect">${ico('crown',18)} Lüks alışveriş <span class="sub">· pahalı eşya daha çok mutlu eder</span></div>
+  <div class="chips-row">${LUX.map(x=>{const n=S.owned.filter(id=>id.startsWith(x.k)).length;
+    return `<button class="chipbtn ${x.k===luxCat?'on':''}" data-act="luxcat" data-k="${x.k}">${ico(x.ic,18)} ${x.ad}${n?` <span class="cnt">${n}</span>`:''}</button>`}).join('')}</div>
+  <div class="grid2">${c.items.map(it=>luxCard(c,it)).join('')}</div>`;
+}
+function luxCard(c,it){
+  const own=S.owned.includes(it.id), lock=S.level<it.lvl;
+  return `<div class="tcard luxc">
+   <div class="luxart" style="--h:${c.hue+it.i*7}">${ico(c.ic,44,1.6)}${own?`<span class="ok">${ico('check',14,3)}</span>`:''}</div>
+   <b class="luxname">${it.ad}</b>
+   <div class="price num" style="font-size:15px">${TL(it.p)}</div>
+   <div class="tags"><span class="tag good">${ico('happy',12)} +${it.h}</span><span class="tag warn">${icoF('star',11)} +${it.r}</span></div>
+   ${own?`<div class="btnbuy owned">${ico('check',16,2.6)} Senin</div>`
+     :`<button class="btnbuy ${lock?'':'grad'}" data-act="lux" data-lux="${it.id}" ${lock||S.cash<it.p?'disabled':''}>${ico(lock?'lock':'cart',16)} ${lock?LEVELS[it.lvl].ad+' gerekir':'Satın al'}</button>`}
+  </div>`;
 }
 let adBusy=false;
 function runAd(k){
@@ -812,7 +871,7 @@ function bindInputs(){
 const curOffer=()=>{const rg=$('#offerRange');return r100(+rg.dataset.base*rg.value/100)};
 const curPrice=()=>{const pr=$('#priceRange');return r100(+pr.dataset.base*pr.value/100)};
 let toastT;
-function toast(ic,txt,cls=''){const t=$('#toast');t.innerHTML=`<span class="${cls}">${ico(ic,20,2.4)}</span>${txt?`<span>${esc(txt)}</span>`:''}`;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2400)}
+function toast(ic,txt,cls=''){const t=$('#toast');t.onclick=null;t.style.cursor='';t.innerHTML=`<span class="${cls}">${ico(ic,20,2.4)}</span>${txt?`<span>${esc(txt)}</span>`:''}`;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2400)}
 function openDlg(html){$('#dialog').innerHTML=html;$('#overlay').hidden=false;const f=$('#dialog').querySelector('button');f&&f.focus()}
 function closeDlg(){$('#overlay').hidden=true}
 const say=(l,m)=>l.chat.push(m);
@@ -911,14 +970,6 @@ function endDay(){
     rep.push({ic:'star',cat:s.cat,m:'Mutlu müşteri, itibar',txt:'+'+up,c:'brass'});
   }
   S.pending=[]; S.offers=[];
-  for(const it of S.inv) if(it.listed){
-    if(Math.random()>Math.min(.95,.5+(it.photo?.2:0)+S.level*.05+(hasStaff('satisci')?.15:0))) continue;
-    const r=Math.random(), type=S.level>=2&&r<.22?'vip':r<.45?'acil':'pazarlik', B=BUYERS[type];
-    const amt=Math.min(it.listed,r100(buyerValue(it)*R(B.lo,B.hi)*(hasStaff('satisci')?1.05:1)));
-    if(amt<it.listed*.5) continue;
-    S.offers.push({id:S.uid++,itemId:it.id,amount:amt,type,buyer:pick(NAMES),countered:false});
-  }
-  if(S.offers.length) rep.push({ic:'phone',m:'Alıcı aradı',txt:String(S.offers.length),c:'good'});
   S.cash-=lvl().rent; rep.push({ic:'home',m:'Kira',v:-lvl().rent,c:'bad'});
   if(S.debt>0){const f=r100(S.debt*.01);S.debt+=f;rep.push({ic:'percent',m:'Kredi faizi',v:-f,c:'bad'})}
   const wages=S.staff.reduce((s,id)=>s+STAFF.find(x=>x.id===id).wage,0);
@@ -1000,12 +1051,14 @@ document.addEventListener('click',e=>{
     case 'repay': {const v=b.dataset.v==='all'?Math.min(S.debt,S.cash):Math.min(10000,S.debt,S.cash); if(v>0){S.debt-=v;S.cash-=v;save();render();toast('check',`${TL(v)} borç ödendi`,'good-c')} break}
     case 'hire': {const st=STAFF.find(x=>x.id===b.dataset.s); if(st&&S.cash>=st.hire&&S.level>=st.lvl&&!hasStaff(st.id)){S.cash-=st.hire;S.staff.push(st.id);save();render();toast(st.ic,`${st.ad} işe başladı`,'good-c')} break}
     case 'fire': {const st=STAFF.find(x=>x.id===b.dataset.s); S.staff=S.staff.filter(x=>x!==b.dataset.s); save(); render(); st&&toast('x',`${st.ad} işten ayrıldı`); break}
-    case 'life': {const c=LIFE.find(x=>x.k===b.dataset.k), nx=c&&c.tiers[S.life[c.k]+1];
-      if(nx&&S.cash>=nx.p&&S.level>=S.life[c.k]){S.cash-=nx.p;S.life[c.k]++;S.rep=clamp(S.rep+nx.r,0,100);save();render();
-        openDlg(`<div class="dhead"><div class="big-ico grad">${ico(c.ic,44)}</div><h2>${nx.ad} senin!</h2></div>
-          <div class="stat3" style="margin:0;grid-template-columns:1fr 1fr"><div class="stat good-c">${ico('happy',24)}<span class="num">${happy()}</span><small>Mutluluk</small></div>
-          <div class="stat brass-c">${icoF('star',22)}<span class="num">+${nx.r}</span><small>İtibar</small></div></div>
-          <button class="bigbtn grad" data-act="close">${ico('check',22,2.6)} Harika</button>`)} break}
+    case 'luxcat': luxCat=b.dataset.k; render(); break;
+    case 'lux': {const id=b.dataset.lux, c=LUX.find(x=>id.startsWith(x.k)&&/^\d+$/.test(id.slice(x.k.length))), it=c&&c.items.find(x=>x.id===id);
+      if(!it||S.owned.includes(id)||S.level<it.lvl) break; if(S.cash<it.p){NOCASH();break}
+      const before=happy(); S.cash-=it.p; S.owned.push(id); S.rep=clamp(S.rep+it.r,0,100); save(); render();
+      openDlg(`<div class="dhead"><div class="big-ico grad">${ico(c.ic,44)}</div><h2>${it.ad} senin!</h2></div>
+        <div class="stat3" style="margin:0;grid-template-columns:1fr 1fr"><div class="stat good-c">${ico('happy',24)}<span class="num">${before} → ${happy()}</span><small>Mutluluk</small></div>
+        <div class="stat brass-c">${icoF('star',22)}<span class="num">+${it.r}</span><small>İtibar</small></div></div>
+        <button class="bigbtn grad" data-act="close">${ico('check',22,2.6)} Harika</button>`); break}
     case 'rel': {const r=RELS.find(x=>x.k===b.dataset.r), i=+b.dataset.i, a=r&&r.acts[i], key=b.dataset.r+':'+i;
       if(!a||S.daily.done.includes(key))break; if(S.cash<a.cost){NOCASH();break}
       S.cash-=a.cost; S.rel[r.k]=clamp(S.rel[r.k]+a.g,0,100); S.daily.done.push(key); save(); render(); toast(r.ic,`${r.ad} +${a.g}`,'good-c'); break}
