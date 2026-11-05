@@ -619,7 +619,7 @@ function offerCard(o){
     <div style="min-width:0"><div class="tname" style="margin:0">${esc(o.buyer)} · ${BUYER_AD[o.type]}</div><div class="price num">${TL(o.amount)}</div>
     <span class="tag ${p>=0?'good':'bad'}">${ico(p>=0?'up':'down',14,2.6)} ${p>=0?'Kâr':'Zarar'} ${TL(Math.abs(p))}</span></div>
     <div class="acts"><button class="ib good" data-act="accept" data-id="${o.id}">${ico('check',26,2.6)}<span class="lbl">Sat</span></button>
-    ${o.amount<it.listed&&!o.countered?`<button class="ib" data-act="counter" data-id="${o.id}">${ico('undo',22)}<span class="lbl">${TL(it.listed)} de</span></button>`:'<span></span>'}
+    <button class="ib" data-act="neg" data-id="${o.id}">${ico('hand',24)}<span class="lbl">Pazarlık yap</span><span class="num">İtibar ${Math.round(S.rep)}</span></button>
     <button class="ib bad" data-act="reject" data-id="${o.id}">${ico('x',26,2.6)}<span class="lbl">Reddet</span></button></div></div>`;
 }
 
@@ -787,6 +787,45 @@ function bankaView(){
      <div class="stat">${ico('cart',22)}<span class="num">${S.stats.bought}</span><small>Alınan</small></div>
      <div class="stat">${ico('tag',22)}<span class="num">${S.stats.sold}</span><small>Satılan</small></div>
      <div class="stat ${S.stats.profit>=0?'good-c':'bad-c'}">${ico(S.stats.profit>=0?'up':'down',22,2.6)}<span class="num" style="font-size:13px">${TL(S.stats.profit)}</span><small>Toplam kâr</small></div></div></div>`;
+}
+
+/* ---- Alıcıyla pazarlık: şans itibara, alıcı tipine ve istenen artışa bağlı ---- */
+const repMul=()=>.5+S.rep/100;
+function negChance(o,ask){const gap=(ask-o.amount)/o.amount;return clamp((BUYERS[o.type].acc+.25)*repMul()*(1-gap*3),.03,.95)}
+const negMax=o=>{const it=S.inv.find(i=>i.id===o.itemId);return Math.max(it?it.listed:0,r100(o.amount*1.3))};
+function negDlg(o){
+  const it=S.inv.find(i=>i.id===o.itemId); if(!it) return;
+  const pat=o.pat??2, max=negMax(o);
+  openDlg(`<div class="dhead">${avatar(o.buyer,0,o.type==='vip')}<h2>Pazarlık</h2>
+      <p class="tip" style="margin:0">${esc(o.buyer)} · ${BUYER_AD[o.type]} · ${esc(T(it).ad)}</p></div>
+    <div class="row between"><span class="muted">Alıcının teklifi</span><b class="num">${TL(o.amount)}</b></div>
+    <div class="card" style="display:flex;flex-direction:column;gap:6px;box-shadow:none;background:var(--sunk)">
+      <div class="muted" style="font-size:13px;text-align:center">Senin istediğin</div>
+      <div class="bigprice num" id="negShow"></div>
+      <input id="negRange" type="range" min="1" max="100" value="35" aria-label="İstediğin fiyat">
+      <div class="row between"><b id="negChance"></b><span class="hearts" aria-label="Alıcının sabrı">${[0,1].map(i=>`<span class="${i<pat?'':'off'}">${icoF('heart',16)}</span>`).join('')}</span></div>
+      <div class="pbar"><i id="negBar"></i></div>
+    </div>
+    <div class="tags"><span class="tag warn">${icoF('star',12)} İtibar ${Math.round(S.rep)} · şans ×${repMul().toFixed(2).replace('.',',')}</span><span class="tag">${BUYER_AD[o.type]}</span></div>
+    <div class="acts two"><button class="ib flat" data-act="close">${ico('x',24,2.6)}<span class="lbl">Vazgeç</span></button>
+      <button class="ib primary" data-act="negsend" data-id="${o.id}">${ico('hand',26)}<span class="lbl">Teklif et</span></button></div>`);
+  const rg=$('#negRange'), upd=()=>{const ask=negAsk(o), c=negChance(o,ask), cl=c>=.6?'good':c>=.3?'warn':'bad';
+    $('#negShow').textContent=TL(ask); $('#negChance').textContent=`Kabul şansı %${Math.round(c*100)}`; $('#negChance').className=cl+'-c';
+    $('#negBar').style.width=c*100+'%'; $('#negBar').className=cl+'-bg'};
+  rg.oninput=upd; upd();
+}
+function negAsk(o){const rg=$('#negRange');return r100(o.amount+(negMax(o)-o.amount)*rg.value/100)}
+function negSend(o){
+  const it=S.inv.find(i=>i.id===o.itemId); if(!it) return closeDlg();
+  const ask=negAsk(o);
+  if(Math.random()<negChance(o,ask)){
+    closeDlg(); const p=sell(it,ask); save(); render();
+    return toast('check',`${o.buyer} kabul etti! ${TL(ask)} · ${p>=0?'kâr':'zarar'} ${TL(Math.abs(p))}`,'good-c');
+  }
+  o.pat=(o.pat??2)-1;
+  if(o.pat<=0){S.offers=S.offers.filter(x=>x!==o); closeDlg(); save(); render(); return toast('x',`${o.buyer} vazgeçti ve kapattı`,'bad-c')}
+  o.amount=r100(o.amount+(ask-o.amount)*R(.25,.5)); save(); render(); negDlg(o);
+  toast('undo',`${o.buyer}: "${TL(o.amount)} olsun, son."`,'warn-c');
 }
 
 /* ---- Çalışanlar ve hayat ---- */
@@ -1061,9 +1100,8 @@ document.addEventListener('click',e=>{
     case 'unlist': {const it=I(); if(it){it.listed=null;S.offers=S.offers.filter(o=>o.itemId!==it.id);save();render()} break}
     case 'accept': {const o=S.offers.find(x=>x.id===id), it=o&&S.inv.find(x=>x.id===o.itemId);
       if(it){const p=sell(it,o.amount);save();render();toast(p>=0?'up':'down',`Satıldı! ${p>=0?'Kâr':'Zarar'} ${TL(Math.abs(p))}`,p>=0?'good-c':'bad-c')} break}
-    case 'counter': {const o=S.offers.find(x=>x.id===id), it=o&&S.inv.find(x=>x.id===o.itemId); if(!it)break;
-      if(Math.random()<BUYERS[o.type].acc){o.amount=it.listed;o.countered=true;toast('check',`${o.buyer} kabul etti`,'good-c')}
-      else {S.offers=S.offers.filter(x=>x!==o);toast('x',`${o.buyer} vazgeçti`,'bad-c')} save(); render(); break}
+    case 'neg': {const o=S.offers.find(x=>x.id===id); o&&negDlg(o); break}
+    case 'negsend': {const o=S.offers.find(x=>x.id===id); o&&negSend(o); break}
     case 'reject': S.offers=S.offers.filter(x=>x.id!==id); save(); render(); break;
     case 'upgrade': {const n=LEVELS[S.level+1]; if(n&&S.cash>=n.price){S.cash-=n.price;S.level++;genListings();save();render();
       openDlg(`<div class="dhead"><div class="big-ico grad">${ico(n.ic,44)}</div><h2>${n.ad} açıldı!</h2></div>
