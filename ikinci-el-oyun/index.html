@@ -522,7 +522,7 @@ function listingView(){
 function valueMeter(lo,hi,price){
   const max=Math.max(hi,price)*1.15, L=lo/max*100, W=Math.max(1.5,(hi-lo)/max*100), P=price/max*100;
   return `<div class="meter" aria-hidden="true"><i style="left:${L}%;width:${W}%"></i><em style="left:${P}%"></em></div>
-   <div class="muted" style="font-size:12px;margin:6px 0 4px">Sarı bant tahmini değer, kırmızı çizgi fiyat.</div>`;
+   <div class="muted" style="font-size:12px;margin:6px 0 4px">Altın bant tahmini değer, pembe çizgi fiyat.</div>`;
 }
 function caught(l,c){return c.lie&&((c.k==='kusur'&&l.item.lup&&l.item.defects.length)||(c.k==='belge'&&(l.item.serial==='supheli'||(l.item.full&&l.item.fake))))}
 function testsHTML(it,ref){
