@@ -61,8 +61,8 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent2);outlin
 .pill.neg{color:var(--bad)}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-radius:28px 28px 0 0;box-shadow:0 -6px 24px rgba(110,80,140,.1);
   padding:8px max(10px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
-.tabbar .app{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
-.tabbar button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 2px 7px;font-size:11px;font-weight:800;color:var(--muted);position:relative;border-radius:18px}
+.tabbar .app{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px}
+.tabbar button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 1px 7px;font-size:10.5px;font-weight:800;color:var(--muted);position:relative;border-radius:18px}
 .tabbar button[aria-current="page"]{color:var(--accent);background:color-mix(in srgb,var(--accent) 13%,transparent)}
 .dot{position:absolute;top:3px;left:calc(50% + 7px);min-width:19px;height:19px;border-radius:10px;font:900 11px/19px var(--f-body);padding:0 5px;box-sizing:border-box;
   background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-fg)}
@@ -189,6 +189,17 @@ input[type=range]{width:100%;accent-color:var(--accent);height:30px}
 .bigbtn:disabled{background:var(--sunk);color:var(--muted);cursor:not-allowed}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--fg);color:var(--bg);
   padding:10px 16px;border-radius:20px;font-size:15px;font-weight:900;max-width:calc(100% - 32px);box-shadow:var(--shadow);display:flex;align-items:center;gap:8px}
+/* çalışanlar, hayat */
+.staff{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px}
+.ricon{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:var(--sunk);flex:none}
+.ib.sm{min-height:72px;min-width:86px;padding:8px 6px}
+.pbar{height:10px;border-radius:5px;background:var(--sunk);overflow:hidden;margin-top:4px}
+.pbar i{display:block;height:100%;border-radius:5px;transition:width .3s}
+.good-bg{background:var(--good)}.warn-bg{background:var(--warn)}.bad-bg{background:var(--bad)}
+.ricon.grad{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-fg)}
+.next{display:flex;gap:10px;align-items:center;padding:10px;border-radius:18px;background:var(--sunk)}
+.next .ib{box-shadow:none}
+.lifelink{border:0;width:100%;text-align:left;display:flex;align-items:center;gap:12px}
 /* kısa etiketler */
 .h1{font-size:24px;font-weight:900;margin:0;letter-spacing:-.01em}
 .h1 small{display:block;font-size:13px;color:var(--muted);font-weight:700;letter-spacing:0}
@@ -286,6 +297,16 @@ const IC={
  flower:'<circle cx="12" cy="12" r="2.5"/><path d="M12 9.5C10 6 12 3 12 3s2 3 0 6.5M14.5 12C18 10 21 12 21 12s-3 2-6.5 0M12 14.5c2 3.5 0 6.5 0 6.5s-2-3 0-6.5M9.5 12C6 14 3 12 3 12s3-2 6.5 0"/>',
  stall:'<path d="M3 9h18l-2-5H5zM3 9c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3M5 12v8h14v-8"/>',
  gem:'<path d="M6 4h12l4 6-10 11L2 10z"/><path d="M2 10h20M9 4l3 6 3-6M12 10v11"/>',
+ car:'<path d="M5 17H3v-5l2.5-5h13L21 12v5h-2"/><path d="M3 12h18M9.5 17h5"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/>',
+ shirt:'<path d="M8 3 4 6l2 4 2-1v12h8V9l2 1 2-4-4-3c-1 2-2.5 3-4 3S9 5 8 3z"/>',
+ family:'<circle cx="8" cy="7" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c.5-4 3-6 6-6s5.5 2 6 6M14 20c.4-2.6 1.6-4 3.5-4s3 1.4 3.5 4"/>',
+ friends:'<circle cx="7" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M1.5 20c.5-4 2.5-6 5.5-6s5 2 5.5 6M11.5 20c.5-4 2.5-6 5.5-6s5 2 5.5 6"/>',
+ tv:'<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M10.5 9v4.5l3.5-2.2z"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+ food:'<path d="M5 3v7a2.5 2.5 0 0 0 5 0V3M7.5 3v18M17 3c-2 0-3 3-3 7 0 2.5 1 3.5 3 3.5V21"/>',
+ gift:'<rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v8h14v-8M12 8v13M12 8C10.5 4 6.5 4 6.5 6.3S10 8 12 8c2 0 5.5.6 5.5-1.7S13.5 4 12 8"/>',
+ ball:'<circle cx="12" cy="12" r="9"/><path d="m12 7.5 3.8 2.8-1.4 4.4H9.6l-1.4-4.4z"/>',
+ msg:'<path d="M4 5h16v11H9l-5 4z"/>',
  trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4.5c0 3 1.5 4.5 4 4.5M16 6h3.5c0 3-1.5 4.5-4 4.5M12 13v4M8 20h8M9.5 17h5"/>'
 };
 const ico=(n,s=24,w=2)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
@@ -328,6 +349,20 @@ const PERSONAS=[
 const NAMES=['Selin','Murat','Elif','Burak','Zeynep','Can','Derya','Emre','Aslı','Kerem','Nil','Ozan','Pelin','Tolga','Hülya','Sinan','Gamze','Levent','Ceren','Bora'];
 const RIVALS=['Rıza','Selim','Nermin','Hakan','Defne'];
 const BUYERS={pazarlik:{lo:.7,hi:.95,acc:.3},acil:{lo:.88,hi:1.05,acc:.55},vip:{lo:.98,hi:1.22,acc:.7}};
+const STAFF=[
+ {id:'temizlikci',ad:'Temizlikçi',ic:'sparkle',desc:'Stoktaki her ürünü her gün temizler.',hire:8000,wage:400,lvl:0},
+ {id:'eksper',ad:'Eksper',ic:'barcode',desc:'Her sabah ilanların ve stoğun seri no kaydına bakar, sahteyi yakalar.',hire:15000,wage:800,lvl:1},
+ {id:'tamirci',ad:'Tamirci usta',ic:'wrench',desc:'Stoktaki gizli kusurları bulur, tamirler %40 ucuzlar.',hire:20000,wage:1000,lvl:1},
+ {id:'fotografci',ad:'Fotoğrafçı',ic:'camera',desc:'Tüm ürünlerin profesyonel fotoğrafını çeker.',hire:12000,wage:600,lvl:1},
+ {id:'satisci',ad:'Satış danışmanı',ic:'phone',desc:'Daha çok alıcı arar, teklifler %5 yüksek gelir.',hire:40000,wage:2000,lvl:2}];
+const LIFE=[
+ {k:'ev',ad:'Evim',ic:'home',tiers:[{ad:'Kiralık oda'},{ad:'1+1 daire',p:150000,h:8,r:2},{ad:'Bahçeli ev',p:450000,h:14,r:4},{ad:'Villa',p:1200000,h:20,r:7},{ad:'Boğaz yalısı',p:3000000,h:26,r:12}]},
+ {k:'araba',ad:'Arabam',ic:'car',tiers:[{ad:'Toplu taşıma'},{ad:'İkinci el hatchback',p:90000,h:6,r:1},{ad:'Sedan',p:250000,h:10,r:3},{ad:'Spor araba',p:700000,h:16,r:6},{ad:'Lüks SUV',p:1500000,h:20,r:9}]},
+ {k:'stil',ad:'Tarzım',ic:'shirt',tiers:[{ad:'Sade giyim'},{ad:'Markalı gardırop',p:40000,h:4,r:2},{ad:'Terzi takım elbise',p:120000,h:7,r:3},{ad:'Koleksiyon saati',p:300000,h:10,r:5}]}];
+const RELS=[
+ {k:'aile',ad:'Ailem',ic:'family',warn:'Annen kırgın, uzun zamandır aramadın.',acts:[{ad:'Telefonla ara',ic:'phone',cost:0,g:6},{ad:'Akşam yemeği',ic:'food',cost:2000,g:15},{ad:'Hediye al',ic:'gift',cost:10000,g:25}]},
+ {k:'arkadas',ad:'Arkadaşlarım',ic:'friends',warn:'Arkadaşların seni unutmaya başladı.',acts:[{ad:'Mesajlaş',ic:'msg',cost:0,g:6},{ad:'Maça git',ic:'ball',cost:1500,g:15},{ad:'Ev partisi',ic:'sparkle',cost:8000,g:25,need:['ev',2],needTxt:'Bahçeli ev'}]},
+ {k:'sevgili',ad:'Sevgilim',ic:'heart',warn:'Sevgilin ilgisizlikten şikâyetçi!',acts:[{ad:'Mesaj at',ic:'msg',cost:0,g:6},{ad:'Akşam yemeği',ic:'food',cost:3000,g:15},{ad:'Hafta sonu kaçamağı',ic:'car',cost:20000,g:30,need:['araba',1],needTxt:'Araba'}]}];
 
 /* ================= YARDIMCILAR ================= */
 const FMT=new Intl.NumberFormat('tr-TR');
@@ -371,7 +406,8 @@ function shieldBadge(it,size=20){const [c,i]=auth(it);return `<span class="bdg $
 function deal(price,it){const [lo,,hi]=est(it);return price<=lo*1.02?['good','happy']:price<=hi?['warn','meh']:['bad','sad']}
 function dealBadge(price,it,s=22){const [c,i]=deal(price,it);return `<span class="bdg ${c}-c" title="Fiyat">${ico(i,s)}</span>`}
 const testCost={lup:it=>r100(Math.max(300,T(it).base*.005)),seri:it=>r100(Math.max(500,T(it).base*.01)),uzman:it=>r100(Math.max(1500,T(it).base*.025))};
-const fixCost=d=>it=>r100(T(it).base*DEF[d].p*.45);
+const hasStaff=k=>(S.staff||[]).includes(k);
+const fixCost=d=>it=>r100(T(it).base*DEF[d].p*.45*(hasStaff('tamirci')?.6:1));
 const cleanCost=it=>r100(Math.max(200,T(it).base*.008));
 const PHOTO=600;
 const lvl=()=>LEVELS[S.level];
@@ -428,6 +464,7 @@ function genAuctions(){
 }
 function newGame(){
   S={day:1,cash:START,debt:0,rep:50,level:0,uid:1,trend:{},listings:[],auctions:[],inv:[],offers:[],pending:[],reviews:[],stats:{bought:0,sold:0,profit:0}};
+  migrate(S);
   for(const c in CATS) S.trend[c]=R(.92,1.08);
   genListings(); genAuctions(); save(); view={tab:'home',id:null}; showGame();
 }
@@ -457,14 +494,15 @@ function showGame(){$('#menu').hidden=true;$('#modeMenu').hidden=true;$('#game')
 function go(tab,id=null){view={tab,id};render();scrollTo(0,0)}
 
 function render(){
+  applyStaff();
   $('#hDay').innerHTML=`${ico(season().ic,18)} ${S.day}`;
   const hc=$('#hCash'); hc.innerHTML=`${ico('coins',18)} ${TL(S.cash)}`; hc.classList.toggle('neg',S.cash<0);
   $('#hRep').innerHTML=`<span class="brass-c">${icoF('star',16)}</span> ${Math.round(S.rep)}`;
   $('#backBtn').innerHTML=ico('back',22); $('#backBtn').setAttribute('aria-label',view.id?'Geri':'Ana menü');
   const unseen=S.listings.filter(l=>!l.seen).length, liveA=S.auctions.filter(a=>!a.done).length;
-  const tabs=[['home','home','Dükkân',S.offers.length],['ilan','search','İlan',unseen],['mezat','hammer','Mezat',liveA],['stok','box','Stok',0],['banka','bank','Banka',0]];
+  const tabs=[['home','home','Dükkân',S.offers.length],['ilan','search','İlan',unseen],['mezat','hammer','Mezat',liveA],['stok','box','Stok',0],['hayat','happy','Hayat',RELS.filter(r=>S.rel[r.k]<30).length],['banka','bank','Banka',0]];
   $('#tabs').innerHTML=tabs.map(([k,i,ad,n])=>`<button data-act="tab" data-tab="${k}" ${view.tab===k?'aria-current="page"':''}>${ico(i,26)}${ad}${n?`<span class="dot">${n}</span>`:''}</button>`).join('');
-  const fn={home:homeView,ilan:view.id?listingView:ilanView,mezat:mezatView,stok:view.id?itemView:stokView,banka:bankaView}[view.tab];
+  const fn={home:homeView,ilan:view.id?listingView:ilanView,mezat:mezatView,stok:view.id?itemView:stokView,hayat:hayatView,banka:bankaView}[view.tab];
   $('#screen').innerHTML=`<div class="screen">${fn()}</div>`;
   bindInputs(); hint();
 }
@@ -517,6 +555,7 @@ function homeView(){
     ${S.offers.length?`<div class="sect">${ico('phone',18)} Telefon <span class="sub">· ${S.offers.length} alıcı aradı</span></div>${S.offers.map(offerCard).join('')}`:''}
     ${trends.length?`<div class="sect">${ico(season().ic,18)} Piyasa <span class="sub">· bugün ne aranıyor?</span></div><div class="trends">${trends.map(([c,m])=>`<div class="trend">${artC(c)}<span class="lbl">${CATS[c][0]}</span><span class="${m>1?'good-c':'bad-c'}">${ico(m>1?'up':'down',20,2.6)}</span></div>`).join('')}</div>`:''}
     ${S.reviews.length?`<div class="sect">${icoF('star',16)} Müşteri yorumları</div><div class="revs">${S.reviews.slice(0,8).map(r=>`<div class="rev">${avatar(r.n,1)}<span class="lbl">${esc(r.n)}</span>${starsH(r.s,12)}</div>`).join('')}</div>`:''}
+    ${homeExtras()}
     <button class="endday grad" data-act="endday">${ico('moon',24)} Dükkânı kapat, günü bitir</button>`;
 }
 function offerCard(o){
@@ -681,6 +720,90 @@ function bankaView(){
      <div class="stat ${S.stats.profit>=0?'good-c':'bad-c'}">${ico(S.stats.profit>=0?'up':'down',22,2.6)}<span class="num" style="font-size:13px">${TL(S.stats.profit)}</span><small>Toplam kâr</small></div></div></div>`;
 }
 
+/* ---- Çalışanlar ve hayat ---- */
+function migrate(s){
+  s.staff=s.staff||[]; s.life=s.life||{ev:0,araba:0,stil:0};
+  s.rel=s.rel||{aile:70,arkadas:60,sevgili:65}; s.daily=s.daily||{done:[],ads:0};
+  return s;
+}
+const serialRoll=it=>it.fake?(Math.random()<.85?'supheli':'temiz'):(Math.random()<.95?'temiz':'supheli');
+function applyStaff(){
+  for(const it of S.inv){
+    if(hasStaff('temizlikci')) it.clean=true;
+    if(hasStaff('fotografci')) it.photo=true;
+    if(hasStaff('tamirci')) it.lup=true;
+    if(hasStaff('eksper')&&!it.serial) it.serial=serialRoll(it);
+  }
+  if(hasStaff('eksper')) for(const l of S.listings) if(!l.item.serial){l.item.serial=serialRoll(l.item); if(l.claims.some(c=>caught(l,c))) l.leverage=true}
+}
+const possH=()=>LIFE.reduce((s,c)=>s+(c.tiers[S.life[c.k]].h||0),0);
+const relAvg=()=>RELS.reduce((s,r)=>s+S.rel[r.k],0)/RELS.length;
+const happy=()=>clamp(Math.round(15+possH()+relAvg()*.3),0,100);
+const moodOf=h=>h>=65?['happy','good']:h>=35?['meh','warn']:['sad','bad'];
+function homeExtras(){
+  const h=happy(), [face,fc]=moodOf(h);
+  return `<div class="sect">${ico('friends',18)} Çalışanlar <span class="sub">· işleri senin yerine yaparlar</span></div>
+   <div class="list">${STAFF.map(staffCard).join('')}</div>
+   <div class="sect">${ico('happy',18)} Hayatım</div>
+   <button class="card lifelink" data-act="tab" data-tab="hayat">
+     <span class="${fc}-c">${ico(face,42,1.8)}</span>
+     <div style="flex:1;min-width:0"><div class="row between"><b>Mutluluk</b><span class="num ${fc}-c">${h}</span></div><div class="pbar"><i class="${fc}-bg" style="width:${h}%"></i></div>
+     <div class="row" style="gap:14px;margin-top:8px">${RELS.map(r=>`<span class="row" style="gap:4px;font-size:13px">${ico(r.ic,16)}<span class="num ${S.rel[r.k]<30?'bad-c':''}">${Math.round(S.rel[r.k])}</span></span>`).join('')}</div></div>
+     <span class="muted">${ico('next',20)}</span></button>`;
+}
+function staffCard(st){
+  const hired=hasStaff(st.id), lock=S.level<st.lvl;
+  return `<div class="card staff"><span class="ricon ${hired?'grad':''}">${ico(st.ic,24)}</span>
+   <div style="min-width:0"><b>${st.ad}</b><div class="muted" style="font-size:13px">${st.desc}</div>
+   <div class="tags" style="margin-top:6px"><span class="tag">Maaş ${TL(st.wage)}/gün</span>${hired?'<span class="tag good">Çalışıyor</span>':''}</div></div>
+   ${hired?`<button class="ib flat sm" data-act="fire" data-s="${st.id}">${ico('x',20,2.6)}<span class="lbl">Çıkar</span></button>`
+     :`<button class="ib ${lock?'flat':'primary'} sm" data-act="hire" data-s="${st.id}" ${lock||S.cash<st.hire?'disabled':''}>${ico(lock?'lock':'plus',20,2.4)}<span class="lbl">${lock?LEVELS[st.lvl].ad+' gerekir':'İşe al'}</span>${lock?'':`<span class="num">${TL(st.hire)}</span>`}</button>`}</div>`;
+}
+function hayatView(){
+  const h=happy(), [face,fc]=moodOf(h);
+  return `<h2 class="h1">Hayatım<small>Mutluluğun itibarını etkiler</small></h2>
+  <div class="card"><div class="row"><span class="${fc}-c">${ico(face,58,1.8)}</span>
+   <div style="flex:1;min-width:0"><div class="row between"><b>Mutluluk</b><span class="num ${fc}-c" style="font-size:24px">${h}</span></div>
+   <div class="pbar"><i class="${fc}-bg" style="width:${h}%"></i></div>
+   <div class="tags" style="margin-top:8px"><span class="tag">${ico('home',13)} Eşyalar +${possH()}</span><span class="tag">${ico('heart',13)} İlişkiler +${Math.round(relAvg()*.3)}</span></div></div></div>
+   <p class="tip" style="text-align:left;margin:10px 0 0">${h>=70?'Çok mutlusun: itibarın her gün +1 artıyor.':h<30?'Mutsuzsun: itibarın her gün 1 düşüyor.':'Mutluluğun 70 olunca itibarın her gün artar. En çok pahalı eşyalar mutlu eder.'}</p></div>
+  <div class="sect">${ico('heart',18)} İlişkilerim <span class="sub">· ilgilenmezsen her gün azalır</span></div>
+  <button class="bigbtn" style="background:var(--surface);box-shadow:var(--shadow)" data-act="ad" ${S.daily.ads>=3?'disabled':''}>${ico('tv',22)} Reklam izle, ilişkin +10 · ${3-S.daily.ads}/3</button>
+  ${RELS.map(relCard).join('')}
+  <div class="sect">${ico('crown',18)} Eşyalarım <span class="sub">· mutluluk ve itibar getirir</span></div>
+  ${LIFE.map(lifeCard).join('')}`;
+}
+function relCard(r){
+  const v=Math.round(S.rel[r.k]), c=v>=60?'good':v>=30?'warn':'bad';
+  return `<div class="card" style="display:flex;flex-direction:column;gap:10px">
+   <div class="row"><span class="ricon ${c}-c">${ico(r.ic,26)}</span><div style="flex:1;min-width:0"><div class="row between"><b>${r.ad}</b><span class="num ${c}-c">${v}</span></div><div class="pbar"><i class="${c}-bg" style="width:${v}%"></i></div></div></div>
+   ${v<30?`<div class="tip bad-c" style="text-align:left">${ico('alert',15)} ${r.warn}</div>`:''}
+   <div class="acts">${r.acts.map((a,i)=>{const key=r.k+':'+i, done=S.daily.done.includes(key), lock=a.need&&S.life[a.need[0]]<a.need[1];
+     return done?`<div class="ib done">${ico(a.ic,24)}<span class="lbl">${a.ad}</span><span class="ok">${ico('check',13,3)}</span></div>`
+       :`<button class="ib" data-act="rel" data-r="${r.k}" data-i="${i}" ${lock||S.cash<a.cost?'disabled':''}>${ico(lock?'lock':a.ic,24)}<span class="lbl">${a.ad}</span><span class="num">${lock?a.needTxt+' gerekir':(a.cost?TL(a.cost):'Bedava')+' · +'+a.g}</span></button>`}).join('')}</div></div>`;
+}
+function lifeCard(c){
+  const cur=S.life[c.k], t=c.tiers[cur], nx=c.tiers[cur+1], lock=nx&&S.level<cur;
+  return `<div class="card" style="display:flex;flex-direction:column;gap:10px">
+   <div class="row"><span class="ricon grad">${ico(c.ic,26)}</span><div style="flex:1;min-width:0"><span class="muted" style="font-size:13px">${c.ad}</span><br><b>${t.ad}</b></div>${t.h?`<span class="tag good">${ico('happy',13)} +${t.h}</span>`:''}</div>
+   ${nx?`<div class="next"><div style="min-width:0;flex:1"><span class="muted" style="font-size:12.5px">Sıradaki</span><br><b>${nx.ad}</b>
+       <div class="tags" style="margin-top:6px"><span class="tag good">${ico('happy',13)} Mutluluk +${nx.h-(t.h||0)}</span><span class="tag warn">${icoF('star',12)} İtibar +${nx.r}</span></div></div>
+     <button class="ib ${lock?'flat':'primary'} sm" data-act="life" data-k="${c.k}" ${lock||S.cash<nx.p?'disabled':''}>${ico(lock?'lock':'cart',22)}<span class="lbl">${lock?LEVELS[cur].ad+' gerekir':'Satın al'}</span><span class="num">${TL(nx.p)}</span></button></div>`
+   :`<div class="tip brass-c">${icoF('trophy',18)} En iyisi sende!</div>`}</div>`;
+}
+let adBusy=false;
+function runAd(k){
+  if(S.daily.ads>=3||adBusy) return;
+  let n=5; adBusy=true; $('#overlay').hidden=false;
+  const draw=()=>{$('#dialog').innerHTML=`<div class="dhead"><div class="big-ico" style="background:var(--sunk)">${ico('tv',40)}</div><h2>Reklam</h2>
+    <p class="tip" style="margin:0">Örnek reklam alanı · ${n} sn</p></div><div class="pbar"><i class="good-bg" style="width:${(5-n)/5*100}%"></i></div>`};
+  draw();
+  const t=setInterval(()=>{n--; if(n>0) return draw(); clearInterval(t); adBusy=false;
+    S.daily.ads++; S.rel[k]=clamp(S.rel[k]+10,0,100); save(); render();
+    const r=RELS.find(x=>x.k===k);
+    openDlg(`<div class="dhead"><div class="big-ico grad">${ico(r.ic,40)}</div><h2>${r.ad} +10</h2></div><button class="bigbtn grad" data-act="close">${ico('check',22,2.6)} Tamam</button>`)},1000);
+}
+
 /* ================= EYLEMLER ================= */
 function bindInputs(){
   const rg=$('#offerRange'); if(rg){const b=+rg.dataset.base;rg.oninput=()=>$('#offerShow').textContent=TL(r100(b*rg.value/100))}
@@ -789,15 +912,22 @@ function endDay(){
   }
   S.pending=[]; S.offers=[];
   for(const it of S.inv) if(it.listed){
-    if(Math.random()>Math.min(.95,.5+(it.photo?.2:0)+S.level*.05)) continue;
+    if(Math.random()>Math.min(.95,.5+(it.photo?.2:0)+S.level*.05+(hasStaff('satisci')?.15:0))) continue;
     const r=Math.random(), type=S.level>=2&&r<.22?'vip':r<.45?'acil':'pazarlik', B=BUYERS[type];
-    const amt=Math.min(it.listed,r100(buyerValue(it)*R(B.lo,B.hi)));
+    const amt=Math.min(it.listed,r100(buyerValue(it)*R(B.lo,B.hi)*(hasStaff('satisci')?1.05:1)));
     if(amt<it.listed*.5) continue;
     S.offers.push({id:S.uid++,itemId:it.id,amount:amt,type,buyer:pick(NAMES),countered:false});
   }
   if(S.offers.length) rep.push({ic:'phone',m:'Alıcı aradı',txt:String(S.offers.length),c:'good'});
   S.cash-=lvl().rent; rep.push({ic:'home',m:'Kira',v:-lvl().rent,c:'bad'});
   if(S.debt>0){const f=r100(S.debt*.01);S.debt+=f;rep.push({ic:'percent',m:'Kredi faizi',v:-f,c:'bad'})}
+  const wages=S.staff.reduce((s,id)=>s+STAFF.find(x=>x.id===id).wage,0);
+  if(wages){S.cash-=wages;rep.push({ic:'friends',m:'Çalışan maaşları',v:-wages,c:'bad'})}
+  for(const r of RELS){S.rel[r.k]=clamp(S.rel[r.k]-R(3,6),0,100); if(S.rel[r.k]<30) rep.push({ic:r.ic,m:r.warn,c:'bad'})}
+  const hp=happy();
+  if(hp>=70){S.rep=clamp(S.rep+1,0,100);rep.push({ic:'happy',m:'Mutlusun, itibarın arttı',txt:'+1',c:'good'})}
+  else if(hp<30){S.rep=clamp(S.rep-1,0,100);rep.push({ic:'sad',m:'Mutsuzsun, itibarın düştü',txt:'−1',c:'bad'})}
+  S.daily={done:[],ads:0};
   const oldSeason=season();
   S.day++;
   for(const c in CATS) S.trend[c]=clamp(S.trend[c]*R(.95,1.05)+(1-S.trend[c])*.08,.6,1.6);
@@ -829,7 +959,7 @@ document.addEventListener('click',e=>{
   const act=b.dataset.act, id=+b.dataset.id;
   const L=()=>S.listings.find(x=>x.id===id), I=()=>S.inv.find(x=>x.id===id), A=()=>S.auctions.find(x=>x.id===id);
   switch(act){
-    case 'play': {const s=load(); if(s){S=s;view={tab:'home',id:null};showGame()} else {newGame();howto()} break}
+    case 'play': {const s=load(); if(s){S=migrate(s);view={tab:'home',id:null};showGame()} else {newGame();howto()} break}
     case 'newask': openDlg(`<div class="dhead"><div class="big-ico grad">${ico('plus',40)}</div><h2>Yeni oyun?</h2><p class="tip" style="margin:0">Kayıtlı oyunun silinir.</p></div>
       <div class="acts two"><button class="ib flat" data-act="close">${ico('x',26,2.6)}<span class="lbl">Vazgeç</span></button><button class="ib primary" data-act="new">${ico('check',26,2.6)}<span class="lbl">Baştan başla</span></button></div>`); break;
     case 'new': closeDlg(); newGame(); break;
@@ -868,12 +998,27 @@ document.addEventListener('click',e=>{
         <button class="bigbtn grad" data-act="close">${ico('check',22,2.6)} Harika</button>`)} break}
     case 'borrow': {const v=+b.dataset.v; if(S.debt+v<=loanLimit()){S.debt+=v;S.cash+=v;save();render();toast('coins',`${TL(v)} kredi kasada`,'good-c')} break}
     case 'repay': {const v=b.dataset.v==='all'?Math.min(S.debt,S.cash):Math.min(10000,S.debt,S.cash); if(v>0){S.debt-=v;S.cash-=v;save();render();toast('check',`${TL(v)} borç ödendi`,'good-c')} break}
+    case 'hire': {const st=STAFF.find(x=>x.id===b.dataset.s); if(st&&S.cash>=st.hire&&S.level>=st.lvl&&!hasStaff(st.id)){S.cash-=st.hire;S.staff.push(st.id);save();render();toast(st.ic,`${st.ad} işe başladı`,'good-c')} break}
+    case 'fire': {const st=STAFF.find(x=>x.id===b.dataset.s); S.staff=S.staff.filter(x=>x!==b.dataset.s); save(); render(); st&&toast('x',`${st.ad} işten ayrıldı`); break}
+    case 'life': {const c=LIFE.find(x=>x.k===b.dataset.k), nx=c&&c.tiers[S.life[c.k]+1];
+      if(nx&&S.cash>=nx.p&&S.level>=S.life[c.k]){S.cash-=nx.p;S.life[c.k]++;S.rep=clamp(S.rep+nx.r,0,100);save();render();
+        openDlg(`<div class="dhead"><div class="big-ico grad">${ico(c.ic,44)}</div><h2>${nx.ad} senin!</h2></div>
+          <div class="stat3" style="margin:0;grid-template-columns:1fr 1fr"><div class="stat good-c">${ico('happy',24)}<span class="num">${happy()}</span><small>Mutluluk</small></div>
+          <div class="stat brass-c">${icoF('star',22)}<span class="num">+${nx.r}</span><small>İtibar</small></div></div>
+          <button class="bigbtn grad" data-act="close">${ico('check',22,2.6)} Harika</button>`)} break}
+    case 'rel': {const r=RELS.find(x=>x.k===b.dataset.r), i=+b.dataset.i, a=r&&r.acts[i], key=b.dataset.r+':'+i;
+      if(!a||S.daily.done.includes(key))break; if(S.cash<a.cost){NOCASH();break}
+      S.cash-=a.cost; S.rel[r.k]=clamp(S.rel[r.k]+a.g,0,100); S.daily.done.push(key); save(); render(); toast(r.ic,`${r.ad} +${a.g}`,'good-c'); break}
+    case 'ad': if(S.daily.ads<3) openDlg(`<div class="dhead"><div class="big-ico grad">${ico('tv',40)}</div><h2>Kimin için?</h2><p class="tip" style="margin:0">Reklamı izle, seçtiğin ilişki +10 artsın.</p></div>
+      <div class="acts">${RELS.map(r=>`<button class="ib" data-act="adgo" data-r="${r.k}">${ico(r.ic,26)}<span class="lbl">${r.ad}</span><span class="num">${Math.round(S.rel[r.k])}</span></button>`).join('')}</div>
+      <button class="bigbtn" style="background:var(--sunk)" data-act="close">Vazgeç</button>`); break;
+    case 'adgo': runAd(b.dataset.r); break;
     case 'mode': setMode(document.documentElement.dataset.mode==='dark'?'light':'dark'); break;
     case 'endday': endDay(); break;
   }
 });
-$('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeDlg()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#overlay').hidden)closeDlg()});
+$('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay'&&!adBusy)closeDlg()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#overlay').hidden&&!adBusy)closeDlg()});
 function setMode(m){
   document.documentElement.dataset.mode=m;
   try{localStorage.setItem('ikinci-vitrin-mode',m)}catch(e){}
